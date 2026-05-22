@@ -1,0 +1,35 @@
+{
+  "name": "homepadel-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "dev:preview": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "15.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "axios": "^1.6.0",
+    "zustand": "^4.5.0",
+    "react-hook-form": "^7.53.0",
+    "zod": "^3.23.0",
+    "@hookform/resolvers": "^3.9.0",
+    "lucide-react": "^0.462.0",
+    "clsx": "^2.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^5",
+    "tailwindcss": "^3.4.0",
+    "autoprefixer": "^10.4.0",
+    "postcss": "^8.4.0",
+    "eslint": "^8",
+    "eslint-config-next": "15.1.0"
+  }
+}

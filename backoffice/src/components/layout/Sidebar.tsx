@@ -1,0 +1,99 @@
+// Sidebar navigation component for the Home Pádel BackOffice dashboard.
+// Shows the brand logo and all main navigation links with Lucide icons.
+// Active route is highlighted with a lime left border and lighter background.
+// Collapses to an icon-only strip on small screens (mobile toggle handled by parent).
+
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import {
+  LayoutDashboard,
+  Package,
+  Tags,
+  Award,
+  ShoppingBag,
+  Users,
+  Percent,
+  Image,
+  Tag,
+  Receipt,
+  Settings,
+} from 'lucide-react';
+
+interface NavItem {
+  label: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+const navItems: NavItem[] = [
+  { label: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { label: 'Productos', href: '/productos', icon: Package },
+  { label: 'Categorías', href: '/categorias', icon: Tags },
+  { label: 'Marcas', href: '/marcas', icon: Award },
+  { label: 'Pedidos', href: '/pedidos', icon: ShoppingBag },
+  { label: 'Clientes', href: '/clientes', icon: Users },
+  { label: 'Promociones', href: '/promociones', icon: Percent },
+  { label: 'Banners', href: '/banners', icon: Image },
+  { label: 'Cupones', href: '/cupones', icon: Tag },
+  { label: 'Gastos', href: '/gastos', icon: Receipt },
+  { label: 'Configuración', href: '/configuracion', icon: Settings },
+];
+
+export function Sidebar() {
+  const pathname = usePathname();
+
+  const isActive = (href: string) => {
+    if (href === '/') return pathname === '/';
+    return pathname.startsWith(href);
+  };
+
+  return (
+    <aside className="w-64 min-h-screen bg-[#0f172a] flex flex-col shrink-0">
+      {/* Logo / Brand */}
+      <div className="px-6 py-5 border-b border-white/10">
+        <div className="flex items-center gap-2">
+          <span className="text-white font-bold text-lg tracking-wide">HOME PÁDEL</span>
+          <span className="w-2 h-2 rounded-full bg-[#C8FF00] shrink-0" />
+        </div>
+        <p className="text-slate-400 text-xs mt-0.5">Panel de Administración</p>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 px-3 py-4 overflow-y-auto">
+        <ul className="space-y-0.5">
+          {navItems.map((item) => {
+            const active = isActive(item.href);
+            const Icon = item.icon;
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className={`
+                    flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150
+                    ${
+                      active
+                        ? 'bg-[#1e293b] text-white border-l-2 border-[#C8FF00] pl-[10px]'
+                        : 'text-slate-400 hover:bg-[#1e293b] hover:text-white border-l-2 border-transparent pl-[10px]'
+                    }
+                  `}
+                >
+                  <Icon
+                    className={`w-4 h-4 shrink-0 ${active ? 'text-[#C8FF00]' : 'text-slate-500'}`}
+                  />
+                  {item.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+
+      {/* Footer version info */}
+      <div className="px-6 py-4 border-t border-white/10">
+        <p className="text-slate-600 text-xs">BackOffice v1.0.0</p>
+      </div>
+    </aside>
+  );
+}
