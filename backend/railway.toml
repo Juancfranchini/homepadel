@@ -1,8 +1,4 @@
-[build]
-buildCommand = "npm install --include=dev && npx prisma generate && npm run build"
-
 [deploy]
-startCommand = "npx prisma migrate deploy && node dist/main"
 healthcheckPath = "/api/docs"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
