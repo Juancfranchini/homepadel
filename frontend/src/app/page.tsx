@@ -1,56 +1,167 @@
-import { getFeaturedProducts, getCategories, getBrands, getBanners } from '@/lib/api';
+import {
+  getFeaturedProducts,
+  getCategories,
+  getBrands,
+  getBanners,
+  getHeroSlides,
+  getBenefits,
+  getTestimonials,
+  getPromotions,
+  getSiteSection,
+} from '@/lib/api';
+
 import HeroBanner from '@/components/home/HeroBanner';
 import BenefitsStrip from '@/components/home/BenefitsStrip';
+import PromoDestacada from '@/components/home/PromoDestacada';
 import CategoryCards from '@/components/home/CategoryCards';
 import FeaturedProducts from '@/components/home/FeaturedProducts';
 import PromoBanners from '@/components/home/PromoBanners';
+import AboutSection from '@/components/home/AboutSection';
+import TestimonialsSection from '@/components/home/TestimonialsSection';
 import BrandsSection from '@/components/home/BrandsSection';
-import NewsletterSection from '@/components/home/NewsletterSection';
-import { Product, Category, Brand, Banner } from '@/types';
+import InstagramSection from '@/components/home/InstagramSection';
+import FinalMessage from '@/components/home/FinalMessage';
+
+import {
+  Product,
+  Category,
+  Brand,
+  Banner,
+  HeroSlide,
+  Benefit,
+  Testimonial,
+  Promotion,
+  AboutSection as AboutData,
+  InstagramConfig,
+  FinalMessageData,
+  SiteSection,
+} from '@/types';
 
 export const revalidate = 60;
 
-function unwrapArray<ItemType>(raw: unknown): ItemType[] {
-  if (Array.isArray(raw)) return raw as ItemType[];
-  const maybe = raw as { data?: ItemType[] };
+// ─── helpers ──────────────────────────────────────────────────────────────────
+
+function arr<T>(raw: unknown): T[] {
+  if (Array.isArray(raw)) return raw as T[];
+  const maybe = raw as { data?: T[] };
   return maybe?.data ?? [];
 }
 
+function sectionData<T>(raw: unknown): T | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const s = raw as SiteSection;
+  if (s.active === false) return null;
+  return (s.data as T) ?? null;
+}
+
+// ─── data fetching ────────────────────────────────────────────────────────────
+
 async function fetchAll() {
-  const results = await Promise.allSettled([
+  const [
+    slidesRes,
+    benefitsRes,
+    productsRes,
+    categoriesRes,
+    brandsRes,
+    bannersRes,
+    testimonialsRes,
+    promotionsRes,
+    aboutRes,
+    instagramRes,
+    finalMsgRes,
+  ] = await Promise.allSettled([
+    getHeroSlides(),
+    getBenefits(),
     getFeaturedProducts(),
     getCategories(),
     getBrands(),
     getBanners(),
+    getTestimonials(),
+    getPromotions(),
+    getSiteSection('about'),
+    getSiteSection('instagram'),
+    getSiteSection('final_message'),
   ]);
 
-  const getValue = (r: PromiseSettledResult<unknown>) =>
-    r.status === 'fulfilled' ? r.value : [];
+  const val = (r: PromiseSettledResult<unknown>) =>
+    r.status === 'fulfilled' ? r.value : null;
 
   return {
-    featuredProducts: unwrapArray<Product>(getValue(results[0])),
-    categories: unwrapArray<Category>(getValue(results[1])),
-    brands: unwrapArray<Brand>(getValue(results[2])),
-    banners: unwrapArray<Banner>(getValue(results[3])),
+    heroSlides: arr<HeroSlide>(val(slidesRes)),
+    benefits: arr<Benefit>(val(benefitsRes)),
+    featuredProducts: arr<Product>(val(productsRes)),
+    categories: arr<Category>(val(categoriesRes)),
+    brands: arr<Brand>(val(brandsRes)),
+    banners: arr<Banner>(val(bannersRes)),
+    testimonials: arr<Testimonial>(val(testimonialsRes)),
+    promotions: arr<Promotion>(val(promotionsRes)),
+    aboutData: sectionData<AboutData>(val(aboutRes)),
+    instagramConfig: sectionData<InstagramConfig>(val(instagramRes)),
+    finalMessageData: sectionData<FinalMessageData>(val(finalMsgRes)),
   };
 }
 
-export default async function HomePage() {
-  const { featuredProducts, categories, brands, banners } = await fetchAll();
+// ─── page ─────────────────────────────────────────────────────────────────────
 
+export default async function HomePage() {
+  const {
+    heroSlides,
+    benefits,
+    featuredProducts,
+    categories,
+    brands,
+    banners,
+    testimonials,
+    promotions,
+    aboutData,
+    instagramConfig,
+    finalMessageData,
+  } = await fetchAll();
+
+  // Banners secundarios (PromoBanners) — todos los banners ordenados
   const sortedBanners = [...banners].sort((a, b) => a.order - b.order);
-  const heroBanner = sortedBanners[0] as Banner | undefined;
-  const promoBanners = sortedBanners.slice(1, 3);
+
+  // Promoción destacada — la primera activa y no expirada
+  const now = new Date();
+  const activePromotion =
+    promotions.find(
+      (p) => p.active && p.endDate && new Date(p.endDate) > now
+    ) ?? null;
 
   return (
     <>
-      <HeroBanner banner={heroBanner} />
-      <BenefitsStrip />
+      {/* 1 · Carrusel hero */}
+      <HeroBanner slides={heroSlides} />
+
+      {/* 2 · Barra de beneficios */}
+      <BenefitsStrip benefits={benefits} />
+
+      {/* 3 · Promoción destacada con countdown */}
+      <PromoDestacada promotion={activePromotion} />
+
+      {/* 4 · Categorías */}
       <CategoryCards categories={categories} />
+
+      {/* 5 · Productos destacados */}
       <FeaturedProducts products={featuredProducts} />
-      <PromoBanners banners={promoBanners} />
+
+      {/* 6 · Banners secundarios */}
+      <PromoBanners banners={sortedBanners} />
+
+      {/* 7 · Quiénes somos */}
+      <AboutSection data={aboutData} />
+
+      {/* 8 · Testimonios */}
+      <TestimonialsSection testimonials={testimonials} />
+
+      {/* 9 · Marcas (slider) */}
       <BrandsSection brands={brands} />
-      <NewsletterSection />
+
+      {/* 10 · Instagram */}
+      <InstagramSection config={instagramConfig} />
+
+      {/* 11 · Mensaje final / CTA */}
+      <FinalMessage data={finalMessageData} />
     </>
   );
 }

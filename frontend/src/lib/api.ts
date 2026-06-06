@@ -1,6 +1,5 @@
 // Cliente Axios configurado para el backend
 // Base URL leída de variable de entorno NEXT_PUBLIC_API_URL
-// Incluye interceptor para agregar JWT automáticamente en cada request
 
 import axios from 'axios';
 
@@ -20,7 +19,7 @@ api.interceptors.request.use((config) => {
 
 export default api;
 
-// ── Funciones de productos ─────────────────────────────────────────────────
+// ── Productos ──────────────────────────────────────────────────────────────
 export const getProducts = (params?: Record<string, unknown>) =>
   api.get('/products', { params }).then((r) => r.data);
 
@@ -54,6 +53,22 @@ export const createOrder = (data: Record<string, unknown>) =>
 export const getMyOrders = () =>
   api.get('/orders/my').then((r) => r.data);
 
-// ── Banners ────────────────────────────────────────────────────────────────
+// ── Banners (banners secundarios del home) ─────────────────────────────────
 export const getBanners = () =>
   api.get('/banners').then((r) => r.data);
+
+// ── Nuevas secciones homepage ──────────────────────────────────────────────
+export const getHeroSlides = () =>
+  api.get('/hero-slides').then((r) => r.data);
+
+export const getBenefits = () =>
+  api.get('/benefits').then((r) => r.data);
+
+export const getTestimonials = () =>
+  api.get('/testimonials').then((r) => r.data);
+
+export const getPromotions = () =>
+  api.get('/promotions').then((r) => r.data);
+
+export const getSiteSection = (key: string) =>
+  api.get(`/site-sections/${key}`).then((r) => r.data);
