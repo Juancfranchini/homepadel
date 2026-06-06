@@ -3,7 +3,7 @@
 // Sidebar de filtros (categorías, marcas, rango de precio) + grid de productos
 // Paginación, ordenamiento, y sincronización con parámetros de URL
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { SlidersHorizontal, ChevronDown, X, Filter } from 'lucide-react';
 import { getProducts, getCategories, getBrands } from '@/lib/api';
@@ -21,6 +21,14 @@ const SORT_OPTIONS = [
 ];
 
 export default function CatalogoPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center"><p className="text-gray-400">Cargando catálogo...</p></div>}>
+      <CatalogoContent />
+    </Suspense>
+  );
+}
+
+function CatalogoContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const addItem = useCartStore((s) => s.addItem);
