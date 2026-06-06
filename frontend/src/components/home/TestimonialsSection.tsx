@@ -22,7 +22,7 @@ function StarRating({ rating }: { rating: number }) {
         <Star
           key={i}
           size={14}
-          className={i < rating ? 'text-[#C8FF00] fill-[#C8FF00]' : 'text-gray-600'}
+          className={i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}
         />
       ))}
     </div>
@@ -34,19 +34,17 @@ export default function TestimonialsSection({ testimonials }: Props) {
   const [current, setCurrent] = useState(0);
   const isMulti = items.length > 3;
 
-  const visibleItems = isMulti ? [items[current % items.length]] : items;
-
   const next = () => setCurrent((c) => (c + 1) % items.length);
   const prev = () => setCurrent((c) => (c - 1 + items.length) % items.length);
 
   return (
-    <section className="bg-white py-14">
+    <section className="bg-white py-16">
       <div className="max-w-7xl mx-auto px-4">
         {/* Encabezado */}
         <div className="flex items-center justify-between mb-10">
           <div className="flex items-center gap-3">
             <span className="w-1 h-7 bg-[#C8FF00] rounded-full" />
-            <h2 className="text-2xl font-black uppercase tracking-tight text-[#111]">
+            <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-[#111]">
               Lo que dicen nuestros clientes
             </h2>
           </div>
@@ -64,8 +62,11 @@ export default function TestimonialsSection({ testimonials }: Props) {
 
         {/* Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {(isMulti ? items.slice(current, current + 3).concat(items.slice(0, Math.max(0, current + 3 - items.length))) : visibleItems).map((t) => (
-            <div key={t.id} className="bg-gray-50 rounded-2xl p-6 flex flex-col gap-4">
+          {(isMulti
+            ? items.slice(current, current + 3).concat(items.slice(0, Math.max(0, current + 3 - items.length)))
+            : items
+          ).map((t) => (
+            <div key={t.id} className="bg-gray-50 rounded-2xl p-7 flex flex-col gap-4 border border-gray-100">
               <StarRating rating={t.rating} />
               <p className="text-gray-700 text-sm leading-relaxed flex-1">
                 &ldquo;{t.comment}&rdquo;
@@ -87,7 +88,7 @@ export default function TestimonialsSection({ testimonials }: Props) {
                 )}
                 <div>
                   <p className="font-bold text-sm text-gray-900">{t.name}</p>
-                  <p className="text-gray-500 text-xs">Cliente verificado</p>
+                  <p className="text-gray-400 text-xs">Cliente verificado</p>
                 </div>
               </div>
             </div>

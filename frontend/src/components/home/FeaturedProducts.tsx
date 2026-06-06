@@ -37,10 +37,10 @@ function ProductCard({ product }: { product: Product }) {
   return (
     <Link
       href={`/producto/${product.slug}`}
-      className="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col overflow-hidden group block"
+      className="bg-[#1a1a1a] rounded-xl border border-white/10 hover:border-white/20 hover:-translate-y-1 transition-all duration-200 flex flex-col overflow-hidden group block"
     >
       {/* Imagen */}
-      <div className="relative aspect-square bg-gray-50 overflow-hidden">
+      <div className="relative aspect-square bg-[#111] overflow-hidden">
         {product.images && product.images.length > 0 ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -49,8 +49,8 @@ function ProductCard({ product }: { product: Product }) {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gray-100">
-            <span className="text-3xl font-black text-gray-300">
+          <div className="w-full h-full flex items-center justify-center bg-[#111]">
+            <span className="text-3xl font-black text-white/10">
               {product.name.slice(0, 2).toUpperCase()}
             </span>
           </div>
@@ -64,12 +64,12 @@ function ProductCard({ product }: { product: Product }) {
             </span>
           )}
           {product.isNew && !hasDiscount && (
-            <span className="bg-[#111] text-[#C8FF00] text-xs font-black px-2 py-0.5 rounded-full">
+            <span className="bg-[#C8FF00] text-[#111] text-xs font-black px-2 py-0.5 rounded-full">
               NUEVO
             </span>
           )}
           {product.isOffer && !hasDiscount && (
-            <span className="bg-[#C8FF00] text-[#111] text-xs font-black px-2 py-0.5 rounded-full">
+            <span className="bg-white text-[#111] text-xs font-black px-2 py-0.5 rounded-full">
               OFERTA
             </span>
           )}
@@ -78,7 +78,7 @@ function ProductCard({ product }: { product: Product }) {
         <button
           onClick={handleWish}
           className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center z-10 shadow-sm transition-all duration-200 ${
-            wished ? 'bg-red-500 text-white' : 'bg-white/90 text-gray-400 hover:text-red-400 hover:bg-white'
+            wished ? 'bg-red-500 text-white' : 'bg-black/50 text-gray-400 hover:text-red-400 hover:bg-black/70'
           }`}
           aria-label={wished ? 'Quitar de favoritos' : 'Agregar a favoritos'}
         >
@@ -89,27 +89,27 @@ function ProductCard({ product }: { product: Product }) {
       {/* Info */}
       <div className="flex flex-col flex-1 p-4 gap-1.5">
         {product.brand && (
-          <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">
+          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
             {product.brand.name}
           </p>
         )}
 
-        <h3 className="font-semibold text-sm text-gray-900 leading-snug line-clamp-2">
+        <h3 className="font-semibold text-sm text-white leading-snug line-clamp-2">
           {product.name}
         </h3>
 
         <div className="flex items-baseline gap-2 mt-1">
           {hasDiscount ? (
             <>
-              <span className="text-lg font-black text-gray-900">
+              <span className="text-lg font-black text-white">
                 {formatPrice(product.salePrice!)}
               </span>
-              <span className="text-sm text-gray-400 line-through">
+              <span className="text-sm text-gray-600 line-through">
                 {formatPrice(product.price)}
               </span>
             </>
           ) : (
-            <span className="text-lg font-black text-gray-900">
+            <span className="text-lg font-black text-white">
               {formatPrice(product.price)}
             </span>
           )}
@@ -117,7 +117,7 @@ function ProductCard({ product }: { product: Product }) {
 
         {/* Cuotas */}
         {product.price >= 10000 && (
-          <p className="text-xs text-green-600 font-medium">
+          <p className="text-xs text-[#C8FF00] font-medium">
             Hasta 9 cuotas sin interés
           </p>
         )}
@@ -127,10 +127,10 @@ function ProductCard({ product }: { product: Product }) {
           disabled={product.stock === 0 || adding}
           className={`mt-auto w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-xs font-black uppercase tracking-wide transition-all duration-200 ${
             product.stock === 0
-              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              ? 'bg-white/5 text-gray-600 cursor-not-allowed border border-white/5'
               : adding
-              ? 'bg-[#C8FF00] text-[#111] scale-95'
-              : 'bg-[#111] text-white hover:bg-[#333]'
+              ? 'bg-white text-[#111] scale-95'
+              : 'bg-[#C8FF00] text-[#111] hover:bg-white'
           }`}
         >
           <ShoppingCart size={13} />
@@ -158,19 +158,21 @@ export default function FeaturedProducts({ products }: Props) {
   const displayProducts = products && products.length > 0 ? products : MOCK_PRODUCTS;
 
   return (
-    <section className="bg-white py-12">
+    <section className="bg-[#0a0a0a] py-14">
       <div className="max-w-7xl mx-auto px-4">
         {/* Encabezado */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-2xl font-black uppercase tracking-tight text-[#111]">
+            <p className="text-[#C8FF00] text-xs font-black uppercase tracking-[0.25em] mb-1">
+              Selección de la semana
+            </p>
+            <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
               Las más vendidas del mes
             </h2>
-            <p className="text-gray-500 text-sm mt-0.5">Elegidas por nuestra comunidad.</p>
           </div>
           <Link
             href="/catalogo"
-            className="text-sm font-bold text-[#C8FF00] hover:text-[#111] transition-colors flex items-center gap-1"
+            className="text-sm font-bold text-gray-400 hover:text-white transition-colors flex items-center gap-1"
           >
             VER TODOS
             <ChevronRight size={14} />
@@ -181,7 +183,7 @@ export default function FeaturedProducts({ products }: Props) {
         <div className="relative">
           <button
             onClick={() => scroll('left')}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 z-10 w-9 h-9 bg-[#111] rounded-full flex items-center justify-center text-white hover:bg-[#333] transition-colors shadow-lg hidden md:flex"
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 z-10 w-9 h-9 bg-white/10 border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-colors shadow-lg hidden md:flex"
             aria-label="Ver anteriores"
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -207,7 +209,7 @@ export default function FeaturedProducts({ products }: Props) {
 
           <button
             onClick={() => scroll('right')}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 z-10 w-9 h-9 bg-[#111] rounded-full flex items-center justify-center text-white hover:bg-[#333] transition-colors shadow-lg hidden md:flex"
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 z-10 w-9 h-9 bg-white/10 border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-colors shadow-lg hidden md:flex"
             aria-label="Ver más"
           >
             <ChevronRight size={18} />

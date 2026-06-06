@@ -13,7 +13,7 @@ const PLACEHOLDER_POSTS = [
   { id: 3, bg: 'from-blue-900 to-indigo-900' },
   { id: 4, bg: 'from-orange-900 to-red-900' },
   { id: 5, bg: 'from-pink-900 to-rose-900' },
-  { id: 6, bg: 'from-slate-900 to-gray-900' },
+  { id: 6, bg: 'from-slate-800 to-gray-900' },
   { id: 7, bg: 'from-violet-900 to-purple-900' },
 ];
 
@@ -33,57 +33,59 @@ export default function InstagramSection({ config }: Props) {
   const ig = config ?? FALLBACK;
 
   return (
-    <section className="max-w-7xl mx-auto px-4 py-12">
-      {/* Encabezado */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <span className="w-1 h-7 bg-[#C8FF00] rounded-full" />
-          <h2 className="text-2xl font-black uppercase tracking-tight text-[#111]">
-            {ig.title}
-          </h2>
-        </div>
-        <a
-          href={ig.buttonUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-sm font-bold text-[#C8FF00] bg-[#111] px-4 py-1.5 rounded-full hover:bg-[#222] transition-colors flex items-center gap-2"
-        >
-          <InstagramIcon size={14} />
-          {ig.username}
-        </a>
-      </div>
-
-      {/* Grilla de placeholders */}
-      <div className="flex gap-3 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
-        {PLACEHOLDER_POSTS.map((post) => (
+    <section className="bg-[#111] border-t border-white/5 py-14">
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Encabezado */}
+        <div className="flex items-center justify-between mb-7">
+          <div className="flex items-center gap-3">
+            <span className="w-1 h-7 bg-[#C8FF00] rounded-full" />
+            <h2 className="text-2xl font-black uppercase tracking-tight text-white">
+              {ig.title}
+            </h2>
+          </div>
           <a
-            key={post.id}
             href={ig.buttonUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-none w-36 h-36 md:w-44 md:h-44 rounded-xl overflow-hidden relative group cursor-pointer"
-            aria-label={`Ver perfil de Instagram de ${ig.username}`}
+            className="text-sm font-bold text-white bg-white/10 border border-white/10 px-4 py-1.5 rounded-full hover:bg-white/20 transition-colors flex items-center gap-2"
           >
-            <div className={`absolute inset-0 bg-gradient-to-br ${post.bg} transition-transform duration-300 group-hover:scale-105`} />
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200 flex items-center justify-center">
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-white">
-                <InstagramIcon size={28} />
-              </div>
-            </div>
+            <InstagramIcon size={14} />
+            {ig.username}
           </a>
-        ))}
-      </div>
+        </div>
 
-      <div className="mt-5 text-center">
-        <a
-          href={ig.buttonUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-[#111] transition-colors font-medium"
-        >
-          <InstagramIcon size={16} />
-          {ig.buttonText}
-        </a>
+        {/* Grilla de placeholders */}
+        <div className="flex gap-3 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
+          {PLACEHOLDER_POSTS.map((post) => (
+            <a
+              key={post.id}
+              href={ig.buttonUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-none w-36 h-36 md:w-44 md:h-44 rounded-xl overflow-hidden relative group cursor-pointer"
+              aria-label={`Ver perfil de Instagram de ${ig.username}`}
+            >
+              <div className={`absolute inset-0 bg-gradient-to-br ${post.bg} transition-transform duration-300 group-hover:scale-105`} />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200 flex items-center justify-center">
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-white">
+                  <InstagramIcon size={28} />
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+
+        <div className="mt-6 text-center">
+          <a
+            href={ig.buttonUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-white transition-colors font-medium"
+          >
+            <InstagramIcon size={16} />
+            {ig.buttonText}
+          </a>
+        </div>
       </div>
     </section>
   );

@@ -12,10 +12,10 @@ interface Props {
 // Slide estático de fallback cuando no hay datos en el backend
 const FALLBACK_SLIDE: HeroSlide = {
   id: 'fallback',
-  title: 'EQUIPAMIENTO\nDE ALTO\nRENDIMIENTO',
-  subtitle: 'Nueva Temporada 2025',
-  description: 'Productos seleccionados para jugadores exigentes que buscan llevar su juego al siguiente nivel.',
-  ctaPrimary: 'VER PALETAS',
+  title: 'TU MEJOR JUEGO\nEMPIEZA ACÁ',
+  subtitle: 'Nueva Temporada 2026',
+  description: 'Equipamiento premium para jugadores que van por más.',
+  ctaPrimary: 'VER PALAS 2026',
   ctaPrimaryUrl: '/catalogo?categoria=paletas',
   ctaSecondary: 'VER OFERTAS',
   ctaSecondaryUrl: '/catalogo?oferta=true',
@@ -117,6 +117,17 @@ function SlideContent({ slide }: { slide: HeroSlide }) {
 
         {/* ── Columna derecha — Imagen ─────────────────────────────────── */}
         <div className="hidden md:flex items-center justify-end relative">
+          {/* Badge 9 cuotas */}
+          <div className="absolute top-0 right-0 bg-[#1a1a1a] border border-white/10 rounded-xl p-4 text-right z-20">
+            <p className="text-gray-400 text-[10px] uppercase tracking-widest leading-none mb-1">HASTA</p>
+            <p className="text-[#C8FF00] font-black text-5xl leading-none">9</p>
+            <p className="text-white font-black text-xs uppercase tracking-widest leading-tight mt-1">CUOTAS<br/>SIN INTERÉS</p>
+            <div className="flex justify-end gap-1 mt-2">
+              <div className="w-5 h-3 bg-gray-600 rounded-sm" />
+              <div className="w-5 h-3 bg-gray-600 rounded-sm" />
+            </div>
+          </div>
+
           {heroImage ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -125,11 +136,11 @@ function SlideContent({ slide }: { slide: HeroSlide }) {
               className="relative z-10 h-[520px] w-auto object-contain object-center drop-shadow-2xl"
             />
           ) : (
-            <div className="relative z-10 w-80 h-96 rounded-2xl bg-[#1a1a1a] border border-white/10 flex flex-col items-center justify-center gap-4">
+            <div className="relative z-10 w-80 h-[420px] rounded-2xl bg-[#1a1a1a] border border-white/10 flex flex-col items-center justify-center gap-4 mt-16">
               <div className="w-24 h-24 rounded-full bg-[#C8FF00]/10 border border-[#C8FF00]/30 flex items-center justify-center">
                 <span className="text-[#C8FF00] font-black text-2xl">HP</span>
               </div>
-              <p className="text-gray-600 text-xs uppercase tracking-widest">
+              <p className="text-gray-600 text-xs uppercase tracking-widest text-center px-8">
                 Subí una imagen desde el backoffice
               </p>
             </div>
@@ -166,12 +177,12 @@ export default function HeroBanner({ slides }: Props) {
 
   return (
     <section
-      className="relative w-full bg-[#111] overflow-hidden min-h-[580px] md:min-h-[640px] flex items-center"
+      className="relative w-full bg-[#0a0a0a] overflow-hidden min-h-[640px] md:min-h-[740px] flex items-center"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
       {/* Gradiente base */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#111] to-[#1a1a1a]" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#050505] via-[#0a0a0a] to-[#111827]" />
 
       {/* Imagen de fondo en mobile */}
       {bgImage && (

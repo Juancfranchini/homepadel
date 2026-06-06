@@ -35,7 +35,7 @@ export default function AboutSection({ data }: Props) {
           <div>
             <div className="flex items-center gap-3 mb-4">
               <span className="w-1 h-7 bg-[#C8FF00] rounded-full" />
-              <h2 className="text-2xl font-black uppercase tracking-tight text-white">
+              <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
                 {about.title}
               </h2>
             </div>

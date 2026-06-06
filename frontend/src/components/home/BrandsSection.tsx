@@ -34,10 +34,10 @@ function BrandSlot({ id, name, logo, url, suffix = '' }: SlotProps) {
     <img
       src={getImageUrl(logo)}
       alt={name}
-      className="h-7 md:h-9 w-auto object-contain grayscale hover:grayscale-0 opacity-50 hover:opacity-100 transition-all duration-300"
+      className="h-7 md:h-9 w-auto object-contain grayscale hover:grayscale-0 opacity-40 hover:opacity-80 transition-all duration-300"
     />
   ) : (
-    <span className="text-gray-400 font-black text-sm uppercase tracking-wider hover:text-[#111] transition-colors whitespace-nowrap cursor-default">
+    <span className="text-gray-500 font-black text-sm uppercase tracking-wider hover:text-gray-300 transition-colors whitespace-nowrap cursor-default">
       {name}
     </span>
   );
@@ -110,19 +110,19 @@ export default function BrandsSection({ brands }: Props) {
         ));
 
   return (
-    <section className="border-t border-b border-gray-100 py-7 overflow-hidden bg-white">
-      <div className="flex items-center gap-0">
-        {/* Etiqueta fija */}
-        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-300 whitespace-nowrap flex-none pl-4 md:pl-8 pr-4 md:pr-8 border-r border-gray-100 leading-tight">
-          Marcas<br />Oficiales
+    <section className="bg-white border-t border-b border-gray-100 py-10 overflow-hidden">
+      {/* Título centrado */}
+      <div className="text-center mb-8">
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">
+          MARCAS QUE CONFÍAN EN NOSOTROS
         </p>
+      </div>
 
-        {/* Track deslizante */}
-        <div className="flex-1 overflow-hidden">
-          <div ref={trackRef} className="flex will-change-transform">
-            {renderSlots('')}
-            {renderSlots('-dup')}
-          </div>
+      {/* Track deslizante */}
+      <div className="overflow-hidden">
+        <div ref={trackRef} className="flex will-change-transform">
+          {renderSlots('')}
+          {renderSlots('-dup')}
         </div>
       </div>
     </section>
