@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, User, ShoppingCart, Menu, X } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { usePathname } from 'next/navigation';
@@ -16,8 +16,11 @@ const NAV_LINKS = [
 export default function Header() {
   const totalItems   = useCartStore((s) => s.totalItems);
   const pathname     = usePathname();
-  const [open, setOpen]   = useState(false);
-  const [query, setQuery] = useState('');
+  const [open, setOpen]       = useState(false);
+  const [query, setQuery]     = useState('');
+  // Evita hydration mismatch: el cart lee localStorage que no existe en SSR
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   return (
     <header className="w-full sticky top-0 z-50 bg-[#050505] border-b border-white/[0.06]">
@@ -73,7 +76,7 @@ export default function Header() {
             aria-label="Carrito"
           >
             <ShoppingCart size={20} />
-            {totalItems() > 0 && (
+            {mounted && totalItems() > 0 && (
               <span className="absolute -top-2 -right-2 bg-[#D4FF00] text-[#111] text-[10px] font-black rounded-full w-4 h-4 flex items-center justify-center leading-none">
                 {totalItems() > 9 ? '9+' : totalItems()}
               </span>
