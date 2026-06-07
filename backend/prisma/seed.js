@@ -46,6 +46,39 @@ async function main() {
     });
   }
 
+  // ── FAQs de contacto ───────────────────────────────────────────────────────
+  const faqs = [
+    { question: '¿Cuánto tardan en llegar los envíos?', answer: 'El envío estándar demora entre 3 y 7 días hábiles. Para Buenos Aires y GBA, 1-3 días hábiles.', order: 1 },
+    { question: '¿Hacen envíos a todo el país?', answer: 'Sí, enviamos a todo el territorio argentino a través de Correo Argentino, OCA y Andreani.', order: 2 },
+    { question: '¿Cuáles son los métodos de pago disponibles?', answer: 'Aceptamos tarjetas de crédito y débito, Mercado Pago, transferencia bancaria. Con crédito hasta 6 cuotas sin interés.', order: 3 },
+    { question: '¿Puedo cambiar o devolver un producto?', answer: 'Sí. Tenés 30 días desde la recepción para realizar cambios o devoluciones en embalaje original sin uso.', order: 4 },
+    { question: '¿Los productos tienen garantía oficial?', answer: 'Todos nuestros productos son 100% originales con garantía oficial del fabricante.', order: 5 },
+  ];
+  for (const faq of faqs) {
+    const existing = await prisma.fAQ.findFirst({ where: { question: faq.question } });
+    if (!existing) await prisma.fAQ.create({ data: faq });
+  }
+
+  // ── SiteSection: contacto ──────────────────────────────────────────────────
+  await prisma.siteSection.upsert({
+    where: { key: 'contact' },
+    update: {},
+    create: {
+      key: 'contact',
+      data: {
+        whatsapp: '5491131813297',
+        email: 'hola@homepadel.com.ar',
+        phone: '11 3181-3297',
+        address: 'Villa Luro, CABA, Argentina',
+        hoursWeekday: 'Lunes a Viernes de 9 a 18 hs',
+        hoursSaturday: 'Sábados de 9 a 13 hs',
+        instagram: 'https://instagram.com/homepadel',
+        facebook: 'https://facebook.com/homepadel',
+      },
+      active: true,
+    },
+  });
+
   console.log('✅ Seed completado');
 }
 

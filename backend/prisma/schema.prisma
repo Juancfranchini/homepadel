@@ -64,26 +64,31 @@ model Brand {
 }
 
 model Product {
-  id          String      @id @default(cuid())
-  name        String
-  slug        String      @unique
-  description String?
-  price       Float
-  salePrice   Float?
-  sku         String      @unique
-  stock       Int         @default(0)
-  images      String[]
-  featured    Boolean     @default(false)
-  isNew       Boolean     @default(false)
-  isOffer     Boolean     @default(false)
-  active      Boolean     @default(true)
-  categoryId  String
-  brandId     String
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  category    Category    @relation(fields: [categoryId], references: [id])
-  brand       Brand       @relation(fields: [brandId], references: [id])
-  orderItems  OrderItem[]
+  id               String      @id @default(cuid())
+  name             String
+  slug             String      @unique
+  description      String?
+  price            Float
+  salePrice        Float?
+  sku              String      @unique
+  stock            Int         @default(0)
+  images           String[]
+  featured         Boolean     @default(false)
+  isNew            Boolean     @default(false)
+  isOffer          Boolean     @default(false)
+  active           Boolean     @default(true)
+  categoryId       String
+  brandId          String
+  // ── Fase 2: campos enriquecidos ──────────────────────────────────────────
+  videoUrl         String?     // URL de YouTube o Vimeo
+  performanceStats Json?       // [{ label: string, value: number }]
+  features         Json?       // [{ icon: string, title: string, subtitle: string }]
+  relatedProductIds String[]   // IDs de productos relacionados seleccionados manualmente
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  category         Category    @relation(fields: [categoryId], references: [id])
+  brand            Brand       @relation(fields: [brandId], references: [id])
+  orderItems       OrderItem[]
 }
 
 model Order {
@@ -208,12 +213,37 @@ model Testimonial {
   updatedAt DateTime @updatedAt
 }
 
-// Secciones singleton del sitio (about, instagram, final_message)
+// Secciones singleton del sitio (about, instagram, final_message, contact, returns-policy)
 // Se administran por clave única — upsert en lugar de create/delete
 model SiteSection {
   id        String   @id @default(cuid())
-  key       String   @unique // 'about' | 'instagram' | 'final_message'
+  key       String   @unique
   data      Json
   active    Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+}
+
+// ─── Fase 2: FAQ para página de contacto ─────────────────────────────────────
+model FAQ {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─── Fase 2: Reseñas de productos ────────────────────────────────────────────
+model ProductReview {
+  id        String   @id @default(cuid())
+  productId String
+  name      String
+  photo     String?
+  rating    Int      @default(5)
+  comment   String
+  verified  Boolean  @default(false)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
