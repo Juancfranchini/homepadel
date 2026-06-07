@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 // Claves válidas para secciones singleton del sitio
@@ -16,8 +17,8 @@ export class SiteSectionsService {
   async upsert(key: SectionKey, dto: { data: Record<string, unknown>; active?: boolean }) {
     return this.prisma.siteSection.upsert({
       where: { key },
-      update: { data: dto.data, active: dto.active ?? true },
-      create: { key, data: dto.data, active: dto.active ?? true },
+      update: { data: dto.data as Prisma.InputJsonValue, active: dto.active ?? true },
+      create: { key, data: dto.data as Prisma.InputJsonValue, active: dto.active ?? true },
     });
   }
 
