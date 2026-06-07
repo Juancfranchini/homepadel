@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Put, Delete, Param, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { TestimonialsService } from './testimonials.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -23,6 +23,7 @@ export class TestimonialsController {
   create(@Body() dto: any) { return this.testimonialsService.create(dto); }
 
   @Patch(':id')
+  @Put(':id')
   @ApiBearerAuth() @UseGuards(JwtAuthGuard, RolesGuard) @Roles(Role.ADMIN)
   update(@Param('id') id: string, @Body() dto: any) { return this.testimonialsService.update(id, dto); }
 

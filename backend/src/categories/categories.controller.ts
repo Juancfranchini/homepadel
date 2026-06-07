@@ -4,7 +4,7 @@
 // PATCH  /api/categories/:id    — actualizar categoría (ADMIN)
 // DELETE /api/categories/:id    — eliminar categoría (ADMIN)
 
-import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Put, Delete, Param, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -28,6 +28,7 @@ export class CategoriesController {
   create(@Body() dto: CreateCategoryDto) { return this.categoriesService.create(dto); }
 
   @Patch(':id')
+  @Put(':id')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)

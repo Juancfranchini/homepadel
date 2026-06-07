@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Put, Delete, Param, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { HeroSlidesService } from './hero-slides.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -25,6 +25,7 @@ export class HeroSlidesController {
   create(@Body() dto: any) { return this.heroSlidesService.create(dto); }
 
   @Patch(':id')
+  @Put(':id')
   @ApiBearerAuth() @UseGuards(JwtAuthGuard, RolesGuard) @Roles(Role.ADMIN)
   update(@Param('id') id: string, @Body() dto: any) { return this.heroSlidesService.update(id, dto); }
 

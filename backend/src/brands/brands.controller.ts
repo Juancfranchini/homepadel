@@ -1,10 +1,10 @@
 // CRUD de marcas
 // GET    /api/brands        — listar todas (público)
 // POST   /api/brands        — crear marca (ADMIN)
-// PATCH  /api/brands/:id    — actualizar marca (ADMIN)
+// PATCH  /api/brands/:id    — actualizar marca (ADMIN)  [también acepta PUT]
 // DELETE /api/brands/:id    — eliminar marca (ADMIN)
 
-import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Put, Delete, Param, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { BrandsService } from './brands.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -24,6 +24,7 @@ export class BrandsController {
   create(@Body() dto: any) { return this.brandsService.create(dto); }
 
   @Patch(':id')
+  @Put(':id')
   @ApiBearerAuth() @UseGuards(JwtAuthGuard, RolesGuard) @Roles(Role.ADMIN)
   update(@Param('id') id: string, @Body() dto: any) { return this.brandsService.update(id, dto); }
 

@@ -1,10 +1,4 @@
-// CRUD de banners del home
-// GET    /api/banners        — listar banners activos ordenados (público)
-// POST   /api/banners        — crear banner (ADMIN)
-// PATCH  /api/banners/:id    — actualizar banner (ADMIN)
-// DELETE /api/banners/:id    — eliminar banner (ADMIN)
-
-import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Put, Delete, Param, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { BannersService } from './banners.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -24,6 +18,7 @@ export class BannersController {
   create(@Body() dto: any) { return this.bannersService.create(dto); }
 
   @Patch(':id')
+  @Put(':id')
   @ApiBearerAuth() @UseGuards(JwtAuthGuard, RolesGuard) @Roles(Role.ADMIN)
   update(@Param('id') id: string, @Body() dto: any) { return this.bannersService.update(id, dto); }
 
