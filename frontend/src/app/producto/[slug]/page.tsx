@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
   ChevronLeft, ChevronRight, Heart, ShoppingCart, Truck,
   RefreshCw, Shield, Minus, Plus, Star, ChevronDown,
-  MessageCircle, MapPin, Check, Play, Zap,
+  MessageCircle, MapPin, Check, Zap,
 } from 'lucide-react';
 import { getProduct, getFeaturedProducts } from '@/lib/api';
 import { Product } from '@/types';
@@ -65,6 +65,26 @@ const DEFAULT_FAQ: FaqItem[] = [
   { q: '¿Qué nivel de juego requiere esta pala?', a: 'Está diseñada para jugadores de nivel intermedio-avanzado que buscan control y precisión.' },
   { q: '¿Tienen stock permanente?', a: 'Manejamos stock limitado de los modelos más populares. Te recomendamos no demorar la compra.' },
 ];
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+
+/**
+ * Convierte una URL de YouTube o Vimeo a su URL de embed.
+ * Soporta: youtube.com/watch?v=..., youtu.be/..., vimeo.com/...
+ * Devuelve null si la URL no es reconocida o está vacía.
+ */
+function getVideoEmbedUrl(url: string | undefined | null): string | null {
+  if (!url) return null;
+  // YouTube: watch?v= o youtu.be/
+  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}?rel=0&modestbranding=1`;
+  // Vimeo
+  const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+  if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}?dnt=1`;
+  // Si ya es una URL de embed directa
+  if (url.includes('youtube.com/embed/') || url.includes('player.vimeo.com/')) return url;
+  return null;
+}
 
 // ─── SUBCOMPONENTES ───────────────────────────────────────────────────────────
 
@@ -515,39 +535,56 @@ export default function ProductoPage() {
         </div>
       </section>
 
-      {/* ══ DESCRIPCIÓN + VIDEO ═══════════════════════════════════════════════ */}
+      {/* ══ VIDEO DEL PRODUCTO ═══════════════════════════════════════════════ */}
+      {(() => {
+        const embedUrl = getVideoEmbedUrl(product.videoUrl);
+        if (!embedUrl) return null;
+        return (
+          <section className="border-t border-white/[0.06] py-14">
+            <div className="max-w-7xl mx-auto px-4">
+              <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white mb-6">
+                VIDEO DEL PRODUCTO
+              </h2>
+              <div className="max-w-2xl">
+                <div className="aspect-video rounded-2xl overflow-hidden border border-white/[0.08]">
+                  <iframe
+                    src={embedUrl}
+                    title="Video del producto"
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              </div>
+            </div>
+          </section>
+        );
+      })()}
+
+      {/* ══ DESCRIPCIÓN ═══════════════════════════════════════════════════════ */}
       {product.description && (
         <section className="border-t border-white/[0.06] py-14">
           <div className="max-w-7xl mx-auto px-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-              {/* Video placeholder */}
-              <div>
-                <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white mb-6">
-                  VIDEO DEL PRODUCTO
-                </h2>
-                <div className="aspect-video bg-[#121212] border border-white/[0.08] rounded-2xl overflow-hidden relative group cursor-pointer">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-16 h-16 rounded-full bg-[#D4FF00] flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Play size={24} className="text-[#111] ml-1" fill="currentColor" />
-                    </div>
-                  </div>
-                  <div className="absolute bottom-4 left-4 text-[#A1A1AA] text-xs">0:00 / 1:06</div>
-                </div>
-              </div>
-
               {/* Por qué elegir */}
               <div>
                 <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white mb-6">
-                  ¿POR QUÉ ELEGIR ESTA PALA?
+                  ¿POR QUÉ ELEGIR ESTE PRODUCTO?
                 </h2>
-                <p className="text-[#A1A1AA] text-sm leading-relaxed mb-6">{product.description}</p>
+                <p className="text-[#A1A1AA] text-sm leading-relaxed">{product.description}</p>
+              </div>
+              {/* Highlights */}
+              <div>
+                <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white mb-6">
+                  DESTACADOS
+                </h2>
                 <ul className="space-y-2.5">
                   {[
-                    'Carbono 18K aluminizado para mayor resistencia y potencia controlada',
-                    'EVA Soft Performance para una excelente salida de bola',
-                    'Spin Blade Decal para mejorar los efectos en cada golpe',
-                    'Dynamic Air Flow para mayor aerodinámica y manejabilidad',
-                    'Smart Holes Curve que optimiza el punto dulce',
+                    'Producto 100% original con garantía oficial del fabricante',
+                    'Envío rápido a todo el país en 1 a 5 días hábiles',
+                    'Cambios gratuitos dentro de los 30 días de recibido',
+                    'Atención personalizada antes y después de la compra',
+                    'Pagá en hasta 6 cuotas sin interés',
                   ].map((point, i) => (
                     <li key={i} className="flex items-start gap-2.5 text-sm text-[#A1A1AA]">
                       <span className="w-4 h-4 rounded bg-[#D4FF00]/10 border border-[#D4FF00]/30 flex items-center justify-center flex-none mt-0.5">

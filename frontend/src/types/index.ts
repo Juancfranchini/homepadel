@@ -33,6 +33,9 @@ export interface Product {
   isNew?: boolean;
   isOffer?: boolean;
   active?: boolean;
+  videoUrl?: string;
+  performanceStats?: unknown;
+  features?: unknown;
   category: Category;
   brand: Brand;
 }

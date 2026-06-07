@@ -14,13 +14,14 @@ export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
   async findAll(query: any) {
-    const { page = 1, limit = 20, category, brand, search, minPrice, maxPrice, showAll } = query;
+    const { page = 1, limit = 20, category, brand, search, minPrice, maxPrice, showAll, isOffer } = query;
     const skip = (Number(page) - 1) * Number(limit);
 
     // showAll=1 omite el filtro active:true — usado por el backoffice admin
     const where: any = showAll === '1' ? {} : { active: true };
     if (category) where.category = { slug: category };
     if (brand) where.brand = { slug: brand };
+    if (isOffer === 'true') where.isOffer = true;
     if (search) where.name = { contains: search, mode: 'insensitive' };
     if (minPrice || maxPrice) {
       where.price = {};

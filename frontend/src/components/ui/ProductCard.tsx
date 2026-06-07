@@ -1,9 +1,10 @@
 'use client';
 // ProductCard — tarjeta de producto reutilizable
-// Muestra imagen, badge de descuento, ícono wishlist, precios, cuotas y botón de carrito
+// Diseño dark premium alineado con el resto de Home Pádel
 // Props: product (Product) + onAddToCart callback
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Heart, ShoppingCart } from 'lucide-react';
 import { Product } from '@/types';
 import { formatPrice, getDiscountPercent, getImageUrl } from '@/lib/utils';
@@ -18,11 +19,8 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
   const [adding, setAdding] = useState(false);
 
   const hasDiscount = product.salePrice !== undefined && product.salePrice < product.price;
-  const discountPct = hasDiscount
-    ? getDiscountPercent(product.price, product.salePrice!)
-    : 0;
+  const discountPct = hasDiscount ? getDiscountPercent(product.price, product.salePrice!) : 0;
 
-  // Genera iniciales del nombre para el placeholder de imagen
   const initials = product.name
     .split(' ')
     .slice(0, 2)
@@ -30,113 +28,117 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
     .join('')
     .toUpperCase();
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
     setAdding(true);
     onAddToCart(product);
     setTimeout(() => setAdding(false), 800);
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-1 flex flex-col overflow-hidden border border-gray-100 group">
-      {/* ── Imagen ─────────────────────────────────────────────────────── */}
-      <div className="relative aspect-square bg-gray-100 overflow-hidden">
+    <div className="bg-[#111] border border-white/[0.08] rounded-xl overflow-hidden flex flex-col group hover:border-white/[0.16] transition-all duration-200 hover:-translate-y-0.5">
+
+      {/* ── Imagen ─────────────────────────────────────────────────────────── */}
+      <Link href={`/producto/${product.slug}`} className="relative aspect-square bg-[#0d0d0d] overflow-hidden block flex-none">
         {product.images && product.images.length > 0 ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={getImageUrl(product.images[0])}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-contain p-5 group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
-          /* Placeholder cuando no hay imagen */
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300">
-            <span className="text-3xl font-black text-gray-400">{initials}</span>
+          <div className="w-full h-full flex items-center justify-center">
+            <span className="text-4xl font-black text-white/[0.06]">{initials}</span>
           </div>
         )}
 
-        {/* Badge de descuento — arriba a la izquierda */}
-        {hasDiscount && (
-          <span className="absolute top-2 left-2 bg-[#e53e3e] text-white text-xs font-bold px-2 py-0.5 rounded-full z-10">
-            -{discountPct}%
-          </span>
-        )}
+        {/* Badges arriba-izquierda */}
+        <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
+          {hasDiscount && (
+            <span className="bg-[#e53e3e] text-white text-[10px] font-black px-2 py-0.5 rounded-full leading-none">
+              -{discountPct}%
+            </span>
+          )}
+          {product.isNew && (
+            <span className="bg-[#D4FF00] text-[#111] text-[10px] font-black px-2 py-0.5 rounded-full leading-none">
+              NUEVO
+            </span>
+          )}
+          {product.isOffer && !hasDiscount && (
+            <span className="bg-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full leading-none">
+              OFERTA
+            </span>
+          )}
+        </div>
 
-        {/* Botón wishlist — arriba a la derecha */}
+        {/* Wishlist arriba-derecha */}
         <button
-          onClick={() => setWished(!wished)}
-          className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center z-10 transition-all duration-200 ${
+          onClick={(e) => { e.preventDefault(); setWished(!wished); }}
+          className={`absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 ${
             wished
               ? 'bg-red-500 text-white'
-              : 'bg-white/90 text-gray-400 hover:text-red-500 hover:bg-white'
-          } shadow-sm`}
+              : 'bg-black/50 text-white/30 hover:text-red-400 hover:bg-black/70'
+          }`}
           aria-label={wished ? 'Quitar de favoritos' : 'Agregar a favoritos'}
         >
-          <Heart size={15} fill={wished ? 'currentColor' : 'none'} />
+          <Heart size={13} fill={wished ? 'currentColor' : 'none'} />
         </button>
-      </div>
+      </Link>
 
-      {/* ── Info del producto ───────────────────────────────────────────── */}
+      {/* ── Contenido ──────────────────────────────────────────────────────── */}
       <div className="flex flex-col flex-1 p-4 gap-2">
+
         {/* Marca */}
         {product.brand && (
-          <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">
+          <p className="text-[10px] text-[#A1A1AA] font-semibold uppercase tracking-widest truncate">
             {product.brand.name}
           </p>
         )}
 
         {/* Nombre */}
-        <h3 className="font-semibold text-sm text-gray-900 leading-snug line-clamp-2">
-          {product.name}
-        </h3>
+        <Link href={`/producto/${product.slug}`}>
+          <h3 className="font-bold text-sm text-white leading-snug line-clamp-2 hover:text-[#D4FF00] transition-colors">
+            {product.name}
+          </h3>
+        </Link>
 
         {/* Precios */}
-        <div className="flex items-end gap-2 mt-auto">
+        <div className="flex items-end gap-2 mt-auto pt-1">
           {hasDiscount ? (
             <>
-              <span className="text-lg font-black text-gray-900">
-                {formatPrice(product.salePrice!)}
-              </span>
-              <span className="text-sm text-gray-400 line-through">
-                {formatPrice(product.price)}
-              </span>
+              <span className="text-lg font-black text-white">{formatPrice(product.salePrice!)}</span>
+              <span className="text-sm text-[#A1A1AA] line-through">{formatPrice(product.price)}</span>
             </>
           ) : (
-            <span className="text-lg font-black text-gray-900">
-              {formatPrice(product.price)}
-            </span>
+            <span className="text-lg font-black text-white">{formatPrice(product.price)}</span>
           )}
         </div>
 
-        {/* Cuotas — siempre muestra 6 cuotas sin interés */}
-        <p className="text-xs font-semibold text-green-600">
+        {/* Cuotas */}
+        <p className="text-[10px] font-semibold text-[#D4FF00]">
           6 x {formatPrice(Math.ceil((product.salePrice ?? product.price) / 6))} sin interés
         </p>
 
         {/* Stock bajo */}
         {product.stock > 0 && product.stock <= 5 && (
-          <p className="text-xs text-orange-500 font-medium">
-            ¡Solo quedan {product.stock}!
-          </p>
+          <p className="text-[10px] text-orange-400 font-semibold">¡Solo quedan {product.stock}!</p>
         )}
 
         {/* Botón agregar al carrito */}
         <button
           onClick={handleAddToCart}
           disabled={product.stock === 0 || adding}
-          className={`mt-2 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-bold transition-all duration-200 ${
+          className={`mt-1.5 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-xs font-black uppercase tracking-wide transition-all duration-200 ${
             product.stock === 0
-              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              ? 'bg-white/[0.04] text-white/20 cursor-not-allowed'
               : adding
               ? 'bg-[#D4FF00] text-[#111] scale-95'
-              : 'bg-[#111] text-white hover:bg-[#222] active:scale-95'
+              : 'bg-[#D4FF00] text-[#111] hover:bg-white active:scale-95'
           }`}
         >
-          <ShoppingCart size={15} />
-          {product.stock === 0
-            ? 'SIN STOCK'
-            : adding
-            ? '¡AGREGADO!'
-            : 'AGREGAR AL CARRITO'}
+          <ShoppingCart size={13} />
+          {product.stock === 0 ? 'SIN STOCK' : adding ? '¡AGREGADO!' : 'AGREGAR AL CARRITO'}
         </button>
       </div>
     </div>
