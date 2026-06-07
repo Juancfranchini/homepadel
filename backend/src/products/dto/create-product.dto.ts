@@ -14,6 +14,9 @@ export class CreateProductDto {
   @ApiProperty() @IsNumber() @Min(0) stock: number;
   @ApiPropertyOptional({ type: [String] }) @IsArray() @IsOptional() images?: string[];
   @ApiPropertyOptional() @IsBoolean() @IsOptional() featured?: boolean;
-  @ApiProperty() @IsString() categoryId: string;
-  @ApiProperty() @IsString() brandId: string;
+  @ApiPropertyOptional() @IsBoolean() @IsOptional() isNew?: boolean;
+  @ApiPropertyOptional() @IsBoolean() @IsOptional() isOffer?: boolean;
+  @ApiPropertyOptional() @IsBoolean() @IsOptional() active?: boolean;
+  @ApiPropertyOptional() @IsString() @IsOptional() categoryId?: string;
+  @ApiPropertyOptional() @IsString() @IsOptional() brandId?: string;
 }

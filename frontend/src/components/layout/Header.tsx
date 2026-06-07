@@ -10,7 +10,7 @@ const NAV_LINKS = [
   { label: 'Inicio',                href: '/' },
   { label: 'Productos',             href: '/catalogo' },
   { label: 'Contacto',              href: '/contacto' },
-  { label: 'Política de Devolución',href: '/cambios' },
+  { label: 'Política de Devolución',href: '/politica-de-devolucion' },
 ];
 
 export default function Header() {

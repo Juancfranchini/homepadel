@@ -1,7 +1,15 @@
 // Products management page for the Home Pádel BackOffice.
 // Full CRUD with TanStack Table for listing (with pagination, search, category filter),
 // a modal form for create/edit (react-hook-form + Zod), and a delete confirmation dialog.
-// All API calls go to /api/products and /api/categories, /api/brands.
+// All API calls go to /api/products, /api/categories, /api/brands.
+//
+// Fixes aplicados:
+// - Products list: lee pRes.data.items (la API retorna { items, total, pages })
+// - ?showAll=1&limit=100 para ver todos los productos incluyendo inactivos
+// - Campos renombrados para coincidir con el backend: featured/active (no isFeatured/isActive)
+// - api.patch en lugar de api.put para updates
+// - categoryId/brandId requeridos en Zod + mensaje de error en el form
+// - Mejor manejo de errores del backend (muestra el mensaje de la API)
 
 'use client';
 
@@ -25,6 +33,7 @@ import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { useToast } from '@/components/ui/Toast';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+// Campos tal como los devuelve el backend (Prisma snake_case → camelCase)
 interface Product {
   id: string;
   name: string;
@@ -32,8 +41,8 @@ interface Product {
   price: number;
   salePrice?: number;
   stock: number;
-  isActive: boolean;
-  isFeatured: boolean;
+  active: boolean;      // backend retorna 'active' (no 'isActive')
+  featured: boolean;    // backend retorna 'featured' (no 'isFeatured')
   isNew?: boolean;
   isOffer?: boolean;
   category?: { id: string; name: string };
@@ -47,18 +56,18 @@ interface Brand { id: string; name: string }
 
 // ─── Form schema ──────────────────────────────────────────────────────────────
 const productSchema = z.object({
-  name: z.string().min(2, 'El nombre es requerido'),
+  name:        z.string().min(2, 'El nombre es requerido'),
   description: z.string().optional(),
-  price: z.coerce.number().min(0, 'El precio debe ser positivo'),
-  salePrice: z.coerce.number().min(0).optional(),
-  sku: z.string().min(1, 'El SKU es requerido'),
-  stock: z.coerce.number().int().min(0),
-  categoryId: z.string().optional(),
-  brandId: z.string().optional(),
-  isFeatured: z.boolean().default(false),
-  isNew: z.boolean().default(false),
-  isOffer: z.boolean().default(false),
-  isActive: z.boolean().default(true),
+  price:       z.coerce.number().min(0, 'El precio debe ser positivo'),
+  salePrice:   z.coerce.number().min(0).optional(),
+  sku:         z.string().min(1, 'El SKU es requerido'),
+  stock:       z.coerce.number().int().min(0),
+  categoryId:  z.string().min(1, 'Seleccioná una categoría'),
+  brandId:     z.string().min(1, 'Seleccioná una marca'),
+  featured:    z.boolean().default(false),
+  isNew:       z.boolean().default(false),
+  isOffer:     z.boolean().default(false),
+  active:      z.boolean().default(true),
 });
 type ProductForm = z.infer<typeof productSchema>;
 
@@ -68,17 +77,17 @@ const col = createColumnHelper<Product>();
 // ─── Page component ───────────────────────────────────────────────────────────
 export default function ProductosPage() {
   const { toast } = useToast();
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products,   setProducts]   = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [brands, setBrands] = useState<Brand[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
+  const [brands,     setBrands]     = useState<Brand[]>([]);
+  const [loading,     setLoading]     = useState(true);
+  const [search,      setSearch]      = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen,   setModalOpen]   = useState(false);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
-  const [deleting, setDeleting] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [deleting,    setDeleting]    = useState(false);
+  const [saving,      setSaving]      = useState(false);
 
   const {
     register,
@@ -87,26 +96,29 @@ export default function ProductosPage() {
     formState: { errors },
   } = useForm<ProductForm>({ resolver: zodResolver(productSchema) });
 
-  // ── Data loading ────────────────────────────────────────────────────────────
+  // ── Data loading ─────────────────────────────────────────────────────────────
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const [pRes, cRes, bRes] = await Promise.all([
-        api.get('/products'),
+        // showAll=1 → incluye inactivos; limit=100 → trae todos sin paginar
+        api.get('/products?showAll=1&limit=100'),
         api.get('/categories'),
         api.get('/brands'),
       ]);
-      const p = pRes.data?.data ?? pRes.data;
+
+      // La API de productos retorna { items, total, pages, ... }
+      const p = pRes.data?.items ?? pRes.data?.data ?? pRes.data;
       const c = cRes.data?.data ?? cRes.data;
       const b = bRes.data?.data ?? bRes.data;
+
       setProducts(Array.isArray(p) ? p : []);
       setCategories(Array.isArray(c) ? c : []);
       setBrands(Array.isArray(b) ? b : []);
     } catch {
-      // Fall back to empty arrays — show mock placeholders
-      setProducts(MOCK_PRODUCTS);
-      setCategories(MOCK_CATEGORIES);
-      setBrands(MOCK_BRANDS);
+      setProducts([]);
+      setCategories([]);
+      setBrands([]);
     } finally {
       setLoading(false);
     }
@@ -114,7 +126,7 @@ export default function ProductosPage() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  // ── Filtered data ───────────────────────────────────────────────────────────
+  // ── Filtered data ─────────────────────────────────────────────────────────────
   const filtered = products.filter((p) => {
     const matchSearch =
       !search ||
@@ -124,7 +136,7 @@ export default function ProductosPage() {
     return matchSearch && matchCat;
   });
 
-  // ── Table ────────────────────────────────────────────────────────────────────
+  // ── Table ─────────────────────────────────────────────────────────────────────
   const columns = [
     col.accessor('images', {
       header: 'Imagen',
@@ -140,11 +152,26 @@ export default function ProductosPage() {
         );
       },
     }),
-    col.accessor('name', { header: 'Nombre', cell: (i) => <span className="font-medium text-gray-900">{i.getValue()}</span> }),
-    col.accessor('sku', { header: 'SKU', cell: (i) => <code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">{i.getValue()}</code> }),
-    col.accessor('category', { header: 'Categoría', cell: (i) => i.getValue()?.name ?? '—' }),
-    col.accessor('brand', { header: 'Marca', cell: (i) => i.getValue()?.name ?? '—' }),
-    col.accessor('price', { header: 'Precio', cell: (i) => <span className="font-semibold">{formatPrice(i.getValue())}</span> }),
+    col.accessor('name', {
+      header: 'Nombre',
+      cell: (i) => <span className="font-medium text-gray-900">{i.getValue()}</span>,
+    }),
+    col.accessor('sku', {
+      header: 'SKU',
+      cell: (i) => <code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">{i.getValue()}</code>,
+    }),
+    col.accessor('category', {
+      header: 'Categoría',
+      cell: (i) => i.getValue()?.name ?? '—',
+    }),
+    col.accessor('brand', {
+      header: 'Marca',
+      cell: (i) => i.getValue()?.name ?? '—',
+    }),
+    col.accessor('price', {
+      header: 'Precio',
+      cell: (i) => <span className="font-semibold">{formatPrice(i.getValue())}</span>,
+    }),
     col.accessor('stock', {
       header: 'Stock',
       cell: (i) => (
@@ -153,11 +180,16 @@ export default function ProductosPage() {
         </span>
       ),
     }),
-    col.accessor('isFeatured', {
+    col.accessor('featured', {
       header: 'Destacado',
-      cell: (i) => i.getValue() ? <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" /> : <span className="text-gray-300">—</span>,
+      cell: (i) => i.getValue()
+        ? <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+        : <span className="text-gray-300">—</span>,
     }),
-    col.accessor('isActive', { header: 'Activo', cell: (i) => <ActiveBadge active={i.getValue()} /> }),
+    col.accessor('active', {
+      header: 'Activo',
+      cell: (i) => <ActiveBadge active={i.getValue()} />,
+    }),
     col.display({
       id: 'actions',
       header: 'Acciones',
@@ -188,28 +220,37 @@ export default function ProductosPage() {
     initialState: { pagination: { pageSize: 10 } },
   });
 
-  // ── CRUD helpers ─────────────────────────────────────────────────────────────
+  // ── CRUD helpers ──────────────────────────────────────────────────────────────
   const openCreate = () => {
     setEditProduct(null);
-    reset({ isActive: true, isFeatured: false, isNew: false, isOffer: false, stock: 0, price: 0 });
+    reset({
+      active: true,
+      featured: false,
+      isNew: false,
+      isOffer: false,
+      stock: 0,
+      price: 0,
+      categoryId: '',
+      brandId: '',
+    });
     setModalOpen(true);
   };
 
   const openEdit = (p: Product) => {
     setEditProduct(p);
     reset({
-      name: p.name,
+      name:        p.name,
       description: p.description ?? '',
-      price: p.price,
-      salePrice: p.salePrice,
-      sku: p.sku,
-      stock: p.stock,
-      categoryId: p.category?.id ?? '',
-      brandId: p.brand?.id ?? '',
-      isFeatured: p.isFeatured,
-      isNew: p.isNew ?? false,
-      isOffer: p.isOffer ?? false,
-      isActive: p.isActive,
+      price:       p.price,
+      salePrice:   p.salePrice,
+      sku:         p.sku,
+      stock:       p.stock,
+      categoryId:  p.category?.id ?? '',
+      brandId:     p.brand?.id ?? '',
+      featured:    p.featured,
+      isNew:       p.isNew ?? false,
+      isOffer:     p.isOffer ?? false,
+      active:      p.active,
     });
     setModalOpen(true);
   };
@@ -217,17 +258,24 @@ export default function ProductosPage() {
   const onSubmit = async (data: ProductForm) => {
     setSaving(true);
     try {
+      // Limpia salePrice vacío para no mandar 0 como precio oferta
+      const payload: Record<string, unknown> = { ...data };
+      if (!data.salePrice) delete payload.salePrice;
+
       if (editProduct) {
-        await api.put(`/products/${editProduct.id}`, data);
+        await api.patch(`/products/${editProduct.id}`, payload);
         toast('Producto actualizado correctamente', 'success');
       } else {
-        await api.post('/products', data);
+        await api.post('/products', payload);
         toast('Producto creado correctamente', 'success');
       }
       setModalOpen(false);
       loadData();
-    } catch {
-      toast('Error al guardar el producto', 'error');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string | string[] } } };
+      const raw = axiosErr.response?.data?.message ?? 'Error al guardar el producto';
+      const msg = Array.isArray(raw) ? raw.join(' · ') : raw;
+      toast(String(msg), 'error');
     } finally {
       setSaving(false);
     }
@@ -305,15 +353,23 @@ export default function ProductosPage() {
               ))}
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {table.getRowModel().rows.map((row) => (
-                <tr key={row.id} className="hover:bg-gray-50 transition-colors">
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-4 py-3 text-gray-700 whitespace-nowrap">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
+              {table.getRowModel().rows.length === 0 ? (
+                <tr>
+                  <td colSpan={columns.length} className="px-4 py-10 text-center text-gray-400 text-sm">
+                    No hay productos. Creá el primero con el botón &quot;Nuevo producto&quot;.
+                  </td>
                 </tr>
-              ))}
+              ) : (
+                table.getRowModel().rows.map((row) => (
+                  <tr key={row.id} className="hover:bg-gray-50 transition-colors">
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className="px-4 py-3 text-gray-700 whitespace-nowrap">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -321,7 +377,7 @@ export default function ProductosPage() {
         {/* Pagination */}
         <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between text-sm text-gray-500">
           <span>
-            Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+            Página {table.getState().pagination.pageIndex + 1} de {Math.max(table.getPageCount(), 1)}
           </span>
           <div className="flex items-center gap-2">
             <button
@@ -351,6 +407,7 @@ export default function ProductosPage() {
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
             {/* Name */}
             <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
@@ -373,7 +430,7 @@ export default function ProductosPage() {
 
             {/* Sale price */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Precio oferta</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Precio oferta <span className="text-gray-400 font-normal">(opcional)</span></label>
               <input type="number" {...register('salePrice')} className="input-field" placeholder="0" />
             </div>
 
@@ -392,20 +449,22 @@ export default function ProductosPage() {
 
             {/* Category */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Categoría *</label>
               <select {...register('categoryId')} className="input-field">
                 <option value="">Seleccionar categoría</option>
                 {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
+              {errors.categoryId && <p className="text-xs text-red-600 mt-1">{errors.categoryId.message}</p>}
             </div>
 
             {/* Brand */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Marca</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Marca *</label>
               <select {...register('brandId')} className="input-field">
                 <option value="">Seleccionar marca</option>
                 {brands.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
               </select>
+              {errors.brandId && <p className="text-xs text-red-600 mt-1">{errors.brandId.message}</p>}
             </div>
 
             {/* Image upload placeholder */}
@@ -421,8 +480,8 @@ export default function ProductosPage() {
             {/* Toggles */}
             <div className="sm:col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-3 bg-gray-50 rounded-lg p-3">
               <div className="flex items-center gap-2">
-                <input type="checkbox" id="isFeatured" {...register('isFeatured')} className="w-4 h-4 rounded accent-[#C8FF00]" />
-                <label htmlFor="isFeatured" className="text-sm text-gray-700">Destacado</label>
+                <input type="checkbox" id="featured" {...register('featured')} className="w-4 h-4 rounded accent-[#C8FF00]" />
+                <label htmlFor="featured" className="text-sm text-gray-700">Destacado</label>
               </div>
               <div className="flex items-center gap-2">
                 <input type="checkbox" id="isNew" {...register('isNew')} className="w-4 h-4 rounded accent-[#C8FF00]" />
@@ -433,8 +492,8 @@ export default function ProductosPage() {
                 <label htmlFor="isOffer" className="text-sm text-gray-700">Badge OFERTA</label>
               </div>
               <div className="flex items-center gap-2">
-                <input type="checkbox" id="isActive" {...register('isActive')} className="w-4 h-4 rounded accent-[#C8FF00]" />
-                <label htmlFor="isActive" className="text-sm text-gray-700">Activo</label>
+                <input type="checkbox" id="active" {...register('active')} className="w-4 h-4 rounded accent-[#C8FF00]" />
+                <label htmlFor="active" className="text-sm text-gray-700">Activo</label>
               </div>
             </div>
           </div>
@@ -461,7 +520,7 @@ export default function ProductosPage() {
         isLoading={deleting}
       />
 
-      {/* Global btn/input styles via style tag (Tailwind JIT classes) */}
+      {/* Global btn/input styles */}
       <style jsx global>{`
         .input-field {
           width: 100%;
@@ -472,6 +531,7 @@ export default function ProductosPage() {
           color: #111827;
           outline: none;
           transition: box-shadow 0.15s, border-color 0.15s;
+          background: white;
         }
         .input-field:focus {
           border-color: #C8FF00;
@@ -502,22 +562,3 @@ export default function ProductosPage() {
     </div>
   );
 }
-
-// ─── Mock fallback data ───────────────────────────────────────────────────────
-const MOCK_PRODUCTS: Product[] = [
-  { id: '1', name: 'Pala Bullpadel Vertex 03', sku: 'BP-VTX-03', price: 85000, stock: 12, isActive: true, isFeatured: true, category: { id: '1', name: 'Palas' }, brand: { id: '1', name: 'Bullpadel' } },
-  { id: '2', name: 'Zapatillas Nox AT10 Lux', sku: 'NOX-AT10-L', price: 52000, stock: 8, isActive: true, isFeatured: false, category: { id: '2', name: 'Zapatillas' }, brand: { id: '2', name: 'Nox' } },
-  { id: '3', name: 'Pelotas Dunlop Pro x3', sku: 'DUN-PRO-3', price: 3200, stock: 50, isActive: true, isFeatured: false, category: { id: '3', name: 'Pelotas' }, brand: { id: '3', name: 'Dunlop' } },
-];
-const MOCK_CATEGORIES: Category[] = [
-  { id: '1', name: 'Palas' },
-  { id: '2', name: 'Zapatillas' },
-  { id: '3', name: 'Pelotas' },
-  { id: '4', name: 'Accesorios' },
-];
-const MOCK_BRANDS: Brand[] = [
-  { id: '1', name: 'Bullpadel' },
-  { id: '2', name: 'Nox' },
-  { id: '3', name: 'Dunlop' },
-  { id: '4', name: 'Adidas' },
-];
