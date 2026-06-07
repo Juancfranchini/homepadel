@@ -1,4 +1,4 @@
-// Orders (Pedidos) management page for the Home Pádel BackOffice.
+﻿// Orders (Pedidos) management page for the Home Pádel BackOffice.
 // Features:
 //  - Status filter tabs: Todos | Pendiente | Pagado | Enviado | Entregado | Cancelado
 //  - TanStack Table with pagination
@@ -79,7 +79,7 @@ export default function PedidosPage() {
     setLoading(true);
     try {
       const res = await api.get('/orders');
-      setOrders(res.data?.data ?? res.data ?? []);
+      setOrders(Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []);
     } catch {
       setOrders(MOCK_ORDERS);
     } finally {
@@ -358,3 +358,4 @@ const MOCK_ORDERS: Order[] = [
     items: [],
   },
 ];
+

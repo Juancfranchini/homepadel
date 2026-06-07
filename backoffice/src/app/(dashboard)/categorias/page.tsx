@@ -1,4 +1,4 @@
-// Categories management page for the Home Pádel BackOffice.
+﻿// Categories management page for the Home Pádel BackOffice.
 // Full CRUD: list all categories in a table, create/edit via modal, delete with confirmation.
 // API: GET/POST/PUT/DELETE /api/categories
 
@@ -52,7 +52,7 @@ export default function CategoriasPage() {
     setLoading(true);
     try {
       const res = await api.get('/categories');
-      setCategories(res.data?.data ?? res.data ?? []);
+      setCategories(Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []);
     } catch {
       setCategories(MOCK);
     } finally {
@@ -239,3 +239,4 @@ const MOCK: Category[] = [
   { id: '4', name: 'Indumentaria', slug: 'indumentaria', isActive: false, _count: { products: 12 } },
   { id: '5', name: 'Accesorios', slug: 'accesorios', isActive: true, _count: { products: 35 } },
 ];
+

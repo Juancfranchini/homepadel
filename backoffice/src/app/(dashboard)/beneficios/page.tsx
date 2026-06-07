@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
@@ -64,7 +64,7 @@ export default function BeneficiosPage() {
     setLoading(true);
     try {
       const res = await api.get('/benefits/admin/all');
-      const data = res.data?.data ?? res.data ?? [];
+      const data = (Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []);
       setBenefits([...data].sort((a: Benefit, b: Benefit) => a.order - b.order));
     } catch {
       setBenefits([]);
@@ -273,3 +273,4 @@ export default function BeneficiosPage() {
     </div>
   );
 }
+

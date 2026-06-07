@@ -1,4 +1,4 @@
-// Customers (Clientes) page for the Home Pádel BackOffice.
+﻿// Customers (Clientes) page for the Home Pádel BackOffice.
 // Lists all registered customers with search by name/email.
 // Click a row to open a customer detail side panel (orders, stats).
 // API: GET /api/users (or /api/customers)
@@ -46,7 +46,7 @@ export default function ClientesPage() {
     setLoading(true);
     try {
       const res = await api.get('/users');
-      setCustomers(res.data?.data ?? res.data ?? []);
+      setCustomers(Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []);
     } catch {
       setCustomers(MOCK);
     } finally {
@@ -254,3 +254,4 @@ const MOCK: Customer[] = [
   { id: '4', name: 'Diego Torres', email: 'diego@email.com', phone: '+54 11 5678-9012', createdAt: '2024-04-10T00:00:00Z', _count: { orders: 1 }, totalSpent: 5200, orders: [] },
   { id: '5', name: 'Ana Martínez', email: 'ana@email.com', createdAt: '2024-05-18T00:00:00Z', _count: { orders: 5 }, totalSpent: 98400, orders: [] },
 ];
+

@@ -1,4 +1,4 @@
-// Brands (Marcas) management page for the Home Pádel BackOffice.
+﻿// Brands (Marcas) management page for the Home Pádel BackOffice.
 // Full CRUD: list, create/edit via modal, delete with confirmation.
 // API: GET/POST/PUT/DELETE /api/brands
 
@@ -55,7 +55,7 @@ export default function MarcasPage() {
     setLoading(true);
     try {
       const res = await api.get('/brands');
-      setBrands(res.data?.data ?? res.data ?? []);
+      setBrands(Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []);
     } catch {
       setBrands(MOCK);
     } finally {
@@ -265,3 +265,4 @@ const MOCK: Brand[] = [
   { id: '4', name: 'Adidas', slug: 'adidas', isActive: true, _count: { products: 15 } },
   { id: '5', name: 'Wilson', slug: 'wilson', isActive: false, _count: { products: 9 } },
 ];
+

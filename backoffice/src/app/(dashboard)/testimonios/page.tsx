@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
@@ -64,7 +64,7 @@ export default function TestimoniosPage() {
     setLoading(true);
     try {
       const res = await api.get('/testimonials/admin/all');
-      const data = res.data?.data ?? res.data ?? [];
+      const data = (Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []);
       setTestimonials([...data].sort((a: Testimonial, b: Testimonial) => a.order - b.order));
     } catch {
       setTestimonials([]);
@@ -283,3 +283,4 @@ export default function TestimoniosPage() {
     </div>
   );
 }
+

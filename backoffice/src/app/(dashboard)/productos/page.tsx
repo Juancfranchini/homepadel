@@ -96,9 +96,12 @@ export default function ProductosPage() {
         api.get('/categories'),
         api.get('/brands'),
       ]);
-      setProducts(pRes.data?.data ?? pRes.data ?? []);
-      setCategories(cRes.data?.data ?? cRes.data ?? []);
-      setBrands(bRes.data?.data ?? bRes.data ?? []);
+      const p = pRes.data?.data ?? pRes.data;
+      const c = cRes.data?.data ?? cRes.data;
+      const b = bRes.data?.data ?? bRes.data;
+      setProducts(Array.isArray(p) ? p : []);
+      setCategories(Array.isArray(c) ? c : []);
+      setBrands(Array.isArray(b) ? b : []);
     } catch {
       // Fall back to empty arrays — show mock placeholders
       setProducts(MOCK_PRODUCTS);

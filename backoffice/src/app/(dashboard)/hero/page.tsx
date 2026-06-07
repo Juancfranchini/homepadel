@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
@@ -67,7 +67,7 @@ export default function HeroPage() {
     setLoading(true);
     try {
       const res = await api.get('/hero-slides/admin/all');
-      const data = res.data?.data ?? res.data ?? [];
+      const data = (Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []);
       setSlides([...data].sort((a: HeroSlide, b: HeroSlide) => a.order - b.order));
     } catch {
       setSlides([]);
@@ -336,3 +336,4 @@ export default function HeroPage() {
     </div>
   );
 }
+

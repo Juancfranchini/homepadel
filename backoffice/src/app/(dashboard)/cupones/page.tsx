@@ -1,4 +1,4 @@
-// Coupons (Cupones) management page for the Home Pádel BackOffice.
+﻿// Coupons (Cupones) management page for the Home Pádel BackOffice.
 // CRUD: list all coupons, create form with PERCENTAGE/FIXED type, edit, delete.
 // API: GET/POST/PUT/DELETE /api/coupons
 
@@ -64,7 +64,7 @@ export default function CuponesPage() {
     setLoading(true);
     try {
       const res = await api.get('/coupons');
-      setCoupons(res.data?.data ?? res.data ?? []);
+      setCoupons(Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []);
     } catch {
       setCoupons(MOCK);
     } finally {
@@ -319,3 +319,4 @@ const MOCK: Coupon[] = [
   { id: '3', code: 'ENVIOGRATIS', type: 'FIXED', discount: 2500, minAmount: 15000, maxUses: 50, usedCount: 50, isActive: false },
   { id: '4', code: 'BF2024', type: 'PERCENTAGE', discount: 35, maxUses: 200, usedCount: 200, expiresAt: '2024-11-30T00:00:00Z', isActive: false },
 ];
+

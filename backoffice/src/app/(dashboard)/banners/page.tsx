@@ -1,4 +1,4 @@
-// Banners management page for the Home Pádel BackOffice.
+﻿// Banners management page for the Home Pádel BackOffice.
 // CRUD: list with image preview and order field, create/edit with image upload, delete.
 // API: GET/POST/PUT/DELETE /api/banners
 
@@ -58,7 +58,7 @@ export default function BannersPage() {
     setLoading(true);
     try {
       const res = await api.get('/banners');
-      const data = res.data?.data ?? res.data ?? [];
+      const data = (Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []);
       setBanners([...data].sort((a: Banner, b: Banner) => a.order - b.order));
     } catch {
       setBanners(MOCK);
@@ -301,3 +301,4 @@ const MOCK: Banner[] = [
   { id: '2', title: 'Nuevas palas 2025', imageUrl: 'https://via.placeholder.com/800x300/1e293b/ffffff?text=Palas+2025', link: '/productos', order: 2, isActive: true },
   { id: '3', title: 'Black Friday', order: 3, isActive: false },
 ];
+

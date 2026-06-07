@@ -1,4 +1,4 @@
-// Promotions (Promociones) management page for the Home Pádel BackOffice.
+﻿// Promotions (Promociones) management page for the Home Pádel BackOffice.
 // CRUD: list, create/edit with date range pickers, delete.
 // API: GET/POST/PUT/DELETE /api/promotions
 
@@ -57,7 +57,7 @@ export default function PromocionesPage() {
     setLoading(true);
     try {
       const res = await api.get('/promotions');
-      setPromos(res.data?.data ?? res.data ?? []);
+      setPromos(Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []);
     } catch {
       setPromos(MOCK);
     } finally {
@@ -262,3 +262,4 @@ const MOCK: Promotion[] = [
   { id: '2', title: 'Black Friday', discount: 35, startDate: '2024-11-29T00:00:00Z', endDate: '2024-11-30T00:00:00Z', isActive: false },
   { id: '3', title: 'Liquidación de stock', discount: 15, startDate: '2024-11-01T00:00:00Z', endDate: '2024-11-30T00:00:00Z', isActive: true },
 ];
+

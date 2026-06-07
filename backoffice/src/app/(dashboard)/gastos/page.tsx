@@ -1,4 +1,4 @@
-// Expenses (Gastos) management page for the Home Pádel BackOffice.
+﻿// Expenses (Gastos) management page for the Home Pádel BackOffice.
 // Features:
 //  - Monthly summary cards (total gastos, highest category, count)
 //  - Full table of expenses with CRUD
@@ -73,7 +73,7 @@ export default function GastosPage() {
     setLoading(true);
     try {
       const res = await api.get('/expenses');
-      setExpenses(res.data?.data ?? res.data ?? []);
+      setExpenses(Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []);
     } catch {
       setExpenses(MOCK);
     } finally {
@@ -320,3 +320,4 @@ const MOCK: Expense[] = [
   { id: '4', description: 'Envíos OCA', amount: 12000, category: 'Logística', date: '2024-11-12T00:00:00Z' },
   { id: '5', description: 'Material de oficina', amount: 4500, category: 'Otros', date: '2024-11-15T00:00:00Z' },
 ];
+
