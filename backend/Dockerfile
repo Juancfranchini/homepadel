@@ -39,4 +39,4 @@ COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
 
 EXPOSE 4000
 
-CMD ["sh", "-c", "node_modules/.bin/prisma migrate resolve --applied 20250606000000_init 2>/dev/null || true && node_modules/.bin/prisma migrate deploy && node dist/main"]
+CMD ["sh", "-c", "node_modules/.bin/prisma db push --accept-data-loss && node dist/main"]
