@@ -18,15 +18,29 @@ async function bootstrap() {
   // Seguridad HTTP headers
   app.use(helmet());
 
-  // CORS — en desarrollo acepta cualquier origen local; en producción restringir con variables de entorno
+  // CORS — acepta localhost en dev y dominios de Vercel + URLs configuradas en producción
   const isDev = process.env.NODE_ENV !== 'production';
   app.enableCors({
     origin: isDev
-      ? true // acepta todos los orígenes en desarrollo
-      : [
-          process.env.FRONTEND_URL || 'http://localhost:3000',
-          process.env.BACKOFFICE_URL || 'http://localhost:3001',
-        ],
+      ? true
+      : (origin, callback) => {
+          // Sin origen (curl, Postman, server-side) → permitir
+          if (!origin) return callback(null, true);
+
+          const allowed = [
+            process.env.FRONTEND_URL,
+            process.env.BACKOFFICE_URL,
+            'http://localhost:3000',
+            'http://localhost:3001',
+          ].filter(Boolean) as string[];
+
+          // Acepta cualquier subdominio de vercel.app (previews incluidas)
+          if (allowed.includes(origin) || origin.endsWith('.vercel.app')) {
+            return callback(null, true);
+          }
+
+          callback(new Error(`CORS: origen no permitido → ${origin}`));
+        },
     credentials: true,
   });
 
