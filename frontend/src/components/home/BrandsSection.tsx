@@ -1,117 +1,64 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useRef } from 'react';
 import { Brand } from '@/types';
 import { getImageUrl } from '@/lib/utils';
 
 interface Props {
-  brands?: Brand[];
+  brands: Brand[];
 }
 
-const FALLBACK_BRANDS: { id: string; name: string }[] = [
-  { id: 'nox',       name: 'NOX' },
-  { id: 'babolat',   name: 'Babolat' },
-  { id: 'bullpadel', name: 'Bullpadel' },
-  { id: 'adidas',    name: 'adidas' },
-  { id: 'wilson',    name: 'Wilson' },
-  { id: 'siux',      name: 'Siux' },
-  { id: 'head',      name: 'HEAD' },
+const FALLBACK: Brand[] = [
+  { id: '1', name: 'NOX', slug: 'nox' },
+  { id: '2', name: 'Bullpadel', slug: 'bullpadel' },
+  { id: '3', name: 'Adidas', slug: 'adidas' },
+  { id: '4', name: 'Head', slug: 'head' },
+  { id: '5', name: 'Wilson', slug: 'wilson' },
+  { id: '6', name: 'Babolat', slug: 'babolat' },
 ];
 
-interface SlotProps {
-  id: string;
-  name: string;
-  logo?: string;
-  url?: string;
-  suffix?: string;
-}
-
-function BrandSlot({ id, name, logo, url, suffix = '' }: SlotProps) {
-  const key = id + suffix;
-  const inner = logo ? (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={getImageUrl(logo)}
-      alt={name}
-      className="h-6 md:h-8 w-auto object-contain brightness-0 invert opacity-40 hover:opacity-80 transition-all duration-300"
-    />
-  ) : (
-    <span className="text-white/30 font-black text-sm uppercase tracking-wider hover:text-white/70 transition-colors whitespace-nowrap cursor-default select-none">
-      {name}
-    </span>
-  );
-
-  return (
-    <div key={key} className="flex items-center justify-center flex-none px-8 md:px-12">
-      {url ? (
-        <a href={url} target="_blank" rel="noopener noreferrer" aria-label={name}>
-          {inner}
-        </a>
-      ) : (
-        inner
-      )}
-    </div>
-  );
-}
-
 export default function BrandsSection({ brands }: Props) {
-  const hasBrands = brands && brands.length > 0;
-  const trackRef = useRef<HTMLDivElement>(null);
-  const animRef = useRef<number | null>(null);
-  const posRef = useRef(0);
-  const pausedRef = useRef(false);
-
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-
-    const SPEED = 0.5;
-
-    const step = () => {
-      if (!pausedRef.current) {
-        const half = track.scrollWidth / 2;
-        posRef.current = (posRef.current + SPEED) % half;
-        track.style.transform = `translateX(-${posRef.current}px)`;
-      }
-      animRef.current = requestAnimationFrame(step);
-    };
-
-    animRef.current = requestAnimationFrame(step);
-
-    const onEnter = () => { pausedRef.current = true; };
-    const onLeave = () => { pausedRef.current = false; };
-
-    track.addEventListener('mouseenter', onEnter);
-    track.addEventListener('mouseleave', onLeave);
-
-    return () => {
-      if (animRef.current) cancelAnimationFrame(animRef.current);
-      track.removeEventListener('mouseenter', onEnter);
-      track.removeEventListener('mouseleave', onLeave);
-    };
-  }, []);
-
-  const renderSlots = (suffix: string) =>
-    hasBrands
-      ? brands!.map((b) => (
-          <BrandSlot key={b.id + suffix} id={b.id} name={b.name} logo={b.logo} url={b.url} suffix={suffix} />
-        ))
-      : FALLBACK_BRANDS.map((b) => (
-          <BrandSlot key={b.id + suffix} id={b.id} name={b.name} suffix={suffix} />
-        ));
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const items = brands && brands.length > 0 ? brands : FALLBACK;
 
   return (
-    <section className="bg-[#0a0a0a] border-t border-white/5 py-10 overflow-hidden">
-      {/* Título centrado */}
-      <p className="text-center text-[10px] font-black uppercase tracking-[0.3em] text-white/25 mb-8">
-        MARCAS QUE CONFÍAN EN NOSOTROS
-      </p>
+    <section className="bg-[#050606] border-t border-[#0D0F0F] py-12 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl md:text-3xl font-semibold uppercase text-[#F7F6F7] mb-2">
+            MARCAS QUE TRABAJAMOS
+          </h2>
+          <p className="text-[#C7C7C0] text-sm">Las mejores marcas del mundo del padel.</p>
+        </div>
+      </div>
 
-      {/* Slider continuo */}
-      <div className="overflow-hidden">
-        <div ref={trackRef} className="flex will-change-transform">
-          {renderSlots('')}
-          {renderSlots('-dup')}
+      {/* Slider infinito */}
+      <div className="relative overflow-hidden">
+        <div
+          ref={scrollRef}
+          className="flex gap-12 animate-scroll"
+          style={{ width: 'max-content' }}
+        >
+          {/* Duplicamos para efecto infinito */}
+          {[...items, ...items].map((brand, i) => {
+            const logoUrl = brand.logo ? getImageUrl(brand.logo) : null;
+            return (
+              <div key={i} className="flex items-center justify-center h-20 flex-shrink-0 px-6">
+                {logoUrl ? (
+                  <img
+                    src={logoUrl}
+                    alt={brand.name}
+                    className="max-h-full w-auto object-contain opacity-60 hover:opacity-100 transition-opacity duration-300"
+                    style={{ maxWidth: '140px' }}
+                  />
+                ) : (
+                  <span className="text-[#8A8A85] text-xl font-bold uppercase tracking-wider opacity-60 hover:opacity-100 hover:text-[#F7F6F7] transition-all duration-300">
+                    {brand.name}
+                  </span>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

@@ -1,115 +1,71 @@
-'use client';
-
-import { useState } from 'react';
-import { Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Testimonial } from '@/types';
 import { getImageUrl } from '@/lib/utils';
-
-const FALLBACK: Testimonial[] = [
-  { id: '1', name: 'Martín R.',    comment: 'Excelentes productos y atención. La pala llegó perfecta y original. Me llegó rapidísimo, 100% recomendables.', rating: 5, order: 1, active: true },
-  { id: '2', name: 'Agustina L.', comment: 'Muy buena experiencia de compra. El asesoramiento fue clave para elegir mis zapatillas. Muy conforme.',          rating: 5, order: 2, active: true },
-  { id: '3', name: 'Lucas G.',     comment: 'Tienen lo mejor en pádel. Volvería a comprar sin dudas. El envío llegó antes de lo esperado.',                  rating: 5, order: 3, active: true },
-];
+import { Star } from 'lucide-react';
 
 interface Props {
-  testimonials?: Testimonial[];
+  testimonials: Testimonial[];
 }
 
-function StarRating({ rating }: { rating: number }) {
-  return (
-    <div className="flex gap-0.5">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <Star
-          key={i}
-          size={14}
-          className={i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-700'}
-        />
-      ))}
-    </div>
-  );
-}
+const PLACEHOLDER: Testimonial[] = [
+  { id: '1', name: 'Martin G.', comment: 'Excelente atencion y productos de primera calidad. La paleta que compre supero mis expectativas.', rating: 5, order: 0, active: true },
+  { id: '2', name: 'Lucia R.', comment: 'El envio fue rapidisimo y el asesoramiento por WhatsApp me ayudo a elegir la paleta ideal para mi nivel.', rating: 5, order: 1, active: true },
+  { id: '3', name: 'Diego P.', comment: 'Los mejores precios del mercado. Compre mis zapatillas Bullpadel y llegaron en 48 horas.', rating: 5, order: 2, active: true },
+];
 
 export default function TestimonialsSection({ testimonials }: Props) {
-  const items = testimonials && testimonials.length > 0 ? testimonials : FALLBACK;
-  const [current, setCurrent] = useState(0);
-  const isMulti = items.length > 3;
-
-  const next = () => setCurrent((c) => (c + 1) % items.length);
-  const prev = () => setCurrent((c) => (c - 1 + items.length) % items.length);
+  const items = testimonials && testimonials.length > 0 ? testimonials : PLACEHOLDER;
 
   return (
-    <section className="bg-[#0a0a0a] border-t border-white/5 py-16">
-      <div className="max-w-7xl mx-auto px-4">
-        {/* Encabezado */}
-        <div className="flex items-center justify-between mb-10">
-          <div className="flex items-center gap-3">
-            <span className="w-1 h-7 bg-[#D4FF00] rounded-full flex-none" />
-            <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">
-              LO QUE DICEN NUESTROS CLIENTES
-            </h2>
-          </div>
-          {isMulti && (
-            <div className="flex gap-2">
-              <button onClick={prev} className="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-white/8 transition-colors">
-                <ChevronLeft size={16} />
-              </button>
-              <button onClick={next} className="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-white/8 transition-colors">
-                <ChevronRight size={16} />
-              </button>
-            </div>
-          )}
+    <section className="bg-[#242A05] border-t border-[#0D0F0F] py-16">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="text-center mb-10">
+          <h2 className="text-2xl md:text-3xl font-semibold uppercase text-[#F7F6F7] mb-2">
+            LO QUE DICEN NUESTROS CLIENTES
+          </h2>
+          <p className="text-[#C7C7C0] text-sm">La experiencia de nuestra comunidad nos respalda.</p>
         </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {(isMulti
-            ? items.slice(current, current + 3).concat(items.slice(0, Math.max(0, current + 3 - items.length)))
-            : items
-          ).map((t) => (
-            <div key={t.id} className="bg-[#111] rounded-2xl p-6 flex flex-col gap-4 border border-white/5">
-              <StarRating rating={t.rating} />
-              <p className="text-gray-400 text-sm leading-relaxed flex-1">
-                &ldquo;{t.comment}&rdquo;
-              </p>
-              <div className="flex items-center gap-3 pt-4 border-t border-white/8">
-                {t.photo ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={getImageUrl(t.photo)}
-                    alt={t.name}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-[#1a1a1a] border border-white/10 flex items-center justify-center flex-none">
-                    <span className="text-[#D4FF00] font-black text-xs">
-                      {t.name.slice(0, 2).toUpperCase()}
-                    </span>
-                  </div>
-                )}
-                <div>
-                  <p className="font-bold text-sm text-white">{t.name}</p>
-                  <p className="text-gray-600 text-xs">Cliente verificado</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {items.slice(0, 3).map((t) => {
+            const photoUrl = t.photo ? getImageUrl(t.photo) : null;
+            const initials = t.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+
+            return (
+              <div key={t.id} className="bg-[#141A1D] rounded-2xl p-6 flex flex-col gap-4 border border-[#0D0F0F]">
+                {/* Fila 1: Foto + Nombre */}
+                <div className="flex items-center gap-3">
+                  {photoUrl ? (
+                    <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border-2 border-[#B7D31A]/30">
+                      <img src={photoUrl} alt={t.name} className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-[#B7D31A]/10 border-2 border-[#B7D31A]/30 flex items-center justify-center flex-shrink-0">
+                      <span className="text-[#B7D31A] font-bold text-sm">{initials}</span>
+                    </div>
+                  )}
+                  <p className="text-[#F7F6F7] font-semibold text-sm">{t.name}</p>
+                </div>
+
+                {/* Fila 2: Comentario */}
+                <p className="text-[#C7C7C0] text-sm leading-relaxed italic flex-1">
+                  &quot;{t.comment}&quot;
+                </p>
+
+                {/* Fila 3: Valoracion abajo a la derecha */}
+                <div className="flex justify-end gap-0.5">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star
+                      key={i}
+                      size={14}
+                      fill={i < (t.rating || 5) ? "#B7D31A" : "none"}
+                      stroke={i < (t.rating || 5) ? "#B7D31A" : "#8A8A85"}
+                    />
+                  ))}
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
-
-        {/* Dots */}
-        {isMulti && (
-          <div className="flex justify-center gap-2 mt-6">
-            {items.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrent(i)}
-                className={`rounded-full transition-all duration-300 ${
-                  i === current ? 'w-5 h-1.5 bg-[#D4FF00]' : 'w-1.5 h-1.5 bg-white/20 hover:bg-white/40'
-                }`}
-                aria-label={`Ir al testimonio ${i + 1}`}
-              />
-            ))}
-          </div>
-        )}
       </div>
     </section>
   );

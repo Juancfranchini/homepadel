@@ -53,11 +53,11 @@ const STEPS = [
 
 export default function EnviosPage() {
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white">
+    <div className="min-h-screen bg-[#050606] text-white">
 
       {/* BREADCRUMB */}
       <div className="border-b border-white/[0.06]">
-        <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center gap-1.5 text-[11px] text-[#A1A1AA]">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-2.5 flex items-center gap-1.5 text-[11px] text-[#A1A1AA]">
           <Link href="/" className="hover:text-white transition-colors">Inicio</Link>
           <span>/</span>
           <span className="text-white">Envíos</span>
@@ -65,10 +65,10 @@ export default function EnviosPage() {
       </div>
 
       {/* HERO */}
-      <section className="max-w-7xl mx-auto px-4 py-12 lg:py-16">
+      <section className="max-w-7xl mx-auto px-6 lg:px-8 py-12 lg:py-16">
         <div className="flex flex-col lg:flex-row items-center gap-10">
           <div>
-            <p className="text-[#D4FF00] text-xs font-black uppercase tracking-[0.2em] mb-3">LOGÍSTICA</p>
+            <p className="text-[#B7D31A] text-xs font-black uppercase tracking-[0.2em] mb-3">LOGÍSTICA</p>
             <h1 className="text-4xl md:text-5xl font-black text-white leading-tight mb-4">
               Información de Envíos
             </h1>
@@ -78,15 +78,15 @@ export default function EnviosPage() {
             </p>
           </div>
           <div className="flex gap-4 flex-none">
-            <div className="bg-[#121212] border border-white/[0.08] rounded-2xl p-5 text-center w-32">
-              <Truck size={28} className="text-[#D4FF00] mx-auto mb-2" />
+            <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-2xl p-5 text-center w-32">
+              <Truck size={28} className="text-[#B7D31A] mx-auto mb-2" />
               <p className="text-white font-black text-sm">ENVÍO A</p>
-              <p className="text-[#D4FF00] font-black text-lg">TODO EL PAÍS</p>
+              <p className="text-[#B7D31A] font-black text-lg">TODO EL PAÍS</p>
             </div>
-            <div className="bg-[#121212] border border-white/[0.08] rounded-2xl p-5 text-center w-32">
-              <Clock size={28} className="text-[#D4FF00] mx-auto mb-2" />
+            <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-2xl p-5 text-center w-32">
+              <Clock size={28} className="text-[#B7D31A] mx-auto mb-2" />
               <p className="text-white font-black text-sm">DESDE</p>
-              <p className="text-[#D4FF00] font-black text-lg">24 HS</p>
+              <p className="text-[#B7D31A] font-black text-lg">24 HS</p>
             </div>
           </div>
         </div>
@@ -94,7 +94,7 @@ export default function EnviosPage() {
 
       {/* ZONAS */}
       <section className="border-t border-white/[0.06] py-14 bg-[#050505]">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white mb-8">
             TIEMPOS Y COSTOS POR ZONA
           </h2>
@@ -112,13 +112,13 @@ export default function EnviosPage() {
                 {ZONAS.map((z, i) => (
                   <tr
                     key={i}
-                    className={`border-b border-white/[0.06] ${z.destacado ? 'bg-[#D4FF00]/[0.04]' : ''}`}
+                    className={`border-b border-white/[0.06] ${z.destacado ? 'bg-[#B7D31A]/[0.04]' : ''}`}
                   >
                     <td className="py-4 pr-4">
-                      <span className={`font-bold text-sm ${z.destacado ? 'text-[#D4FF00]' : 'text-white'}`}>
+                      <span className={`font-bold text-sm ${z.destacado ? 'text-[#B7D31A]' : 'text-white'}`}>
                         {z.zona}
                         {z.destacado && (
-                          <span className="ml-2 bg-[#D4FF00]/20 text-[#D4FF00] text-[9px] font-black px-1.5 py-0.5 rounded uppercase">
+                          <span className="ml-2 bg-[#B7D31A]/20 text-[#B7D31A] text-[9px] font-black px-1.5 py-0.5 rounded uppercase">
                             Express
                           </span>
                         )}
@@ -126,7 +126,7 @@ export default function EnviosPage() {
                     </td>
                     <td className="py-4 pr-4 text-[#A1A1AA] text-sm">{z.tiempo}</td>
                     <td className="py-4 pr-4 text-white text-sm font-semibold">{z.costo}</td>
-                    <td className="py-4 text-[#D4FF00] text-xs font-semibold">{z.gratis}</td>
+                    <td className="py-4 text-[#B7D31A] text-xs font-semibold">{z.gratis}</td>
                   </tr>
                 ))}
               </tbody>
@@ -140,14 +140,14 @@ export default function EnviosPage() {
 
       {/* CÓMO FUNCIONA */}
       <section className="border-t border-white/[0.06] py-14">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white mb-10">
             ¿CÓMO FUNCIONA EL ENVÍO?
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {STEPS.map((step, i) => (
-              <div key={i} className="bg-[#121212] border border-white/[0.08] rounded-2xl p-5">
-                <div className="w-10 h-10 rounded-xl bg-[#D4FF00]/10 border border-[#D4FF00]/20 flex items-center justify-center text-[#D4FF00] mb-4">
+              <div key={i} className="bg-[#0C0C0C] border border-white/[0.08] rounded-2xl p-5">
+                <div className="w-10 h-10 rounded-xl bg-[#B7D31A]/10 border border-[#B7D31A]/20 flex items-center justify-center text-[#B7D31A] mb-4">
                   {step.icon}
                 </div>
                 <p className="text-white font-black text-sm mb-1">{step.title}</p>
@@ -160,9 +160,9 @@ export default function EnviosPage() {
 
       {/* RETIRO EN LOCAL */}
       <section className="border-t border-white/[0.06] py-12 bg-[#050505]">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="bg-[#121212] border border-white/[0.08] rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-start gap-6">
-            <div className="w-12 h-12 rounded-xl bg-[#D4FF00]/10 border border-[#D4FF00]/20 flex items-center justify-center text-[#D4FF00] flex-none">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-start gap-6">
+            <div className="w-12 h-12 rounded-xl bg-[#B7D31A]/10 border border-[#B7D31A]/20 flex items-center justify-center text-[#B7D31A] flex-none">
               <MapPin size={24} />
             </div>
             <div>
@@ -179,7 +179,7 @@ export default function EnviosPage() {
 
       {/* CTA */}
       <section className="border-t border-white/[0.06] py-10">
-        <div className="max-w-7xl mx-auto px-4 text-center">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
           <p className="text-[#A1A1AA] text-sm mb-4">¿Tenés dudas sobre tu envío?</p>
           <a
             href="https://wa.me/5491131813297"

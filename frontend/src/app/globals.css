@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -13,9 +14,9 @@
 
 /* ─── Token de color de acento ───────────────────────────────────────── */
 :root {
-  --accent: #D4FF00;
-  --bg-base:    #0A0A0A;
-  --bg-surface: #121212;
+  --accent: #B7D31A;
+  --bg-base:    #050606;
+  --bg-surface: #0C0C0C;
   --border:     rgba(255, 255, 255, 0.08);
   --text-primary:   #FFFFFF;
   --text-secondary: #A1A1AA;
@@ -24,12 +25,12 @@
 /* ─── Fondo global oscuro ────────────────────────────────────────────── */
 html {
   scroll-behavior: smooth;
-  background: #0A0A0A;
+  background: #050606;
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background: #0A0A0A;
+  font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+  background: #050606;
   color: #FFFFFF;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -41,7 +42,7 @@ body {
   height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #111;
+  background: #050606;
 }
 ::-webkit-scrollbar-thumb {
   background: #333;
@@ -54,3 +55,71 @@ body {
 /* ─── Ocultar scrollbar horizontal ──────────────────────────────────── */
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ============================================================
+   BOTONES PRIMARIOS - Glow abajo y costados
+   ============================================================ */
+.btn-primary-glow {
+  box-shadow: 
+    2px 0 6px rgba(183, 211, 26, 0.3),
+    -2px 0 6px rgba(183, 211, 26, 0.3),
+    0 4px 8px rgba(183, 211, 26, 0.3);
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+
+.btn-primary-glow:hover {
+  transform: translateY(3px);
+  box-shadow: 
+    3px 0 10px rgba(183, 211, 26, 0.5),
+    -3px 0 10px rgba(183, 211, 26, 0.5),
+    0 6px 14px rgba(183, 211, 26, 0.4);
+}
+/* ============================================================
+   DEGRADADO ENTRE SECCIONES
+   ============================================================ */
+.section-gradient {
+  position: relative;
+}
+
+.section-gradient::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #B7D31A40, transparent);
+  z-index: 1;
+}
+
+.section-gradient::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(to bottom, rgba(183,211,26,0.03), transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+/* Jerarquia tipografica Poppins */
+h1, .h1 { font-weight: 700; letter-spacing: -0.02em; }
+h2, .h2 { font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; }
+h3, .h3 { font-weight: 500; }
+h4, .h4 { font-weight: 600; }
+p, a, li, span, input, textarea, select, label { font-weight: 400; }
+.font-semibold, .font-bold, .font-black { font-family: 'Poppins', system-ui, -apple-system, sans-serif; }
+/* Animacion scroll infinito para marcas */
+@keyframes scroll-brands {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-scroll {
+  animation: scroll-brands 25s linear infinite;
+}
+
+.animate-scroll:hover {
+  animation-play-state: paused;
+}

@@ -51,18 +51,18 @@ export default function NewsletterSection() {
   };
 
   return (
-    <section className="bg-[#111]">
+    <section className="section-gradient bg-[#050606]">
       {/* ── Newsletter ────────────────────────────────────────────────────── */}
-      <div className="max-w-7xl mx-auto px-4 py-14">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-14">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
 
           {/* Columna izquierda — formulario */}
           <div>
             <div className="flex items-center gap-3 mb-5">
-              <div className="w-11 h-11 rounded-full bg-[#D4FF00]/15 border border-[#D4FF00]/30 flex items-center justify-center text-[#D4FF00] flex-none">
+              <div className="w-11 h-11 rounded-full bg-[#B7D31A]/15 border border-[#B7D31A]/30 flex items-center justify-center text-[#B7D31A] flex-none">
                 <Mail size={22} />
               </div>
-              <p className="text-[#D4FF00] text-xs font-bold uppercase tracking-widest">
+              <p className="text-[#B7D31A] text-xs font-bold uppercase tracking-widest">
                 Newsletter exclusivo
               </p>
             </div>
@@ -75,7 +75,7 @@ export default function NewsletterSection() {
             </p>
 
             {submitted ? (
-              <div className="flex items-center gap-3 text-[#D4FF00]">
+              <div className="flex items-center gap-3 text-[#B7D31A]">
                 <CheckCircle size={24} />
                 <div>
                   <p className="font-bold text-sm">¡Gracias por suscribirte!</p>
@@ -93,7 +93,7 @@ export default function NewsletterSection() {
                     type="email"
                     placeholder="Tu email"
                     {...register('email')}
-                    className={`w-full px-4 py-3 rounded-lg bg-white/10 border text-white placeholder-gray-500 text-sm focus:outline-none focus:border-[#D4FF00] transition-colors ${
+                    className={`w-full px-4 py-3 rounded-lg bg-white/10 border text-white placeholder-gray-500 text-sm focus:outline-none focus:border-[#B7D31A] transition-colors ${
                       errors.email ? 'border-red-500' : 'border-white/20'
                     }`}
                   />
@@ -106,7 +106,7 @@ export default function NewsletterSection() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-none w-10 h-10 sm:w-auto sm:h-auto sm:px-5 sm:py-3 bg-[#D4FF00] text-[#111] rounded-lg font-black hover:bg-white transition-colors disabled:opacity-70 flex items-center justify-center"
+                  className="flex-none w-10 h-10 sm:w-auto sm:h-auto sm:px-5 sm:py-3 bg-[#B7D31A] text-[#050606] rounded-lg font-black hover:bg-[#B7D31A] transition-colors disabled:opacity-70 flex items-center justify-center"
                   aria-label="Suscribirse"
                 >
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="sm:hidden" aria-hidden="true">
@@ -128,16 +128,16 @@ export default function NewsletterSection() {
 
           {/* Columna derecha — imagen decorativa */}
           <div className="hidden md:flex items-center justify-end">
-            <div className="w-full max-w-sm h-64 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a] border border-white/10 flex items-center justify-center overflow-hidden">
+            <div className="w-full max-w-sm h-64 rounded-2xl bg-gradient-to-br from-[#0C0C0C] to-[#050606] border border-[#0D0F0F] flex items-center justify-center overflow-hidden">
               <div className="text-center opacity-20">
                 <svg width="120" height="120" viewBox="0 0 120 120" fill="none" aria-hidden="true">
-                  <ellipse cx="55" cy="42" rx="30" ry="35" fill="#2a2a2a" stroke="#D4FF00" strokeWidth="3"/>
-                  <circle cx="45" cy="32" r="4" fill="#D4FF00" opacity="0.8"/>
-                  <circle cx="60" cy="28" r="4" fill="#D4FF00" opacity="0.8"/>
-                  <circle cx="68" cy="38" r="4" fill="#D4FF00" opacity="0.8"/>
-                  <circle cx="48" cy="46" r="4" fill="#D4FF00" opacity="0.6"/>
-                  <circle cx="63" cy="50" r="4" fill="#D4FF00" opacity="0.6"/>
-                  <rect x="48" y="74" width="14" height="34" rx="7" fill="#D4FF00" opacity="0.9"/>
+                  <ellipse cx="55" cy="42" rx="30" ry="35" fill="#2a2a2a" stroke="#B7D31A" strokeWidth="3"/>
+                  <circle cx="45" cy="32" r="4" fill="#B7D31A" opacity="0.8"/>
+                  <circle cx="60" cy="28" r="4" fill="#B7D31A" opacity="0.8"/>
+                  <circle cx="68" cy="38" r="4" fill="#B7D31A" opacity="0.8"/>
+                  <circle cx="48" cy="46" r="4" fill="#B7D31A" opacity="0.6"/>
+                  <circle cx="63" cy="50" r="4" fill="#B7D31A" opacity="0.6"/>
+                  <rect x="48" y="74" width="14" height="34" rx="7" fill="#B7D31A" opacity="0.9"/>
                 </svg>
               </div>
             </div>
@@ -146,12 +146,12 @@ export default function NewsletterSection() {
       </div>
 
       {/* ── Trust badges ─────────────────────────────────────────────────── */}
-      <div className="border-t border-white/10">
-        <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="border-t border-[#0D0F0F]">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {TRUST_BADGES.map((b, i) => (
               <div key={i} className="flex items-center gap-3">
-                <div className="flex-none w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[#D4FF00]">
+                <div className="flex-none w-10 h-10 rounded-full bg-white/5 border border-[#0D0F0F] flex items-center justify-center text-[#B7D31A]">
                   {b.icon}
                 </div>
                 <div>

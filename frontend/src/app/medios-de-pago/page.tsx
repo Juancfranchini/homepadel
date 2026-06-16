@@ -18,11 +18,11 @@ const TARJETAS = ['VISA', 'MASTERCARD', 'AMERICAN EXPRESS', 'NARANJA', 'CABAL', 
 
 export default function MediosDePagoPage() {
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white">
+    <div className="min-h-screen bg-[#050606] text-white">
 
       {/* BREADCRUMB */}
       <div className="border-b border-white/[0.06]">
-        <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center gap-1.5 text-[11px] text-[#A1A1AA]">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-2.5 flex items-center gap-1.5 text-[11px] text-[#A1A1AA]">
           <Link href="/" className="hover:text-white transition-colors">Inicio</Link>
           <span>/</span>
           <span className="text-white">Medios de Pago</span>
@@ -30,8 +30,8 @@ export default function MediosDePagoPage() {
       </div>
 
       {/* HERO */}
-      <section className="max-w-7xl mx-auto px-4 py-12 lg:py-16 text-center">
-        <p className="text-[#D4FF00] text-xs font-black uppercase tracking-[0.2em] mb-3">PAGOS</p>
+      <section className="max-w-7xl mx-auto px-6 lg:px-8 py-12 lg:py-16 text-center">
+        <p className="text-[#B7D31A] text-xs font-black uppercase tracking-[0.2em] mb-3">PAGOS</p>
         <h1 className="text-4xl md:text-5xl font-black text-white leading-tight mb-4">
           Medios de Pago
         </h1>
@@ -43,12 +43,12 @@ export default function MediosDePagoPage() {
 
       {/* OPCIONES */}
       <section className="border-t border-white/[0.06] py-14 bg-[#050505]">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
 
             {/* Tarjetas de crédito */}
-            <div className="bg-[#121212] border border-white/[0.08] rounded-2xl p-6 hover:border-[#D4FF00]/20 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-[#D4FF00]/10 border border-[#D4FF00]/20 flex items-center justify-center text-[#D4FF00] mb-4">
+            <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-2xl p-6 hover:border-[#B7D31A]/20 transition-colors">
+              <div className="w-10 h-10 rounded-xl bg-[#B7D31A]/10 border border-[#B7D31A]/20 flex items-center justify-center text-[#B7D31A] mb-4">
                 <CreditCard size={20} />
               </div>
               <h3 className="text-white font-black text-base mb-2">Tarjeta de Crédito</h3>
@@ -65,8 +65,8 @@ export default function MediosDePagoPage() {
             </div>
 
             {/* Tarjetas de débito */}
-            <div className="bg-[#121212] border border-white/[0.08] rounded-2xl p-6 hover:border-[#D4FF00]/20 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-[#D4FF00]/10 border border-[#D4FF00]/20 flex items-center justify-center text-[#D4FF00] mb-4">
+            <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-2xl p-6 hover:border-[#B7D31A]/20 transition-colors">
+              <div className="w-10 h-10 rounded-xl bg-[#B7D31A]/10 border border-[#B7D31A]/20 flex items-center justify-center text-[#B7D31A] mb-4">
                 <CreditCard size={20} />
               </div>
               <h3 className="text-white font-black text-base mb-2">Tarjeta de Débito</h3>
@@ -83,22 +83,22 @@ export default function MediosDePagoPage() {
             </div>
 
             {/* Mercado Pago */}
-            <div className="bg-[#121212] border border-white/[0.08] rounded-2xl p-6 hover:border-[#D4FF00]/20 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-[#D4FF00]/10 border border-[#D4FF00]/20 flex items-center justify-center text-[#D4FF00] mb-4">
+            <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-2xl p-6 hover:border-[#B7D31A]/20 transition-colors">
+              <div className="w-10 h-10 rounded-xl bg-[#B7D31A]/10 border border-[#B7D31A]/20 flex items-center justify-center text-[#B7D31A] mb-4">
                 <Smartphone size={20} />
               </div>
               <h3 className="text-white font-black text-base mb-2">Mercado Pago</h3>
               <p className="text-[#A1A1AA] text-sm leading-relaxed mb-4">
                 Pagá con tu saldo de Mercado Pago, tarjetas o desde la app. Rápido y seguro.
               </p>
-              <span className="bg-[#D4FF00]/10 text-[#D4FF00] text-[10px] font-bold px-2 py-1 rounded border border-[#D4FF00]/20">
+              <span className="bg-[#B7D31A]/10 text-[#B7D31A] text-[10px] font-bold px-2 py-1 rounded border border-[#B7D31A]/20">
                 MERCADO PAGO
               </span>
             </div>
 
             {/* Transferencia bancaria */}
-            <div className="bg-[#121212] border border-white/[0.08] rounded-2xl p-6 hover:border-[#D4FF00]/20 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-[#D4FF00]/10 border border-[#D4FF00]/20 flex items-center justify-center text-[#D4FF00] mb-4">
+            <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-2xl p-6 hover:border-[#B7D31A]/20 transition-colors">
+              <div className="w-10 h-10 rounded-xl bg-[#B7D31A]/10 border border-[#B7D31A]/20 flex items-center justify-center text-[#B7D31A] mb-4">
                 <Building2 size={20} />
               </div>
               <h3 className="text-white font-black text-base mb-2">Transferencia Bancaria / CBU</h3>
@@ -109,8 +109,8 @@ export default function MediosDePagoPage() {
             </div>
 
             {/* QR */}
-            <div className="bg-[#121212] border border-white/[0.08] rounded-2xl p-6 hover:border-[#D4FF00]/20 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-[#D4FF00]/10 border border-[#D4FF00]/20 flex items-center justify-center text-[#D4FF00] mb-4">
+            <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-2xl p-6 hover:border-[#B7D31A]/20 transition-colors">
+              <div className="w-10 h-10 rounded-xl bg-[#B7D31A]/10 border border-[#B7D31A]/20 flex items-center justify-center text-[#B7D31A] mb-4">
                 <Smartphone size={20} />
               </div>
               <h3 className="text-white font-black text-base mb-2">Pago con QR</h3>
@@ -121,8 +121,8 @@ export default function MediosDePagoPage() {
             </div>
 
             {/* Seguridad */}
-            <div className="bg-[#121212] border border-[#D4FF00]/20 rounded-2xl p-6">
-              <div className="w-10 h-10 rounded-xl bg-[#D4FF00]/10 border border-[#D4FF00]/20 flex items-center justify-center text-[#D4FF00] mb-4">
+            <div className="bg-[#0C0C0C] border border-[#B7D31A]/20 rounded-2xl p-6">
+              <div className="w-10 h-10 rounded-xl bg-[#B7D31A]/10 border border-[#B7D31A]/20 flex items-center justify-center text-[#B7D31A] mb-4">
                 <Shield size={20} />
               </div>
               <h3 className="text-white font-black text-base mb-2">Compra 100% Segura</h3>
@@ -138,23 +138,23 @@ export default function MediosDePagoPage() {
 
       {/* CUOTAS */}
       <section className="border-t border-white/[0.06] py-14">
-        <div className="max-w-4xl mx-auto px-4">
+        <div className="max-w-4xl mx-auto px-6 lg:px-8">
           <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white mb-8">
             PLAN DE CUOTAS
           </h2>
-          <div className="bg-[#121212] border border-white/[0.08] rounded-2xl overflow-hidden">
+          <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-2xl overflow-hidden">
             {CUOTAS.map((c, i) => (
               <div
                 key={i}
-                className={`flex items-center justify-between px-6 py-4 ${i < CUOTAS.length - 1 ? 'border-b border-white/[0.06]' : ''} ${i < 3 ? 'bg-[#D4FF00]/[0.02]' : ''}`}
+                className={`flex items-center justify-between px-6 py-4 ${i < CUOTAS.length - 1 ? 'border-b border-white/[0.06]' : ''} ${i < 3 ? 'bg-[#B7D31A]/[0.02]' : ''}`}
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-none ${i < 3 ? 'bg-[#D4FF00]/10 border border-[#D4FF00]/30' : 'bg-white/5 border border-white/10'}`}>
-                    <Check size={10} className={i < 3 ? 'text-[#D4FF00]' : 'text-white/30'} />
+                  <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-none ${i < 3 ? 'bg-[#B7D31A]/10 border border-[#B7D31A]/30' : 'bg-white/5 border border-white/10'}`}>
+                    <Check size={10} className={i < 3 ? 'text-[#B7D31A]' : 'text-white/30'} />
                   </div>
                   <span className="text-white font-bold text-sm">{c.cuotas}</span>
                 </div>
-                <span className={`text-sm font-semibold ${i < 3 ? 'text-[#D4FF00]' : 'text-[#A1A1AA]'}`}>
+                <span className={`text-sm font-semibold ${i < 3 ? 'text-[#B7D31A]' : 'text-[#A1A1AA]'}`}>
                   {c.desc}
                 </span>
               </div>

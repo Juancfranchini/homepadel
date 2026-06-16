@@ -87,11 +87,11 @@ Dirección: Buenos Aires, Argentina`,
 
 export default function TerminosPage() {
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white">
+    <div className="min-h-screen bg-[#050606] text-white">
 
       {/* BREADCRUMB */}
       <div className="border-b border-white/[0.06]">
-        <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center gap-1.5 text-[11px] text-[#A1A1AA]">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-2.5 flex items-center gap-1.5 text-[11px] text-[#A1A1AA]">
           <Link href="/" className="hover:text-white transition-colors">Inicio</Link>
           <span>/</span>
           <span className="text-white">Términos y Condiciones</span>
@@ -99,8 +99,8 @@ export default function TerminosPage() {
       </div>
 
       {/* HERO */}
-      <section className="max-w-4xl mx-auto px-4 py-12 lg:py-14">
-        <p className="text-[#D4FF00] text-xs font-black uppercase tracking-[0.2em] mb-3">LEGAL</p>
+      <section className="max-w-4xl mx-auto px-6 lg:px-8 py-12 lg:py-14">
+        <p className="text-[#B7D31A] text-xs font-black uppercase tracking-[0.2em] mb-3">LEGAL</p>
         <h1 className="text-4xl md:text-5xl font-black text-white leading-tight mb-4">
           Términos y Condiciones
         </h1>
@@ -112,10 +112,10 @@ export default function TerminosPage() {
 
       {/* CONTENIDO */}
       <section className="border-t border-white/[0.06] py-12">
-        <div className="max-w-4xl mx-auto px-4">
+        <div className="max-w-4xl mx-auto px-6 lg:px-8">
           <div className="space-y-6">
             {SECTIONS.map((section, i) => (
-              <div key={i} className="bg-[#121212] border border-white/[0.08] rounded-2xl p-6 md:p-8">
+              <div key={i} className="bg-[#0C0C0C] border border-white/[0.08] rounded-2xl p-6 md:p-8">
                 <h2 className="text-white font-black text-base mb-3">{section.title}</h2>
                 <div className="text-[#A1A1AA] text-sm leading-relaxed whitespace-pre-line">
                   {section.content}
@@ -127,19 +127,19 @@ export default function TerminosPage() {
           <div className="mt-8 flex flex-wrap gap-3 text-center justify-center">
             <Link
               href="/privacidad"
-              className="px-4 py-2 border border-white/20 text-[#A1A1AA] text-sm rounded-xl hover:border-white/40 hover:text-white transition-colors"
+              className="px-6 lg:px-8 py-2 border border-white/20 text-[#A1A1AA] text-sm rounded-xl hover:border-white/40 hover:text-white transition-colors"
             >
               Política de Privacidad
             </Link>
             <Link
               href="/politica-de-devolucion"
-              className="px-4 py-2 border border-white/20 text-[#A1A1AA] text-sm rounded-xl hover:border-white/40 hover:text-white transition-colors"
+              className="px-6 lg:px-8 py-2 border border-white/20 text-[#A1A1AA] text-sm rounded-xl hover:border-white/40 hover:text-white transition-colors"
             >
               Política de Devolución
             </Link>
             <Link
               href="/contacto"
-              className="px-4 py-2 bg-[#D4FF00] text-[#111] font-bold text-sm rounded-xl hover:bg-[#c5ef00] transition-colors"
+              className="px-6 lg:px-8 py-2 bg-[#B7D31A] text-[#050606] font-bold text-sm rounded-xl hover:bg-[#c5ef00] transition-colors"
             >
               Contactarnos
             </Link>

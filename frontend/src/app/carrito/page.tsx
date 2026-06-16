@@ -37,8 +37,8 @@ export default function CarritoPage() {
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <h1 className="text-2xl font-black uppercase tracking-tight text-[#111] mb-8">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
+          <h1 className="text-2xl font-black uppercase tracking-tight text-[#050606] mb-8">
             Mi carrito
           </h1>
           <div className="bg-white rounded-2xl border border-gray-200 p-16 text-center">
@@ -49,7 +49,7 @@ export default function CarritoPage() {
             </p>
             <Link
               href="/catalogo"
-              className="inline-flex items-center gap-2 bg-[#D4FF00] text-[#111] px-8 py-3.5 rounded-xl font-black text-sm uppercase tracking-wider hover:bg-[#111] hover:text-white transition-colors duration-200"
+              className="inline-flex items-center gap-2 bg-[#B7D31A] text-[#050606] px-8 py-3.5 rounded-xl font-black text-sm uppercase tracking-wider hover:bg-[#050606] hover:text-white transition-colors duration-200"
             >
               Ver catálogo
               <ArrowRight size={16} />
@@ -62,10 +62,10 @@ export default function CarritoPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
         {/* Título + vaciar */}
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-black uppercase tracking-tight text-[#111]">
+          <h1 className="text-2xl font-black uppercase tracking-tight text-[#050606]">
             Mi carrito ({totalItems()} {totalItems() === 1 ? 'producto' : 'productos'})
           </h1>
           <button
@@ -114,7 +114,7 @@ export default function CarritoPage() {
                         </p>
                         <Link
                           href={`/producto/${product.slug}`}
-                          className="font-semibold text-sm text-[#111] hover:text-[#444] line-clamp-2 leading-snug"
+                          className="font-semibold text-sm text-[#050606] hover:text-[#8A8A85] line-clamp-2 leading-snug"
                         >
                           {product.name}
                         </Link>
@@ -131,7 +131,7 @@ export default function CarritoPage() {
 
                     {/* Precio unitario */}
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-sm font-black text-[#111]">
+                      <span className="text-sm font-black text-[#050606]">
                         {formatPrice(itemPrice)}
                       </span>
                       {product.salePrice && (
@@ -159,7 +159,7 @@ export default function CarritoPage() {
                           <Plus size={14} />
                         </button>
                       </div>
-                      <span className="font-black text-[#111] text-sm">
+                      <span className="font-black text-[#050606] text-sm">
                         {formatPrice(subtotalItem)}
                       </span>
                     </div>
@@ -171,7 +171,7 @@ export default function CarritoPage() {
             {/* Seguir comprando */}
             <Link
               href="/catalogo"
-              className="flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-[#111] transition-colors pt-2"
+              className="flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-[#050606] transition-colors pt-2"
             >
               ← Seguir comprando
             </Link>
@@ -235,7 +235,7 @@ export default function CarritoPage() {
                   <button
                     onClick={couponApplied ? () => { setCouponApplied(false); setCoupon(''); } : handleApplyCoupon}
                     disabled={!coupon && !couponApplied}
-                    className="px-4 py-2 bg-[#111] text-white text-xs font-bold rounded-lg hover:bg-[#222] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="px-6 lg:px-8 py-2 bg-[#050606] text-white text-xs font-bold rounded-lg hover:bg-[#0D0F0F] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     {couponApplied ? 'Quitar' : 'Aplicar'}
                   </button>
@@ -254,7 +254,7 @@ export default function CarritoPage() {
               <div className="flex justify-between items-end pt-4 border-t border-gray-200 mb-5">
                 <span className="font-black text-base uppercase">Total</span>
                 <div className="text-right">
-                  <p className="text-2xl font-black text-[#111]">{formatPrice(total)}</p>
+                  <p className="text-2xl font-black text-[#050606]">{formatPrice(total)}</p>
                   <p className="text-xs text-gray-400">IVA incluido</p>
                 </div>
               </div>
@@ -262,7 +262,7 @@ export default function CarritoPage() {
               {/* Botón finalizar compra */}
               <Link
                 href="/checkout"
-                className="w-full flex items-center justify-center gap-2 bg-[#D4FF00] text-[#111] py-4 rounded-xl font-black text-sm uppercase tracking-wider hover:bg-[#111] hover:text-white transition-colors duration-200"
+                className="w-full flex items-center justify-center gap-2 bg-[#B7D31A] text-[#050606] py-4 rounded-xl font-black text-sm uppercase tracking-wider hover:bg-[#050606] hover:text-white transition-colors duration-200"
               >
                 Finalizar compra
                 <ArrowRight size={16} />

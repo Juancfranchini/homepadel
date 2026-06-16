@@ -36,10 +36,10 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
   };
 
   return (
-    <div className="bg-[#111] border border-white/[0.08] rounded-xl overflow-hidden flex flex-col group hover:border-white/[0.16] transition-all duration-200 hover:-translate-y-0.5">
+    <div className="bg-[#050606] border border-white/[0.08] rounded-xl overflow-hidden flex flex-col group hover:border-white/[0.16] transition-all duration-200 hover:-translate-y-0.5">
 
       {/* ── Imagen ─────────────────────────────────────────────────────────── */}
-      <Link href={`/producto/${product.slug}`} className="relative aspect-square bg-[#0d0d0d] overflow-hidden block flex-none">
+      <Link href={`/producto/${product.slug}`} className="relative aspect-square bg-[#0C0C0C] overflow-hidden block flex-none">
         {product.images && product.images.length > 0 ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -61,7 +61,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
             </span>
           )}
           {product.isNew && (
-            <span className="bg-[#D4FF00] text-[#111] text-[10px] font-black px-2 py-0.5 rounded-full leading-none">
+            <span className="bg-[#B7D31A] text-[#050606] text-[10px] font-black px-2 py-0.5 rounded-full leading-none">
               NUEVO
             </span>
           )}
@@ -98,7 +98,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
 
         {/* Nombre */}
         <Link href={`/producto/${product.slug}`}>
-          <h3 className="font-bold text-sm text-white leading-snug line-clamp-2 hover:text-[#D4FF00] transition-colors">
+          <h3 className="font-bold text-sm text-white leading-snug line-clamp-2 hover:text-[#B7D31A] transition-colors">
             {product.name}
           </h3>
         </Link>
@@ -116,7 +116,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
         </div>
 
         {/* Cuotas */}
-        <p className="text-[10px] font-semibold text-[#D4FF00]">
+        <p className="text-[10px] font-semibold text-[#B7D31A]">
           6 x {formatPrice(Math.ceil((product.salePrice ?? product.price) / 6))} sin interés
         </p>
 
@@ -133,8 +133,8 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
             product.stock === 0
               ? 'bg-white/[0.04] text-white/20 cursor-not-allowed'
               : adding
-              ? 'bg-[#D4FF00] text-[#111] scale-95'
-              : 'bg-[#D4FF00] text-[#111] hover:bg-white active:scale-95'
+              ? 'bg-[#B7D31A] text-[#050606] scale-95'
+              : 'bg-[#B7D31A] text-[#050606] hover:bg-white active:scale-95'
           }`}
         >
           <ShoppingCart size={13} />

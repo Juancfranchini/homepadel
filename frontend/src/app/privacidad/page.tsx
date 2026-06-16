@@ -78,11 +78,11 @@ Dirección: Buenos Aires, Argentina`,
 
 export default function PrivacidadPage() {
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white">
+    <div className="min-h-screen bg-[#050606] text-white">
 
       {/* BREADCRUMB */}
       <div className="border-b border-white/[0.06]">
-        <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center gap-1.5 text-[11px] text-[#A1A1AA]">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-2.5 flex items-center gap-1.5 text-[11px] text-[#A1A1AA]">
           <Link href="/" className="hover:text-white transition-colors">Inicio</Link>
           <span>/</span>
           <span className="text-white">Política de Privacidad</span>
@@ -90,8 +90,8 @@ export default function PrivacidadPage() {
       </div>
 
       {/* HERO */}
-      <section className="max-w-4xl mx-auto px-4 py-12 lg:py-14">
-        <p className="text-[#D4FF00] text-xs font-black uppercase tracking-[0.2em] mb-3">LEGAL</p>
+      <section className="max-w-4xl mx-auto px-6 lg:px-8 py-12 lg:py-14">
+        <p className="text-[#B7D31A] text-xs font-black uppercase tracking-[0.2em] mb-3">LEGAL</p>
         <h1 className="text-4xl md:text-5xl font-black text-white leading-tight mb-4">
           Política de Privacidad
         </h1>
@@ -104,10 +104,10 @@ export default function PrivacidadPage() {
 
       {/* CONTENIDO */}
       <section className="border-t border-white/[0.06] py-12">
-        <div className="max-w-4xl mx-auto px-4">
+        <div className="max-w-4xl mx-auto px-6 lg:px-8">
           <div className="space-y-8">
             {SECTIONS.map((section, i) => (
-              <div key={i} className="bg-[#121212] border border-white/[0.08] rounded-2xl p-6 md:p-8">
+              <div key={i} className="bg-[#0C0C0C] border border-white/[0.08] rounded-2xl p-6 md:p-8">
                 <h2 className="text-white font-black text-base mb-4">{section.title}</h2>
                 <div className="text-[#A1A1AA] text-sm leading-relaxed whitespace-pre-line">
                   {section.content}
@@ -116,12 +116,12 @@ export default function PrivacidadPage() {
             ))}
           </div>
 
-          <div className="mt-10 bg-[#D4FF00]/5 border border-[#D4FF00]/20 rounded-2xl p-6 text-center">
-            <p className="text-[#D4FF00] font-black text-sm mb-1">¿Tenés preguntas sobre tu privacidad?</p>
+          <div className="mt-10 bg-[#B7D31A]/5 border border-[#B7D31A]/20 rounded-2xl p-6 text-center">
+            <p className="text-[#B7D31A] font-black text-sm mb-1">¿Tenés preguntas sobre tu privacidad?</p>
             <p className="text-[#A1A1AA] text-sm mb-4">Contactanos y te responderemos en menos de 48 hs hábiles.</p>
             <a
               href="mailto:privacidad@homepadel.com.ar"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#D4FF00] text-[#111] font-black text-sm rounded-xl hover:bg-[#c5ef00] transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#B7D31A] text-[#050606] font-black text-sm rounded-xl hover:bg-[#c5ef00] transition-colors"
             >
               privacidad@homepadel.com.ar
             </a>

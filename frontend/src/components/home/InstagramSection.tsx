@@ -8,13 +8,12 @@ const FALLBACK: InstagramConfig = {
 };
 
 const PLACEHOLDER_POSTS = [
-  { id: 1, bg: 'from-purple-900 to-pink-900' },
-  { id: 2, bg: 'from-emerald-900 to-teal-900' },
-  { id: 3, bg: 'from-blue-900 to-indigo-900' },
-  { id: 4, bg: 'from-orange-900 to-red-900' },
-  { id: 5, bg: 'from-pink-900 to-rose-900' },
-  { id: 6, bg: 'from-slate-800 to-gray-900' },
-  { id: 7, bg: 'from-violet-900 to-purple-900' },
+  { id: 1, bg: 'from-[#1A1F21] to-[#242A05]', label: 'Padel' },
+  { id: 2, bg: 'from-[#0C0C0C] to-[#1A1F21]', label: 'Equipo' },
+  { id: 3, bg: 'from-[#242A05] to-[#030F14]', label: 'Cancha' },
+  { id: 4, bg: 'from-[#030F14] to-[#0C0C0C]', label: 'Torneo' },
+  { id: 5, bg: 'from-[#1A1F21] to-[#0C0C0C]', label: 'Paleta' },
+  { id: 6, bg: 'from-[#0C0C0C] to-[#242A05]', label: 'Accion' },
 ];
 
 function InstagramIcon({ size = 24 }: { size?: number }) {
@@ -33,58 +32,52 @@ export default function InstagramSection({ config }: Props) {
   const ig = config ?? FALLBACK;
 
   return (
-    <section className="bg-[#111] border-t border-white/5 py-14">
-      <div className="max-w-7xl mx-auto px-4">
+    <section className="section-gradient bg-[#030F14] border-t border-[#0D0F0F] py-16">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
         {/* Encabezado */}
-        <div className="flex items-center justify-between mb-7">
-          <div className="flex items-center gap-3">
-            <span className="w-1 h-7 bg-[#D4FF00] rounded-full" />
-            <h2 className="text-2xl font-black uppercase tracking-tight text-white">
-              {ig.title}
-            </h2>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#B7D31A] to-[#1699D3] flex items-center justify-center">
+              <InstagramIcon size={22} />
+            </div>
+            <div>
+              <h2 className="text-2xl md:text-3xl font-semibold uppercase text-[#F7F6F7]">
+                {ig.title}
+              </h2>
+              <p className="text-[#C7C7C0] text-sm">{ig.username}</p>
+            </div>
           </div>
           <a
             href={ig.buttonUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm font-bold text-white bg-white/10 border border-white/10 px-4 py-1.5 rounded-full hover:bg-white/20 transition-colors flex items-center gap-2"
+            className="text-sm font-semibold text-[#F7F6F7] bg-[#0A2D3D] hover:bg-[#0D3D52] px-5 py-2 rounded-lg transition-colors flex items-center gap-2"
           >
             <InstagramIcon size={14} />
-            {ig.username}
+            {ig.buttonText}
           </a>
         </div>
 
-        {/* Grilla de placeholders */}
-        <div className="flex gap-3 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
+        {/* Grilla de posts */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           {PLACEHOLDER_POSTS.map((post) => (
             <a
               key={post.id}
               href={ig.buttonUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-none w-36 h-36 md:w-44 md:h-44 rounded-xl overflow-hidden relative group cursor-pointer"
-              aria-label={`Ver perfil de Instagram de ${ig.username}`}
+              className="aspect-square rounded-xl overflow-hidden relative group cursor-pointer"
+              aria-label={'Ver perfil de Instagram de ' + ig.username}
             >
-              <div className={`absolute inset-0 bg-gradient-to-br ${post.bg} transition-transform duration-300 group-hover:scale-105`} />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200 flex items-center justify-center">
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-white">
-                  <InstagramIcon size={28} />
+              <div className={'absolute inset-0 bg-gradient-to-br ' + post.bg + ' transition-transform duration-500 group-hover:scale-110'} />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors duration-300 flex items-center justify-center">
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white flex flex-col items-center gap-2">
+                  <InstagramIcon size={32} />
+                  <span className="text-xs font-semibold uppercase tracking-wider">{post.label}</span>
                 </div>
               </div>
             </a>
           ))}
-        </div>
-
-        <div className="mt-6 text-center">
-          <a
-            href={ig.buttonUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-white transition-colors font-medium"
-          >
-            <InstagramIcon size={16} />
-            {ig.buttonText}
-          </a>
         </div>
       </div>
     </section>

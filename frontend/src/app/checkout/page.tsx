@@ -87,7 +87,7 @@ export default function CheckoutPage() {
           <p className="text-gray-500 mb-4">Tu carrito está vacío</p>
           <Link
             href="/catalogo"
-            className="bg-[#111] text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-[#222] transition-colors"
+            className="bg-[#050606] text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-[#0D0F0F] transition-colors"
           >
             Ir al catálogo
           </Link>
@@ -141,9 +141,9 @@ export default function CheckoutPage() {
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
             <CheckCircle size={32} className="text-green-600" />
           </div>
-          <h1 className="text-2xl font-black text-[#111] mb-2">¡Pedido confirmado!</h1>
+          <h1 className="text-2xl font-black text-[#050606] mb-2">¡Pedido confirmado!</h1>
           <p className="text-gray-500 text-sm mb-1">Número de orden:</p>
-          <p className="text-2xl font-black text-[#D4FF00] bg-[#111] px-4 py-2 rounded-lg mb-5 inline-block">
+          <p className="text-2xl font-black text-[#B7D31A] bg-[#050606] px-6 lg:px-8 py-2 rounded-lg mb-5 inline-block">
             #{orderNumber}
           </p>
           <p className="text-gray-500 text-sm mb-8">
@@ -152,7 +152,7 @@ export default function CheckoutPage() {
           <div className="flex flex-col gap-3">
             <Link
               href="/cuenta"
-              className="bg-[#111] text-white py-3 rounded-xl font-bold text-sm hover:bg-[#222] transition-colors"
+              className="bg-[#050606] text-white py-3 rounded-xl font-bold text-sm hover:bg-[#0D0F0F] transition-colors"
             >
               Ver mis pedidos
             </Link>
@@ -170,7 +170,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
         {/* Título */}
         <div className="mb-8">
           <p className="text-xs text-gray-400 mb-1">
@@ -180,7 +180,7 @@ export default function CheckoutPage() {
             {' / '}
             <span className="text-gray-600">Checkout</span>
           </p>
-          <h1 className="text-2xl font-black uppercase tracking-tight text-[#111]">
+          <h1 className="text-2xl font-black uppercase tracking-tight text-[#050606]">
             Finalizar compra
           </h1>
         </div>
@@ -192,7 +192,7 @@ export default function CheckoutPage() {
               {/* Datos personales */}
               <div className="bg-white rounded-2xl border border-gray-200 p-6">
                 <div className="flex items-center gap-3 mb-5">
-                  <div className="w-8 h-8 bg-[#D4FF00] rounded-full flex items-center justify-center text-[#111] font-black text-sm">
+                  <div className="w-8 h-8 bg-[#B7D31A] rounded-full flex items-center justify-center text-[#050606] font-black text-sm">
                     1
                   </div>
                   <h2 className="font-black text-base uppercase tracking-wide flex items-center gap-2">
@@ -210,7 +210,7 @@ export default function CheckoutPage() {
                       {...register('name')}
                       type="text"
                       placeholder="Juan García"
-                      className={`w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-gray-400 transition-colors ${
+                      className={`w-full border rounded-lg px-6 lg:px-8 py-2.5 text-sm focus:outline-none focus:border-gray-400 transition-colors ${
                         errors.name ? 'border-red-400 bg-red-50' : 'border-gray-200'
                       }`}
                     />
@@ -227,7 +227,7 @@ export default function CheckoutPage() {
                       {...register('email')}
                       type="email"
                       placeholder="juan@email.com"
-                      className={`w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-gray-400 transition-colors ${
+                      className={`w-full border rounded-lg px-6 lg:px-8 py-2.5 text-sm focus:outline-none focus:border-gray-400 transition-colors ${
                         errors.email ? 'border-red-400 bg-red-50' : 'border-gray-200'
                       }`}
                     />
@@ -244,7 +244,7 @@ export default function CheckoutPage() {
                       {...register('phone')}
                       type="tel"
                       placeholder="+54 11 1234 5678"
-                      className={`w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-gray-400 transition-colors ${
+                      className={`w-full border rounded-lg px-6 lg:px-8 py-2.5 text-sm focus:outline-none focus:border-gray-400 transition-colors ${
                         errors.phone ? 'border-red-400 bg-red-50' : 'border-gray-200'
                       }`}
                     />
@@ -258,7 +258,7 @@ export default function CheckoutPage() {
               {/* Dirección de envío */}
               <div className="bg-white rounded-2xl border border-gray-200 p-6">
                 <div className="flex items-center gap-3 mb-5">
-                  <div className="w-8 h-8 bg-[#D4FF00] rounded-full flex items-center justify-center text-[#111] font-black text-sm">
+                  <div className="w-8 h-8 bg-[#B7D31A] rounded-full flex items-center justify-center text-[#050606] font-black text-sm">
                     2
                   </div>
                   <h2 className="font-black text-base uppercase tracking-wide flex items-center gap-2">
@@ -276,7 +276,7 @@ export default function CheckoutPage() {
                       {...register('street')}
                       type="text"
                       placeholder="Av. Corrientes 1234"
-                      className={`w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-gray-400 transition-colors ${
+                      className={`w-full border rounded-lg px-6 lg:px-8 py-2.5 text-sm focus:outline-none focus:border-gray-400 transition-colors ${
                         errors.street ? 'border-red-400 bg-red-50' : 'border-gray-200'
                       }`}
                     />
@@ -293,7 +293,7 @@ export default function CheckoutPage() {
                       {...register('city')}
                       type="text"
                       placeholder="Buenos Aires"
-                      className={`w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-gray-400 transition-colors ${
+                      className={`w-full border rounded-lg px-6 lg:px-8 py-2.5 text-sm focus:outline-none focus:border-gray-400 transition-colors ${
                         errors.city ? 'border-red-400 bg-red-50' : 'border-gray-200'
                       }`}
                     />
@@ -310,7 +310,7 @@ export default function CheckoutPage() {
                       {...register('postalCode')}
                       type="text"
                       placeholder="1043"
-                      className={`w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-gray-400 transition-colors ${
+                      className={`w-full border rounded-lg px-6 lg:px-8 py-2.5 text-sm focus:outline-none focus:border-gray-400 transition-colors ${
                         errors.postalCode ? 'border-red-400 bg-red-50' : 'border-gray-200'
                       }`}
                     />
@@ -325,7 +325,7 @@ export default function CheckoutPage() {
                     </label>
                     <select
                       {...register('province')}
-                      className={`w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-gray-400 transition-colors ${
+                      className={`w-full border rounded-lg px-6 lg:px-8 py-2.5 text-sm focus:outline-none focus:border-gray-400 transition-colors ${
                         errors.province ? 'border-red-400 bg-red-50' : 'border-gray-200'
                       }`}
                     >
@@ -344,7 +344,7 @@ export default function CheckoutPage() {
               {/* Método de pago */}
               <div className="bg-white rounded-2xl border border-gray-200 p-6">
                 <div className="flex items-center gap-3 mb-5">
-                  <div className="w-8 h-8 bg-[#D4FF00] rounded-full flex items-center justify-center text-[#111] font-black text-sm">
+                  <div className="w-8 h-8 bg-[#B7D31A] rounded-full flex items-center justify-center text-[#050606] font-black text-sm">
                     3
                   </div>
                   <h2 className="font-black text-base uppercase tracking-wide flex items-center gap-2">
@@ -356,7 +356,7 @@ export default function CheckoutPage() {
                 <div className="space-y-3">
                   {/* Tarjeta de crédito/débito */}
                   <label className={`flex items-center gap-3 border-2 rounded-xl p-4 cursor-pointer transition-colors ${
-                    selectedPayment === 'card' ? 'border-[#D4FF00] bg-[#D4FF00]/5' : 'border-gray-200 hover:border-gray-300'
+                    selectedPayment === 'card' ? 'border-[#B7D31A] bg-[#B7D31A]/5' : 'border-gray-200 hover:border-gray-300'
                   }`}>
                     <input
                       {...register('paymentMethod')}
@@ -365,10 +365,10 @@ export default function CheckoutPage() {
                       className="sr-only"
                     />
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                      selectedPayment === 'card' ? 'border-[#D4FF00]' : 'border-gray-300'
+                      selectedPayment === 'card' ? 'border-[#B7D31A]' : 'border-gray-300'
                     }`}>
                       {selectedPayment === 'card' && (
-                        <div className="w-2.5 h-2.5 rounded-full bg-[#D4FF00]" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#B7D31A]" />
                       )}
                     </div>
                     <div className="flex-1">
@@ -386,7 +386,7 @@ export default function CheckoutPage() {
 
                   {/* Mercado Pago */}
                   <label className={`flex items-center gap-3 border-2 rounded-xl p-4 cursor-pointer transition-colors ${
-                    selectedPayment === 'mercadopago' ? 'border-[#D4FF00] bg-[#D4FF00]/5' : 'border-gray-200 hover:border-gray-300'
+                    selectedPayment === 'mercadopago' ? 'border-[#B7D31A] bg-[#B7D31A]/5' : 'border-gray-200 hover:border-gray-300'
                   }`}>
                     <input
                       {...register('paymentMethod')}
@@ -395,10 +395,10 @@ export default function CheckoutPage() {
                       className="sr-only"
                     />
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                      selectedPayment === 'mercadopago' ? 'border-[#D4FF00]' : 'border-gray-300'
+                      selectedPayment === 'mercadopago' ? 'border-[#B7D31A]' : 'border-gray-300'
                     }`}>
                       {selectedPayment === 'mercadopago' && (
-                        <div className="w-2.5 h-2.5 rounded-full bg-[#D4FF00]" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#B7D31A]" />
                       )}
                     </div>
                     <div className="flex-1">
@@ -410,7 +410,7 @@ export default function CheckoutPage() {
 
                   {/* Transferencia */}
                   <label className={`flex items-center gap-3 border-2 rounded-xl p-4 cursor-pointer transition-colors ${
-                    selectedPayment === 'transfer' ? 'border-[#D4FF00] bg-[#D4FF00]/5' : 'border-gray-200 hover:border-gray-300'
+                    selectedPayment === 'transfer' ? 'border-[#B7D31A] bg-[#B7D31A]/5' : 'border-gray-200 hover:border-gray-300'
                   }`}>
                     <input
                       {...register('paymentMethod')}
@@ -419,10 +419,10 @@ export default function CheckoutPage() {
                       className="sr-only"
                     />
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                      selectedPayment === 'transfer' ? 'border-[#D4FF00]' : 'border-gray-300'
+                      selectedPayment === 'transfer' ? 'border-[#B7D31A]' : 'border-gray-300'
                     }`}>
                       {selectedPayment === 'transfer' && (
-                        <div className="w-2.5 h-2.5 rounded-full bg-[#D4FF00]" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#B7D31A]" />
                       )}
                     </div>
                     <div>
@@ -468,7 +468,7 @@ export default function CheckoutPage() {
                           <p className="text-xs font-medium text-gray-700 truncate">{product.name}</p>
                           <p className="text-xs text-gray-400">x{quantity}</p>
                         </div>
-                        <p className="text-xs font-bold text-[#111] flex-none">
+                        <p className="text-xs font-bold text-[#050606] flex-none">
                           {formatPrice(price * quantity)}
                         </p>
                       </div>
@@ -498,7 +498,7 @@ export default function CheckoutPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="mt-5 w-full flex items-center justify-center gap-2 bg-[#D4FF00] text-[#111] py-4 rounded-xl font-black text-sm uppercase tracking-wider hover:bg-[#111] hover:text-white transition-colors duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="mt-5 w-full flex items-center justify-center gap-2 bg-[#B7D31A] text-[#050606] py-4 rounded-xl font-black text-sm uppercase tracking-wider hover:bg-[#050606] hover:text-white transition-colors duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? (
                     'Procesando...'

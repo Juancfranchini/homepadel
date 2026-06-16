@@ -50,9 +50,9 @@ function Countdown({ endDate }: { endDate: string }) {
         { v: pad(seconds), l: 'SEG' },
       ].map(({ v, l }, i) => (
         <div key={l} className="flex items-center gap-3">
-          {i > 0 && <span className="text-[#D4FF00] font-black text-xl">:</span>}
+          {i > 0 && <span className="text-[#B7D31A] font-black text-xl">:</span>}
           <div className="text-center">
-            <div className="bg-[#0a0a0a] border border-white/10 rounded-lg px-4 py-3 min-w-[64px]">
+            <div className="bg-[030F14] border border-[#0D0F0F] rounded-lg px-4 py-3 min-w-[64px]">
               <span className="text-white font-black text-3xl tabular-nums">{v}</span>
             </div>
             <p className="text-gray-500 text-[10px] uppercase tracking-widest mt-1.5">{l}</p>
@@ -70,12 +70,12 @@ export default function PromoDestacada({ promotion }: Props) {
   if (!promotion.active || new Date(promotion.endDate) < new Date()) return null;
 
   return (
-    <section className="bg-[#111] border-t border-b border-white/10 py-10">
-      <div className="max-w-7xl mx-auto px-4">
+    <section className="section-gradient bg-[#050606] border-t border-b border-[#0D0F0F] py-10">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-8">
           {/* Texto */}
           <div className="text-center md:text-left">
-            <span className="text-[#D4FF00] text-xs font-black uppercase tracking-widest mb-2 block">
+            <span className="text-[#B7D31A] text-xs font-black uppercase tracking-widest mb-2 block">
               OFERTA POR TIEMPO LIMITADO
             </span>
             <h2 className="text-white font-black text-3xl md:text-4xl uppercase leading-tight">
@@ -96,7 +96,7 @@ export default function PromoDestacada({ promotion }: Props) {
           {promotion.ctaText && promotion.ctaUrl && (
             <Link
               href={promotion.ctaUrl}
-              className="inline-flex items-center gap-2 bg-[#D4FF00] text-[#111] px-8 py-3.5 font-black text-sm uppercase tracking-wider rounded hover:bg-white transition-colors whitespace-nowrap"
+              className="inline-flex items-center gap-2 bg-[#B7D31A] text-[#050606] px-8 py-3.5 font-black text-sm uppercase tracking-wider rounded hover:bg-[#B7D31A] transition-colors whitespace-nowrap"
             >
               {promotion.ctaText}
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
