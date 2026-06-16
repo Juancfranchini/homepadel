@@ -2,8 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 function normalizeDto(dto: any): any {
-  const { isActive, ...rest } = dto;
+  const { isActive, imageUrl, ...rest } = dto;
   if (isActive !== undefined) rest.active = isActive;
+  if (imageUrl !== undefined) rest.image = imageUrl;
   return rest;
 }
 

@@ -21,7 +21,7 @@ interface Category {
   name: string;
   slug: string;
   order?: number;
-  isActive: boolean;
+  active: boolean;     // campo real en la API
   _count?: { products: number };
 }
 
@@ -70,7 +70,7 @@ export default function CategoriasPage() {
 
   const openEdit = (c: Category) => {
     setEditItem(c);
-    reset({ name: c.name, order: c.order ?? 0, isActive: c.isActive });
+    reset({ name: c.name, order: c.order ?? 0, isActive: c.active });  // API devuelve 'active', form usa 'isActive'
     setModalOpen(true);
   };
 
@@ -154,7 +154,7 @@ export default function CategoriasPage() {
                   <code className="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-600">{cat.slug}</code>
                 </td>
                 <td className="px-6 py-3.5 text-gray-500">{cat._count?.products ?? '—'}</td>
-                <td className="px-6 py-3.5"><ActiveBadge active={cat.isActive} /></td>
+                <td className="px-6 py-3.5"><ActiveBadge active={cat.active} /></td>
                 <td className="px-6 py-3.5">
                   <div className="flex items-center gap-1.5">
                     <button onClick={() => openEdit(cat)} className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50">
@@ -233,10 +233,10 @@ export default function CategoriasPage() {
 }
 
 const MOCK: Category[] = [
-  { id: '1', name: 'Palas', slug: 'palas', isActive: true, _count: { products: 24 } },
-  { id: '2', name: 'Zapatillas', slug: 'zapatillas', isActive: true, _count: { products: 18 } },
-  { id: '3', name: 'Pelotas', slug: 'pelotas', isActive: true, _count: { products: 7 } },
-  { id: '4', name: 'Indumentaria', slug: 'indumentaria', isActive: false, _count: { products: 12 } },
-  { id: '5', name: 'Accesorios', slug: 'accesorios', isActive: true, _count: { products: 35 } },
+  { id: '1', name: 'Palas', slug: 'palas', active: true, _count: { products: 24 } },
+  { id: '2', name: 'Zapatillas', slug: 'zapatillas', active: true, _count: { products: 18 } },
+  { id: '3', name: 'Pelotas', slug: 'pelotas', active: true, _count: { products: 7 } },
+  { id: '4', name: 'Indumentaria', slug: 'indumentaria', active: false, _count: { products: 12 } },
+  { id: '5', name: 'Accesorios', slug: 'accesorios', active: true, _count: { products: 35 } },
 ];
 

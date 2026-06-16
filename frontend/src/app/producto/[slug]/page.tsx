@@ -5,8 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   ChevronLeft, ChevronRight, Heart, ShoppingCart, Truck,
-  RefreshCw, Shield, Minus, Plus, Star, ChevronDown,
-  MessageCircle, MapPin, Check, Zap,
+  RefreshCw, Shield, Minus, Plus,
+  MessageCircle, MapPin, Check, Zap, X, CreditCard,
 } from 'lucide-react';
 import { getProduct, getFeaturedProducts } from '@/lib/api';
 import { Product } from '@/types';
@@ -17,88 +17,24 @@ import { useCartStore } from '@/store/cartStore';
 
 interface PerformanceStat { label: string; value: number; }
 interface Feature { icon: string; title: string; subtitle: string; }
-interface CompetitorRow { label: string; values: (number | string)[]; }
-interface Review { name: string; avatar: string; rating: number; comment: string; date: string; verified: boolean; }
-interface FaqItem { q: string; a: string; }
-
-// ─── DATOS ESTÁTICOS DE ENRIQUECIMIENTO ──────────────────────────────────────
-
-const DEFAULT_PERFORMANCE: PerformanceStat[] = [
-  { label: 'CONTROL',       value: 95 },
-  { label: 'POTENCIA',      value: 75 },
-  { label: 'SALIDA DE BOLA',value: 90 },
-  { label: 'MANEJABILIDAD', value: 92 },
-  { label: 'DUREZA',        value: 70 },
-  { label: 'JUGABILIDAD',   value: 96 },
-];
-
-const DEFAULT_FEATURES: Feature[] = [
-  { icon: '⬡', title: 'Carbono 18K',      subtitle: 'Máxima resistencia y durabilidad' },
-  { icon: '◯', title: 'Forma Redonda',    subtitle: 'Mayor punto dulce y control' },
-  { icon: '⚖', title: 'Balance Medio',   subtitle: 'Equilibrio perfecto entre control y potencia' },
-  { icon: '⚡', title: 'Peso 360-375g',  subtitle: 'Peso ideal para máximo rendimiento' },
-  { icon: '🎯', title: 'Jugador Avanzado',subtitle: 'Diseñado para jugadores exigentes' },
-  { icon: '✦',  title: 'Control Superior',subtitle: 'Tecnología enfocada en el control total' },
-];
-
-const DEFAULT_COMPETITORS = ['Metalbone HRD 3.3', 'Adipower Ctrl 3.3', 'Cross It Light 3.3'];
-const COMPETITOR_ROWS: CompetitorRow[] = [
-  { label: 'Control',      values: [5, 4, 4, 3] },
-  { label: 'Potencia',     values: [4, 5, 3, 5] },
-  { label: 'Salida de bola',values: [5, 4, 4, 4] },
-  { label: 'Manejabilidad',values: [4, 4, 4, 4] },
-  { label: 'Balance',      values: ['Medio', 'Alto', 'Medio', 'Bajo'] },
-  { label: 'Nivel',        values: ['Inter - Avz', 'Avanzado', 'Inter - Avz', 'Intermedio'] },
-];
-
-const DEFAULT_REVIEWS: Review[] = [
-  { name: 'Martín Guevara', avatar: 'MG', rating: 5, comment: 'Excelente control y salida de bola. La mejor pala que tuve hasta ahora.', date: 'Hace 2 días', verified: true },
-  { name: 'Pablo S.',       avatar: 'PS', rating: 5, comment: 'Me llegó en 2 días y en perfecto estado. La pala es una locura, súper recomendable.', date: 'Hace 1 semana', verified: true },
-  { name: 'Jorge L.',       avatar: 'JL', rating: 5, comment: 'Gran equilibrio entre control y potencia. Ideal para mi estilo de juego.', date: 'Hace 2 semanas', verified: true },
-  { name: 'Eduardo P.',     avatar: 'EP', rating: 5, comment: 'Terminaciones premium y sensación increíble en cada golpe.', date: 'Hace 3 semanas', verified: true },
-];
-
-const DEFAULT_FAQ: FaqItem[] = [
-  { q: '¿Es original y tiene garantía oficial?', a: 'Sí, todos nuestros productos son 100% originales con garantía oficial del fabricante.' },
-  { q: '¿Cuánto tarda en llegar?', a: 'El envío estándar demora entre 3 y 5 días hábiles. Ofrecemos envío express en 24-48 hs.' },
-  { q: '¿Puedo cambiarla si no me convence?', a: 'Sí, aceptamos cambios dentro de los 30 días desde la compra, siempre que el producto esté sin uso.' },
-  { q: '¿Qué nivel de juego requiere esta pala?', a: 'Está diseñada para jugadores de nivel intermedio-avanzado que buscan control y precisión.' },
-  { q: '¿Tienen stock permanente?', a: 'Manejamos stock limitado de los modelos más populares. Te recomendamos no demorar la compra.' },
-];
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
 /**
  * Convierte una URL de YouTube o Vimeo a su URL de embed.
- * Soporta: youtube.com/watch?v=..., youtu.be/..., vimeo.com/...
  * Devuelve null si la URL no es reconocida o está vacía.
  */
 function getVideoEmbedUrl(url: string | undefined | null): string | null {
   if (!url) return null;
-  // YouTube: watch?v= o youtu.be/
   const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
   if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}?rel=0&modestbranding=1`;
-  // Vimeo
   const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
   if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}?dnt=1`;
-  // Si ya es una URL de embed directa
   if (url.includes('youtube.com/embed/') || url.includes('player.vimeo.com/')) return url;
   return null;
 }
 
 // ─── SUBCOMPONENTES ───────────────────────────────────────────────────────────
-
-function StarBar({ rating, max = 5 }: { rating: number; max?: number }) {
-  return (
-    <div className="flex gap-0.5">
-      {Array.from({ length: max }).map((_, i) =>
-        typeof rating === 'number' ? (
-          <Star key={i} size={13} className={i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-700'} />
-        ) : null
-      )}
-    </div>
-  );
-}
 
 function PerformanceBar({ label, value }: PerformanceStat) {
   return (
@@ -106,35 +42,142 @@ function PerformanceBar({ label, value }: PerformanceStat) {
       <p className="text-[10px] font-black uppercase tracking-widest text-[#A1A1AA] w-28 flex-none">{label}</p>
       <div className="flex-1 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
         <div
-          className="h-full bg-[#B7D31A] rounded-full transition-all duration-700"
+          className="h-full bg-[#D4FF00] rounded-full transition-all duration-700"
           style={{ width: `${value}%` }}
         />
       </div>
-      <span className="text-[#B7D31A] font-black text-xs w-8 text-right">{value}%</span>
+      <span className="text-[#D4FF00] font-black text-xs w-8 text-right">{value}%</span>
     </div>
   );
 }
 
-function FaqAccordion({ items }: { items: FaqItem[] }) {
-  const [open, setOpen] = useState<number | null>(null);
+// ─── MEDIOS DE PAGO ──────────────────────────────────────────────────────────
+
+interface PaymentDef { label: string; group: 'credit' | 'debit' | 'transfer' | 'wallet'; color: string }
+
+const PAYMENT_CATALOG: Record<string, PaymentDef> = {
+  visa:         { label: 'Visa',            group: 'credit',   color: 'bg-blue-900/40 text-blue-300 border-blue-700/40' },
+  mastercard:   { label: 'Mastercard',      group: 'credit',   color: 'bg-orange-900/40 text-orange-300 border-orange-700/40' },
+  amex:         { label: 'Amex',            group: 'credit',   color: 'bg-blue-900/40 text-blue-200 border-blue-700/40' },
+  naranja_x:    { label: 'Naranja X',       group: 'credit',   color: 'bg-orange-900/40 text-orange-400 border-orange-700/40' },
+  nativa:       { label: 'Nativa',          group: 'credit',   color: 'bg-yellow-900/40 text-yellow-300 border-yellow-700/40' },
+  cabal:        { label: 'Cabal',           group: 'credit',   color: 'bg-red-900/40 text-red-300 border-red-700/40' },
+  argencard:    { label: 'Argencard',       group: 'credit',   color: 'bg-green-900/40 text-green-300 border-green-700/40' },
+  visa_deb:     { label: 'Visa Débito',     group: 'debit',    color: 'bg-blue-900/30 text-blue-300 border-blue-800/40' },
+  mc_deb:       { label: 'MC Débito',       group: 'debit',    color: 'bg-orange-900/30 text-orange-300 border-orange-800/40' },
+  cabal_deb:    { label: 'Cabal Débito',    group: 'debit',    color: 'bg-red-900/30 text-red-300 border-red-800/40' },
+  transferencia:{ label: 'Transferencia',   group: 'transfer', color: 'bg-[#D4FF00]/10 text-[#D4FF00] border-[#D4FF00]/30' },
+  banelco:      { label: 'Banelco',         group: 'transfer', color: 'bg-emerald-900/40 text-emerald-300 border-emerald-700/40' },
+  link:         { label: 'Link Pagos',      group: 'transfer', color: 'bg-emerald-900/40 text-emerald-400 border-emerald-700/40' },
+  mercadopago:  { label: 'Mercado Pago',    group: 'wallet',   color: 'bg-sky-900/40 text-sky-300 border-sky-700/40' },
+  cuenta_dni:   { label: 'Cuenta DNI',      group: 'wallet',   color: 'bg-slate-800 text-slate-300 border-slate-600/40' },
+};
+
+const PAYMENT_GROUP_LABELS: Record<string, string> = {
+  credit:   'Tarjetas de crédito',
+  debit:    'Tarjetas de débito',
+  transfer: 'Transferencia o depósito',
+  wallet:   'Billetera virtual',
+};
+
+interface PaymentModalProps {
+  onClose: () => void;
+  methods: string[];
+  displayPrice: number;
+  transferPrice: number;
+}
+
+function PaymentModal({ onClose, methods, displayPrice, transferPrice }: PaymentModalProps) {
+  const groups = ['credit', 'debit', 'transfer', 'wallet'] as const;
+  const hasTransfer = methods.some((m) => ['transferencia', 'banelco', 'link'].includes(m));
+  const creditMethods = methods.filter((m) => PAYMENT_CATALOG[m]?.group === 'credit');
+  const cuota3  = Math.ceil(displayPrice / 3);
+  const cuota6  = Math.ceil(displayPrice / 6);
+  const cuota9  = Math.ceil(displayPrice / 9);
+
   return (
-    <div className="space-y-2">
-      {items.map((item, i) => (
-        <div key={i} className="border border-white/[0.08] rounded-xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+
+      {/* Panel */}
+      <div className="relative z-10 w-full sm:max-w-lg bg-[#111] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl max-h-[85vh] overflow-y-auto">
+        {/* Header */}
+        <div className="sticky top-0 bg-[#111] border-b border-white/[0.08] px-5 py-4 flex items-center justify-between z-10">
+          <div className="flex items-center gap-2">
+            <CreditCard size={18} className="text-[#D4FF00]" />
+            <h2 className="text-white font-black text-base uppercase tracking-wide">Medios de pago</h2>
+          </div>
           <button
-            onClick={() => setOpen(open === i ? null : i)}
-            className="w-full flex items-center justify-between px-5 py-4 text-left text-white font-semibold text-sm hover:bg-white/[0.03] transition-colors"
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-white/[0.06] flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-colors"
           >
-            {item.q}
-            <ChevronDown size={16} className={`flex-none text-[#A1A1AA] transition-transform duration-200 ${open === i ? 'rotate-180' : ''}`} />
+            <X size={16} />
           </button>
-          {open === i && (
-            <div className="px-5 pb-4 text-[#A1A1AA] text-sm leading-relaxed border-t border-white/[0.06]">
-              <p className="pt-3">{item.a}</p>
+        </div>
+
+        <div className="p-5 space-y-5">
+          {/* Cuotas — solo si hay métodos de crédito */}
+          {creditMethods.length > 0 && (
+            <div className="bg-[#1a1a1a] border border-white/[0.06] rounded-xl p-4">
+              <p className="text-xs text-[#A1A1AA] font-semibold uppercase tracking-wide mb-3">
+                Total en 1 pago: <span className="text-white">{formatPrice(displayPrice)}</span> con todas las tarjetas
+              </p>
+              <p className="text-xs text-[#A1A1AA] mb-2">O pagá en cuotas sin interés:</p>
+              <div className="space-y-2">
+                {[
+                  { n: 3, monto: cuota3 },
+                  { n: 6, monto: cuota6 },
+                  { n: 9, monto: cuota9 },
+                ].map(({ n, monto }) => (
+                  <div key={n} className="flex items-center justify-between text-sm py-1.5 border-b border-white/[0.04] last:border-0">
+                    <span className="text-white font-semibold">{n} cuotas de {formatPrice(monto)} sin interés</span>
+                    <span className="text-[#A1A1AA] text-xs">Total {formatPrice(displayPrice)}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
+
+          {/* Transfer descuento */}
+          {hasTransfer && (
+            <div className="bg-[#D4FF00]/[0.06] border border-[#D4FF00]/20 rounded-xl p-4">
+              <p className="text-[#D4FF00] font-black text-sm mb-1">20% de descuento por transferencia</p>
+              <p className="text-2xl font-black text-white">{formatPrice(transferPrice)}</p>
+              <p className="text-[#A1A1AA] text-xs mt-1">El descuento se aplica al confirmar el pago por transferencia</p>
+            </div>
+          )}
+
+          {/* Por grupo */}
+          {groups.map((group) => {
+            const groupMethods = methods.filter((m) => PAYMENT_CATALOG[m]?.group === group);
+            if (groupMethods.length === 0) return null;
+            return (
+              <div key={group}>
+                <p className="text-xs font-black uppercase tracking-widest text-[#A1A1AA] mb-3">{PAYMENT_GROUP_LABELS[group]}</p>
+                <div className="bg-[#1a1a1a] border border-white/[0.06] rounded-xl p-4">
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {groupMethods.map((key) => (
+                      <span
+                        key={key}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border ${PAYMENT_CATALOG[key]?.color ?? 'bg-white/10 text-white border-white/20'}`}
+                      >
+                        {PAYMENT_CATALOG[key]?.label ?? key}
+                      </span>
+                    ))}
+                  </div>
+                  {group === 'transfer' && (
+                    <p className="text-[#D4FF00] text-xs font-semibold">Total: {formatPrice(transferPrice)}</p>
+                  )}
+                  {group !== 'transfer' && (
+                    <p className="text-[#A1A1AA] text-xs">Total: {formatPrice(displayPrice)}</p>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
-      ))}
+      </div>
     </div>
   );
 }
@@ -146,14 +189,15 @@ export default function ProductoPage() {
   const router  = useRouter();
   const addItem = useCartStore((s) => s.addItem);
 
-  const [product,  setProduct]  = useState<Product | null>(null);
-  const [related,  setRelated]  = useState<Product[]>([]);
-  const [loading,  setLoading]  = useState(true);
-  const [selImg,   setSelImg]   = useState(0);
-  const [quantity, setQuantity] = useState(1);
-  const [wished,   setWished]   = useState(false);
-  const [added,    setAdded]    = useState(false);
-  const [postal,   setPostal]   = useState('');
+  const [product,          setProduct]          = useState<Product | null>(null);
+  const [related,          setRelated]          = useState<Product[]>([]);
+  const [loading,          setLoading]          = useState(true);
+  const [selImg,           setSelImg]           = useState(0);
+  const [quantity,         setQuantity]         = useState(1);
+  const [wished,           setWished]           = useState(false);
+  const [added,            setAdded]            = useState(false);
+  const [postal,           setPostal]           = useState('');
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const relScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -164,7 +208,7 @@ export default function ProductoPage() {
       getFeaturedProducts(),
     ]).then(([prodRes, relRes]) => {
       const p = prodRes.status === 'fulfilled' ? (prodRes.value?.data ?? prodRes.value) : null;
-      setProduct(p ?? MOCK_PRODUCT);
+      setProduct(p ?? null);  // sin mock de fallback — si no existe el producto, mostrar página not found
       if (relRes.status === 'fulfilled') {
         const all: Product[] = Array.isArray(relRes.value) ? relRes.value : (relRes.value as { data?: Product[] })?.data ?? [];
         setRelated(all.filter((x) => x.slug !== params.slug).slice(0, 6));
@@ -188,7 +232,7 @@ export default function ProductoPage() {
   // ── Loading skeleton
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#050606] py-12">
+      <div className="min-h-screen bg-[#0A0A0A] py-12">
         <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-12 animate-pulse">
           <div className="aspect-square bg-white/[0.04] rounded-2xl" />
           <div className="space-y-4">
@@ -205,24 +249,64 @@ export default function ProductoPage() {
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-[#050606] flex items-center justify-center">
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
         <div className="text-center">
           <p className="text-[#A1A1AA] mb-4">Producto no encontrado</p>
-          <Link href="/catalogo" className="text-[#B7D31A] font-bold underline">Volver al catálogo</Link>
+          <Link href="/catalogo" className="text-[#D4FF00] font-bold underline">Volver al catálogo</Link>
         </div>
       </div>
     );
   }
 
-  const hasDiscount  = product.salePrice !== undefined && product.salePrice < product.price;
-  const discountPct  = hasDiscount ? getDiscountPercent(product.price, product.salePrice!) : 0;
-  const displayPrice = product.salePrice ?? product.price;
-  const images       = product.images.length > 0 ? product.images : ['', '', '', ''];
-  const cuota        = Math.ceil(displayPrice / 9);
-  const transferPrice = Math.ceil(displayPrice * 0.8);
+  // ── Valores derivados
+  const hasDiscount   = product.salePrice !== undefined && product.salePrice > 0 && product.salePrice < product.price;
+  const discountPct   = hasDiscount ? getDiscountPercent(product.price, product.salePrice!) : 0;
+  const displayPrice  = hasDiscount ? product.salePrice! : product.price;
+  const images        = product.images.length > 0 ? product.images : [];
+  const cuota         = Math.ceil(displayPrice / 9);
+  // transferPrice: usar el valor del backoffice si está configurado, si no calcular 80%
+  const transferPrice = product.transferPrice && product.transferPrice > 0
+    ? product.transferPrice
+    : Math.ceil(displayPrice * 0.8);
+  const embedUrl      = getVideoEmbedUrl(product.videoUrl);
+
+  // Parsear campos JSON de la DB — solo se muestran si el admin los configuró
+  const performanceStats: PerformanceStat[] = (() => {
+    const raw = product.performanceStats;
+    if (!raw || !Array.isArray(raw) || raw.length === 0) return [];
+    return raw as PerformanceStat[];
+  })();
+
+  const features: Feature[] = (() => {
+    const raw = product.features;
+    if (!raw || !Array.isArray(raw) || raw.length === 0) return [];
+    return raw as Feature[];
+  })();
+
+  const highlights: string[] = (() => {
+    const raw = product.highlights;
+    if (!raw || !Array.isArray(raw) || raw.length === 0) return [];
+    return raw.filter((h): h is string => typeof h === 'string');
+  })();
+
+  const paymentMethods: string[] = (() => {
+    const raw = product.paymentMethods;
+    if (!raw || !Array.isArray(raw) || raw.length === 0) return [];
+    return raw.filter((m): m is string => typeof m === 'string');
+  })();
 
   return (
-    <div className="min-h-screen bg-[#050606] text-white">
+    <div className="min-h-screen bg-[#0A0A0A] text-white">
+
+      {/* Modal de medios de pago */}
+      {showPaymentModal && paymentMethods.length > 0 && (
+        <PaymentModal
+          onClose={() => setShowPaymentModal(false)}
+          methods={paymentMethods}
+          displayPrice={displayPrice}
+          transferPrice={transferPrice}
+        />
+      )}
 
       {/* ══ BREADCRUMB ═══════════════════════════════════════════════════════ */}
       <div className="border-b border-white/[0.06]">
@@ -243,36 +327,33 @@ export default function ProductoPage() {
 
           {/* ── GALERÍA ────────────────────────────────────────────────────── */}
           <div className="flex gap-3">
-            {/* Miniaturas verticales */}
-            <div className="flex flex-col gap-2 w-[60px] flex-none">
-              {images.map((img, i) => (
-                <button
-                  key={i}
-                  onClick={() => setSelImg(i)}
-                  className={`w-[60px] h-[60px] rounded-lg overflow-hidden border transition-all ${
-                    selImg === i
-                      ? 'border-[#B7D31A] shadow-[0_0_12px_rgba(212,255,0,0.25)]'
-                      : 'border-white/[0.08] hover:border-white/25'
-                  } bg-[#0C0C0C]`}
-                >
-                  {img ? (
-                    // eslint-disable-next-line @next/next/no-img-element
+
+            {/* Miniaturas verticales — solo si hay más de 1 imagen */}
+            {images.length > 1 && (
+              <div className="flex flex-col gap-2 w-[60px] flex-none">
+                {images.map((img, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setSelImg(i)}
+                    className={`w-[60px] h-[60px] rounded-lg overflow-hidden border transition-all ${
+                      selImg === i
+                        ? 'border-[#D4FF00] shadow-[0_0_12px_rgba(212,255,0,0.25)]'
+                        : 'border-white/[0.08] hover:border-white/25'
+                    } bg-[#121212]`}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={getImageUrl(img)} alt="" className="w-full h-full object-contain p-1" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-[10px] font-black text-white/20">
-                      {i + 1}
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Imagen principal */}
-            <div className="flex-1 aspect-square bg-[#0C0C0C] rounded-2xl border border-white/[0.08] overflow-hidden relative group">
-              {images[selImg] ? (
+            <div className="flex-1 aspect-square bg-[#121212] rounded-2xl border border-white/[0.08] overflow-hidden relative group">
+              {images.length > 0 ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={getImageUrl(images[selImg])}
+                  src={getImageUrl(images[selImg] ?? images[0])}
                   alt={product.name}
                   className="w-full h-full object-contain p-8 transition-transform duration-500 group-hover:scale-105"
                 />
@@ -293,13 +374,13 @@ export default function ProductoPage() {
                   </span>
                 )}
                 {product.isNew && (
-                  <span className="bg-[#B7D31A] text-[#050606] text-xs font-black px-3 py-1 rounded-full">
+                  <span className="bg-[#D4FF00] text-[#111] text-xs font-black px-3 py-1 rounded-full">
                     NUEVO
                   </span>
                 )}
               </div>
 
-              {/* Nav flechas */}
+              {/* Flechas de navegación — solo si hay más de 1 imagen */}
               {images.length > 1 && (
                 <>
                   <button
@@ -325,7 +406,7 @@ export default function ProductoPage() {
             {/* Marca */}
             <Link
               href={`/catalogo?marca=${product.brand.slug}`}
-              className="text-[#B7D31A] text-xs font-black uppercase tracking-[0.2em] hover:opacity-80 transition-opacity"
+              className="text-[#D4FF00] text-xs font-black uppercase tracking-[0.2em] hover:opacity-80 transition-opacity"
             >
               {product.brand.name}
             </Link>
@@ -335,18 +416,7 @@ export default function ProductoPage() {
               {product.name}
             </h1>
 
-            {/* Rating */}
-            <div className="flex items-center gap-2">
-              <div className="flex gap-0.5">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} size={14} className="text-yellow-400 fill-yellow-400" />
-                ))}
-              </div>
-              <span className="text-white font-bold text-sm">4.9</span>
-              <span className="text-[#A1A1AA] text-xs">(29 reseñas verificadas)</span>
-            </div>
-
-            {/* Precios */}
+            {/* Precios — lógica corregida: displayPrice = salePrice SOLO si es menor que price */}
             <div className="space-y-1.5">
               <div className="flex items-baseline gap-3">
                 <span className="text-4xl md:text-5xl font-black text-white">
@@ -358,18 +428,25 @@ export default function ProductoPage() {
                   </span>
                 )}
               </div>
-              {/* Descuento transferencia */}
-              <p className="text-[#B7D31A] text-sm font-semibold">
-                {formatPrice(transferPrice)} con transferencia
+              <p className="text-[#D4FF00] text-sm font-semibold">
+                {formatPrice(transferPrice)} con Transferencia o depósito
               </p>
-              {/* Cuotas */}
               <div className="flex items-center gap-1.5 text-[#A1A1AA] text-sm">
                 <span className="text-white font-bold">9 cuotas sin interés</span>
                 <span>de {formatPrice(cuota)}</span>
               </div>
+              {paymentMethods.length > 0 && (
+                <button
+                  onClick={() => setShowPaymentModal(true)}
+                  className="flex items-center gap-1.5 text-[#A1A1AA] hover:text-white text-xs underline underline-offset-2 transition-colors w-fit"
+                >
+                  <CreditCard size={12} />
+                  Ver más detalles
+                </button>
+              )}
             </div>
 
-            {/* Stock urgency */}
+            {/* Stock crítico */}
             {product.stock > 0 && product.stock <= 5 && (
               <div className="inline-flex items-center gap-2 bg-[#e53e3e]/10 border border-[#e53e3e]/30 text-[#e53e3e] text-xs font-black px-3 py-2 rounded-lg w-fit">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#e53e3e] animate-pulse flex-none" />
@@ -385,16 +462,16 @@ export default function ProductoPage() {
                 { icon: <RefreshCw size={16} />, text: 'Cambios gratuitos' },
               ].map((t, i) => (
                 <div key={i} className="flex flex-col items-center gap-1 text-center">
-                  <span className="text-[#B7D31A]">{t.icon}</span>
+                  <span className="text-[#D4FF00]">{t.icon}</span>
                   <span className="text-[10px] text-[#A1A1AA] leading-snug">{t.text}</span>
                 </div>
               ))}
             </div>
 
-            {/* Cantidad */}
+            {/* Selector de cantidad */}
             <div className="flex items-center gap-4">
               <span className="text-sm font-semibold text-[#A1A1AA]">Cantidad:</span>
-              <div className="flex items-center bg-[#0C0C0C] border border-white/[0.08] rounded-xl overflow-hidden">
+              <div className="flex items-center bg-[#121212] border border-white/[0.08] rounded-xl overflow-hidden">
                 <button
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                   disabled={quantity <= 1}
@@ -415,17 +492,15 @@ export default function ProductoPage() {
 
             {/* CTAs */}
             <div className="flex flex-col gap-3">
-              {/* Comprar ahora */}
               <button
                 onClick={handleBuyNow}
                 disabled={product.stock === 0}
-                className="w-full py-4 rounded-xl bg-[#B7D31A] text-[#050606] font-black text-sm uppercase tracking-wider hover:bg-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-xl bg-[#D4FF00] text-[#111] font-black text-sm uppercase tracking-wider hover:bg-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 <Zap size={16} />
                 COMPRAR AHORA
               </button>
 
-              {/* Agregar al carrito + Favoritos */}
               <div className="flex gap-2">
                 <button
                   onClick={handleAddToCart}
@@ -434,7 +509,7 @@ export default function ProductoPage() {
                     product.stock === 0
                       ? 'border-white/[0.08] text-white/20 cursor-not-allowed'
                       : added
-                      ? 'border-[#B7D31A] bg-[#B7D31A]/10 text-[#B7D31A]'
+                      ? 'border-[#D4FF00] bg-[#D4FF00]/10 text-[#D4FF00]'
                       : 'border-white/20 text-white hover:border-white/40 hover:bg-white/[0.04]'
                   }`}
                 >
@@ -452,7 +527,6 @@ export default function ProductoPage() {
                 </button>
               </div>
 
-              {/* WhatsApp */}
               <a
                 href="https://wa.me/5491172345678?text=Hola! Me interesa este producto"
                 target="_blank"
@@ -465,9 +539,9 @@ export default function ProductoPage() {
             </div>
 
             {/* Calculadora de envío */}
-            <div className="bg-[#0C0C0C] border border-white/[0.08] rounded-xl p-4">
+            <div className="bg-[#121212] border border-white/[0.08] rounded-xl p-4">
               <div className="flex items-center gap-2 mb-3">
-                <MapPin size={14} className="text-[#B7D31A]" />
+                <MapPin size={14} className="text-[#D4FF00]" />
                 <p className="text-sm font-bold text-white">Calculá tu envío</p>
               </div>
               <div className="flex gap-2">
@@ -476,14 +550,14 @@ export default function ProductoPage() {
                   value={postal}
                   onChange={(e) => setPostal(e.target.value)}
                   placeholder="Ingresá tu código postal"
-                  className="flex-1 bg-[#050606] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#B7D31A]/50"
+                  className="flex-1 bg-[#0A0A0A] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#D4FF00]/50"
                 />
-                <button className="px-4 py-2 bg-[#B7D31A] text-[#050606] rounded-lg text-xs font-black uppercase tracking-wide hover:bg-white transition-colors">
+                <button className="px-4 py-2 bg-[#D4FF00] text-[#111] rounded-lg text-xs font-black uppercase tracking-wide hover:bg-white transition-colors">
                   Calcular
                 </button>
               </div>
               <p className="text-[10px] text-white/20 mt-2 flex items-center gap-1">
-                <Shield size={10} className="text-[#B7D31A]" />
+                <Shield size={10} className="text-[#D4FF00]" />
                 Compra protegida · Datos 100% seguros
               </p>
             </div>
@@ -494,210 +568,108 @@ export default function ProductoPage() {
         </div>
       </div>
 
-      {/* ══ PERFORMANCE ══════════════════════════════════════════════════════ */}
-      <section className="border-t border-white/[0.06] py-14">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="mb-8">
-            <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white">
-              RENDIMIENTO DE UN VISTAZO
-            </h2>
-            <p className="text-[#A1A1AA] text-sm mt-1">
-              Ideal para jugadores de nivel:{' '}
-              <span className="text-[#B7D31A] font-bold">INTERMEDIO - AVANZADO</span>
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {DEFAULT_PERFORMANCE.map((s) => (
-              <PerformanceBar key={s.label} {...s} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══ CARACTERÍSTICAS PRINCIPALES ══════════════════════════════════════ */}
-      <section className="border-t border-white/[0.06] py-14 bg-[#050505]">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white mb-8">
-            CARACTERÍSTICAS PRINCIPALES
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            {DEFAULT_FEATURES.map((f) => (
-              <div
-                key={f.title}
-                className="bg-[#0C0C0C] border border-white/[0.08] rounded-xl p-4 flex flex-col items-center text-center gap-2 hover:border-[#B7D31A]/30 transition-colors"
-              >
-                <span className="text-2xl">{f.icon}</span>
-                <p className="text-white font-black text-xs uppercase tracking-wide leading-snug">{f.title}</p>
-                <p className="text-[#A1A1AA] text-[10px] leading-snug">{f.subtitle}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══ VIDEO DEL PRODUCTO ═══════════════════════════════════════════════ */}
-      {(() => {
-        const embedUrl = getVideoEmbedUrl(product.videoUrl);
-        if (!embedUrl) return null;
-        return (
-          <section className="border-t border-white/[0.06] py-14">
-            <div className="max-w-7xl mx-auto px-4">
-              <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white mb-6">
-                VIDEO DEL PRODUCTO
-              </h2>
-              <div className="max-w-2xl">
-                <div className="aspect-video rounded-2xl overflow-hidden border border-white/[0.08]">
-                  <iframe
-                    src={embedUrl}
-                    title="Video del producto"
-                    className="w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                </div>
-              </div>
-            </div>
-          </section>
-        );
-      })()}
-
-      {/* ══ DESCRIPCIÓN ═══════════════════════════════════════════════════════ */}
-      {product.description && (
+      {/* ══ RENDIMIENTO — solo si el admin configuró los datos en el backoffice ══ */}
+      {performanceStats.length > 0 && (
         <section className="border-t border-white/[0.06] py-14">
           <div className="max-w-7xl mx-auto px-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-              {/* Por qué elegir */}
-              <div>
-                <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white mb-6">
-                  ¿POR QUÉ ELEGIR ESTE PRODUCTO?
-                </h2>
-                <p className="text-[#A1A1AA] text-sm leading-relaxed">{product.description}</p>
-              </div>
-              {/* Highlights */}
-              <div>
-                <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white mb-6">
-                  DESTACADOS
-                </h2>
-                <ul className="space-y-2.5">
-                  {[
-                    'Producto 100% original con garantía oficial del fabricante',
-                    'Envío rápido a todo el país en 1 a 5 días hábiles',
-                    'Cambios gratuitos dentro de los 30 días de recibido',
-                    'Atención personalizada antes y después de la compra',
-                    'Pagá en hasta 6 cuotas sin interés',
-                  ].map((point, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-sm text-[#A1A1AA]">
-                      <span className="w-4 h-4 rounded bg-[#B7D31A]/10 border border-[#B7D31A]/30 flex items-center justify-center flex-none mt-0.5">
-                        <Check size={10} className="text-[#B7D31A]" />
-                      </span>
-                      {point}
-                    </li>
-                  ))}
-                </ul>
+            <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white mb-8">
+              RENDIMIENTO DE UN VISTAZO
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {performanceStats.map((s) => (
+                <PerformanceBar key={s.label} {...s} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ══ CARACTERÍSTICAS — solo si el admin configuró los datos en el backoffice ══ */}
+      {features.length > 0 && (
+        <section className="border-t border-white/[0.06] py-14 bg-[#050505]">
+          <div className="max-w-7xl mx-auto px-4">
+            <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white mb-8">
+              CARACTERÍSTICAS PRINCIPALES
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+              {features.map((f) => (
+                <div
+                  key={f.title}
+                  className="bg-[#121212] border border-white/[0.08] rounded-xl p-4 flex flex-col items-center text-center gap-2 hover:border-[#D4FF00]/30 transition-colors"
+                >
+                  <span className="text-2xl">{f.icon}</span>
+                  <p className="text-white font-black text-xs uppercase tracking-wide leading-snug">{f.title}</p>
+                  <p className="text-[#A1A1AA] text-[10px] leading-snug">{f.subtitle}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ══ VIDEO — solo si tiene videoUrl válido de YouTube o Vimeo ════════════ */}
+      {embedUrl && (
+        <section className="border-t border-white/[0.06] py-14">
+          <div className="max-w-7xl mx-auto px-4">
+            <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white mb-6">
+              VIDEO DEL PRODUCTO
+            </h2>
+            <div className="max-w-2xl">
+              <div className="aspect-video rounded-2xl overflow-hidden border border-white/[0.08]">
+                <iframe
+                  src={embedUrl}
+                  title="Video del producto"
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
               </div>
             </div>
           </div>
         </section>
       )}
 
-      {/* ══ TABLA COMPARATIVA ════════════════════════════════════════════════ */}
-      <section className="border-t border-white/[0.06] py-14 bg-[#050505]">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white mb-8">
-            COMPARÁ CON OTROS MODELOS
-          </h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-white/[0.08]">
-                  <th className="text-left py-3 pr-4 text-[#A1A1AA] font-semibold text-xs uppercase tracking-wider w-36">
-                    Característica
-                  </th>
-                  <th className="py-3 px-3 text-center">
-                    <span className="bg-[#B7D31A] text-[#050606] text-xs font-black px-2 py-1 rounded-full whitespace-nowrap">
-                      {product.name.split(' ').slice(0, 3).join(' ')}
-                    </span>
-                  </th>
-                  {DEFAULT_COMPETITORS.map((c) => (
-                    <th key={c} className="py-3 px-3 text-center text-white/60 text-xs font-semibold whitespace-nowrap">{c}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {COMPETITOR_ROWS.map((row, ri) => (
-                  <tr key={ri} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
-                    <td className="py-3 pr-4 text-[#A1A1AA] text-xs font-semibold">{row.label}</td>
-                    {row.values.map((v, vi) => (
-                      <td key={vi} className={`py-3 px-3 text-center ${vi === 0 ? 'bg-[#B7D31A]/[0.04]' : ''}`}>
-                        {typeof v === 'number' ? (
-                          <div className="flex justify-center">
-                            <StarBar rating={v} />
-                          </div>
-                        ) : (
-                          <span className={`text-xs font-semibold ${vi === 0 ? 'text-[#B7D31A]' : 'text-[#A1A1AA]'}`}>{v}</span>
-                        )}
-                      </td>
+      {/* ══ DESCRIPCIÓN + DESTACADOS — side-by-side si ambos existen ═════════ */}
+      {(product.description?.trim() || highlights.length > 0) && (
+        <section className="border-t border-white/[0.06] py-14">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className={`grid grid-cols-1 ${product.description?.trim() && highlights.length > 0 ? 'lg:grid-cols-2' : ''} gap-10`}>
+              {/* Descripción — solo si existe */}
+              {product.description?.trim() && (
+                <div>
+                  <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white mb-6">
+                    ¿POR QUÉ ELEGIR ESTE PRODUCTO?
+                  </h2>
+                  <p className="text-[#A1A1AA] text-sm leading-relaxed whitespace-pre-line">
+                    {product.description}
+                  </p>
+                </div>
+              )}
+
+              {/* Destacados — solo si existen */}
+              {highlights.length > 0 && (
+                <div>
+                  <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white mb-6">
+                    DESTACADOS
+                  </h2>
+                  <ul className="space-y-2.5">
+                    {highlights.map((text, i) => (
+                      <li key={i} className="flex items-start gap-2.5 text-sm text-[#A1A1AA]">
+                        <span className="w-4 h-4 rounded bg-[#D4FF00]/10 border border-[#D4FF00]/30 flex items-center justify-center flex-none mt-0.5">
+                          <Check size={10} className="text-[#D4FF00]" />
+                        </span>
+                        {text}
+                      </li>
                     ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      {/* ══ RESEÑAS ══════════════════════════════════════════════════════════ */}
-      <section className="border-t border-white/[0.06] py-14">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white">
-                LO QUE DICEN NUESTROS CLIENTES
-              </h2>
-              <div className="flex items-center gap-2 mt-1">
-                <div className="flex gap-0.5">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} size={12} className="text-yellow-400 fill-yellow-400" />
-                  ))}
+                  </ul>
                 </div>
-                <span className="text-[#A1A1AA] text-xs">4.9 · 29 reseñas verificadas</span>
-              </div>
+              )}
             </div>
-            <button className="text-xs text-[#B7D31A] font-bold hover:opacity-80 flex items-center gap-1">
-              Ver todas las 29 reseñas <ChevronRight size={12} />
-            </button>
           </div>
+        </section>
+      )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {DEFAULT_REVIEWS.map((rev, i) => (
-              <div key={i} className="bg-[#0C0C0C] border border-white/[0.08] rounded-2xl p-5 flex flex-col gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#B7D31A]/10 border border-[#B7D31A]/20 flex items-center justify-center flex-none">
-                    <span className="text-[#B7D31A] font-black text-xs">{rev.avatar}</span>
-                  </div>
-                  <div>
-                    <p className="text-white font-bold text-sm">{rev.name}</p>
-                    {rev.verified && (
-                      <div className="flex items-center gap-1 text-[10px] text-green-400">
-                        <Check size={10} /> Comprador verificado
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className="flex gap-0.5">
-                  {Array.from({ length: rev.rating }).map((_, j) => (
-                    <Star key={j} size={12} className="text-yellow-400 fill-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-[#A1A1AA] text-xs leading-relaxed flex-1">{rev.comment}</p>
-                <p className="text-white/20 text-[10px]">{rev.date}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══ PRODUCTOS RELACIONADOS ════════════════════════════════════════════ */}
+      {/* ══ PRODUCTOS RELACIONADOS — datos reales de la API ══════════════════ */}
       {related.length > 0 && (
         <section className="border-t border-white/[0.06] py-14 bg-[#050505]">
           <div className="max-w-7xl mx-auto px-4">
@@ -707,7 +679,7 @@ export default function ProductoPage() {
             <div className="relative">
               <button
                 onClick={() => relScrollRef.current?.scrollBy({ left: -280, behavior: 'smooth' })}
-                className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-[#0C0C0C] border border-white/[0.08] flex items-center justify-center text-white hover:border-white/20 transition-colors hidden md:flex"
+                className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-[#121212] border border-white/[0.08] flex items-center justify-center text-white hover:border-white/20 transition-colors hidden md:flex"
               >
                 <ChevronLeft size={14} />
               </button>
@@ -717,15 +689,15 @@ export default function ProductoPage() {
                 style={{ scrollbarWidth: 'none', scrollSnapType: 'x mandatory' }}
               >
                 {related.map((p) => {
-                  const relDiscount = p.salePrice && p.salePrice < p.price;
+                  const relDiscount = p.salePrice !== undefined && p.salePrice > 0 && p.salePrice < p.price;
                   return (
                     <Link
                       key={p.id}
                       href={`/producto/${p.slug}`}
-                      className="flex-none w-52 bg-[#0C0C0C] border border-white/[0.08] rounded-xl overflow-hidden hover:border-white/20 transition-all group"
+                      className="flex-none w-52 bg-[#121212] border border-white/[0.08] rounded-xl overflow-hidden hover:border-white/20 transition-all group"
                       style={{ scrollSnapAlign: 'start' }}
                     >
-                      <div className="aspect-square bg-[#050606] overflow-hidden">
+                      <div className="aspect-square bg-[#0A0A0A] overflow-hidden">
                         {p.images.length > 0 ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
@@ -745,7 +717,7 @@ export default function ProductoPage() {
                         <p className="text-[10px] text-[#A1A1AA] font-semibold uppercase tracking-wider">{p.brand?.name}</p>
                         <p className="text-white text-xs font-bold leading-snug mt-0.5 line-clamp-2">{p.name}</p>
                         <p className="text-white font-black text-sm mt-1.5">
-                          {formatPrice(p.salePrice ?? p.price)}
+                          {formatPrice(relDiscount ? p.salePrice! : p.price)}
                           {relDiscount && (
                             <span className="text-[#A1A1AA] text-[10px] font-normal line-through ml-1.5">
                               {formatPrice(p.price)}
@@ -759,7 +731,7 @@ export default function ProductoPage() {
               </div>
               <button
                 onClick={() => relScrollRef.current?.scrollBy({ left: 280, behavior: 'smooth' })}
-                className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-[#0C0C0C] border border-white/[0.08] flex items-center justify-center text-white hover:border-white/20 transition-colors hidden md:flex"
+                className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-[#121212] border border-white/[0.08] flex items-center justify-center text-white hover:border-white/20 transition-colors hidden md:flex"
               >
                 <ChevronRight size={14} />
               </button>
@@ -768,29 +740,19 @@ export default function ProductoPage() {
         </section>
       )}
 
-      {/* ══ FAQ ══════════════════════════════════════════════════════════════ */}
-      <section className="border-t border-white/[0.06] py-14">
-        <div className="max-w-3xl mx-auto px-4">
-          <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white mb-8">
-            PREGUNTAS FRECUENTES
-          </h2>
-          <FaqAccordion items={DEFAULT_FAQ} />
-        </div>
-      </section>
-
       {/* ══ TRUST BOTTOM ═════════════════════════════════════════════════════ */}
       <section className="border-t border-white/[0.06] py-10 bg-[#050505]">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {[
-              { icon: <Truck size={22} />,      title: 'ENVÍOS A TODO EL PAÍS',    sub: 'Recibí tu pedido en cualquier punto del país' },
-              { icon: <RefreshCw size={22} />,   title: '30 DÍAS PARA CAMBIOS',     sub: 'Si no estás conforme, podés cambiar tu producto' },
-              { icon: <Shield size={22} />,      title: 'GARANTÍA OFICIAL',         sub: 'Todos nuestros productos cuentan con garantía oficial' },
-              { icon: <Check size={22} />,       title: 'PAGOS 100% SEGUROS',       sub: 'Protegemos tus datos con el más alto nivel de seguridad' },
-              { icon: <MessageCircle size={22} />,title: 'ATENCIÓN PERSONALIZADA', sub: 'Te asesoramos por WhatsApp en todo momento' },
+              { icon: <Truck size={22} />,        title: 'ENVÍOS A TODO EL PAÍS',    sub: 'Recibí tu pedido en cualquier punto del país' },
+              { icon: <RefreshCw size={22} />,     title: '30 DÍAS PARA CAMBIOS',     sub: 'Si no estás conforme, podés cambiar tu producto' },
+              { icon: <Shield size={22} />,        title: 'GARANTÍA OFICIAL',         sub: 'Todos nuestros productos cuentan con garantía oficial' },
+              { icon: <Check size={22} />,         title: 'PAGOS 100% SEGUROS',       sub: 'Protegemos tus datos con el más alto nivel de seguridad' },
+              { icon: <MessageCircle size={22} />, title: 'ATENCIÓN PERSONALIZADA',   sub: 'Te asesoramos por WhatsApp en todo momento' },
             ].map((t, i) => (
               <div key={i} className="flex flex-col items-center text-center gap-2 p-3">
-                <span className="text-[#B7D31A]">{t.icon}</span>
+                <span className="text-[#D4FF00]">{t.icon}</span>
                 <p className="text-white font-black text-[11px] uppercase tracking-wide leading-snug">{t.title}</p>
                 <p className="text-[#A1A1AA] text-[10px] leading-snug">{t.sub}</p>
               </div>
@@ -802,21 +764,3 @@ export default function ProductoPage() {
     </div>
   );
 }
-
-// ─── MOCK DE FALLBACK ─────────────────────────────────────────────────────────
-const MOCK_PRODUCT: Product = {
-  id: '1',
-  name: 'Adidas Metalbone Ctrl 3.5 2026',
-  slug: 'adidas-metalbone-ctrl-3-5-2026',
-  description: 'La Metalbone Ctrl 3.5 es la elección perfecta para jugadores que buscan el máximo control sin resignar potencia. Su forma redonda, balance medio y tecnologías de última generación ofrecen una experiencia de juego superior.',
-  price: 800000,
-  salePrice: undefined,
-  sku: 'ADI-MB-CTRL-3526',
-  stock: 3,
-  images: [],
-  featured: true,
-  isNew: true,
-  isOffer: false,
-  category: { id: '1', name: 'Paletas', slug: 'paletas' },
-  brand:    { id: '1', name: 'Adidas',  slug: 'adidas' },
-};

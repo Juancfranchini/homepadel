@@ -23,7 +23,7 @@ interface Promotion {
   discount: number;
   startDate: string;
   endDate: string;
-  isActive: boolean;
+  active: boolean;     // campo real en la API
   description?: string;
 }
 
@@ -81,7 +81,7 @@ export default function PromocionesPage() {
       discount: p.discount,
       startDate: p.startDate.slice(0, 10),
       endDate: p.endDate.slice(0, 10),
-      isActive: p.isActive,
+      isActive: p.active,    // API devuelve 'active', form usa 'isActive'
     });
     setModalOpen(true);
   };
@@ -184,7 +184,7 @@ export default function PromocionesPage() {
                     <span className="text-xs text-blue-500 font-medium">Próximamente</span>
                   )}
                 </td>
-                <td className="px-6 py-3.5"><ActiveBadge active={p.isActive} /></td>
+                <td className="px-6 py-3.5"><ActiveBadge active={p.active} /></td>
                 <td className="px-6 py-3.5">
                   <div className="flex items-center gap-1.5">
                     <button onClick={() => openEdit(p)} className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50"><Edit2 className="w-4 h-4" /></button>
@@ -258,8 +258,8 @@ export default function PromocionesPage() {
 }
 
 const MOCK: Promotion[] = [
-  { id: '1', title: 'Promo de verano', discount: 20, startDate: '2024-12-01T00:00:00Z', endDate: '2025-02-28T00:00:00Z', isActive: true, description: 'Descuento en palas y zapatillas' },
-  { id: '2', title: 'Black Friday', discount: 35, startDate: '2024-11-29T00:00:00Z', endDate: '2024-11-30T00:00:00Z', isActive: false },
-  { id: '3', title: 'Liquidación de stock', discount: 15, startDate: '2024-11-01T00:00:00Z', endDate: '2024-11-30T00:00:00Z', isActive: true },
+  { id: '1', title: 'Promo de verano', discount: 20, startDate: '2024-12-01T00:00:00Z', endDate: '2025-02-28T00:00:00Z', active: true, description: 'Descuento en palas y zapatillas' },
+  { id: '2', title: 'Black Friday', discount: 35, startDate: '2024-11-29T00:00:00Z', endDate: '2024-11-30T00:00:00Z', active: false },
+  { id: '3', title: 'Liquidación de stock', discount: 15, startDate: '2024-11-01T00:00:00Z', endDate: '2024-11-30T00:00:00Z', active: true },
 ];
 

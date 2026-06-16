@@ -83,6 +83,9 @@ model Product {
   videoUrl         String?     // URL de YouTube o Vimeo
   performanceStats Json?       // [{ label: string, value: number }]
   features         Json?       // [{ icon: string, title: string, subtitle: string }]
+  highlights       Json?       // string[] — bullets del DESTACADOS por producto
+  transferPrice    Float?      // precio por transferencia (si null: 80% del displayPrice)
+  paymentMethods   Json?       // string[] — keys de métodos habilitados para este producto
   relatedProductIds String[]   // IDs de productos relacionados seleccionados manualmente
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt

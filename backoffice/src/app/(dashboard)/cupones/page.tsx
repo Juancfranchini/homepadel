@@ -26,7 +26,7 @@ interface Coupon {
   maxUses?: number;
   usedCount: number;
   expiresAt?: string;
-  isActive: boolean;
+  active: boolean;     // campo real en la API
 }
 
 // ─── Schema ─────────────────────────────────────────────────────────────────
@@ -89,7 +89,7 @@ export default function CuponesPage() {
       minAmount: c.minAmount,
       maxUses: c.maxUses,
       expiresAt: c.expiresAt ? c.expiresAt.slice(0, 10) : '',
-      isActive: c.isActive,
+      isActive: c.active,    // API devuelve 'active', form usa 'isActive'
     });
     setModalOpen(true);
   };
@@ -226,7 +226,7 @@ export default function CuponesPage() {
                         </span>
                       ) : <span className="text-gray-400">Sin vencimiento</span>}
                     </td>
-                    <td className="px-4 py-3.5"><ActiveBadge active={c.isActive} /></td>
+                    <td className="px-4 py-3.5"><ActiveBadge active={c.active} /></td>
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-1.5">
                         <button onClick={() => openEdit(c)} className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50"><Edit2 className="w-4 h-4" /></button>
@@ -314,9 +314,9 @@ export default function CuponesPage() {
 }
 
 const MOCK: Coupon[] = [
-  { id: '1', code: 'VERANO20', type: 'PERCENTAGE', discount: 20, minAmount: 5000, maxUses: 100, usedCount: 42, expiresAt: '2025-02-28T00:00:00Z', isActive: true },
-  { id: '2', code: 'BIENVENIDO', type: 'PERCENTAGE', discount: 10, usedCount: 189, isActive: true },
-  { id: '3', code: 'ENVIOGRATIS', type: 'FIXED', discount: 2500, minAmount: 15000, maxUses: 50, usedCount: 50, isActive: false },
-  { id: '4', code: 'BF2024', type: 'PERCENTAGE', discount: 35, maxUses: 200, usedCount: 200, expiresAt: '2024-11-30T00:00:00Z', isActive: false },
+  { id: '1', code: 'VERANO20', type: 'PERCENTAGE', discount: 20, minAmount: 5000, maxUses: 100, usedCount: 42, expiresAt: '2025-02-28T00:00:00Z', active: true },
+  { id: '2', code: 'BIENVENIDO', type: 'PERCENTAGE', discount: 10, usedCount: 189, active: true },
+  { id: '3', code: 'ENVIOGRATIS', type: 'FIXED', discount: 2500, minAmount: 15000, maxUses: 50, usedCount: 50, active: false },
+  { id: '4', code: 'BF2024', type: 'PERCENTAGE', discount: 35, maxUses: 200, usedCount: 200, expiresAt: '2024-11-30T00:00:00Z', active: false },
 ];
 

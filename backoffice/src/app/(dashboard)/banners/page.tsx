@@ -19,12 +19,12 @@ import { useToast } from '@/components/ui/Toast';
 interface Banner {
   id: string;
   title: string;
-  imageUrl?: string;
+  image?: string;       // campo real en la API
   imageMobile?: string;
   ctaText?: string;
   link?: string;
   order: number;
-  isActive: boolean;
+  active: boolean;      // campo real en la API
 }
 
 // ─── Schema ─────────────────────────────────────────────────────────────────
@@ -57,7 +57,7 @@ export default function BannersPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await api.get('/banners');
+      const res = await api.get('/banners?showAll=1');  // ver todos los banners, incluyendo inactivos
       const data = (Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []);
       setBanners([...data].sort((a: Banner, b: Banner) => a.order - b.order));
     } catch {
@@ -79,12 +79,12 @@ export default function BannersPage() {
     setEditItem(b);
     reset({
       title: b.title,
-      imageUrl: b.imageUrl ?? '',
+      imageUrl: b.image ?? '',         // API devuelve 'image', el form usa 'imageUrl'
       imageMobile: b.imageMobile ?? '',
       ctaText: b.ctaText ?? '',
       link: b.link ?? '',
       order: b.order,
-      isActive: b.isActive,
+      isActive: b.active,             // API devuelve 'active', el form usa 'isActive'
     });
     setModalOpen(true);
   };
@@ -148,9 +148,9 @@ export default function BannersPage() {
           <div key={b.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm group">
             {/* Image */}
             <div className="aspect-[16/6] bg-gray-100 relative">
-              {b.imageUrl ? (
+              {b.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={b.imageUrl} alt={b.title} className="w-full h-full object-cover" />
+                <img src={b.image} alt={b.title} className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
                   <ImageIcon className="w-10 h-10 text-gray-300" />
@@ -160,7 +160,7 @@ export default function BannersPage() {
                 #{b.order}
               </div>
               <div className="absolute top-2 right-2">
-                <ActiveBadge active={b.isActive} />
+                <ActiveBadge active={b.active} />
               </div>
             </div>
 
@@ -214,9 +214,9 @@ export default function BannersPage() {
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  {b.imageUrl ? (
+                  {b.image ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={b.imageUrl} alt={b.title} className="w-20 h-10 object-cover rounded-lg border border-gray-100" />
+                    <img src={b.image} alt={b.title} className="w-20 h-10 object-cover rounded-lg border border-gray-100" />
                   ) : (
                     <div className="w-20 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
                       <ImageIcon className="w-4 h-4 text-gray-300" />
@@ -225,7 +225,7 @@ export default function BannersPage() {
                 </td>
                 <td className="px-4 py-3 font-medium text-gray-900">{b.title}</td>
                 <td className="px-4 py-3 text-sm text-blue-500 max-w-[200px] truncate">{b.link ?? '—'}</td>
-                <td className="px-4 py-3"><ActiveBadge active={b.isActive} /></td>
+                <td className="px-4 py-3"><ActiveBadge active={b.active} /></td>
                 <td className="px-4 py-3">
                   <div className="flex gap-1.5">
                     <button onClick={() => openEdit(b)} className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50"><Edit2 className="w-4 h-4" /></button>
@@ -297,8 +297,8 @@ export default function BannersPage() {
 }
 
 const MOCK: Banner[] = [
-  { id: '1', title: 'Banner principal — Verano', imageUrl: 'https://via.placeholder.com/800x300/0f172a/C8FF00?text=HOME+PADEL', link: '/promociones', order: 1, isActive: true },
-  { id: '2', title: 'Nuevas palas 2025', imageUrl: 'https://via.placeholder.com/800x300/1e293b/ffffff?text=Palas+2025', link: '/productos', order: 2, isActive: true },
-  { id: '3', title: 'Black Friday', order: 3, isActive: false },
+  { id: '1', title: 'Banner principal — Verano', image: 'https://via.placeholder.com/800x300/0f172a/C8FF00?text=HOME+PADEL', link: '/promociones', order: 1, active: true },
+  { id: '2', title: 'Nuevas palas 2025', image: 'https://via.placeholder.com/800x300/1e293b/ffffff?text=Palas+2025', link: '/productos', order: 2, active: true },
+  { id: '3', title: 'Black Friday', order: 3, active: false },
 ];
 

@@ -36,6 +36,9 @@ export interface Product {
   videoUrl?: string;
   performanceStats?: unknown;
   features?: unknown;
+  highlights?: unknown;
+  transferPrice?: number;
+  paymentMethods?: unknown;
   category: Category;
   brand: Brand;
 }

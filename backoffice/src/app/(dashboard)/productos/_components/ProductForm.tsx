@@ -12,6 +12,7 @@ import { z } from 'zod';
 import {
   ArrowLeft, Save, Plus, Trash2, GripVertical,
   Package, DollarSign, BarChart2, Zap, Video, Image as ImageIcon,
+  CreditCard, List,
 } from 'lucide-react';
 import api from '@/lib/api';
 import { useToast } from '@/components/ui/Toast';
@@ -42,8 +43,9 @@ const schema = z.object({
   active:      z.boolean().default(true),
 
   // Precios
-  price:     z.coerce.number().min(0, 'Precio requerido'),
-  salePrice: z.coerce.number().min(0).optional(),
+  price:         z.coerce.number().min(0, 'Precio requerido'),
+  salePrice:     z.coerce.number().min(0).optional(),
+  transferPrice: z.coerce.number().min(0).optional(),
 
   // Stock
   stock: z.coerce.number().int().min(0),
@@ -56,6 +58,12 @@ const schema = z.object({
 
   // Características
   features: z.array(featureSchema).optional(),
+
+  // DESTACADOS — bullets por producto
+  highlights: z.array(z.string().min(1)).optional(),
+
+  // Medios de pago habilitados
+  paymentMethods: z.array(z.string()).optional(),
 
   // Video
   videoUrl: z.string().optional(),
@@ -110,6 +118,35 @@ function ErrorMsg({ msg }: { msg?: string }) {
   return <p className="text-xs text-red-600 mt-1">{msg}</p>;
 }
 
+// ─── Catálogo de medios de pago ───────────────────────────────────────────────
+
+interface PaymentMethodDef { label: string; group: 'credit' | 'debit' | 'transfer' | 'wallet'; color: string }
+
+const PAYMENT_CATALOG: Record<string, PaymentMethodDef> = {
+  visa:         { label: 'Visa',            group: 'credit',   color: 'bg-blue-100 text-blue-800' },
+  mastercard:   { label: 'Mastercard',      group: 'credit',   color: 'bg-orange-100 text-orange-800' },
+  amex:         { label: 'Amex',            group: 'credit',   color: 'bg-blue-100 text-blue-900' },
+  naranja_x:    { label: 'Naranja X',       group: 'credit',   color: 'bg-orange-100 text-orange-700' },
+  nativa:       { label: 'Nativa',          group: 'credit',   color: 'bg-yellow-100 text-yellow-800' },
+  cabal:        { label: 'Cabal',           group: 'credit',   color: 'bg-red-100 text-red-800' },
+  argencard:    { label: 'Argencard',       group: 'credit',   color: 'bg-green-100 text-green-800' },
+  visa_deb:     { label: 'Visa Débito',     group: 'debit',    color: 'bg-blue-50 text-blue-700' },
+  mc_deb:       { label: 'MC Débito',       group: 'debit',    color: 'bg-orange-50 text-orange-700' },
+  cabal_deb:    { label: 'Cabal Débito',    group: 'debit',    color: 'bg-red-50 text-red-700' },
+  transferencia:{ label: 'Transferencia',   group: 'transfer', color: 'bg-green-100 text-green-900' },
+  banelco:      { label: 'Banelco',         group: 'transfer', color: 'bg-green-100 text-green-800' },
+  link:         { label: 'Link Pagos',      group: 'transfer', color: 'bg-emerald-100 text-emerald-800' },
+  mercadopago:  { label: 'Mercado Pago',    group: 'wallet',   color: 'bg-sky-100 text-sky-800' },
+  cuenta_dni:   { label: 'Cuenta DNI',      group: 'wallet',   color: 'bg-slate-100 text-slate-800' },
+};
+
+const PAYMENT_GROUPS: { key: 'credit'|'debit'|'transfer'|'wallet'; label: string }[] = [
+  { key: 'credit',   label: 'Tarjetas de crédito' },
+  { key: 'debit',    label: 'Tarjetas de débito' },
+  { key: 'transfer', label: 'Transferencia / depósito' },
+  { key: 'wallet',   label: 'Billetera virtual' },
+];
+
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 interface Props {
@@ -125,11 +162,12 @@ interface Brand    { id: string; name: string }
 export default function ProductForm({ mode, productId }: Props) {
   const { toast } = useToast();
   const router    = useRouter();
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [brands,     setBrands]     = useState<Brand[]>([]);
-  const [loading,    setLoading]    = useState(mode === 'edit');
-  const [saving,     setSaving]     = useState(false);
-  const [newImageUrl, setNewImageUrl] = useState('');
+  const [categories,    setCategories]    = useState<Category[]>([]);
+  const [brands,        setBrands]        = useState<Brand[]>([]);
+  const [loading,       setLoading]       = useState(mode === 'edit');
+  const [saving,        setSaving]        = useState(false);
+  const [newImageUrl,   setNewImageUrl]   = useState('');
+  const [newHighlight,  setNewHighlight]  = useState('');
 
   const {
     register,
@@ -149,14 +187,16 @@ export default function ProductForm({ mode, productId }: Props) {
       stock:            0,
       price:            0,
       images:           [],
-      performanceStats: DEFAULT_PERF,
-      features:         DEFAULT_FEATURES,
+      performanceStats: [],   // vacío: el admin rellena solo si quiere mostrar barras
+      features:         [],   // vacío: el admin rellena solo si quiere mostrar características
     },
   });
 
   const perfArray     = useFieldArray({ control, name: 'performanceStats' });
   const featuresArray = useFieldArray({ control, name: 'features' });
-  const imagesWatch   = watch('images') ?? [];
+  const imagesWatch       = watch('images')        ?? [];
+  const highlightsWatch   = watch('highlights')    ?? [];
+  const paymentWatch      = watch('paymentMethods') ?? [];
 
   // ── Load catalogs ──────────────────────────────────────────────────────────
   const loadCatalogs = useCallback(async () => {
@@ -192,16 +232,15 @@ export default function ProductForm({ mode, productId }: Props) {
         isNew:            p.isNew        ?? false,
         isOffer:          p.isOffer      ?? false,
         active:           p.active       ?? true,
-        price:            p.price        ?? 0,
-        salePrice:        p.salePrice    ?? undefined,
-        stock:            p.stock        ?? 0,
-        images:           Array.isArray(p.images) ? p.images : [],
-        performanceStats: Array.isArray(p.performanceStats) && p.performanceStats.length > 0
-                            ? p.performanceStats
-                            : DEFAULT_PERF,
-        features:         Array.isArray(p.features) && p.features.length > 0
-                            ? p.features
-                            : DEFAULT_FEATURES,
+        price:          p.price          ?? 0,
+        salePrice:      p.salePrice      ?? undefined,
+        transferPrice:  p.transferPrice  ?? undefined,
+        stock:          p.stock          ?? 0,
+        images:           Array.isArray(p.images)          ? p.images          : [],
+        performanceStats: Array.isArray(p.performanceStats) ? p.performanceStats : [],
+        features:         Array.isArray(p.features)         ? p.features         : [],
+        highlights:       Array.isArray(p.highlights)       ? p.highlights       : [],
+        paymentMethods:   Array.isArray(p.paymentMethods)   ? p.paymentMethods   : [],
         videoUrl:         p.videoUrl ?? '',
       });
     } catch {
@@ -235,11 +274,14 @@ export default function ProductForm({ mode, productId }: Props) {
     try {
       const payload: Record<string, unknown> = {
         ...data,
-        salePrice: data.salePrice && data.salePrice > 0 ? data.salePrice : undefined,
+        salePrice:     data.salePrice     && data.salePrice     > 0 ? data.salePrice     : undefined,
+        transferPrice: data.transferPrice && data.transferPrice > 0 ? data.transferPrice : undefined,
         videoUrl:  data.videoUrl?.trim() || undefined,
-        images:    data.images ?? [],
-        performanceStats: data.performanceStats ?? [],
-        features:         data.features ?? [],
+        images:           data.images           ?? [],
+        performanceStats: data.performanceStats  ?? [],
+        features:         data.features          ?? [],
+        highlights:       data.highlights        ?? [],
+        paymentMethods:   data.paymentMethods    ?? [],
       };
 
       if (mode === 'create') {
@@ -371,13 +413,17 @@ export default function ProductForm({ mode, productId }: Props) {
               <div>
                 <Label>Precio oferta ($) <span className="text-gray-400 font-normal">(opcional)</span></Label>
                 <input type="number" min={0} step={100} {...register('salePrice')} className="input-field" placeholder="0" />
-                <p className="text-xs text-gray-400 mt-1">Si tiene precio oferta se muestra tachado el precio normal</p>
+                <p className="text-xs text-gray-400 mt-1">Se muestra tachado el precio normal cuando es menor</p>
               </div>
-              <div className="sm:col-span-2 bg-gray-50 rounded-lg p-4">
-                <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide mb-2">Precios calculados automáticamente en el frontend</p>
-                <div className="grid grid-cols-2 gap-3 text-xs text-gray-600">
-                  <div>💳 <strong>Precio transferencia</strong> = 80% del precio normal</div>
-                  <div>📦 <strong>Cuotas</strong> = precio normal ÷ 9</div>
+              <div>
+                <Label>Precio por transferencia ($) <span className="text-gray-400 font-normal">(opcional)</span></Label>
+                <input type="number" min={0} step={100} {...register('transferPrice')} className="input-field" placeholder="0" />
+                <p className="text-xs text-gray-400 mt-1">Si no se configura, se muestra 80% del precio activo</p>
+              </div>
+              <div className="flex items-end">
+                <div className="bg-gray-50 rounded-lg p-3 w-full text-xs text-gray-600">
+                  📦 <strong>9 cuotas sin interés</strong> = precio activo ÷ 9<br/>
+                  <span className="text-gray-400">(calculado automáticamente)</span>
                 </div>
               </div>
             </div>
@@ -543,6 +589,110 @@ export default function ProductForm({ mode, productId }: Props) {
             )}
           </SectionCard>
 
+          {/* DESTACADOS */}
+          <SectionCard icon={<List className="w-4 h-4" />} title="Destacados del producto">
+            <p className="text-xs text-gray-500 -mt-2 mb-2">
+              Bullets que aparecen en la sección &quot;DESTACADOS&quot; del detalle del producto. Cada producto puede tener los suyos.
+            </p>
+            <div className="space-y-2">
+              {highlightsWatch.map((item, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <input
+                    value={item}
+                    onChange={(e) => {
+                      const updated = [...highlightsWatch];
+                      updated[idx] = e.target.value;
+                      setValue('highlights', updated);
+                    }}
+                    className="input-field flex-1 text-sm"
+                    placeholder="Ej: Producto original con garantía oficial"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setValue('highlights', highlightsWatch.filter((_, i) => i !== idx))}
+                    className="p-1.5 text-red-400 hover:text-red-600 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2 mt-2">
+              <input
+                type="text"
+                value={newHighlight}
+                onChange={(e) => setNewHighlight(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const text = newHighlight.trim();
+                    if (!text) return;
+                    setValue('highlights', [...highlightsWatch, text]);
+                    setNewHighlight('');
+                  }
+                }}
+                className="input-field flex-1 text-sm"
+                placeholder="Escribí un destacado y presioná Enter o +"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  const text = newHighlight.trim();
+                  if (!text) return;
+                  setValue('highlights', [...highlightsWatch, text]);
+                  setNewHighlight('');
+                }}
+                className="px-4 py-2 bg-[#0f172a] text-white rounded-lg text-sm font-medium hover:bg-[#1e293b] transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
+          </SectionCard>
+
+          {/* Medios de pago */}
+          <SectionCard icon={<CreditCard className="w-4 h-4" />} title="Medios de pago habilitados">
+            <p className="text-xs text-gray-500 -mt-2 mb-3">
+              Seleccioná los medios de pago disponibles para este producto. Se muestran en el botón &quot;Ver más detalles&quot; de la página del producto.
+            </p>
+            {PAYMENT_GROUPS.map((group) => {
+              const methods = Object.entries(PAYMENT_CATALOG).filter(([, def]) => def.group === group.key);
+              return (
+                <div key={group.key} className="mb-4">
+                  <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">{group.label}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {methods.map(([key, def]) => {
+                      const checked = paymentWatch.includes(key);
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => {
+                            const updated = checked
+                              ? paymentWatch.filter((k) => k !== key)
+                              : [...paymentWatch, key];
+                            setValue('paymentMethods', updated);
+                          }}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                            checked
+                              ? `${def.color} border-current ring-2 ring-offset-1 ring-current/30`
+                              : 'bg-gray-50 text-gray-500 border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          {def.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+            {paymentWatch.length === 0 && (
+              <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mt-1">
+                Sin medios de pago configurados — el botón &quot;Ver más detalles&quot; no se mostrará en el frontend.
+              </p>
+            )}
+          </SectionCard>
+
         </div>
 
         {/* ── RIGHT COLUMN (1/3) ───────────────────────────────────────── */}
@@ -592,33 +742,48 @@ export default function ProductForm({ mode, productId }: Props) {
           </div>
 
           {/* Preview precios */}
-          {watch('price') > 0 && (
-            <div className="bg-[#0f172a] rounded-xl p-5 text-white">
-              <p className="text-xs text-slate-400 font-semibold uppercase tracking-wide mb-3">Preview de precios</p>
-              <p className="text-2xl font-black text-white">
-                ${Number(watch('price')).toLocaleString('es-AR')}
-              </p>
-              {watch('salePrice') && Number(watch('salePrice')) > 0 && (
-                <p className="text-sm text-slate-400 line-through">
-                  Precio normal: ${Number(watch('salePrice')).toLocaleString('es-AR')}
-                </p>
-              )}
-              <div className="mt-3 space-y-1 text-xs">
-                <div className="flex justify-between text-slate-300">
-                  <span>💳 Con transferencia</span>
-                  <span className="text-[#C8FF00] font-bold">
-                    ${Math.ceil(Number(watch('price')) * 0.8).toLocaleString('es-AR')}
-                  </span>
-                </div>
-                <div className="flex justify-between text-slate-300">
-                  <span>📦 9 cuotas s/interés</span>
-                  <span className="text-[#C8FF00] font-bold">
-                    ${Math.ceil(Number(watch('price')) / 9).toLocaleString('es-AR')}/mes
-                  </span>
+          {watch('price') > 0 && (() => {
+            const basePrice    = Number(watch('price'));
+            const saleVal      = Number(watch('salePrice')     ?? 0);
+            const transferVal  = Number(watch('transferPrice') ?? 0);
+            const hasOffer     = saleVal > 0 && saleVal < basePrice;
+            const activePrice  = hasOffer ? saleVal : basePrice;
+            const transferShow = transferVal > 0 ? transferVal : Math.ceil(activePrice * 0.8);
+            return (
+              <div className="bg-[#0f172a] rounded-xl p-5 text-white">
+                <p className="text-xs text-slate-400 font-semibold uppercase tracking-wide mb-3">Preview de precios</p>
+                {hasOffer ? (
+                  <>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-2xl font-black text-[#C8FF00]">
+                        ${saleVal.toLocaleString('es-AR')}
+                      </p>
+                      <span className="text-xs bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full font-bold">
+                        -{Math.round((1 - saleVal / basePrice) * 100)}% OFF
+                      </span>
+                    </div>
+                    <p className="text-sm text-slate-400 line-through">${basePrice.toLocaleString('es-AR')}</p>
+                  </>
+                ) : (
+                  <p className="text-2xl font-black text-white">${basePrice.toLocaleString('es-AR')}</p>
+                )}
+                <div className="mt-3 space-y-1 text-xs">
+                  <div className="flex justify-between text-slate-300">
+                    <span>💳 Con transferencia{transferVal > 0 ? ' ✓' : ' (auto)'}</span>
+                    <span className="text-[#C8FF00] font-bold">
+                      ${transferShow.toLocaleString('es-AR')}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-slate-300">
+                    <span>📦 9 cuotas s/interés</span>
+                    <span className="text-[#C8FF00] font-bold">
+                      ${Math.ceil(activePrice / 9).toLocaleString('es-AR')}/mes
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Guardar rápido */}
           <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">

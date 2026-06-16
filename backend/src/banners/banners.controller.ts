@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Put, Delete, Param, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Put, Delete, Param, Body, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { BannersService } from './banners.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -11,7 +11,9 @@ import { Role } from '@prisma/client';
 export class BannersController {
   constructor(private readonly bannersService: BannersService) {}
 
-  @Get() findAll() { return this.bannersService.findAll(); }
+  @Get() findAll(@Query('showAll') showAll?: string) {
+    return showAll === '1' ? this.bannersService.findAllAdmin() : this.bannersService.findAll();
+  }
 
   @Post()
   @ApiBearerAuth() @UseGuards(JwtAuthGuard, RolesGuard) @Roles(Role.ADMIN)

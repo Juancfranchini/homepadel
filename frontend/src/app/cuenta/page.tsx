@@ -25,6 +25,7 @@ import { login, register as registerUser, getMyOrders } from '@/lib/api';
 import { formatPrice } from '@/lib/utils';
 import { Order } from '@/types';
 import { useEffect } from 'react';
+import BrandLogo from '@/components/ui/BrandLogo';
 
 // Schemas de validación
 const loginSchema = z.object({
@@ -115,22 +116,22 @@ export default function CuentaPage() {
   if (isAuthenticated() && user) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-6 lg:px-8 py-10">
+        <div className="max-w-4xl mx-auto px-4 py-10">
           {/* Header de cuenta */}
           <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-[#B7D31A] rounded-full flex items-center justify-center text-[#050606] font-black text-xl">
+              <div className="w-14 h-14 bg-[#D4FF00] rounded-full flex items-center justify-center text-[#111] font-black text-xl">
                 {user.name.charAt(0).toUpperCase()}
               </div>
               <div>
                 <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">Bienvenido</p>
-                <h1 className="text-xl font-black text-[#050606]">{user.name}</h1>
+                <h1 className="text-xl font-black text-[#111]">{user.name}</h1>
                 <p className="text-sm text-gray-500">{user.email}</p>
               </div>
             </div>
             <button
               onClick={logout}
-              className="flex items-center gap-2 text-sm text-gray-500 hover:text-red-500 transition-colors border border-gray-200 px-6 lg:px-8 py-2 rounded-lg hover:border-red-200"
+              className="flex items-center gap-2 text-sm text-gray-500 hover:text-red-500 transition-colors border border-gray-200 px-4 py-2 rounded-lg hover:border-red-200"
             >
               <LogOut size={15} />
               Cerrar sesión
@@ -148,7 +149,7 @@ export default function CuentaPage() {
               <a
                 key={item.label}
                 href={item.href}
-                className="bg-white rounded-xl border border-gray-200 p-4 flex flex-col items-center gap-2 text-center hover:border-[#B7D31A] hover:shadow-sm transition-all"
+                className="bg-white rounded-xl border border-gray-200 p-4 flex flex-col items-center gap-2 text-center hover:border-[#D4FF00] hover:shadow-sm transition-all"
               >
                 <item.icon size={22} className="text-gray-600" />
                 <span className="text-xs font-semibold text-gray-700">{item.label}</span>
@@ -176,7 +177,7 @@ export default function CuentaPage() {
                 <p className="text-gray-400 text-sm mb-5">¡Empezá a comprar ahora!</p>
                 <Link
                   href="/catalogo"
-                  className="inline-flex items-center gap-2 bg-[#B7D31A] text-[#050606] px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-[#050606] hover:text-white transition-colors"
+                  className="inline-flex items-center gap-2 bg-[#D4FF00] text-[#111] px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-[#111] hover:text-white transition-colors"
                 >
                   Ver catálogo
                   <ChevronRight size={14} />
@@ -212,7 +213,7 @@ export default function CuentaPage() {
                         <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${status.color}`}>
                           {status.label}
                         </span>
-                        <span className="font-black text-sm text-[#050606]">
+                        <span className="font-black text-sm text-[#111]">
                           {formatPrice(order.total)}
                         </span>
                         <ChevronRight size={16} className="text-gray-300" />
@@ -237,7 +238,7 @@ export default function CuentaPage() {
           <button
             onClick={() => { setIsRegister(false); setApiError(''); }}
             className={`flex-1 py-3 text-sm font-bold transition-colors ${
-              !isRegister ? 'bg-[#050606] text-white' : 'bg-white text-gray-500 hover:text-gray-700'
+              !isRegister ? 'bg-[#111] text-white' : 'bg-white text-gray-500 hover:text-gray-700'
             }`}
           >
             Iniciar sesión
@@ -245,7 +246,7 @@ export default function CuentaPage() {
           <button
             onClick={() => { setIsRegister(true); setApiError(''); }}
             className={`flex-1 py-3 text-sm font-bold transition-colors ${
-              isRegister ? 'bg-[#050606] text-white' : 'bg-white text-gray-500 hover:text-gray-700'
+              isRegister ? 'bg-[#111] text-white' : 'bg-white text-gray-500 hover:text-gray-700'
             }`}
           >
             Crear cuenta
@@ -253,17 +254,12 @@ export default function CuentaPage() {
         </div>
 
         <div className="bg-white rounded-2xl border border-gray-200 p-8">
-          {/* Logo */}
+          {/* Logo oficial */}
           <div className="text-center mb-6">
-            <Link href="/" className="inline-flex items-center gap-2">
-              <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-                <circle cx="16" cy="16" r="15" fill="#B7D31A" />
-                <circle cx="16" cy="16" r="11" fill="#050606" />
-                <path d="M10 16 Q13 10 16 16 Q19 22 22 16" stroke="#B7D31A" strokeWidth="1.5" fill="none" />
-              </svg>
-              <span className="font-black text-lg text-[#050606]">HOME<span className="text-[#B7D31A]">.</span>PÁDEL</span>
+            <Link href="/" aria-label="Home Pádel — Inicio" className="inline-block">
+              <BrandLogo variant="light" size="sm" showText={true} />
             </Link>
-            <h1 className="text-xl font-black mt-3 text-[#050606]">
+            <h1 className="text-xl font-black mt-3 text-[#111]">
               {isRegister ? 'Crear cuenta' : 'Bienvenido de vuelta'}
             </h1>
             <p className="text-gray-400 text-sm mt-1">
@@ -275,7 +271,7 @@ export default function CuentaPage() {
 
           {/* Error de API */}
           {apiError && (
-            <div className="bg-red-50 border border-red-200 rounded-lg px-6 lg:px-8 py-3 mb-4">
+            <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-4">
               <p className="text-red-600 text-sm">{apiError}</p>
             </div>
           )}
@@ -335,7 +331,7 @@ export default function CuentaPage() {
               </div>
 
               <div className="flex justify-end">
-                <a href="#" className="text-xs text-gray-500 hover:text-[#050606] transition-colors">
+                <a href="#" className="text-xs text-gray-500 hover:text-[#111] transition-colors">
                   ¿Olvidaste tu contraseña?
                 </a>
               </div>
@@ -343,7 +339,7 @@ export default function CuentaPage() {
               <button
                 type="submit"
                 disabled={loginForm.formState.isSubmitting}
-                className="w-full bg-[#B7D31A] text-[#050606] py-3.5 rounded-xl font-black text-sm uppercase tracking-wider hover:bg-[#050606] hover:text-white transition-colors duration-200 disabled:opacity-70"
+                className="w-full bg-[#D4FF00] text-[#111] py-3.5 rounded-xl font-black text-sm uppercase tracking-wider hover:bg-[#111] hover:text-white transition-colors duration-200 disabled:opacity-70"
               >
                 {loginForm.formState.isSubmitting ? 'Ingresando...' : 'Iniciar sesión'}
               </button>
@@ -463,7 +459,7 @@ export default function CuentaPage() {
               <button
                 type="submit"
                 disabled={registerForm.formState.isSubmitting}
-                className="w-full bg-[#B7D31A] text-[#050606] py-3.5 rounded-xl font-black text-sm uppercase tracking-wider hover:bg-[#050606] hover:text-white transition-colors duration-200 disabled:opacity-70"
+                className="w-full bg-[#D4FF00] text-[#111] py-3.5 rounded-xl font-black text-sm uppercase tracking-wider hover:bg-[#111] hover:text-white transition-colors duration-200 disabled:opacity-70"
               >
                 {registerForm.formState.isSubmitting ? 'Creando cuenta...' : 'Crear cuenta'}
               </button>
@@ -476,7 +472,7 @@ export default function CuentaPage() {
               {isRegister ? '¿Ya tenés cuenta? ' : '¿No tenés cuenta? '}
               <button
                 onClick={() => { setIsRegister(!isRegister); setApiError(''); }}
-                className="text-[#050606] font-bold hover:text-[#B7D31A] transition-colors"
+                className="text-[#111] font-bold hover:text-[#D4FF00] transition-colors"
               >
                 {isRegister ? 'Iniciá sesión' : 'Registrate gratis'}
               </button>

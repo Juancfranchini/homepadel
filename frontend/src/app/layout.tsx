@@ -20,18 +20,30 @@ export const metadata: Metadata = {
     'zapatillas padel',
     'indumentaria padel',
     'accesorios padel',
+    'home padel',
   ],
   openGraph: {
     type: 'website',
     locale: 'es_AR',
     siteName: 'Home Pádel',
+    images: [{ url: '/logo-full.svg', width: 400, height: 180, alt: 'Home Pádel' }],
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Home Pádel',
+    description: 'Equipamiento profesional para jugadores apasionados.',
+    images: ['/logo-full.svg'],
   },
   icons: {
+    // Favicon: logo oficial (chevron + pelota)
     icon: [
       {
-        url: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="%230A0A0A"/><circle cx="16" cy="16" r="14" stroke="%23D4FF00" stroke-width="1.2" fill="none"/><path d="M6 16 Q11 9 16 16 Q21 23 26 16" stroke="%23D4FF00" stroke-width="1.2" fill="none" stroke-linecap="round"/><path d="M6 16 Q11 23 16 16 Q21 9 26 16" stroke="%23D4FF00" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg>',
+        url: '/logo-icon.svg',
+        type: 'image/svg+xml',
       },
     ],
+    shortcut: '/logo-icon.svg',
+    apple: '/logo-icon.svg',
   },
 };
 
