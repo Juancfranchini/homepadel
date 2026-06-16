@@ -9,7 +9,7 @@ interface Props {
 const FALLBACK: AboutData = {
   title: 'SOMOS HOME PADEL',
   description: 'En Home Padel somos apasionados por este deporte. Ofrecemos las mejores marcas con atencion personalizada y envios a todo el pais.',
-  image: null,
+  image: undefined,
 };
 
 const FEATURES = [
