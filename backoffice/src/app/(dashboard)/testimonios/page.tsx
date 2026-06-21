@@ -4,12 +4,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Edit2, Trash2, Eye, EyeOff, Star, ArrowRight, X, ArrowUpDown } from 'lucide-react';
+import { Plus, Edit2, Trash2, Star, ArrowRight, X, ArrowUpDown } from 'lucide-react';
 import api from '@/lib/api';
 import { Modal, ConfirmDialog } from '@/components/ui/Modal';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { useToast } from '@/components/ui/Toast';
 import SearchBar from './components/SearchBar';
+import Toggle from './components/Toggle';
 import AdvancedSearchModal, { AdvancedFilters } from './components/AdvancedSearchModal';
 import Pagination from '@/components/ui/Pagination';
 
@@ -192,7 +193,6 @@ export default function TestimoniosPage() {
         </div>
         <div className="flex items-center gap-2">
           <SearchBar value={search} onChange={setSearch} onAdvancedSearch={() => setAdvancedOpen(true)} hasAdvancedFilters={advancedFilters !== null} onClearFilters={() => { setAdvancedFilters(null); setAdvancedOpen(false); }} />
-
           <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] transition-colors">
             <Plus className="w-4 h-4" />Nuevo testimonio
           </button>
@@ -238,14 +238,12 @@ export default function TestimoniosPage() {
                     <div className="flex justify-center"><StarRating rating={t.rating} /></div>
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <button
-                      onClick={() => toggleActive(t)}
-                      className={'inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg transition-colors ' +
-                        (t.active ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-50 text-red-500 hover:bg-red-100')}
-                    >
-                      {t.active ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-                      {t.active ? 'Activo' : 'Inactivo'}
-                    </button>
+                    <div className="flex items-center justify-center gap-2">
+                      <Toggle checked={t.active} onChange={() => toggleActive(t)} />
+                      <span className={'text-xs font-medium ' + (t.active ? 'text-green-600' : 'text-gray-400')}>
+                        {t.active ? 'Activo' : 'Inactivo'}
+                      </span>
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-center gap-1">
