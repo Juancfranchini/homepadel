@@ -16,6 +16,23 @@ export class TestimonialsService {
 
   create(dto: any) { return this.prisma.testimonial.create({ data: normalizeDto(dto) }); }
 
+  createPublic(dto: any) {
+    return this.prisma.testimonial.create({
+      data: {
+        name: dto.name,
+        comment: dto.comment,
+        rating: dto.rating || 5,
+        active: false,
+      },
+    });
+  }
+
+  async approve(id: string) {
+    const item = await this.prisma.testimonial.findUnique({ where: { id } });
+    if (!item) throw new NotFoundException('Testimonio no encontrado');
+    return this.prisma.testimonial.update({ where: { id }, data: { active: true } });
+  }
+
   async update(id: string, dto: any) {
     const item = await this.prisma.testimonial.findUnique({ where: { id } });
     if (!item) throw new NotFoundException('Testimonio no encontrado');
