@@ -247,14 +247,14 @@ export default function TestimoniosPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-center gap-1">
-                      <button onClick={() => setDetailItem(t)} className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors" title="Ver detalle">
-                        <ArrowRight className="w-4 h-4" />
-                      </button>
                       <button onClick={() => openEdit(t)} className="p-1.5 rounded-lg text-[#C8FF00] hover:bg-[#C8FF00]/10 transition-colors" title="Editar">
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button onClick={() => setDeleteTarget(t)} className="p-1.5 rounded-lg text-red-400 hover:bg-red-400/10 transition-colors" title="Eliminar">
                         <Trash2 className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => setDetailItem(t)} className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors" title="Ver detalle">
+                        <ArrowRight className="w-4 h-4" />
                       </button>
                     </div>
                   </td>
@@ -283,7 +283,7 @@ export default function TestimoniosPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Puntuacion</label>
               <select {...register('rating')} className={inputClass}>
-                {[5,4,3,2,1].map(r => (<option key={r} value={r}>{r} estrella{r>1?'s':''}</option>))}
+                {[5, 4, 3, 2, 1].map(r => (<option key={r} value={r}>{r} estrella{r > 1 ? 's' : ''}</option>))}
               </select>
             </div>
             <div>
@@ -321,7 +321,7 @@ export default function TestimoniosPage() {
                 <img src={detailItem.photo} alt={detailItem.name} className="w-12 h-12 rounded-full object-cover border-2 border-[#C8FF00]/30" />
               ) : (
                 <div className="w-12 h-12 rounded-full bg-[#C8FF00]/10 border-2 border-[#C8FF00]/30 flex items-center justify-center">
-                  <span className="text-[#C8FF00] font-bold text-sm">{detailItem.name.slice(0,2).toUpperCase()}</span>
+                  <span className="text-[#C8FF00] font-bold text-sm">{detailItem.name.slice(0, 2).toUpperCase()}</span>
                 </div>
               )}
               <div>
