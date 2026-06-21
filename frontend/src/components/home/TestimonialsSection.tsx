@@ -1,6 +1,10 @@
+'use client';
+
+import { useState } from 'react';
+import { Star, MessageSquare } from 'lucide-react';
 import { Testimonial } from '@/types';
 import { getImageUrl } from '@/lib/utils';
-import { Star } from 'lucide-react';
+import ReviewForm from './ReviewForm';
 
 interface Props {
   testimonials: Testimonial[];
@@ -13,6 +17,7 @@ const PLACEHOLDER: Testimonial[] = [
 ];
 
 export default function TestimonialsSection({ testimonials }: Props) {
+  const [showForm, setShowForm] = useState(false);
   const items = testimonials && testimonials.length > 0 ? testimonials : PLACEHOLDER;
 
   return (
@@ -29,10 +34,8 @@ export default function TestimonialsSection({ testimonials }: Props) {
           {items.slice(0, 3).map((t) => {
             const photoUrl = t.photo ? getImageUrl(t.photo) : null;
             const initials = t.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-
             return (
               <div key={t.id} className="bg-[#141A1D] rounded-2xl p-6 flex flex-col gap-4 border border-[#0D0F0F]">
-                {/* Fila 1: Foto + Nombre */}
                 <div className="flex items-center gap-3">
                   {photoUrl ? (
                     <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border-2 border-[#B7D31A]/30">
@@ -45,27 +48,36 @@ export default function TestimonialsSection({ testimonials }: Props) {
                   )}
                   <p className="text-[#F7F6F7] font-semibold text-sm">{t.name}</p>
                 </div>
-
-                {/* Fila 2: Comentario */}
                 <p className="text-[#C7C7C0] text-sm leading-relaxed italic flex-1">
-                  &quot;{t.comment}&quot;
+                  {t.comment}
                 </p>
-
-                {/* Fila 3: Valoracion abajo a la derecha */}
                 <div className="flex justify-end gap-0.5">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      size={14}
-                      fill={i < (t.rating || 5) ? "#B7D31A" : "none"}
-                      stroke={i < (t.rating || 5) ? "#B7D31A" : "#8A8A85"}
-                    />
+                    <Star key={i} size={14} fill={i < (t.rating || 5) ? '#B7D31A' : 'none'} stroke={i < (t.rating || 5) ? '#B7D31A' : '#8A8A85'} />
                   ))}
                 </div>
               </div>
             );
           })}
         </div>
+
+        {!showForm && (
+          <div className="mt-10 text-center">
+            <button
+              onClick={() => setShowForm(true)}
+              className="inline-flex items-center gap-2 px-12 py-4 bg-[#B7D31A] text-[#050606] rounded-xl font-semibold text-sm uppercase tracking-wider btn-primary-glow transition-all"
+            >
+              <MessageSquare className="w-5 h-5" />
+              Deja tu resena
+            </button>
+          </div>
+        )}
+
+        {showForm && (
+          <div className="mt-10 max-w-lg mx-auto">
+            <ReviewForm onClose={() => setShowForm(false)} />
+          </div>
+        )}
       </div>
     </section>
   );
