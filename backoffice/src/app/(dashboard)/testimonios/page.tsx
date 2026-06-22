@@ -282,7 +282,7 @@ export default function TestimoniosPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Puntuacion</label>
-              <select {...register('rating')} className={inputClass}>
+              <select {...register('rating')} className={inputClass + ' pr-10'}>
                 {[5, 4, 3, 2, 1].map(r => (<option key={r} value={r}>{r} estrella{r > 1 ? 's' : ''}</option>))}
               </select>
             </div>

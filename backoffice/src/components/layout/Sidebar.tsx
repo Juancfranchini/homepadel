@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import {usePathname } from 'next/navigation';
 import {
+  HelpCircle,
   LayoutDashboard,
   Package,
   Tags,
@@ -63,6 +64,7 @@ const navGroups: NavGroup[] = [
       { label: 'Hero Slider', href: '/hero', icon: PlaySquare },
       { label: 'Beneficios', href: '/beneficios', icon: Sparkles },
       { label: 'Testimonios', href: '/testimonios', icon: MessageSquare },
+      { label: 'FAQ', href: '/faq', icon: HelpCircle },
       { label: 'Sobre Nosotros', href: '/configuracion/about', icon: Info },
       { label: 'Instagram', href: '/configuracion/instagram', icon: Instagram },
       { label: 'Mensaje Final', href: '/configuracion/mensaje-final', icon: Megaphone },

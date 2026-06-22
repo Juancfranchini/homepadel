@@ -204,6 +204,7 @@ model SiteSection {
 }
 
 model FAQ {
+    category  String   @default("General")
   id        String   @id @default(cuid())
   question  String
   answer    String
