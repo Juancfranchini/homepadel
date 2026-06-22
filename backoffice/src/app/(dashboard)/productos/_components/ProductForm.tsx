@@ -1,8 +1,8 @@
 'use client';
 
-// ProductForm — formulario completo de creación/edición de producto
-// Cubre todos los campos del spec: info básica, precios, stock, imágenes,
-// rendimiento (6 barras), características dinámicas, video y SEO.
+// ProductForm â€” formulario completo de creaciÃ³n/ediciÃ³n de producto
+// Cubre todos los campos del spec: info bÃ¡sica, precios, stock, imÃ¡genes,
+// rendimiento (6 barras), caracterÃ­sticas dinÃ¡micas, video y SEO.
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -17,7 +17,7 @@ import {
 import api from '@/lib/api';
 import { useToast } from '@/components/ui/Toast';
 
-// ─── Schema ───────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Schema â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const perfStatSchema = z.object({
   label: z.string().min(1),
@@ -25,41 +25,41 @@ const perfStatSchema = z.object({
 });
 
 const featureSchema = z.object({
-  icon:     z.string().optional(),
-  title:    z.string().min(1),
+  icon: z.string().optional(),
+  title: z.string().min(1),
   subtitle: z.string().min(1),
 });
 
 const schema = z.object({
-  // Básico
-  name:        z.string().min(2, 'Nombre requerido (mín. 2 caracteres)'),
+  // BÃ¡sico
+  name: z.string().min(2, 'Nombre requerido (mÃ­n. 2 caracteres)'),
   description: z.string().optional(),
-  sku:         z.string().min(1, 'SKU requerido'),
-  categoryId:  z.string().min(1, 'Seleccioná una categoría'),
-  brandId:     z.string().min(1, 'Seleccioná una marca'),
-  featured:    z.boolean().default(false),
-  isNew:       z.boolean().default(false),
-  isOffer:     z.boolean().default(false),
-  active:      z.boolean().default(true),
+  sku: z.string().min(1, 'SKU requerido'),
+  categoryId: z.string().min(1, 'SeleccionÃ¡ una categorÃ­a'),
+  brandId: z.string().min(1, 'SeleccionÃ¡ una marca'),
+  featured: z.boolean().default(false),
+  isNew: z.boolean().default(false),
+  isOffer: z.boolean().default(false),
+  active: z.boolean().default(true),
 
   // Precios
-  price:         z.coerce.number().min(0, 'Precio requerido'),
-  salePrice:     z.coerce.number().min(0).optional(),
+  price: z.coerce.number().min(0, 'Precio requerido'),
+  salePrice: z.coerce.number().min(0).optional(),
   transferPrice: z.coerce.number().min(0).optional(),
 
   // Stock
   stock: z.coerce.number().int().min(0),
 
-  // Imágenes (URLs)
-  images: z.array(z.string().url('URL de imagen inválida')).optional(),
+  // ImÃ¡genes (URLs)
+  images: z.array(z.string().url('URL de imagen invÃ¡lida')).optional(),
 
   // Rendimiento (performance stats)
   performanceStats: z.array(perfStatSchema).optional(),
 
-  // Características
+  // CaracterÃ­sticas
   features: z.array(featureSchema).optional(),
 
-  // DESTACADOS — bullets por producto
+  // DESTACADOS â€” bullets por producto
   highlights: z.array(z.string().min(1)).optional(),
 
   // Medios de pago habilitados
@@ -71,23 +71,23 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-// ─── Defaults ─────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Defaults â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const DEFAULT_PERF: z.infer<typeof perfStatSchema>[] = [
-  { label: 'Control',       value: 85 },
-  { label: 'Potencia',      value: 75 },
-  { label: 'Salida de bola',value: 80 },
+  { label: 'Control', value: 85 },
+  { label: 'Potencia', value: 75 },
+  { label: 'Salida de bola', value: 80 },
   { label: 'Manejabilidad', value: 82 },
-  { label: 'Dureza',        value: 70 },
-  { label: 'Jugabilidad',   value: 88 },
+  { label: 'Dureza', value: 70 },
+  { label: 'Jugabilidad', value: 88 },
 ];
 
 const DEFAULT_FEATURES: z.infer<typeof featureSchema>[] = [
-  { icon: '⚡', title: 'Material', subtitle: 'Carbono 18K' },
-  { icon: '🎯', title: 'Forma',    subtitle: 'Redonda' },
+  { icon: 'âš¡', title: 'Material', subtitle: 'Carbono 18K' },
+  { icon: 'ðŸŽ¯', title: 'Forma', subtitle: 'Redonda' },
 ];
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function SectionCard({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
   return (
@@ -118,36 +118,36 @@ function ErrorMsg({ msg }: { msg?: string }) {
   return <p className="text-xs text-red-600 mt-1">{msg}</p>;
 }
 
-// ─── Catálogo de medios de pago ───────────────────────────────────────────────
+// â”€â”€â”€ CatÃ¡logo de medios de pago â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 interface PaymentMethodDef { label: string; group: 'credit' | 'debit' | 'transfer' | 'wallet'; color: string }
 
 const PAYMENT_CATALOG: Record<string, PaymentMethodDef> = {
-  visa:         { label: 'Visa',            group: 'credit',   color: 'bg-blue-100 text-blue-800' },
-  mastercard:   { label: 'Mastercard',      group: 'credit',   color: 'bg-orange-100 text-orange-800' },
-  amex:         { label: 'Amex',            group: 'credit',   color: 'bg-blue-100 text-blue-900' },
-  naranja_x:    { label: 'Naranja X',       group: 'credit',   color: 'bg-orange-100 text-orange-700' },
-  nativa:       { label: 'Nativa',          group: 'credit',   color: 'bg-yellow-100 text-yellow-800' },
-  cabal:        { label: 'Cabal',           group: 'credit',   color: 'bg-red-100 text-red-800' },
-  argencard:    { label: 'Argencard',       group: 'credit',   color: 'bg-green-100 text-green-800' },
-  visa_deb:     { label: 'Visa Débito',     group: 'debit',    color: 'bg-blue-50 text-blue-700' },
-  mc_deb:       { label: 'MC Débito',       group: 'debit',    color: 'bg-orange-50 text-orange-700' },
-  cabal_deb:    { label: 'Cabal Débito',    group: 'debit',    color: 'bg-red-50 text-red-700' },
-  transferencia:{ label: 'Transferencia',   group: 'transfer', color: 'bg-green-100 text-green-900' },
-  banelco:      { label: 'Banelco',         group: 'transfer', color: 'bg-green-100 text-green-800' },
-  link:         { label: 'Link Pagos',      group: 'transfer', color: 'bg-emerald-100 text-emerald-800' },
-  mercadopago:  { label: 'Mercado Pago',    group: 'wallet',   color: 'bg-sky-100 text-sky-800' },
-  cuenta_dni:   { label: 'Cuenta DNI',      group: 'wallet',   color: 'bg-slate-100 text-slate-800' },
+  visa: { label: 'Visa', group: 'credit', color: 'bg-blue-100 text-blue-800' },
+  mastercard: { label: 'Mastercard', group: 'credit', color: 'bg-orange-100 text-orange-800' },
+  amex: { label: 'Amex', group: 'credit', color: 'bg-blue-100 text-blue-900' },
+  naranja_x: { label: 'Naranja X', group: 'credit', color: 'bg-orange-100 text-orange-700' },
+  nativa: { label: 'Nativa', group: 'credit', color: 'bg-yellow-100 text-yellow-800' },
+  cabal: { label: 'Cabal', group: 'credit', color: 'bg-red-100 text-red-800' },
+  argencard: { label: 'Argencard', group: 'credit', color: 'bg-green-100 text-green-800' },
+  visa_deb: { label: 'Visa DÃ©bito', group: 'debit', color: 'bg-blue-50 text-blue-700' },
+  mc_deb: { label: 'MC DÃ©bito', group: 'debit', color: 'bg-orange-50 text-orange-700' },
+  cabal_deb: { label: 'Cabal DÃ©bito', group: 'debit', color: 'bg-red-50 text-red-700' },
+  transferencia: { label: 'Transferencia', group: 'transfer', color: 'bg-green-100 text-green-900' },
+  banelco: { label: 'Banelco', group: 'transfer', color: 'bg-green-100 text-green-800' },
+  link: { label: 'Link Pagos', group: 'transfer', color: 'bg-emerald-100 text-emerald-800' },
+  mercadopago: { label: 'Mercado Pago', group: 'wallet', color: 'bg-sky-100 text-sky-800' },
+  cuenta_dni: { label: 'Cuenta DNI', group: 'wallet', color: 'bg-slate-100 text-slate-800' },
 };
 
-const PAYMENT_GROUPS: { key: 'credit'|'debit'|'transfer'|'wallet'; label: string }[] = [
-  { key: 'credit',   label: 'Tarjetas de crédito' },
-  { key: 'debit',    label: 'Tarjetas de débito' },
-  { key: 'transfer', label: 'Transferencia / depósito' },
-  { key: 'wallet',   label: 'Billetera virtual' },
+const PAYMENT_GROUPS: { key: 'credit' | 'debit' | 'transfer' | 'wallet'; label: string }[] = [
+  { key: 'credit', label: 'Tarjetas de crÃ©dito' },
+  { key: 'debit', label: 'Tarjetas de dÃ©bito' },
+  { key: 'transfer', label: 'Transferencia / depÃ³sito' },
+  { key: 'wallet', label: 'Billetera virtual' },
 ];
 
-// ─── Props ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Props â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 interface Props {
   mode: 'create' | 'edit';
@@ -155,19 +155,19 @@ interface Props {
 }
 
 interface Category { id: string; name: string }
-interface Brand    { id: string; name: string }
+interface Brand { id: string; name: string }
 
-// ─── Main component ───────────────────────────────────────────────────────────
+// â”€â”€â”€ Main component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function ProductForm({ mode, productId }: Props) {
   const { toast } = useToast();
-  const router    = useRouter();
-  const [categories,    setCategories]    = useState<Category[]>([]);
-  const [brands,        setBrands]        = useState<Brand[]>([]);
-  const [loading,       setLoading]       = useState(mode === 'edit');
-  const [saving,        setSaving]        = useState(false);
-  const [newImageUrl,   setNewImageUrl]   = useState('');
-  const [newHighlight,  setNewHighlight]  = useState('');
+  const router = useRouter();
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [loading, setLoading] = useState(mode === 'edit');
+  const [saving, setSaving] = useState(false);
+  const [newImageUrl, setNewImageUrl] = useState('');
+  const [newHighlight, setNewHighlight] = useState('');
 
   const {
     register,
@@ -180,25 +180,25 @@ export default function ProductForm({ mode, productId }: Props) {
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      active:           true,
-      featured:         false,
-      isNew:            false,
-      isOffer:          false,
-      stock:            0,
-      price:            0,
-      images:           [],
-      performanceStats: [],   // vacío: el admin rellena solo si quiere mostrar barras
-      features:         [],   // vacío: el admin rellena solo si quiere mostrar características
+      active: true,
+      featured: false,
+      isNew: false,
+      isOffer: false,
+      stock: 0,
+      price: 0,
+      images: [],
+      performanceStats: [],   // vacÃ­o: el admin rellena solo si quiere mostrar barras
+      features: [],   // vacÃ­o: el admin rellena solo si quiere mostrar caracterÃ­sticas
     },
   });
 
-  const perfArray     = useFieldArray({ control, name: 'performanceStats' });
+  const perfArray = useFieldArray({ control, name: 'performanceStats' });
   const featuresArray = useFieldArray({ control, name: 'features' });
-  const imagesWatch       = watch('images')        ?? [];
-  const highlightsWatch   = watch('highlights')    ?? [];
-  const paymentWatch      = watch('paymentMethods') ?? [];
+  const imagesWatch = watch('images') ?? [];
+  const highlightsWatch = watch('highlights') ?? [];
+  const paymentWatch = watch('paymentMethods') ?? [];
 
-  // ── Load catalogs ──────────────────────────────────────────────────────────
+  // â”€â”€ Load catalogs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const loadCatalogs = useCallback(async () => {
     try {
       const [cRes, bRes] = await Promise.all([
@@ -215,7 +215,7 @@ export default function ProductForm({ mode, productId }: Props) {
     }
   }, []);
 
-  // ── Load product for edit ──────────────────────────────────────────────────
+  // â”€â”€ Load product for edit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const loadProduct = useCallback(async () => {
     if (mode !== 'edit' || !productId) return;
     setLoading(true);
@@ -223,25 +223,25 @@ export default function ProductForm({ mode, productId }: Props) {
       const res = await api.get(`/products/${productId}`);
       const p = res.data;
       reset({
-        name:             p.name,
-        description:      p.description ?? '',
-        sku:              p.sku,
-        categoryId:       p.category?.id ?? p.categoryId ?? '',
-        brandId:          p.brand?.id    ?? p.brandId    ?? '',
-        featured:         p.featured     ?? false,
-        isNew:            p.isNew        ?? false,
-        isOffer:          p.isOffer      ?? false,
-        active:           p.active       ?? true,
-        price:          p.price          ?? 0,
-        salePrice:      p.salePrice      ?? undefined,
-        transferPrice:  p.transferPrice  ?? undefined,
-        stock:          p.stock          ?? 0,
-        images:           Array.isArray(p.images)          ? p.images          : [],
+        name: p.name,
+        description: p.description ?? '',
+        sku: p.sku,
+        categoryId: p.category?.id ?? p.categoryId ?? '',
+        brandId: p.brand?.id ?? p.brandId ?? '',
+        featured: p.featured ?? false,
+        isNew: p.isNew ?? false,
+        isOffer: p.isOffer ?? false,
+        active: p.active ?? true,
+        price: p.price ?? 0,
+        salePrice: p.salePrice ?? undefined,
+        transferPrice: p.transferPrice ?? undefined,
+        stock: p.stock ?? 0,
+        images: Array.isArray(p.images) ? p.images : [],
         performanceStats: Array.isArray(p.performanceStats) ? p.performanceStats : [],
-        features:         Array.isArray(p.features)         ? p.features         : [],
-        highlights:       Array.isArray(p.highlights)       ? p.highlights       : [],
-        paymentMethods:   Array.isArray(p.paymentMethods)   ? p.paymentMethods   : [],
-        videoUrl:         p.videoUrl ?? '',
+        features: Array.isArray(p.features) ? p.features : [],
+        highlights: Array.isArray(p.highlights) ? p.highlights : [],
+        paymentMethods: Array.isArray(p.paymentMethods) ? p.paymentMethods : [],
+        videoUrl: p.videoUrl ?? '',
       });
     } catch {
       toast('Error al cargar el producto', 'error');
@@ -256,7 +256,7 @@ export default function ProductForm({ mode, productId }: Props) {
     loadProduct();
   }, [loadCatalogs, loadProduct]);
 
-  // ── Image helpers ──────────────────────────────────────────────────────────
+  // â”€â”€ Image helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const addImage = () => {
     const url = newImageUrl.trim();
     if (!url) return;
@@ -268,20 +268,20 @@ export default function ProductForm({ mode, productId }: Props) {
     setValue('images', imagesWatch.filter((_, i) => i !== idx));
   };
 
-  // ── Submit ─────────────────────────────────────────────────────────────────
+  // â”€â”€ Submit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const onSubmit = async (data: FormValues) => {
     setSaving(true);
     try {
       const payload: Record<string, unknown> = {
         ...data,
-        salePrice:     data.salePrice     && data.salePrice     > 0 ? data.salePrice     : undefined,
+        salePrice: data.salePrice && data.salePrice > 0 ? data.salePrice : undefined,
         transferPrice: data.transferPrice && data.transferPrice > 0 ? data.transferPrice : undefined,
-        videoUrl:  data.videoUrl?.trim() || undefined,
-        images:           data.images           ?? [],
-        performanceStats: data.performanceStats  ?? [],
-        features:         data.features          ?? [],
-        highlights:       data.highlights        ?? [],
-        paymentMethods:   data.paymentMethods    ?? [],
+        videoUrl: data.videoUrl?.trim() || undefined,
+        images: data.images ?? [],
+        performanceStats: data.performanceStats ?? [],
+        features: data.features ?? [],
+        highlights: data.highlights ?? [],
+        paymentMethods: data.paymentMethods ?? [],
       };
 
       if (mode === 'create') {
@@ -295,7 +295,7 @@ export default function ProductForm({ mode, productId }: Props) {
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string | string[] } } };
       const raw = axiosErr.response?.data?.message ?? 'Error al guardar el producto';
-      const msg = Array.isArray(raw) ? raw.join(' · ') : String(raw);
+      const msg = Array.isArray(raw) ? raw.join(' Â· ') : String(raw);
       toast(msg, 'error');
     } finally {
       setSaving(false);
@@ -312,7 +312,7 @@ export default function ProductForm({ mode, productId }: Props) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      {/* ── Top bar ─────────────────────────────────────────────────────── */}
+      {/* â”€â”€ Top bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <button
@@ -327,7 +327,7 @@ export default function ProductForm({ mode, productId }: Props) {
               {mode === 'create' ? 'Nuevo producto' : 'Editar producto'}
             </h1>
             <p className="text-sm text-gray-500 mt-0.5">
-              {mode === 'create' ? 'Completá los datos del nuevo producto' : 'Modificá los datos del producto'}
+              {mode === 'create' ? 'CompletÃ¡ los datos del nuevo producto' : 'ModificÃ¡ los datos del producto'}
             </p>
           </div>
         </div>
@@ -348,11 +348,11 @@ export default function ProductForm({ mode, productId }: Props) {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
-        {/* ── LEFT COLUMN (2/3) ────────────────────────────────────────── */}
+        {/* â”€â”€ LEFT COLUMN (2/3) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <div className="xl:col-span-2 space-y-6">
 
-          {/* Información básica */}
-          <SectionCard icon={<Package className="w-4 h-4" />} title="Información básica">
+          {/* InformaciÃ³n bÃ¡sica */}
+          <SectionCard icon={<Package className="w-4 h-4" />} title="InformaciÃ³n bÃ¡sica">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="sm:col-span-2">
                 <Label required>Nombre</Label>
@@ -364,7 +364,7 @@ export default function ProductForm({ mode, productId }: Props) {
                 <Label required>SKU</Label>
                 <input {...register('sku')} className="input-field" placeholder="NOX-AT10-18K" />
                 <ErrorMsg msg={errors.sku?.message} />
-                <p className="text-xs text-gray-400 mt-1">Identificador único del producto</p>
+                <p className="text-xs text-gray-400 mt-1">Identificador Ãºnico del producto</p>
               </div>
 
               <div>
@@ -373,9 +373,9 @@ export default function ProductForm({ mode, productId }: Props) {
               </div>
 
               <div>
-                <Label required>Categoría</Label>
-                <select {...register('categoryId')} className="input-field">
-                  <option value="">Seleccionar categoría</option>
+                <Label required>CategorÃ­a</Label>
+                <select {...register('categoryId')} className="input-field pr-10">
+                  <option value="">Seleccionar categorÃ­a</option>
                   {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
                 <ErrorMsg msg={errors.categoryId?.message} />
@@ -383,7 +383,7 @@ export default function ProductForm({ mode, productId }: Props) {
 
               <div>
                 <Label required>Marca</Label>
-                <select {...register('brandId')} className="input-field">
+                <select {...register('brandId')} className="input-field pr-10">
                   <option value="">Seleccionar marca</option>
                   {brands.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
                 </select>
@@ -391,12 +391,12 @@ export default function ProductForm({ mode, productId }: Props) {
               </div>
 
               <div className="sm:col-span-2">
-                <Label>Descripción</Label>
+                <Label>DescripciÃ³n</Label>
                 <textarea
                   {...register('description')}
                   rows={4}
                   className="input-field resize-none"
-                  placeholder="Descripción detallada del producto..."
+                  placeholder="DescripciÃ³n detallada del producto..."
                 />
               </div>
             </div>
@@ -422,15 +422,15 @@ export default function ProductForm({ mode, productId }: Props) {
               </div>
               <div className="flex items-end">
                 <div className="bg-gray-50 rounded-lg p-3 w-full text-xs text-gray-600">
-                  📦 <strong>9 cuotas sin interés</strong> = precio activo ÷ 9<br/>
-                  <span className="text-gray-400">(calculado automáticamente)</span>
+                  ðŸ“¦ <strong>9 cuotas sin interÃ©s</strong> = precio activo Ã· 9<br />
+                  <span className="text-gray-400">(calculado automÃ¡ticamente)</span>
                 </div>
               </div>
             </div>
           </SectionCard>
 
-          {/* Imágenes */}
-          <SectionCard icon={<ImageIcon className="w-4 h-4" />} title="Imágenes del producto">
+          {/* ImÃ¡genes */}
+          <SectionCard icon={<ImageIcon className="w-4 h-4" />} title="ImÃ¡genes del producto">
             <div>
               <Label>Agregar imagen por URL</Label>
               <div className="flex gap-2">
@@ -450,7 +450,7 @@ export default function ProductForm({ mode, productId }: Props) {
                   <Plus className="w-4 h-4" />
                 </button>
               </div>
-              <p className="text-xs text-gray-400 mt-1">Presioná Enter o el botón + para agregar. La primera imagen es la principal.</p>
+              <p className="text-xs text-gray-400 mt-1">PresionÃ¡ Enter o el botÃ³n + para agregar. La primera imagen es la principal.</p>
             </div>
 
             {imagesWatch.length > 0 ? (
@@ -462,7 +462,7 @@ export default function ProductForm({ mode, productId }: Props) {
                       src={url}
                       alt={`imagen ${idx + 1}`}
                       className="w-full h-full object-cover"
-                      onError={(e) => { (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23f3f4f6" width="100" height="100"/><text y="55" x="50" font-size="30" text-anchor="middle">🖼️</text></svg>'; }}
+                      onError={(e) => { (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23f3f4f6" width="100" height="100"/><text y="55" x="50" font-size="30" text-anchor="middle">ðŸ–¼ï¸</text></svg>'; }}
                     />
                     {idx === 0 && (
                       <span className="absolute top-1 left-1 bg-[#C8FF00] text-[#0f172a] text-[9px] font-black px-1.5 py-0.5 rounded uppercase">Principal</span>
@@ -480,13 +480,13 @@ export default function ProductForm({ mode, productId }: Props) {
             ) : (
               <div className="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center text-gray-400">
                 <ImageIcon className="w-8 h-8 mx-auto mb-2 opacity-40" />
-                <p className="text-sm">Sin imágenes todavía. Pegá una URL arriba para agregar.</p>
+                <p className="text-sm">Sin imÃ¡genes todavÃ­a. PegÃ¡ una URL arriba para agregar.</p>
               </div>
             )}
           </SectionCard>
 
           {/* Rendimiento */}
-          <SectionCard icon={<BarChart2 className="w-4 h-4" />} title="Estadísticas de rendimiento">
+          <SectionCard icon={<BarChart2 className="w-4 h-4" />} title="EstadÃ­sticas de rendimiento">
             <p className="text-xs text-gray-500 -mt-2 mb-2">Valores del 0 al 100. Se muestran como barras de progreso en el detalle del producto.</p>
             <div className="space-y-3">
               {perfArray.fields.map((field, idx) => (
@@ -526,30 +526,30 @@ export default function ProductForm({ mode, productId }: Props) {
               onClick={() => perfArray.append({ label: '', value: 75 })}
               className="flex items-center gap-1.5 text-sm text-[#0f172a] hover:text-gray-600 font-medium mt-1"
             >
-              <Plus className="w-4 h-4" /> Agregar estadística
+              <Plus className="w-4 h-4" /> Agregar estadÃ­stica
             </button>
           </SectionCard>
 
-          {/* Características */}
-          <SectionCard icon={<Zap className="w-4 h-4" />} title="Características destacadas">
-            <p className="text-xs text-gray-500 -mt-2 mb-2">Cards de características técnicas que se muestran debajo de las barras de rendimiento.</p>
+          {/* CaracterÃ­sticas */}
+          <SectionCard icon={<Zap className="w-4 h-4" />} title="CaracterÃ­sticas destacadas">
+            <p className="text-xs text-gray-500 -mt-2 mb-2">Cards de caracterÃ­sticas tÃ©cnicas que se muestran debajo de las barras de rendimiento.</p>
             <div className="space-y-3">
               {featuresArray.fields.map((field, idx) => (
                 <div key={field.id} className="grid grid-cols-[auto_1fr_1fr_auto] gap-2 items-start bg-gray-50 p-3 rounded-lg">
                   <input
                     {...register(`features.${idx}.icon`)}
                     className="w-10 h-9 border border-gray-200 rounded-lg text-center text-base bg-white"
-                    placeholder="⚡"
+                    placeholder="âš¡"
                   />
                   <input
                     {...register(`features.${idx}.title`)}
                     className="input-field text-sm"
-                    placeholder="Título (ej: Carbono 18K)"
+                    placeholder="TÃ­tulo (ej: Carbono 18K)"
                   />
                   <input
                     {...register(`features.${idx}.subtitle`)}
                     className="input-field text-sm"
-                    placeholder="Subtítulo (ej: Alta resistencia)"
+                    placeholder="SubtÃ­tulo (ej: Alta resistencia)"
                   />
                   <button
                     type="button"
@@ -566,7 +566,7 @@ export default function ProductForm({ mode, productId }: Props) {
               onClick={() => featuresArray.append({ icon: '', title: '', subtitle: '' })}
               className="flex items-center gap-1.5 text-sm text-[#0f172a] hover:text-gray-600 font-medium mt-1"
             >
-              <Plus className="w-4 h-4" /> Agregar característica
+              <Plus className="w-4 h-4" /> Agregar caracterÃ­stica
             </button>
           </SectionCard>
 
@@ -579,7 +579,7 @@ export default function ProductForm({ mode, productId }: Props) {
                 className="input-field"
                 placeholder="https://youtube.com/watch?v=..."
               />
-              <p className="text-xs text-gray-400 mt-1">Si tiene video se muestra en el detalle del producto. Dejar vacío para ocultar.</p>
+              <p className="text-xs text-gray-400 mt-1">Si tiene video se muestra en el detalle del producto. Dejar vacÃ­o para ocultar.</p>
             </div>
             {watch('videoUrl') && (
               <div className="mt-2 p-3 bg-gray-50 rounded-lg text-xs text-gray-600 flex items-center gap-2">
@@ -592,7 +592,7 @@ export default function ProductForm({ mode, productId }: Props) {
           {/* DESTACADOS */}
           <SectionCard icon={<List className="w-4 h-4" />} title="Destacados del producto">
             <p className="text-xs text-gray-500 -mt-2 mb-2">
-              Bullets que aparecen en la sección &quot;DESTACADOS&quot; del detalle del producto. Cada producto puede tener los suyos.
+              Bullets que aparecen en la secciÃ³n &quot;DESTACADOS&quot; del detalle del producto. Cada producto puede tener los suyos.
             </p>
             <div className="space-y-2">
               {highlightsWatch.map((item, idx) => (
@@ -605,7 +605,7 @@ export default function ProductForm({ mode, productId }: Props) {
                       setValue('highlights', updated);
                     }}
                     className="input-field flex-1 text-sm"
-                    placeholder="Ej: Producto original con garantía oficial"
+                    placeholder="Ej: Producto original con garantÃ­a oficial"
                   />
                   <button
                     type="button"
@@ -632,7 +632,7 @@ export default function ProductForm({ mode, productId }: Props) {
                   }
                 }}
                 className="input-field flex-1 text-sm"
-                placeholder="Escribí un destacado y presioná Enter o +"
+                placeholder="EscribÃ­ un destacado y presionÃ¡ Enter o +"
               />
               <button
                 type="button"
@@ -652,7 +652,7 @@ export default function ProductForm({ mode, productId }: Props) {
           {/* Medios de pago */}
           <SectionCard icon={<CreditCard className="w-4 h-4" />} title="Medios de pago habilitados">
             <p className="text-xs text-gray-500 -mt-2 mb-3">
-              Seleccioná los medios de pago disponibles para este producto. Se muestran en el botón &quot;Ver más detalles&quot; de la página del producto.
+              SeleccionÃ¡ los medios de pago disponibles para este producto. Se muestran en el botÃ³n &quot;Ver mÃ¡s detalles&quot; de la pÃ¡gina del producto.
             </p>
             {PAYMENT_GROUPS.map((group) => {
               const methods = Object.entries(PAYMENT_CATALOG).filter(([, def]) => def.group === group.key);
@@ -672,11 +672,10 @@ export default function ProductForm({ mode, productId }: Props) {
                               : [...paymentWatch, key];
                             setValue('paymentMethods', updated);
                           }}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
-                            checked
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${checked
                               ? `${def.color} border-current ring-2 ring-offset-1 ring-current/30`
                               : 'bg-gray-50 text-gray-500 border-gray-200 hover:border-gray-300'
-                          }`}
+                            }`}
                         >
                           {def.label}
                         </button>
@@ -688,14 +687,14 @@ export default function ProductForm({ mode, productId }: Props) {
             })}
             {paymentWatch.length === 0 && (
               <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mt-1">
-                Sin medios de pago configurados — el botón &quot;Ver más detalles&quot; no se mostrará en el frontend.
+                Sin medios de pago configurados â€” el botÃ³n &quot;Ver mÃ¡s detalles&quot; no se mostrarÃ¡ en el frontend.
               </p>
             )}
           </SectionCard>
 
         </div>
 
-        {/* ── RIGHT COLUMN (1/3) ───────────────────────────────────────── */}
+        {/* â”€â”€ RIGHT COLUMN (1/3) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <div className="space-y-6">
 
           {/* Estado y visibilidad */}
@@ -727,8 +726,8 @@ export default function ProductForm({ mode, productId }: Props) {
             <div className="space-y-2 pt-1">
               <p className="text-sm font-medium text-gray-700 mb-2">Etiquetas</p>
               <div className="flex items-center gap-3">
-                <input type="checkbox" id="isNew"   {...register('isNew')}   className="w-4 h-4 rounded accent-[#C8FF00]" />
-                <label htmlFor="isNew"   className="text-sm text-gray-700 flex items-center gap-1.5">
+                <input type="checkbox" id="isNew"   {...register('isNew')} className="w-4 h-4 rounded accent-[#C8FF00]" />
+                <label htmlFor="isNew" className="text-sm text-gray-700 flex items-center gap-1.5">
                   <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-bold">NUEVO</span>
                 </label>
               </div>
@@ -743,11 +742,11 @@ export default function ProductForm({ mode, productId }: Props) {
 
           {/* Preview precios */}
           {watch('price') > 0 && (() => {
-            const basePrice    = Number(watch('price'));
-            const saleVal      = Number(watch('salePrice')     ?? 0);
-            const transferVal  = Number(watch('transferPrice') ?? 0);
-            const hasOffer     = saleVal > 0 && saleVal < basePrice;
-            const activePrice  = hasOffer ? saleVal : basePrice;
+            const basePrice = Number(watch('price'));
+            const saleVal = Number(watch('salePrice') ?? 0);
+            const transferVal = Number(watch('transferPrice') ?? 0);
+            const hasOffer = saleVal > 0 && saleVal < basePrice;
+            const activePrice = hasOffer ? saleVal : basePrice;
             const transferShow = transferVal > 0 ? transferVal : Math.ceil(activePrice * 0.8);
             return (
               <div className="bg-[#0f172a] rounded-xl p-5 text-white">
@@ -769,13 +768,13 @@ export default function ProductForm({ mode, productId }: Props) {
                 )}
                 <div className="mt-3 space-y-1 text-xs">
                   <div className="flex justify-between text-slate-300">
-                    <span>💳 Con transferencia{transferVal > 0 ? ' ✓' : ' (auto)'}</span>
+                    <span>ðŸ’³ Con transferencia{transferVal > 0 ? ' âœ“' : ' (auto)'}</span>
                     <span className="text-[#C8FF00] font-bold">
                       ${transferShow.toLocaleString('es-AR')}
                     </span>
                   </div>
                   <div className="flex justify-between text-slate-300">
-                    <span>📦 9 cuotas s/interés</span>
+                    <span>ðŸ“¦ 9 cuotas s/interÃ©s</span>
                     <span className="text-[#C8FF00] font-bold">
                       ${Math.ceil(activePrice / 9).toLocaleString('es-AR')}/mes
                     </span>
@@ -785,7 +784,7 @@ export default function ProductForm({ mode, productId }: Props) {
             );
           })()}
 
-          {/* Guardar rápido */}
+          {/* Guardar rÃ¡pido */}
           <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
             <button type="submit" disabled={saving} className="btn-primary w-full justify-center">
               <Save className="w-4 h-4" />

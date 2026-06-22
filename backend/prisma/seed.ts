@@ -71,6 +71,26 @@ async function main() {
     });
   }
 
+  
+  // FAQs
+  const faqs = [
+    { question: 'Como realizo una compra?', answer: 'Podes comprar directamente desde nuestra web: elegis el producto, lo agregas al carrito y completas el proceso de pago con los metodos disponibles.', order: 1, active: true },
+    { question: 'Necesito crear una cuenta para comprar?', answer: 'No es obligatorio, podes comprar como invitado. Sin embargo, registrarte te permite hacer seguimiento de tus pedidos y tener acceso a promociones exclusivas.', order: 2, active: true },
+    { question: 'Hacen envios a todo el pais?', answer: 'Si, enviamos a todo el pais. Para CABA y GBA ofrecemos envio express en 24/48 hs habiles.', order: 3, active: true },
+    { question: 'Cuanto tarda en llegar mi pedido?', answer: 'CABA y GBA: 1 a 3 dias habiles. Interior del pais: 3 a 7 dias habiles segun la zona.', order: 4, active: true },
+    { question: 'Que medios de pago aceptan?', answer: 'Aceptamos tarjetas de credito, debito, Mercado Pago y transferencia bancaria.', order: 5, active: true },
+    { question: 'Puedo pagar en cuotas?', answer: 'Si, ofrecemos hasta 6 cuotas sin interes con las principales tarjetas de credito.', order: 6, active: true },
+    { question: 'Es seguro pagar en la web?', answer: 'Si, todas las transacciones estan protegidas con certificado SSL.', order: 7, active: true },
+    { question: 'Puedo devolver un producto?', answer: 'Si, tenes 30 dias desde la recepcion del producto para solicitar un cambio o devolucion.', order: 8, active: true },
+    { question: 'Como solicito una devolucion?', answer: 'Contactanos por WhatsApp o email con tu numero de pedido y el motivo de la devolucion.', order: 9, active: true },
+    { question: 'Me devuelven el dinero?', answer: 'Podes elegir entre cambio por otro producto o reintegro del dinero.', order: 10, active: true },
+    { question: 'Los productos tienen garantia?', answer: 'Todos nuestros productos cuentan con garantia del fabricante.', order: 11, active: true },
+    { question: 'Como elijo el tamano correcto de paleta?', answer: 'Contamos con una guia de talles detallada.', order: 12, active: true },
+    { question: 'Los precios son con IVA incluido?', answer: 'Si, todos nuestros precios publicados incluyen IVA.', order: 13, active: true },
+  ];
+  for (const faq of faqs) {
+    await prisma.fAQ.upsert({ where: { id: faq.question }, update: faq, create: { ...faq, id: faq.question } });
+  }
   console.log('Seed completado');
 }
 

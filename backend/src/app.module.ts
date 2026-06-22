@@ -19,6 +19,7 @@ import { ExpensesModule } from './expenses/expenses.module';
 import { HeroSlidesModule } from './hero-slides/hero-slides.module';
 import { BenefitsModule } from './benefits/benefits.module';
 import { TestimonialsModule } from './testimonials/testimonials.module';
+import { FaqModule } from './faq/faq.module';
 import { SiteSectionsModule } from './site-sections/site-sections.module';
 
 @Module({
@@ -40,6 +41,7 @@ import { SiteSectionsModule } from './site-sections/site-sections.module';
     HeroSlidesModule,
     BenefitsModule,
     TestimonialsModule,
+    FaqModule,
     SiteSectionsModule,
   ],
 })

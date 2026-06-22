@@ -22,6 +22,13 @@ export class TestimonialsController {
   @ApiBearerAuth() @UseGuards(JwtAuthGuard, RolesGuard) @Roles(Role.ADMIN)
   create(@Body() dto: any) { return this.testimonialsService.create(dto); }
 
+  @Post('public')
+  createPublic(@Body() dto: any) { return this.testimonialsService.createPublic(dto); }
+
+  @Patch(':id/approve')
+  @ApiBearerAuth() @UseGuards(JwtAuthGuard, RolesGuard) @Roles(Role.ADMIN)
+  approve(@Param('id') id: string) { return this.testimonialsService.approve(id); }
+
   @Patch(':id')
   @Put(':id')
   @ApiBearerAuth() @UseGuards(JwtAuthGuard, RolesGuard) @Roles(Role.ADMIN)
