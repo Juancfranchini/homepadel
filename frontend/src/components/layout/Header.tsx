@@ -6,6 +6,7 @@ import { User, ShoppingCart, Menu, X } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { usePathname } from 'next/navigation';
 import BrandLogo from '@/components/ui/BrandLogo';
+import { useBranding } from '@/hooks/useBranding';
 
 const NAV_LINKS = [
   { label: 'Inicio',                href: '/' },
@@ -16,6 +17,14 @@ const NAV_LINKS = [
 ];
 
 export default function Header() {
+  const branding = useBranding();
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
   const totalItems = useCartStore((s) => s.totalItems);
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -26,7 +35,7 @@ export default function Header() {
     <header className="w-full sticky top-0 z-50 glass border-b border-[#0D0F0F]">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
         <Link href="/" className="flex-shrink-0">
-          <BrandLogo variant="light" size="md" showText={true} />
+          <BrandLogo variant="light" size="lg" showText={!branding.logoHeader} imageUrl={(isMobile ? (branding.logoMobile || branding.logoHeader) : branding.logoHeader) || undefined} />
         </Link>
 
         <nav className="hidden lg:flex items-center gap-1">

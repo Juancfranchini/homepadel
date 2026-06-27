@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import * as fs from 'fs';
+import * as path from 'path';
 
-// Claves válidas para secciones singleton del sitio
-export type SectionKey = 'about' | 'instagram' | 'final_message';
+export type SectionKey = 'about' | 'instagram' | 'final_message' | 'branding' | 'settings';
 
 @Injectable()
 export class SiteSectionsService {
@@ -15,6 +16,11 @@ export class SiteSectionsService {
   }
 
   async upsert(key: SectionKey, dto: { data: Record<string, unknown>; active?: boolean }) {
+    // Si es branding, eliminar imagenes viejas antes de actualizar
+    if (key === 'branding') {
+      await this.removeOldImages(dto.data);
+    }
+
     return this.prisma.siteSection.upsert({
       where: { key },
       update: { data: dto.data as Prisma.InputJsonValue, active: dto.active ?? true },
@@ -22,18 +28,48 @@ export class SiteSectionsService {
     });
   }
 
-  // Valores por defecto para que el frontend nunca reciba null
+  // Elimina archivos de imagen que ya no estan en los nuevos datos
+  private async removeOldImages(newData: Record<string, unknown>) {
+    try {
+      const existing = await this.prisma.siteSection.findUnique({ where: { key: 'branding' } });
+      if (!existing?.data) return;
+
+      const oldData = existing.data as Record<string, unknown>;
+      const uploadsDir = path.join(__dirname, '..', '..', 'uploads');
+
+      const imageKeys = ['logoHeader', 'logoFooter', 'isotipo', 'logoMobile'];
+      
+      for (const key of imageKeys) {
+        const oldUrl = oldData[key] as string;
+        const newUrl = newData[key] as string;
+
+        // Si habia una imagen y cambio, eliminar la vieja
+        if (oldUrl && oldUrl !== newUrl && oldUrl.startsWith('/uploads/')) {
+          const filename = oldUrl.replace('/uploads/', '');
+          const filepath = path.join(uploadsDir, filename);
+          
+          try {
+            if (fs.existsSync(filepath)) {
+              fs.unlinkSync(filepath);
+              console.log('Imagen eliminada:', filename);
+            }
+          } catch (err) {
+            console.error('Error al eliminar imagen:', filename, err);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Error en removeOldImages:', err);
+    }
+  }
+
   private getDefault(key: SectionKey): Record<string, unknown> {
     const defaults: Record<SectionKey, Record<string, unknown>> = {
       about: {
-        title: 'Somos Home Pádel',
-        description: 'Vivimos el pádel tanto como vos. Seleccionamos los mejores productos para que solo te enfoques en jugar tu mejor partido.',
+        title: 'Somos Home Padel',
+        description: 'Vivimos el padel tanto como vos.',
         image: null,
-        benefits: [
-          { icon: 'Heart', title: 'Pasión por el pádel', description: 'Somos jugadores antes que vendedores' },
-          { icon: 'Users', title: 'Atención personalizada', description: 'Te asesoramos según tu nivel y estilo' },
-          { icon: 'Shield', title: 'Experiencia y confianza', description: 'Años en el mercado del pádel argentino' },
-        ],
+        benefits: [],
       },
       instagram: {
         title: 'Seguinos en Instagram',
@@ -41,10 +77,23 @@ export class SiteSectionsService {
         buttonText: 'Ver perfil',
         buttonUrl: 'https://instagram.com/homepadel',
       },
+      settings: {
+        storeName: 'Home Padel',
+        contactEmail: 'hola@homepadel.com',
+        phone: '',
+        address: '',
+        whatsapp: '',
+      },
+      branding: {
+        logoHeader: null,
+        logoFooter: null,
+        isotipo: null,
+        logoMobile: null,
+      },
       final_message: {
         title: 'Un mensaje para vos',
-        text: 'Gracias por elegir Home Pádel. Cada compra nos impulsa a seguir creciendo y acercarte lo mejor del pádel. Vamos por más, juntos.',
-        buttonText: 'Ver catálogo',
+        text: 'Gracias por elegir Home Padel.',
+        buttonText: 'Ver catalogo',
         buttonUrl: '/catalogo',
       },
     };

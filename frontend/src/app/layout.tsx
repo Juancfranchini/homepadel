@@ -1,51 +1,78 @@
-// Layout raíz de Next.js 15
-// Aplica metadatos SEO globales, fuente Inter, header y footer en todas las páginas
-// Envuelve el contenido principal en <main> para accesibilidad
-
 import type { Metadata } from 'next';
 import './globals.css';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 
-export const metadata: Metadata = {
-  title: {
-    default: 'Home Pádel — Equipamiento profesional',
-    template: '%s | Home Pádel',
-  },
-  description:
-    'Las mejores paletas, indumentaria y accesorios para pádel. Nueva temporada 2026 con hasta 20% OFF.',
-  keywords: [
-    'padel',
-    'paletas',
-    'zapatillas padel',
-    'indumentaria padel',
-    'accesorios padel',
-    'home padel',
-  ],
-  openGraph: {
-    type: 'website',
-    locale: 'es_AR',
-    siteName: 'Home Pádel',
-    images: [{ url: '/logo-full.svg', width: 400, height: 180, alt: 'Home Pádel' }],
-  },
-  twitter: {
-    card: 'summary',
-    title: 'Home Pádel',
-    description: 'Equipamiento profesional para jugadores apasionados.',
-    images: ['/logo-full.svg'],
-  },
-  icons: {
-    // Favicon: logo oficial (chevron + pelota)
-    icon: [
-      {
-        url: '/logo-icon.svg',
-        type: 'image/svg+xml',
-      },
+async function getFaviconUrl(): Promise<string> {
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+    const baseUrl = apiUrl.replace('/api', '');
+    const res = await fetch(apiUrl + '/site-sections/branding', { next: { revalidate: 3600 } });
+    const data = await res.json();
+    const isotipo = data?.data?.isotipo || data?.isotipo;
+    if (isotipo) return baseUrl + isotipo;
+  } catch {}
+  return '/logo-icon.svg';
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const faviconUrl = await getFaviconUrl();
+
+  return {
+    title: {
+      default: 'Home Padel - Equipamiento profesional de padel',
+      template: '%s | Home Padel',
+    },
+    description:
+      'Las mejores paletas, indumentaria y accesorios para padel. Nueva temporada 2026 con envios a todo el pais.',
+    keywords: [
+      'padel',
+      'paletas de padel',
+      'zapatillas padel',
+      'indumentaria padel',
+      'accesorios padel',
+      'equipamiento padel',
+      'home padel',
     ],
-    shortcut: '/logo-icon.svg',
-    apple: '/logo-icon.svg',
-  },
-};
+    authors: [{ name: 'Home Padel' }],
+    creator: 'Home Padel',
+    publisher: 'Home Padel',
+    formatDetection: { email: false, address: false, telephone: false },
+    metadataBase: new URL('https://www.homepadel.com.ar'),
+    alternates: { canonical: '/' },
+    openGraph: {
+      type: 'website',
+      locale: 'es_AR',
+      url: 'https://www.homepadel.com.ar',
+      siteName: 'Home Padel',
+      title: 'Home Padel - Equipamiento profesional de padel',
+      description: 'Las mejores paletas, indumentaria y accesorios para padel.',
+      images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Home Padel' }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'Home Padel - Equipamiento profesional de padel',
+      description: 'Las mejores paletas, indumentaria y accesorios para padel.',
+      images: ['/og-image.jpg'],
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
+    icons: {
+      icon: [{ url: faviconUrl }],
+      shortcut: faviconUrl,
+      apple: faviconUrl,
+    },
+  };
+}
 
 export default function RootLayout({
   children,

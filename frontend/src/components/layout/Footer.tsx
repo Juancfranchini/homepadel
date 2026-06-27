@@ -1,24 +1,20 @@
+'use client';
 import Link from 'next/link';
 import { Instagram, Facebook, Youtube, Mail, Phone, MapPin, Clock } from 'lucide-react';
+import { useBranding } from '@/hooks/useBranding';
+import BrandLogo from '@/components/ui/BrandLogo';
 
 export default function Footer() {
+  const branding = useBranding();
   return (
     <footer className="bg-[#141A1D] text-[#C7C7C0] border-t border-[#0D0F0F]">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-10">
-          
+
           {/* Logo + descripcion + redes - 2 columnas */}
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-                <circle cx="16" cy="16" r="15" fill="#B7D31A" />
-                <circle cx="16" cy="16" r="11" fill="#141A1D" />
-                <path d="M10 16 Q13 10 16 16 Q19 22 22 16" stroke="#B7D31A" strokeWidth="1.5" fill="none" />
-                <path d="M10 16 Q13 22 16 16 Q19 10 22 16" stroke="#B7D31A" strokeWidth="1.5" fill="none" />
-              </svg>
-              <span className="font-bold text-xl tracking-tight text-[#F7F6F7] leading-none">
-                HOME<span className="text-[#B7D31A]">.</span>PADEL
-              </span>
+              <BrandLogo variant="light" size="sm" showText={!branding.logoFooter} imageUrl={branding.logoFooter || undefined} />
             </Link>
             <p className="text-sm leading-relaxed mb-6">
               Equipamiento profesional para jugadores apasionados. Las mejores marcas, los mejores precios.
@@ -151,9 +147,9 @@ export default function Footer() {
               </div>
               <div className="w-10 h-7 bg-black rounded flex items-center justify-center">
                 <svg width="24" height="16" viewBox="0 0 24 16">
-                  <rect width="24" height="16" rx="2" fill="#000"/>
-                  <circle cx="9" cy="8" r="4" fill="#FF0000" opacity="0.8"/>
-                  <circle cx="15" cy="8" r="4" fill="#FF9900" opacity="0.8"/>
+                  <rect width="24" height="16" rx="2" fill="#000" />
+                  <circle cx="9" cy="8" r="4" fill="#FF0000" opacity="0.8" />
+                  <circle cx="15" cy="8" r="4" fill="#FF9900" opacity="0.8" />
                 </svg>
               </div>
               <div className="w-10 h-7 bg-[#2E77BC] rounded flex items-center justify-center">

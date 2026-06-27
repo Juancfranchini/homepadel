@@ -5,6 +5,7 @@
 // Los archivos se guardan en: ./uploads/ (configurable con UPLOADS_DIR en .env)
 
 import { Module } from '@nestjs/common';
+import { join } from 'path';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
@@ -14,7 +15,7 @@ import { UploadsController } from './uploads.controller';
   imports: [
     MulterModule.register({
       storage: diskStorage({
-        destination: process.env.UPLOADS_DIR || './uploads',
+        destination: process.env.UPLOADS_DIR || join(__dirname, '..', '..', 'uploads'),
         filename: (_req, file, cb) => {
           const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
           cb(null, `${unique}${extname(file.originalname)}`);

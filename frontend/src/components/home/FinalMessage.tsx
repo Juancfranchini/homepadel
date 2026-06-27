@@ -1,6 +1,6 @@
 import { FinalMessageData } from '@/types';
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight , Package} from 'lucide-react';
 import NewsletterForm from './NewsletterForm';
 
 interface Props {
@@ -25,11 +25,7 @@ export default function FinalMessage({ data }: Props) {
             <div className="flex flex-col gap-5">
               {/* Nivel 1: Icono/Logo */}
               <div className="w-12 h-12 rounded-full bg-[#B7D31A]/10 border border-[#B7D31A]/20 flex items-center justify-center">
-                <svg width="36" height="36" viewBox="0 0 48 48" fill="none" aria-hidden="true" className="text-[#B7D31A]">
-                  <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="2.5" />
-                  <path d="M8 20 Q16 14 24 20 Q32 26 40 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" />
-                  <path d="M8 28 Q16 22 24 28 Q32 34 40 28" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" />
-                </svg>
+                <Package className="w-6 h-6 text-[#B7D31A]" />
               </div>
 
               {/* Nivel 2: Titulo */}
