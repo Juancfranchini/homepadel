@@ -133,3 +133,34 @@ p, a, li, span, input, textarea, select, label { font-weight: 400; }
   animation: slideUp 0.4s ease-out forwards;
   overflow: hidden;
 }
+
+
+/* Fondo animado con efecto de gradiente espejo empanado */
+.bg-waves {
+  position: relative;
+  overflow: hidden;
+}
+.bg-waves::before {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  z-index: -1;
+  background: radial-gradient(ellipse at 30% 50%, rgba(183, 211, 26, 0.04) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 30%, rgba(22, 153, 211, 0.04) 0%, transparent 50%),
+              radial-gradient(ellipse at 50% 80%, rgba(36, 42, 5, 0.3) 0%, transparent 50%),
+              linear-gradient(180deg, #050606 0%, #030F14 25%, #0C0C0C 50%, #061E29 75%, #050606 100%);
+  background-size: 100% 100%;
+  animation: waveFlow 20s ease-in-out infinite;
+  backdrop-filter: blur(100px);
+  -webkit-backdrop-filter: blur(100px);
+}
+@keyframes waveFlow {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(2%, -1%) rotate(1deg); }
+  50% { transform: translate(-1%, 2%) rotate(-1deg); }
+  75% { transform: translate(-2%, -2%) rotate(1deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
