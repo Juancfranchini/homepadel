@@ -36,10 +36,10 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
   };
 
   return (
-    <div className="bg-[#050606] border border-white/[0.08] rounded-xl overflow-hidden flex flex-col group hover:border-white/[0.16] transition-all duration-200 hover:-translate-y-0.5">
+    <div className="bg-[#0C0C0C] rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:shadow-[#B7D31A]/10 border border-[#B7D31A]/20 hover:border-[#B7D31A]/60 flex flex-col">
 
       {/* ── Imagen ─────────────────────────────────────────────────────────── */}
-      <Link href={`/producto/${product.slug}`} className="relative aspect-square bg-[#0C0C0C] overflow-hidden block flex-none">
+      <Link href={`/producto/${product.slug}`} className="relative aspect-square bg-[#050606] overflow-hidden block flex-none">
         {product.images && product.images.length > 0 ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -61,7 +61,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
             </span>
           )}
           {product.isNew && (
-            <span className="bg-[#B7D31A] text-[#050606] text-[10px] font-black px-2 py-0.5 rounded-full leading-none">
+            <span className="bg-[#B7D31A] text-[#050606] btn-primary-glow text-xs font-bold px-2.5 py-1 rounded-full">
               NUEVO
             </span>
           )}
@@ -78,7 +78,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
           className={`absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 ${
             wished
               ? 'bg-red-500 text-white'
-              : 'bg-black/50 text-white/30 hover:text-red-400 hover:bg-black/70'
+              : 'bg-black/40 text-[#B7D31A] border border-[#B7D31A]/50 hover:bg-[#B7D31A] hover:text-[#050606]'
           }`}
           aria-label={wished ? 'Quitar de favoritos' : 'Agregar a favoritos'}
         >
@@ -133,8 +133,8 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
             product.stock === 0
               ? 'bg-white/[0.04] text-white/20 cursor-not-allowed'
               : adding
-              ? 'bg-[#B7D31A] text-[#050606] scale-95'
-              : 'bg-[#B7D31A] text-[#050606] hover:bg-white active:scale-95'
+              ? 'bg-[#B7D31A] text-[#050606] btn-primary-glow scale-95 px-6 py-2.5 rounded-lg font-semibold text-xs uppercase tracking-wider'
+              : 'bg-[#B7D31A] text-[#050606] btn-primary-glow hover:bg-[#CAE52E] active:scale-95'
           }`}
         >
           <ShoppingCart size={13} />

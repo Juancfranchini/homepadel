@@ -12,7 +12,7 @@ const NAV_LINKS = [
   { label: 'Inicio',                href: '/' },
   { label: 'Productos',             href: '/catalogo' },
   { label: 'Politica de Devolucion', href: '/politica-de-devolucion' },
-  { label: 'FAQ',                   href: '/faq' },
+  { label: 'Preguntas Frecuentes',   href: '/faq' },
   { label: 'Contacto',              href: '/contacto' },
 ];
 
