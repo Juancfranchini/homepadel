@@ -1,4 +1,4 @@
-import { Truck, CreditCard, RefreshCw, Shield } from 'lucide-react';
+import { Truck, CreditCard, RefreshCw, Shield, Lock, Package, Sparkles, Heart, Star, Check } from 'lucide-react';
 import { Benefit } from '@/types';
 
 interface Props {
@@ -12,12 +12,22 @@ const FALLBACK = [
   { id: '4', title: 'PRODUCTOS ORIGINALES', description: 'Calidad asegurada', icon: 'shield' },
 ];
 
-const ICONS: Record<string, React.ReactNode> = {
-  truck: <Truck size={36} />,
-  'credit-card': <CreditCard size={36} />,
-  'refresh-cw': <RefreshCw size={36} />,
-  shield: <Shield size={36} />,
-};
+function getIcon(iconName: string): React.ReactNode {
+  const key = iconName.toLowerCase().replace(/([A-Z])/g, '-').replace(/^-/, '').replace(/--/g, '-');
+  const icons: Record<string, React.ReactNode> = {
+    'truck': <Truck size={36} />,
+    'credit-card': <CreditCard size={36} />,
+    'refresh-cw': <RefreshCw size={36} />,
+    'shield': <Shield size={36} />,
+    'lock': <Lock size={36} />,
+    'package': <Package size={36} />,
+    'sparkles': <Sparkles size={36} />,
+    'heart': <Heart size={36} />,
+    'star': <Star size={36} />,
+    'check': <Check size={36} />,
+  };
+  return icons[key] || <Truck size={36} />;
+}
 
 export default function BenefitsStrip({ benefits }: Props) {
   const items = benefits && benefits.length > 0 ? benefits : FALLBACK;
@@ -31,7 +41,7 @@ export default function BenefitsStrip({ benefits }: Props) {
             <div key={b.id} className="flex items-center gap-4 border-r border-white/20 last:border-r-0 px-6 first:pl-0 last:pr-0">
               <div className="flex-shrink-0 w-[40%] flex justify-center">
                 <span className="text-[#B7D31A]">
-                  {ICONS[b.icon] || <Truck size={36} />}
+                  {getIcon(b.icon)}
                 </span>
               </div>
               <div className="flex-1 w-[60%]">
@@ -47,7 +57,7 @@ export default function BenefitsStrip({ benefits }: Props) {
           {items.slice(0, 2).map((b) => (
             <div key={b.id} className="flex flex-col items-center text-center gap-2">
               <span className="text-[#B7D31A]">
-                {ICONS[b.icon] || <Truck size={36} />}
+                {getIcon(b.icon)}
               </span>
               <div>
                 <h4 className="text-[#F7F6F7] font-semibold text-xs uppercase leading-tight">{b.title}</h4>
@@ -58,7 +68,7 @@ export default function BenefitsStrip({ benefits }: Props) {
           {items.slice(2, 4).map((b) => (
             <div key={b.id} className="flex flex-col items-center text-center gap-2">
               <span className="text-[#B7D31A]">
-                {ICONS[b.icon] || <Truck size={36} />}
+                {getIcon(b.icon)}
               </span>
               <div>
                 <h4 className="text-[#F7F6F7] font-semibold text-xs uppercase leading-tight">{b.title}</h4>
