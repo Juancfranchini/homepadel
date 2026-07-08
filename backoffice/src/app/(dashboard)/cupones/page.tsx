@@ -1,4 +1,4 @@
-﻿// Coupons (Cupones) management page for the Home Pádel BackOffice.
+// Coupons (Cupones) management page for the Home Pádel BackOffice.
 // CRUD: list all coupons, create form with PERCENTAGE/FIXED type, edit, delete.
 // API: GET/POST/PUT/DELETE /api/coupons
 

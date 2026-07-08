@@ -1,39 +1,48 @@
 ﻿'use client';
 
 import { useState } from 'react';
-import { X, Tag, Layers } from 'lucide-react';
+import { X, Tag, Layers, Star, Package } from 'lucide-react';
 
-export interface FaqAdvancedFilters {
-  category: string | null;
+export interface ProductAdvancedFilters {
+  categoryId: string | null;
+  brandId: string | null;
   active: boolean | null;
+  featured: boolean | null;
 }
+
+interface Category { id: string; name: string }
+interface Brand { id: string; name: string }
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onApply: (filters: FaqAdvancedFilters) => void;
+  onApply: (filters: ProductAdvancedFilters) => void;
+  categories: Category[];
+  brands: Brand[];
 }
 
 const menuItems = [
   { id: 'category', label: 'Categoria', icon: Layers },
+  { id: 'brand', label: 'Marca', icon: Package },
   { id: 'active', label: 'Estado', icon: Tag },
+  { id: 'featured', label: 'Destacado', icon: Star },
 ];
 
-type MenuSection = 'category' | 'active';
+type MenuSection = 'category' | 'brand' | 'active' | 'featured';
 
-const CATEGORIES = ['COMPRAS', 'ENVIOS', 'PAGOS', 'DEVOLUCIONES', 'PRODUCTOS', 'General'];
-
-export default function FaqAdvancedSearchModal({ isOpen, onClose, onApply }: Props) {
+export default function ProductAdvancedSearchModal({ isOpen, onClose, onApply, categories, brands }: Props) {
   const [activeSection, setActiveSection] = useState<MenuSection>('category');
-  const [category, setCategory] = useState<string | null>(null);
+  const [categoryId, setCategoryId] = useState<string | null>(null);
+  const [brandId, setBrandId] = useState<string | null>(null);
   const [active, setActive] = useState<boolean | null>(null);
+  const [featured, setFeatured] = useState<boolean | null>(null);
 
   if (!isOpen) return null;
 
-  const hasFilters = category !== null || active !== null;
+  const hasFilters = categoryId !== null || brandId !== null || active !== null || featured !== null;
 
-  const handleClear = () => { setCategory(null); setActive(null); };
-  const handleApply = () => { onApply({ category, active }); onClose(); };
+  const handleClear = () => { setCategoryId(null); setBrandId(null); setActive(null); setFeatured(null); };
+  const handleApply = () => { onApply({ categoryId, brandId, active, featured }); onClose(); };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -44,7 +53,7 @@ export default function FaqAdvancedSearchModal({ isOpen, onClose, onApply }: Pro
             <h2 className="text-lg font-semibold text-gray-900">Busqueda Avanzada</h2>
             <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
           </div>
-          <p className="text-sm text-gray-500 mt-1">Selecciona los filtros para buscar FAQs</p>
+          <p className="text-sm text-gray-500 mt-1">Selecciona los filtros para buscar productos</p>
         </div>
 
         <div className="w-full h-px bg-gray-200" />
@@ -79,14 +88,29 @@ export default function FaqAdvancedSearchModal({ isOpen, onClose, onApply }: Pro
 
             {activeSection === 'category' && (
               <div className="grid grid-cols-2 gap-3">
-                <label className={'flex items-center gap-2 px-4 py-3 rounded-lg border cursor-pointer transition-colors ' + (!category ? 'border-[#C8FF00] bg-[#C8FF00]/5 text-[#C8FF00]' : 'border-gray-200 text-gray-600 hover:bg-gray-50')}>
-                  <input type="radio" name="cat" checked={!category} onChange={() => setCategory(null)} className="sr-only" />
+                <label className={'flex items-center gap-2 px-4 py-3 rounded-lg border cursor-pointer transition-colors ' + (!categoryId ? 'border-[#C8FF00] bg-[#C8FF00]/5 text-[#C8FF00]' : 'border-gray-200 text-gray-600 hover:bg-gray-50')}>
+                  <input type="radio" name="cat" checked={!categoryId} onChange={() => setCategoryId(null)} className="sr-only" />
                   <span className="text-sm font-medium">Todas</span>
                 </label>
-                {CATEGORIES.map((c) => (
-                  <label key={c} className={'flex items-center gap-2 px-4 py-3 rounded-lg border cursor-pointer transition-colors ' + (category === c ? 'border-[#C8FF00] bg-[#C8FF00]/5 text-[#C8FF00]' : 'border-gray-200 text-gray-600 hover:bg-gray-50')}>
-                    <input type="radio" name="cat" checked={category === c} onChange={() => setCategory(c)} className="sr-only" />
-                    <span className="text-sm font-medium">{c}</span>
+                {categories.map((c) => (
+                  <label key={c.id} className={'flex items-center gap-2 px-4 py-3 rounded-lg border cursor-pointer transition-colors ' + (categoryId === c.id ? 'border-[#C8FF00] bg-[#C8FF00]/5 text-[#C8FF00]' : 'border-gray-200 text-gray-600 hover:bg-gray-50')}>
+                    <input type="radio" name="cat" checked={categoryId === c.id} onChange={() => setCategoryId(c.id)} className="sr-only" />
+                    <span className="text-sm font-medium">{c.name}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+
+            {activeSection === 'brand' && (
+              <div className="grid grid-cols-2 gap-3">
+                <label className={'flex items-center gap-2 px-4 py-3 rounded-lg border cursor-pointer transition-colors ' + (!brandId ? 'border-[#C8FF00] bg-[#C8FF00]/5 text-[#C8FF00]' : 'border-gray-200 text-gray-600 hover:bg-gray-50')}>
+                  <input type="radio" name="brand" checked={!brandId} onChange={() => setBrandId(null)} className="sr-only" />
+                  <span className="text-sm font-medium">Todas</span>
+                </label>
+                {brands.map((b) => (
+                  <label key={b.id} className={'flex items-center gap-2 px-4 py-3 rounded-lg border cursor-pointer transition-colors ' + (brandId === b.id ? 'border-[#C8FF00] bg-[#C8FF00]/5 text-[#C8FF00]' : 'border-gray-200 text-gray-600 hover:bg-gray-50')}>
+                    <input type="radio" name="brand" checked={brandId === b.id} onChange={() => setBrandId(b.id)} className="sr-only" />
+                    <span className="text-sm font-medium">{b.name}</span>
                   </label>
                 ))}
               </div>
@@ -105,6 +129,23 @@ export default function FaqAdvancedSearchModal({ isOpen, onClose, onApply }: Pro
                 <label className={'flex items-center gap-2 px-4 py-3 rounded-lg border cursor-pointer transition-colors ' + (active === false ? 'border-[#C8FF00] bg-[#C8FF00]/5 text-[#C8FF00]' : 'border-gray-200 text-gray-600 hover:bg-gray-50')}>
                   <input type="radio" name="act" checked={active === false} onChange={() => setActive(false)} className="sr-only" />
                   <span className="text-sm font-medium">Inactivos</span>
+                </label>
+              </div>
+            )}
+
+            {activeSection === 'featured' && (
+              <div className="grid grid-cols-2 gap-3">
+                <label className={'flex items-center gap-2 px-4 py-3 rounded-lg border cursor-pointer transition-colors ' + (featured === null ? 'border-[#C8FF00] bg-[#C8FF00]/5 text-[#C8FF00]' : 'border-gray-200 text-gray-600 hover:bg-gray-50')}>
+                  <input type="radio" name="feat" checked={featured === null} onChange={() => setFeatured(null)} className="sr-only" />
+                  <span className="text-sm font-medium">Todos</span>
+                </label>
+                <label className={'flex items-center gap-2 px-4 py-3 rounded-lg border cursor-pointer transition-colors ' + (featured === true ? 'border-[#C8FF00] bg-[#C8FF00]/5 text-[#C8FF00]' : 'border-gray-200 text-gray-600 hover:bg-gray-50')}>
+                  <input type="radio" name="feat" checked={featured === true} onChange={() => setFeatured(true)} className="sr-only" />
+                  <span className="text-sm font-medium">Destacados</span>
+                </label>
+                <label className={'flex items-center gap-2 px-4 py-3 rounded-lg border cursor-pointer transition-colors ' + (featured === false ? 'border-[#C8FF00] bg-[#C8FF00]/5 text-[#C8FF00]' : 'border-gray-200 text-gray-600 hover:bg-gray-50')}>
+                  <input type="radio" name="feat" checked={featured === false} onChange={() => setFeatured(false)} className="sr-only" />
+                  <span className="text-sm font-medium">No destacados</span>
                 </label>
               </div>
             )}

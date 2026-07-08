@@ -1,4 +1,4 @@
-﻿// Expenses (Gastos) management page for the Home Pádel BackOffice.
+// Expenses (Gastos) management page for the Home Pádel BackOffice.
 // Features:
 //  - Monthly summary cards (total gastos, highest category, count)
 //  - Full table of expenses with CRUD

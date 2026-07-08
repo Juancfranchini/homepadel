@@ -1,4 +1,4 @@
-﻿// Brands (Marcas) management page for the Home Pádel BackOffice.
+// Brands (Marcas) management page for the Home Pádel BackOffice.
 // Full CRUD: list, create/edit via modal, delete with confirmation.
 // API: GET/POST/PUT/DELETE /api/brands
 

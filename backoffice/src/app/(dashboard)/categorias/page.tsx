@@ -1,4 +1,4 @@
-﻿// Categories management page for the Home Pádel BackOffice.
+// Categories management page for the Home Pádel BackOffice.
 // Full CRUD: list all categories in a table, create/edit via modal, delete with confirmation.
 // API: GET/POST/PUT/DELETE /api/categories
 
