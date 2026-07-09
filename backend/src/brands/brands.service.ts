@@ -1,15 +1,12 @@
-// Servicio de marcas
-// El slug se genera automáticamente a partir del nombre con slugify
-// normalizeDto: mapea isActive → active (campo real en Prisma)
-
-import { Injectable, NotFoundException } from '@nestjs/common';
+﻿import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import slugify from 'slugify';
 
 function normalizeDto(dto: any): any {
-  const { isActive, logoUrl, ...rest } = dto;
+  const { isActive, logoUrl, logo, ...rest } = dto;
   if (isActive !== undefined) rest.active = isActive;
-  // logoUrl no existe en el modelo Brand (es 'logo'), lo ignoramos por ahora
+  const finalLogo = logoUrl || logo;
+  if (finalLogo !== undefined) rest.logo = finalLogo;
   return rest;
 }
 
