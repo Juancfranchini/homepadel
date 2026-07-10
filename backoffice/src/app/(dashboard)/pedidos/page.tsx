@@ -1,4 +1,4 @@
-﻿// Orders (Pedidos) management page for the Home Pádel BackOffice.
+// Orders (Pedidos) management page for the Home Pádel BackOffice.
 // Features:
 //  - Status filter tabs: Todos | Pendiente | Pagado | Enviado | Entregado | Cancelado
 //  - TanStack Table with pagination

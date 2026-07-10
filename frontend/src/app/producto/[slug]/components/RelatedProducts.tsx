@@ -16,14 +16,14 @@ export default function RelatedProducts({ products }: Props) {
   if (products.length === 0) return null;
 
   return (
-    <section className="border-t border-[#0D0F0F] py-14 bg-[#050606]">
+    <section className="border-t border-[#0D0F0F] py-10 bg-[#0C0C0C]">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-tight text-[#F7F6F7] mb-8">
           PRODUCTOS RELACIONADOS
         </h2>
         <div className="relative">
           <button onClick={() => scrollRef.current?.scrollBy({ left: -280, behavior: 'smooth' })}
-            className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-[#0C0C0C] border border-[#0D0F0F] flex items-center justify-center text-[#F7F6F7] hover:border-[#B7D31A] transition-colors hidden md:flex">
+            className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-[#1A1F21] border border-[#B7D31A]/30 flex items-center justify-center text-[#B7D31A] hover:bg-[#B7D31A]/20 hover:border-[#B7D31A] transition-all hidden md:flex">
             <ChevronLeft size={14} />
           </button>
           <div ref={scrollRef} className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollSnapType: 'x mandatory' }}>
@@ -31,7 +31,7 @@ export default function RelatedProducts({ products }: Props) {
               const relDiscount = p.salePrice !== undefined && p.salePrice > 0 && p.salePrice < p.price;
               return (
                 <Link key={p.id} href={'/producto/' + p.slug}
-                  className="flex-none w-52 bg-[#0C0C0C] border border-[#0D0F0F] rounded-xl overflow-hidden hover:border-[#B7D31A]/30 transition-all group"
+                  className="flex-none w-52 bg-[#1A1F21] border border-[#B7D31A]/20 rounded-xl overflow-hidden hover:border-[#B7D31A]/60 transition-all group relative"
                   style={{ scrollSnapAlign: 'start' }}>
                   <div className="aspect-square bg-[#050606] overflow-hidden">
                     {p.images.length > 0 ? (
@@ -50,12 +50,13 @@ export default function RelatedProducts({ products }: Props) {
                       {relDiscount && <span className="text-[#8A8A85] text-[10px] font-normal line-through ml-1.5">{formatPrice(p.price)}</span>}
                     </p>
                   </div>
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[#B7D31A] to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
                 </Link>
               );
             })}
           </div>
           <button onClick={() => scrollRef.current?.scrollBy({ left: 280, behavior: 'smooth' })}
-            className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-[#0C0C0C] border border-[#0D0F0F] flex items-center justify-center text-[#F7F6F7] hover:border-[#B7D31A] transition-colors hidden md:flex">
+            className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-[#1A1F21] border border-[#B7D31A]/30 flex items-center justify-center text-[#B7D31A] hover:bg-[#B7D31A]/20 hover:border-[#B7D31A] transition-all hidden md:flex">
             <ChevronRight size={14} />
           </button>
         </div>

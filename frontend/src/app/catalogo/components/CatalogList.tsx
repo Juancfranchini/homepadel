@@ -57,7 +57,7 @@ export default function CatalogList({ products, onAddToCart }: Props) {
                   disabled={product.stock === 0}
                   className="px-6 py-2.5 bg-[#B7D31A] text-[#050606] rounded-lg font-semibold text-xs uppercase tracking-wider btn-primary-glow disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
                 >
-                  {product.stock === 0 ? 'Sin stock' : 'COMPRAR'}
+                  {product.stock === 0 ? 'Sin stock' : 'AGREGAR'}
                 </button>
               </div>
             </div>

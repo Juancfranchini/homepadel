@@ -1,4 +1,4 @@
-﻿// Promotions (Promociones) management page for the Home Pádel BackOffice.
+// Promotions (Promociones) management page for the Home Pádel BackOffice.
 // CRUD: list, create/edit with date range pickers, delete.
 // API: GET/POST/PUT/DELETE /api/promotions
 

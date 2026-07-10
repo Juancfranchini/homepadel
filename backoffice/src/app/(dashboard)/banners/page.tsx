@@ -1,4 +1,4 @@
-﻿// Banners management page for the Home Pádel BackOffice.
+// Banners management page for the Home Pádel BackOffice.
 // CRUD: list with image preview and order field, create/edit with image upload, delete.
 // API: GET/POST/PUT/DELETE /api/banners
 

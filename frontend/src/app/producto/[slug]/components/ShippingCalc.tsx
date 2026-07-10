@@ -7,7 +7,7 @@ export default function ShippingCalc() {
   const [postal, setPostal] = useState('');
 
   return (
-    <div className="bg-[#0C0C0C] border border-[#0D0F0F] rounded-xl p-4">
+    <div className="bg-[#1A1F21] border border-[#0D0F0F] rounded-xl p-4">
       <div className="flex items-center gap-2 mb-3">
         <MapPin size={14} className="text-[#B7D31A]" />
         <p className="text-sm font-semibold text-[#F7F6F7]">Calcula tu envio</p>

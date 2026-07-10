@@ -1,4 +1,4 @@
-﻿// Customers (Clientes) page for the Home Pádel BackOffice.
+// Customers (Clientes) page for the Home Pádel BackOffice.
 // Lists all registered customers with search by name/email.
 // Click a row to open a customer detail side panel (orders, stats).
 // API: GET /api/users (or /api/customers)
