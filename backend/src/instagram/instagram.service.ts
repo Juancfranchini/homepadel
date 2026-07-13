@@ -3,7 +3,7 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { PrismaService } from '../prisma/prisma.service';
 
-interface InstagramPost {
+export interface InstagramPost {
   id: string;
   url: string;
   thumbnail_url: string;
