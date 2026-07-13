@@ -96,7 +96,7 @@ export default function MarcasPage() {
     if (!deleteTarget) return;
     setDeleting(true);
     try { await api.delete('/brands/' + deleteTarget.id); toast('Marca eliminada', 'success'); setDeleteTarget(null); load(); }
-    catch { toast('Error al eliminar', 'error'); } finally { setDeleting(false); }
+    catch (err: any) { toast(err?.response?.data?.message || 'Error al eliminar', 'error'); } finally { setDeleting(false); }
   };
 
   const isBrandActive = (b: Brand) => b.active ?? b.isActive ?? false;
