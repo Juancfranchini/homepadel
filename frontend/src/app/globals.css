@@ -1,18 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
-/* ─── Reset base ─────────────────────────────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-/* ─── Token de color de acento ───────────────────────────────────────── */
 :root {
   --accent: #B7D31A;
   --bg-base:    #050606;
@@ -22,7 +20,6 @@
   --text-secondary: #A1A1AA;
 }
 
-/* ─── Fondo global oscuro ────────────────────────────────────────────── */
 html {
   scroll-behavior: smooth;
   background: #050606;
@@ -36,31 +33,16 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ─── Scrollbar dark ─────────────────────────────────────────────────── */
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
-::-webkit-scrollbar-track {
-  background: #050606;
-}
-::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: #050606; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #555; }
 
-/* ─── Ocultar scrollbar horizontal ──────────────────────────────────── */
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* ============================================================
-   BOTONES PRIMARIOS - Glow abajo y costados
-   ============================================================ */
 .btn-primary-glow {
-  box-shadow: 
+  box-shadow:
     2px 0 6px rgba(183, 211, 26, 0.3),
     -2px 0 6px rgba(183, 211, 26, 0.3),
     0 4px 8px rgba(183, 211, 26, 0.3);
@@ -69,14 +51,12 @@ body {
 
 .btn-primary-glow:hover {
   transform: translateY(3px);
-  box-shadow: 
+  box-shadow:
     3px 0 10px rgba(183, 211, 26, 0.5),
     -3px 0 10px rgba(183, 211, 26, 0.5),
     0 6px 14px rgba(183, 211, 26, 0.4);
 }
-/* ============================================================
-   DEGRADADO ENTRE SECCIONES
-   ============================================================ */
+
 .section-gradient {
   position: relative;
 }
@@ -103,14 +83,14 @@ body {
   pointer-events: none;
   z-index: 0;
 }
-/* Jerarquia tipografica Poppins */
+
 h1, .h1 { font-weight: 700; letter-spacing: -0.02em; }
 h2, .h2 { font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; }
 h3, .h3 { font-weight: 500; }
 h4, .h4 { font-weight: 600; }
 p, a, li, span, input, textarea, select, label { font-weight: 400; }
 .font-semibold, .font-bold, .font-black { font-family: 'Poppins', system-ui, -apple-system, sans-serif; }
-/* Animacion scroll infinito para marcas */
+
 @keyframes scroll-brands {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
@@ -123,7 +103,7 @@ p, a, li, span, input, textarea, select, label { font-weight: 400; }
 .animate-scroll:hover {
   animation-play-state: paused;
 }
-/* Animacion slide-up para formulario de resena */
+
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(20px); max-height: 0; }
   to { opacity: 1; transform: translateY(0); max-height: 600px; }
@@ -134,12 +114,20 @@ p, a, li, span, input, textarea, select, label { font-weight: 400; }
   overflow: hidden;
 }
 
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
 
-/* Fondo animado con efecto de gradiente espejo empanado */
+.animate-slide-in {
+  animation: slideInRight 0.3s ease-out;
+}
+
 .bg-waves {
   position: relative;
   overflow: hidden;
 }
+
 .bg-waves::before {
   content: '';
   position: fixed;
@@ -157,6 +145,7 @@ p, a, li, span, input, textarea, select, label { font-weight: 400; }
   backdrop-filter: blur(100px);
   -webkit-backdrop-filter: blur(100px);
 }
+
 @keyframes waveFlow {
   0% { transform: translate(0, 0) rotate(0deg); }
   25% { transform: translate(2%, -1%) rotate(1deg); }

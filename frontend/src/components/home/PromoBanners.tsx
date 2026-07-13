@@ -1,4 +1,4 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 import { Banner } from '@/types';
 import { getImageUrl } from '@/lib/utils';
 
@@ -33,7 +33,10 @@ export default function PromoBanners({ banners }: Props) {
   const items = banners && banners.length > 0 ? banners : FALLBACK;
 
   return (
-    <section className="section-gradient bg-[#030F14] py-14">
+    <section className="relative py-14" style={{ background: 'linear-gradient(to bottom, #030F14 0%, #0D2028 100%)' }}>
+      {/* Linea divisoria superior */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#B7D31A]/30 to-transparent" />
+
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {items.slice(0, 2).map((banner) => {
@@ -44,20 +47,18 @@ export default function PromoBanners({ banners }: Props) {
                 key={banner.id}
                 className="relative rounded-2xl overflow-hidden h-64 md:h-72 flex flex-col items-start justify-end text-left p-6 md:p-8"
               >
-                {/* Imagen de fondo */}
                 {bgImage ? (
                   <>
                     <div
                       className="absolute inset-0 bg-cover bg-center bg-no-repeat"
                       style={{ backgroundImage: 'url(' + bgImage + ')' }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#030F14] via-[#030F14]/50 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#030F14] via-[#030F14]/60 to-transparent" />
                   </>
                 ) : (
                   <div className="absolute inset-0 bg-gradient-to-br from-[#0C0C0C] to-[#1A1F21]" />
                 )}
 
-                {/* Contenido */}
                 <div className="relative z-10 flex flex-col items-start gap-2">
                   <p className="text-[#B7D31A] text-xs font-semibold uppercase tracking-[0.2em]">
                     {banner.subtitle}

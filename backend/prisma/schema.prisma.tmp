@@ -1,0 +1,17 @@
+﻿model Order {
+    id         String      @id @default(cuid())
+    number     String      @unique
+    status     OrderStatus @default(PENDING)
+    total      Float
+    subtotal   Float
+    shipping   Float       @default(0)
+    discount   Float       @default(0)
+    couponCode String?
+    userId     String?
+    notes      String?
+    address    String
+    createdAt  DateTime    @default(now())
+    updatedAt  DateTime    @updatedAt
+    user       User?       @relation(fields: [userId], references: [id])
+    items      OrderItem[]
+  }

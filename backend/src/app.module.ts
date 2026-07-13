@@ -1,7 +1,4 @@
-// Módulo raíz — importa todos los módulos de la app
-// Para agregar un nuevo módulo: importarlo aquí y en el array imports
-
-import { Module } from '@nestjs/common';
+﻿import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { PrismaModule } from './prisma/prisma.module';
@@ -21,6 +18,7 @@ import { BenefitsModule } from './benefits/benefits.module';
 import { TestimonialsModule } from './testimonials/testimonials.module';
 import { FaqModule } from './faq/faq.module';
 import { SiteSectionsModule } from './site-sections/site-sections.module';
+import { InstagramModule } from './instagram/instagram.module';
 
 @Module({
   imports: [
@@ -43,6 +41,7 @@ import { SiteSectionsModule } from './site-sections/site-sections.module';
     TestimonialsModule,
     FaqModule,
     SiteSectionsModule,
+    InstagramModule,
   ],
 })
 export class AppModule {}

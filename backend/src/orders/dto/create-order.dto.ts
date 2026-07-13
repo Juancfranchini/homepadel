@@ -1,8 +1,4 @@
-// DTO para crear un pedido
-// items: array de productos con productId, quantity y price (precio al momento de la compra)
-// El precio en items se guarda explícitamente para preservar el historial si el precio cambia
-
-import { IsString, IsNumber, IsArray, IsOptional, ValidateNested, Min } from 'class-validator';
+﻿import { IsString, IsNumber, IsArray, IsOptional, ValidateNested, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -18,4 +14,7 @@ export class CreateOrderDto {
   @ApiPropertyOptional() @IsNumber() @IsOptional() shipping?: number;
   @ApiPropertyOptional() @IsNumber() @IsOptional() discount?: number;
   @ApiPropertyOptional() @IsString() @IsOptional() couponCode?: string;
+  @ApiPropertyOptional() @IsString() @IsOptional() buyerEmail?: string;
+  @ApiPropertyOptional() @IsString() @IsOptional() buyerPhone?: string;
+  @ApiPropertyOptional() @IsString() @IsOptional() buyerName?: string;
 }
