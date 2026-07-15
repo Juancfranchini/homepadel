@@ -1,8 +1,8 @@
 'use client';
 
-// ProductForm â€” formulario completo de creaciÃ³n/ediciÃ³n de producto
-// Cubre todos los campos del spec: info bÃ¡sica, precios, stock, imÃ¡genes,
-// rendimiento (6 barras), caracterÃ­sticas dinÃ¡micas, video y SEO.
+// ProductForm â€” formulario completo de creación/edición de producto
+// Cubre todos los campos del spec: info básica, precios, stock, imágenes,
+// rendimiento (6 barras), caracterí­sticas dinámicas, video y SEO.
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -31,12 +31,12 @@ const featureSchema = z.object({
 });
 
 const schema = z.object({
-  // BÃ¡sico
-  name: z.string().min(2, 'Nombre requerido (mÃ­n. 2 caracteres)'),
+  // Básico
+  name: z.string().min(2, 'Nombre requerido (mí­n. 2 caracteres)'),
   description: z.string().optional(),
   sku: z.string().min(1, 'SKU requerido'),
-  categoryId: z.string().min(1, 'SeleccionÃ¡ una categorÃ­a'),
-  brandId: z.string().min(1, 'SeleccionÃ¡ una marca'),
+  categoryId: z.string().min(1, 'Seleccioná una categorí­a'),
+  brandId: z.string().min(1, 'Seleccioná una marca'),
   featured: z.boolean().default(false),
   isNew: z.boolean().default(false),
   isOffer: z.boolean().default(false),
@@ -50,13 +50,13 @@ const schema = z.object({
   // Stock
   stock: z.coerce.number().int().min(0),
 
-  // ImÃ¡genes (URLs)
-  images: z.array(z.string().url('URL de imagen invÃ¡lida')).optional(),
+  // Imágenes (URLs)
+  images: z.array(z.string().url('URL de imagen inválida')).optional(),
 
   // Rendimiento (performance stats)
   performanceStats: z.array(perfStatSchema).optional(),
 
-  // CaracterÃ­sticas
+  // Caracterí­sticas
   features: z.array(featureSchema).optional(),
 
   // DESTACADOS â€” bullets por producto
@@ -118,7 +118,7 @@ function ErrorMsg({ msg }: { msg?: string }) {
   return <p className="text-xs text-red-600 mt-1">{msg}</p>;
 }
 
-// â”€â”€â”€ CatÃ¡logo de medios de pago â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â”€â”€â”€ Catálogo de medios de pago â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 interface PaymentMethodDef { label: string; group: 'credit' | 'debit' | 'transfer' | 'wallet'; color: string }
 
@@ -130,9 +130,9 @@ const PAYMENT_CATALOG: Record<string, PaymentMethodDef> = {
   nativa: { label: 'Nativa', group: 'credit', color: 'bg-yellow-100 text-yellow-800' },
   cabal: { label: 'Cabal', group: 'credit', color: 'bg-red-100 text-red-800' },
   argencard: { label: 'Argencard', group: 'credit', color: 'bg-green-100 text-green-800' },
-  visa_deb: { label: 'Visa DÃ©bito', group: 'debit', color: 'bg-blue-50 text-blue-700' },
-  mc_deb: { label: 'MC DÃ©bito', group: 'debit', color: 'bg-orange-50 text-orange-700' },
-  cabal_deb: { label: 'Cabal DÃ©bito', group: 'debit', color: 'bg-red-50 text-red-700' },
+  visa_deb: { label: 'Visa Dí©bito', group: 'debit', color: 'bg-blue-50 text-blue-700' },
+  mc_deb: { label: 'MC Dí©bito', group: 'debit', color: 'bg-orange-50 text-orange-700' },
+  cabal_deb: { label: 'Cabal Dí©bito', group: 'debit', color: 'bg-red-50 text-red-700' },
   transferencia: { label: 'Transferencia', group: 'transfer', color: 'bg-green-100 text-green-900' },
   banelco: { label: 'Banelco', group: 'transfer', color: 'bg-green-100 text-green-800' },
   link: { label: 'Link Pagos', group: 'transfer', color: 'bg-emerald-100 text-emerald-800' },
@@ -141,9 +141,9 @@ const PAYMENT_CATALOG: Record<string, PaymentMethodDef> = {
 };
 
 const PAYMENT_GROUPS: { key: 'credit' | 'debit' | 'transfer' | 'wallet'; label: string }[] = [
-  { key: 'credit', label: 'Tarjetas de crÃ©dito' },
-  { key: 'debit', label: 'Tarjetas de dÃ©bito' },
-  { key: 'transfer', label: 'Transferencia / depÃ³sito' },
+  { key: 'credit', label: 'Tarjetas de crí©dito' },
+  { key: 'debit', label: 'Tarjetas de dí©bito' },
+  { key: 'transfer', label: 'Transferencia / depósito' },
   { key: 'wallet', label: 'Billetera virtual' },
 ];
 
@@ -187,8 +187,8 @@ export default function ProductForm({ mode, productId }: Props) {
       stock: 0,
       price: 0,
       images: [],
-      performanceStats: [],   // vacÃ­o: el admin rellena solo si quiere mostrar barras
-      features: [],   // vacÃ­o: el admin rellena solo si quiere mostrar caracterÃ­sticas
+      performanceStats: [],   // vací­o: el admin rellena solo si quiere mostrar barras
+      features: [],   // vací­o: el admin rellena solo si quiere mostrar caracterí­sticas
     },
   });
 
@@ -327,7 +327,7 @@ export default function ProductForm({ mode, productId }: Props) {
               {mode === 'create' ? 'Nuevo producto' : 'Editar producto'}
             </h1>
             <p className="text-sm text-gray-500 mt-0.5">
-              {mode === 'create' ? 'CompletÃ¡ los datos del nuevo producto' : 'ModificÃ¡ los datos del producto'}
+              {mode === 'create' ? 'Completá los datos del nuevo producto' : 'Modificá los datos del producto'}
             </p>
           </div>
         </div>
@@ -351,8 +351,8 @@ export default function ProductForm({ mode, productId }: Props) {
         {/* â”€â”€ LEFT COLUMN (2/3) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <div className="xl:col-span-2 space-y-6">
 
-          {/* InformaciÃ³n bÃ¡sica */}
-          <SectionCard icon={<Package className="w-4 h-4" />} title="InformaciÃ³n bÃ¡sica">
+          {/* Información básica */}
+          <SectionCard icon={<Package className="w-4 h-4" />} title="Información básica">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="sm:col-span-2">
                 <Label required>Nombre</Label>
@@ -364,7 +364,7 @@ export default function ProductForm({ mode, productId }: Props) {
                 <Label required>SKU</Label>
                 <input {...register('sku')} className="input-field" placeholder="NOX-AT10-18K" />
                 <ErrorMsg msg={errors.sku?.message} />
-                <p className="text-xs text-gray-400 mt-1">Identificador Ãºnico del producto</p>
+                <p className="text-xs text-gray-400 mt-1">Identificador íºnico del producto</p>
               </div>
 
               <div>
@@ -373,9 +373,9 @@ export default function ProductForm({ mode, productId }: Props) {
               </div>
 
               <div>
-                <Label required>CategorÃ­a</Label>
+                <Label required>Categorí­a</Label>
                 <select {...register('categoryId')} className="input-field pr-10">
-                  <option value="">Seleccionar categorÃ­a</option>
+                  <option value="">Seleccionar categorí­a</option>
                   {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
                 <ErrorMsg msg={errors.categoryId?.message} />
@@ -391,12 +391,12 @@ export default function ProductForm({ mode, productId }: Props) {
               </div>
 
               <div className="sm:col-span-2">
-                <Label>DescripciÃ³n</Label>
+                <Label>Descripción</Label>
                 <textarea
                   {...register('description')}
                   rows={4}
                   className="input-field resize-none"
-                  placeholder="DescripciÃ³n detallada del producto..."
+                  placeholder="Descripción detallada del producto..."
                 />
               </div>
             </div>
@@ -422,15 +422,15 @@ export default function ProductForm({ mode, productId }: Props) {
               </div>
               <div className="flex items-end">
                 <div className="bg-gray-50 rounded-lg p-3 w-full text-xs text-gray-600">
-                  ðŸ“¦ <strong>9 cuotas sin interÃ©s</strong> = precio activo Ã· 9<br />
-                  <span className="text-gray-400">(calculado automÃ¡ticamente)</span>
+                  ðŸ“¦ <strong>9 cuotas sin interí©s</strong> = precio activo í· 9<br />
+                  <span className="text-gray-400">(calculado automáticamente)</span>
                 </div>
               </div>
             </div>
           </SectionCard>
 
-          {/* ImÃ¡genes */}
-          <SectionCard icon={<ImageIcon className="w-4 h-4" />} title="ImÃ¡genes del producto">
+          {/* Imágenes */}
+          <SectionCard icon={<ImageIcon className="w-4 h-4" />} title="Imágenes del producto">
             <div>
               <Label>Agregar imagen por URL</Label>
               <div className="flex gap-2">
@@ -450,7 +450,7 @@ export default function ProductForm({ mode, productId }: Props) {
                   <Plus className="w-4 h-4" />
                 </button>
               </div>
-              <p className="text-xs text-gray-400 mt-1">PresionÃ¡ Enter o el botÃ³n + para agregar. La primera imagen es la principal.</p>
+              <p className="text-xs text-gray-400 mt-1">Presioná Enter o el botón + para agregar. La primera imagen es la principal.</p>
             </div>
 
             {imagesWatch.length > 0 ? (
@@ -480,13 +480,13 @@ export default function ProductForm({ mode, productId }: Props) {
             ) : (
               <div className="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center text-gray-400">
                 <ImageIcon className="w-8 h-8 mx-auto mb-2 opacity-40" />
-                <p className="text-sm">Sin imÃ¡genes todavÃ­a. PegÃ¡ una URL arriba para agregar.</p>
+                <p className="text-sm">Sin imágenes todaví­a. Pegá una URL arriba para agregar.</p>
               </div>
             )}
           </SectionCard>
 
           {/* Rendimiento */}
-          <SectionCard icon={<BarChart2 className="w-4 h-4" />} title="EstadÃ­sticas de rendimiento">
+          <SectionCard icon={<BarChart2 className="w-4 h-4" />} title="Estadí­sticas de rendimiento">
             <p className="text-xs text-gray-500 -mt-2 mb-2">Valores del 0 al 100. Se muestran como barras de progreso en el detalle del producto.</p>
             <div className="space-y-3">
               {perfArray.fields.map((field, idx) => (
@@ -526,13 +526,13 @@ export default function ProductForm({ mode, productId }: Props) {
               onClick={() => perfArray.append({ label: '', value: 75 })}
               className="flex items-center gap-1.5 text-sm text-[#0f172a] hover:text-gray-600 font-medium mt-1"
             >
-              <Plus className="w-4 h-4" /> Agregar estadÃ­stica
+              <Plus className="w-4 h-4" /> Agregar estadí­stica
             </button>
           </SectionCard>
 
-          {/* CaracterÃ­sticas */}
-          <SectionCard icon={<Zap className="w-4 h-4" />} title="CaracterÃ­sticas destacadas">
-            <p className="text-xs text-gray-500 -mt-2 mb-2">Cards de caracterÃ­sticas tÃ©cnicas que se muestran debajo de las barras de rendimiento.</p>
+          {/* Caracterí­sticas */}
+          <SectionCard icon={<Zap className="w-4 h-4" />} title="Caracterí­sticas destacadas">
+            <p className="text-xs text-gray-500 -mt-2 mb-2">Cards de caracterí­sticas tí©cnicas que se muestran debajo de las barras de rendimiento.</p>
             <div className="space-y-3">
               {featuresArray.fields.map((field, idx) => (
                 <div key={field.id} className="grid grid-cols-[auto_1fr_1fr_auto] gap-2 items-start bg-gray-50 p-3 rounded-lg">
@@ -544,12 +544,12 @@ export default function ProductForm({ mode, productId }: Props) {
                   <input
                     {...register(`features.${idx}.title`)}
                     className="input-field text-sm"
-                    placeholder="TÃ­tulo (ej: Carbono 18K)"
+                    placeholder="Tí­tulo (ej: Carbono 18K)"
                   />
                   <input
                     {...register(`features.${idx}.subtitle`)}
                     className="input-field text-sm"
-                    placeholder="SubtÃ­tulo (ej: Alta resistencia)"
+                    placeholder="Subtí­tulo (ej: Alta resistencia)"
                   />
                   <button
                     type="button"
@@ -566,7 +566,7 @@ export default function ProductForm({ mode, productId }: Props) {
               onClick={() => featuresArray.append({ icon: '', title: '', subtitle: '' })}
               className="flex items-center gap-1.5 text-sm text-[#0f172a] hover:text-gray-600 font-medium mt-1"
             >
-              <Plus className="w-4 h-4" /> Agregar caracterÃ­stica
+              <Plus className="w-4 h-4" /> Agregar caracterí­stica
             </button>
           </SectionCard>
 
@@ -579,7 +579,7 @@ export default function ProductForm({ mode, productId }: Props) {
                 className="input-field"
                 placeholder="https://youtube.com/watch?v=..."
               />
-              <p className="text-xs text-gray-400 mt-1">Si tiene video se muestra en el detalle del producto. Dejar vacÃ­o para ocultar.</p>
+              <p className="text-xs text-gray-400 mt-1">Si tiene video se muestra en el detalle del producto. Dejar vací­o para ocultar.</p>
             </div>
             {watch('videoUrl') && (
               <div className="mt-2 p-3 bg-gray-50 rounded-lg text-xs text-gray-600 flex items-center gap-2">
@@ -592,7 +592,7 @@ export default function ProductForm({ mode, productId }: Props) {
           {/* DESTACADOS */}
           <SectionCard icon={<List className="w-4 h-4" />} title="Destacados del producto">
             <p className="text-xs text-gray-500 -mt-2 mb-2">
-              Bullets que aparecen en la secciÃ³n &quot;DESTACADOS&quot; del detalle del producto. Cada producto puede tener los suyos.
+              Bullets que aparecen en la sección &quot;DESTACADOS&quot; del detalle del producto. Cada producto puede tener los suyos.
             </p>
             <div className="space-y-2">
               {highlightsWatch.map((item, idx) => (
@@ -605,7 +605,7 @@ export default function ProductForm({ mode, productId }: Props) {
                       setValue('highlights', updated);
                     }}
                     className="input-field flex-1 text-sm"
-                    placeholder="Ej: Producto original con garantÃ­a oficial"
+                    placeholder="Ej: Producto original con garantí­a oficial"
                   />
                   <button
                     type="button"
@@ -632,7 +632,7 @@ export default function ProductForm({ mode, productId }: Props) {
                   }
                 }}
                 className="input-field flex-1 text-sm"
-                placeholder="EscribÃ­ un destacado y presionÃ¡ Enter o +"
+                placeholder="Escribí­ un destacado y presioná Enter o +"
               />
               <button
                 type="button"
@@ -652,7 +652,7 @@ export default function ProductForm({ mode, productId }: Props) {
           {/* Medios de pago */}
           <SectionCard icon={<CreditCard className="w-4 h-4" />} title="Medios de pago habilitados">
             <p className="text-xs text-gray-500 -mt-2 mb-3">
-              SeleccionÃ¡ los medios de pago disponibles para este producto. Se muestran en el botÃ³n &quot;Ver mÃ¡s detalles&quot; de la pÃ¡gina del producto.
+              Seleccioná los medios de pago disponibles para este producto. Se muestran en el botón &quot;Ver más detalles&quot; de la página del producto.
             </p>
             {PAYMENT_GROUPS.map((group) => {
               const methods = Object.entries(PAYMENT_CATALOG).filter(([, def]) => def.group === group.key);
@@ -687,7 +687,7 @@ export default function ProductForm({ mode, productId }: Props) {
             })}
             {paymentWatch.length === 0 && (
               <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mt-1">
-                Sin medios de pago configurados â€” el botÃ³n &quot;Ver mÃ¡s detalles&quot; no se mostrarÃ¡ en el frontend.
+                Sin medios de pago configurados â€” el botón &quot;Ver más detalles&quot; no se mostrará en el frontend.
               </p>
             )}
           </SectionCard>
@@ -774,7 +774,7 @@ export default function ProductForm({ mode, productId }: Props) {
                     </span>
                   </div>
                   <div className="flex justify-between text-slate-300">
-                    <span>ðŸ“¦ 9 cuotas s/interÃ©s</span>
+                    <span>ðŸ“¦ 9 cuotas s/interí©s</span>
                     <span className="text-[#C8FF00] font-bold">
                       ${Math.ceil(activePrice / 9).toLocaleString('es-AR')}/mes
                     </span>
@@ -784,7 +784,7 @@ export default function ProductForm({ mode, productId }: Props) {
             );
           })()}
 
-          {/* Guardar rÃ¡pido */}
+          {/* Guardar rápido */}
           <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
             <button type="submit" disabled={saving} className="btn-primary w-full justify-center">
               <Save className="w-4 h-4" />
