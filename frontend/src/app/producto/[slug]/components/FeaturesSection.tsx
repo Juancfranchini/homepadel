@@ -1,30 +1,32 @@
-interface Feature {
-  icon: string;
-  title: string;
-  subtitle: string;
-}
+import { createElement } from 'react';
+import { Zap, Target, Shield, Gauge, TrendingUp, Star, Wind, Package, Thermometer, Footprints, Droplets, Maximize, Layers, Scissors } from 'lucide-react';
 
-interface Props {
-  features: Feature[];
-}
+const ICON_MAP: Record<string, any> = { Zap, Target, Shield, Gauge, TrendingUp, Star, Wind, Package, Thermometer, Footprints, Droplets, Maximize, Layers, Scissors };
+
+interface Feature { icon: string; title: string; subtitle: string; }
+interface Props { features: Feature[]; }
 
 export default function FeaturesSection({ features }: Props) {
   if (!features || features.length === 0) return null;
-
   return (
-    <section className="border-t border-[#0D0F0F] py-10 bg-[#050606]">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-tight text-[#F7F6F7] mb-6">
-          CARACTERISTICAS PRINCIPALES
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          {features.map((f) => (
-            <div key={f.title} className="bg-[#1A1F21] border border-[#0D0F0F] rounded-xl p-4 flex flex-col items-center text-center gap-2 hover:border-[#B7D31A]/30 transition-colors">
-              <span className="text-2xl">{f.icon}</span>
-              <p className="text-[#F7F6F7] font-semibold text-xs uppercase tracking-wide leading-snug">{f.title}</p>
-              <p className="text-[#C7C7C0] text-[10px] leading-snug">{f.subtitle}</p>
-            </div>
-          ))}
+    <section className="py-8 border-t border-[#0D0F0F]">
+      <div className="max-w-4xl mx-auto px-6 lg:px-8">
+        <h3 className="text-lg font-semibold text-[#F7F6F7] mb-4">Caracteristicas</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {features.map((f, i) => {
+            const IconComp = ICON_MAP[f.icon] || Zap;
+            return (
+              <div key={i} className="bg-[#0C0C0C] rounded-xl border border-[#0D0F0F] p-4 flex items-start gap-3">
+                <div className="w-10 h-10 rounded-lg bg-[#B7D31A]/10 flex items-center justify-center flex-shrink-0">
+                  {createElement(IconComp, { size: 18, className: 'text-[#B7D31A]' })}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-[#F7F6F7]">{f.title}</p>
+                  <p className="text-xs text-[#8A8A85]">{f.subtitle}</p>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

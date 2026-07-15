@@ -1,8 +1,13 @@
 import { Check } from 'lucide-react';
 import RelatedVideos from './RelatedVideos';
 
+interface RelatedVideo { title: string; url: string; }
+
 interface Props {
   highlights: string[];
+  highlightsTitle?: string;
+  highlightsDescription?: string;
+  relatedVideos?: RelatedVideo[];
 }
 
 const PLACEHOLDER_HIGHLIGHTS = [
@@ -12,17 +17,17 @@ const PLACEHOLDER_HIGHLIGHTS = [
   'Balance perfecto entre control y potencia para jugadores exigentes',
 ];
 
-export default function HighlightsSection({ highlights }: Props) {
-  const items = highlights.length > 0 ? highlights : PLACEHOLDER_HIGHLIGHTS;
+export default function HighlightsSection({ highlights, highlightsTitle, highlightsDescription, relatedVideos }: Props) {
+  const items = highlights && highlights.length > 0 ? highlights : PLACEHOLDER_HIGHLIGHTS;
 
   return (
     <div className="flex flex-col h-full">
       <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-tight text-[#F7F6F7] mb-3">
-        POR QUE ELEGIR ESTE PRODUCTO
+        {highlightsTitle || 'POR QUE ELEGIR ESTE PRODUCTO'}
       </h2>
-      <p className="text-[#C7C7C0] text-sm leading-relaxed mb-4">
-        Descubri por que este producto es la mejor opcion para tu juego. Cada detalle fue disenado para llevarte al siguiente nivel.
-      </p>
+      {highlightsDescription && (
+        <p className="text-[#C7C7C0] text-sm leading-relaxed mb-4">{highlightsDescription}</p>
+      )}
       <ul className="space-y-3">
         {items.map((text, i) => (
           <li key={i} className="flex items-start gap-3">
@@ -33,9 +38,8 @@ export default function HighlightsSection({ highlights }: Props) {
           </li>
         ))}
       </ul>
-
       <div className="mt-auto pt-4">
-        <RelatedVideos />
+        <RelatedVideos videos={relatedVideos || []} />
       </div>
     </div>
   );
