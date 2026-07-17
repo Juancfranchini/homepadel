@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import * as fs from 'fs';
 import * as path from 'path';
 
-export type SectionKey = 'about' | 'instagram' | 'final_message' | 'branding' | 'settings' | 'trust_bottom';
+export type SectionKey = 'about' | 'instagram' | 'final_message' | 'branding' | 'settings' | 'trust_bottom' | 'politica_devolucion' | 'envios' | 'medios_pago' | 'terminos' | 'privacidad' | 'contacto' | 'talles';
 
 @Injectable()
 export class SiteSectionsService {
@@ -65,6 +65,13 @@ export class SiteSectionsService {
 
   private getDefault(key: SectionKey): Record<string, unknown> {
     const defaults: Record<SectionKey, Record<string, unknown>> = {
+    'politica_devolucion': { title: 'Politica de Devolucion', content: '' },
+    'envios': { title: 'Envios', content: '' },
+    'medios_pago': { title: 'Medios de Pago', content: '' },
+    'terminos': { title: 'Terminos y Condiciones', content: '' },
+    'privacidad': { title: 'Politica de Privacidad', content: '' },
+    'contacto': { title: 'Contacto', content: '' },
+    'talles': { title: 'Guia de Talles', content: '' },
       about: {
         title: 'Somos Home Padel',
         description: 'Vivimos el padel tanto como vos.',

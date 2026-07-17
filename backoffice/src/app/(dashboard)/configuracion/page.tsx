@@ -25,7 +25,7 @@ const passwordSchema = z.object({
   currentPassword: z.string().min(6),
   newPassword: z.string().min(8),
   confirmPassword: z.string(),
-}).refine((d) => d.newPassword === d.confirmPassword, { message: 'Las contraseñas no coinciden', path: ['confirmPassword'] });
+}).refine((d) => d.newPassword === d.confirmPassword, { message: 'Las contraseÃ±as no coinciden', path: ['confirmPassword'] });
 type PasswordForm = z.infer<typeof passwordSchema>;
 
 function FormField({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
@@ -51,7 +51,7 @@ const LOGO_MAP = [
   { key: 'logoUrl', label: 'Logo del sitio (Header)', desc: 'Se muestra arriba a la izquierda en todas las paginas', position: 'Header - Escritorio y tablet' },
   { key: 'logoFooter', label: 'Logo del pie de pagina (Footer)', desc: 'Se muestra abajo en todas las paginas', position: 'Footer - Parte inferior del sitio' },
   { key: 'logoMobile', label: 'Logo para celulares', desc: 'Version reducida para pantallas chicas', position: 'Header - Pantallas menores a 768px' },
-  { key: 'isotipo', label: 'Icono de pestaña (Favicon)', desc: 'Se muestra en la pestaña del navegador', position: 'Pestaña del navegador y marcadores' },
+  { key: 'isotipo', label: 'Icono de pestaÃ±a (Favicon)', desc: 'Se muestra en la pestaÃ±a del navegador', position: 'PestaÃ±a del navegador y marcadores' },
 ];
 
 const API_BASE = 'http://localhost:4000';
@@ -158,7 +158,7 @@ export default function ConfiguracionPage() {
     setSavingPassword(true);
     try {
       await api.post('/auth/change-password', { currentPassword: data.currentPassword, newPassword: data.newPassword });
-      toast('Contraseña actualizada', 'success');
+      toast('ContraseÃ±a actualizada', 'success');
       passwordForm.reset();
     } catch { toast('Error', 'error'); } finally { setSavingPassword(false); }
   };
@@ -265,9 +265,9 @@ export default function ConfiguracionPage() {
 
       {activeTab === 'seguridad' && (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 max-w-md">
-          <h2 className="text-sm font-semibold text-gray-800 mb-5 flex items-center gap-2"><Shield className="w-4 h-4 text-gray-500" />Cambiar contraseña</h2>
+          <h2 className="text-sm font-semibold text-gray-800 mb-5 flex items-center gap-2"><Shield className="w-4 h-4 text-gray-500" />Cambiar contraseÃ±a</h2>
           <form onSubmit={passwordForm.handleSubmit(onChangePassword)} className="space-y-4">
-            <FormField label="Contraseña actual *" error={passwordForm.formState.errors.currentPassword?.message}>
+            <FormField label="ContraseÃ±a actual *" error={passwordForm.formState.errors.currentPassword?.message}>
               <div className="relative">
                 <input type={showCurrent ? 'text' : 'password'} {...passwordForm.register('currentPassword')} className={inputClass + ' pr-10'} />
                 <button type="button" onClick={() => setShowCurrent((v) => !v)} className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600">
@@ -275,7 +275,7 @@ export default function ConfiguracionPage() {
                 </button>
               </div>
             </FormField>
-            <FormField label="Nueva contraseña *" error={passwordForm.formState.errors.newPassword?.message}>
+            <FormField label="Nueva contraseÃ±a *" error={passwordForm.formState.errors.newPassword?.message}>
               <div className="relative">
                 <input type={showNew ? 'text' : 'password'} {...passwordForm.register('newPassword')} className={inputClass + ' pr-10'} placeholder="Minimo 8 caracteres" />
                 <button type="button" onClick={() => setShowNew((v) => !v)} className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600">
@@ -283,7 +283,7 @@ export default function ConfiguracionPage() {
                 </button>
               </div>
             </FormField>
-            <FormField label="Confirmar contraseña *" error={passwordForm.formState.errors.confirmPassword?.message}>
+            <FormField label="Confirmar contraseÃ±a *" error={passwordForm.formState.errors.confirmPassword?.message}>
               <div className="relative">
                 <input type={showConfirm ? 'text' : 'password'} {...passwordForm.register('confirmPassword')} className={inputClass + ' pr-10'} />
                 <button type="button" onClick={() => setShowConfirm((v) => !v)} className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600">
@@ -292,7 +292,7 @@ export default function ConfiguracionPage() {
               </div>
             </FormField>
             <button type="submit" disabled={savingPassword} className="flex items-center gap-2 px-5 py-2.5 bg-[#0f172a] text-white rounded-lg font-semibold text-sm hover:bg-[#1e293b] disabled:opacity-50">
-              <Shield className="w-4 h-4" />{savingPassword ? 'Actualizando...' : 'Cambiar contraseña'}
+              <Shield className="w-4 h-4" />{savingPassword ? 'Actualizando...' : 'Cambiar contraseÃ±a'}
             </button>
           </form>
         </div>
@@ -306,7 +306,7 @@ export default function ConfiguracionPage() {
               { key: 'newOrder' as const, label: 'Nuevo pedido recibido', desc: 'Email cuando llegue un pedido nuevo' },
               { key: 'lowStock' as const, label: 'Stock bajo', desc: 'Alerta cuando stock sea menor a 5 unidades' },
               { key: 'newCustomer' as const, label: 'Nuevo cliente', desc: 'Notificacion cuando un usuario se registre' },
-              { key: 'dailyReport' as const, label: 'Reporte diario', desc: 'Resumen de ventas cada mañana' },
+              { key: 'dailyReport' as const, label: 'Reporte diario', desc: 'Resumen de ventas cada maÃ±ana' },
               { key: 'weeklyReport' as const, label: 'Reporte semanal', desc: 'Informe completo todos los lunes' },
               { key: 'promotionExpiry' as const, label: 'Vencimiento de promociones', desc: 'Aviso 24hs antes de que venza' },
             ].map(({ key, label, desc }) => (
