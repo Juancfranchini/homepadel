@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Ruler } from 'lucide-react';
-import { getProduct, getFeaturedProducts } from '@/lib/api';
+import { getProduct, getProducts } from '@/lib/api';
 import { Product } from '@/types';
 import { formatPrice, getDiscountPercent } from '@/lib/utils';
 import { useCartStore } from '@/store/cartStore';
@@ -22,6 +22,7 @@ import ProductStars from './components/ProductStars';
 import PerformanceSection from './components/PerformanceSection';
 import HighlightsSection from './components/HighlightsSection';
 import VideoSection from './components/VideoSection';
+
 import ProductReviews from './components/ProductReviews';
 import CompareModels from './components/CompareModels';
 import OverallCustomerOpinions from './components/OverallCustomerOpinions';
@@ -42,13 +43,13 @@ export default function ProductoPage() {
   useEffect(() => {
     if (!params.slug) return;
     setLoading(true);
-    Promise.allSettled([getProduct(params.slug), getFeaturedProducts()])
+    Promise.allSettled([getProduct(params.slug), getProducts({ showAll: 1, limit: 50 })])
       .then(([prodRes, relRes]) => {
         const p = prodRes.status === 'fulfilled' ? (prodRes.value?.data ?? prodRes.value) : null;
         setProduct(p ?? null);
         if (relRes.status === 'fulfilled') {
-          const all: Product[] = Array.isArray(relRes.value) ? relRes.value : (relRes.value as any)?.data ?? [];
-          setRelated(all.filter((x) => x.slug !== params.slug).slice(0, 6));
+          const all: Product[] = Array.isArray(relRes.value) ? relRes.value : (relRes.value as any)?.items ?? (relRes.value as any)?.data ?? [];
+          const relatedIds: string[] = (p as any)?.relatedProductIds || []; if (relatedIds.length > 0) { setRelated(all.filter((x) => relatedIds.includes(x.id))); } else { setRelated(all.filter((x) => x.slug !== params.slug).slice(0, 6)); }
         }
       })
       .finally(() => setLoading(false));
@@ -85,6 +86,11 @@ export default function ProductoPage() {
   const paymentMethods: string[] = Array.isArray(product.paymentMethods) ? product.paymentMethods.filter((m): m is string => typeof m === 'string') : [];
   const performanceStats = Array.isArray(product.performanceStats) ? product.performanceStats : [];
   const highlights = Array.isArray(product.highlights) ? product.highlights.filter((h): h is string => typeof h === 'string') : [];
+  const specs = (product as any).specs || [];
+  const relatedVideos = (product as any).relatedVideos || [];
+  const compareData = (product as any).compareData || null;
+  const highlightsTitle = (product as any).highlightsTitle || '';
+  const highlightsDescription = (product as any).highlightsDescription || '';
 
   const getVideoEmbedUrl = (url?: string) => {
     if (!url) return null;
@@ -132,42 +138,17 @@ export default function ProductoPage() {
         </div>
       </div>
 
-      <PerformanceSection stats={performanceStats} specs={[]} />
+      <PerformanceSection stats={performanceStats} specs={specs} />
+
+      
 
       {(embedUrl || highlights.length > 0) && (
-        <section className="border-t border-[#0D0F0F] py-6">
-          <div className="max-w-7xl mx-auto px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-stretch">
-              <VideoSection embedUrl={embedUrl} />
-              <HighlightsSection highlights={highlights} />
-            </div>
-          </div>
-        </section>
+        <ProductReviews productId={product.id} />
       )}
 
-      <CompareModels />
+      <CompareModels data={compareData} />
 
-      <section className="border-t border-[#0D0F0F] py-6">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-tight text-[#F7F6F7] mb-6">
-            LO QUE DICEN NUESTROS CLIENTES
-          </h2>
-          <div className="flex flex-col lg:flex-row gap-6">
-            <div className="lg:w-[30%] flex-shrink-0">
-              <OverallCustomerOpinions averageRating={4.5} totalReviews={30595} distribution={[
-                { stars: 5, count: 24000, percentage: 78 },
-                { stars: 4, count: 4500, percentage: 15 },
-                { stars: 3, count: 1200, percentage: 4 },
-                { stars: 2, count: 500, percentage: 2 },
-                { stars: 1, count: 395, percentage: 1 },
-              ]} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <ProductReviews reviews={[]} />
-            </div>
-          </div>
-        </div>
-      </section>
+      <ProductReviews productId={product.id} />
 
       <RelatedProducts products={related} />
 

@@ -1,6 +1,3 @@
-// DTO para crear producto — incluye todos los campos de la Fase 2
-// El slug se genera automáticamente en el servicio
-
 import { IsString, IsNumber, IsOptional, IsBoolean, IsArray, Min, IsUrl } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -18,9 +15,15 @@ export class CreateProductDto {
   @ApiPropertyOptional()    @IsBoolean() @IsOptional()            active?: boolean;
   @ApiPropertyOptional()    @IsString()  @IsOptional()            categoryId?: string;
   @ApiPropertyOptional()    @IsString()  @IsOptional()            brandId?: string;
-  // ── Fase 2 ────────────────────────────────────────────────────────────────
   @ApiPropertyOptional()    @IsString()  @IsOptional()            videoUrl?: string;
   @ApiPropertyOptional()                @IsOptional()             performanceStats?: unknown;
   @ApiPropertyOptional()                @IsOptional()             features?: unknown;
   @ApiPropertyOptional({ type: [String] }) @IsArray() @IsOptional() relatedProductIds?: string[];
+  @ApiPropertyOptional({ type: [String] }) @IsArray() @IsOptional() highlights?: string[];
+  @ApiPropertyOptional() @IsNumber() @Min(0) @IsOptional() transferPrice?: number;
+  @ApiPropertyOptional()                @IsOptional()             relatedVideos?: unknown;
+  @ApiPropertyOptional()                @IsOptional()             specs?: unknown;
+  @ApiPropertyOptional()                @IsOptional()             compareData?: unknown;
+  @ApiPropertyOptional()    @IsString()  @IsOptional()            highlightsTitle?: string;
+  @ApiPropertyOptional()    @IsString()  @IsOptional()            highlightsDescription?: string;
 }

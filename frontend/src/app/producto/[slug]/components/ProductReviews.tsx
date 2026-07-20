@@ -1,84 +1,81 @@
 'use client';
 
-import { useRef } from 'react';
-import { Star, Check } from 'lucide-react';
-import { getImageUrl } from '@/lib/utils';
+import { useState, useEffect } from 'react';
+import { Star, User, CheckCircle } from 'lucide-react';
+import OverallCustomerOpinions from './OverallCustomerOpinions';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
 interface Review {
+  active?: boolean;
   id: string;
   name: string;
-  comment: string;
-  rating: number;
   photo?: string;
+  rating: number;
+  comment: string;
+  verified: boolean;
+  createdAt: string;
 }
 
 interface Props {
-  reviews: Review[];
+  productId: string;
 }
 
-const PLACEHOLDER_REVIEWS: Review[] = [
-  { id: '1', name: 'Martin G.', comment: 'Excelente paleta. El control y la potencia son increibles. La recomiendo totalmente para jugadores avanzados.', rating: 5 },
-  { id: '2', name: 'Lucia R.', comment: 'Muy buen producto. Llego en perfectas condiciones y el envio fue rapidisimo.', rating: 4 },
-  { id: '3', name: 'Diego P.', comment: 'La mejor paleta que he probado. El balance es perfecto y los materiales de primera calidad.', rating: 5 },
-  { id: '4', name: 'Carla S.', comment: 'Buena relacion precio-calidad. La uso hace 3 meses y sigue como nueva.', rating: 4 },
-];
+export default function ProductReviews({ productId }: Props) {
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export default function ProductReviews({ reviews }: Props) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const displayReviews = reviews.length > 0 ? reviews : PLACEHOLDER_REVIEWS;
-  const hasSlider = displayReviews.length > 2;
+  useEffect(() => {
+    fetch(API_URL + '/reviews?productId=' + productId)
+      .then((res) => res.json())
+      .then((data) => {
+        const all = Array.isArray(data) ? data : (data?.data || []);
+        setReviews(all.filter((r: Review) => r.active !== false));
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [productId]);
+
+  if (loading) return null;
+  if (reviews.length === 0) return null;
 
   return (
-    <div className="relative h-full">
-      {hasSlider && (
-        <>
-          <button onClick={() => scrollRef.current?.scrollBy({ left: -340, behavior: 'smooth' })}
-            className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-[#B7D31A]/10 backdrop-blur-sm border border-[#B7D31A]/30 flex items-center justify-center text-[#B7D31A] hover:bg-[#B7D31A]/20 transition-all">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2"><path d="M13 4l-6 6 6 6"/></svg>
-          </button>
-          <button onClick={() => scrollRef.current?.scrollBy({ left: 340, behavior: 'smooth' })}
-            className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-[#B7D31A]/10 backdrop-blur-sm border border-[#B7D31A]/30 flex items-center justify-center text-[#B7D31A] hover:bg-[#B7D31A]/20 transition-all">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2"><path d="M7 4l6 6-6 6"/></svg>
-          </button>
-        </>
-      )}
-
-      <div ref={scrollRef} className="flex gap-4 overflow-x-auto scrollbar-hide h-full" style={{ scrollSnapType: 'x mandatory', height: '100%' }}>
-        {displayReviews.map((r) => {
-          const initials = r.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-          return (
-            <div key={r.id} className="flex-none w-[320px] h-full" style={{ scrollSnapAlign: 'start' }}>
-              <div className="bg-[#1A1F21] border border-[#0D0F0F] rounded-2xl p-5 flex gap-4 h-full">
-                <div className="flex-shrink-0">
-                  {r.photo ? (
-                    <img src={getImageUrl(r.photo)} alt={r.name} className="w-12 h-12 rounded-full object-cover border-2 border-[#B7D31A]/30" />
-                  ) : (
-                    <div className="w-12 h-12 rounded-full bg-[#B7D31A]/10 border-2 border-[#B7D31A]/30 flex items-center justify-center">
-                      <span className="text-[#B7D31A] font-bold text-sm">{initials}</span>
+    <section className="border-t border-[#0D0F0F] py-6">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-tight text-[#F7F6F7] mb-6">
+          LO QUE DICEN NUESTROS CLIENTES
+        </h2>
+        <div className="flex flex-col lg:flex-row gap-6">
+          <div className="lg:w-[30%] flex-shrink-0">
+            <OverallCustomerOpinions productId={productId} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm font-semibold text-[#F7F6F7] mb-4">Resenas ({reviews.length})</h3>
+            <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+              {reviews.map((review) => (
+                <div key={review.id} className="bg-[#0C0C0C] rounded-xl border border-[#0D0F0F] p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-full bg-[#1A1F21] flex items-center justify-center flex-shrink-0">
+                      {review.photo ? <img src={review.photo} alt="" className="w-full h-full rounded-full object-cover" /> : <User className="w-4 h-4 text-[#8A8A85]" />}
                     </div>
-                  )}
-                </div>
-
-                <div className="flex-1 min-w-0 flex flex-col">
-                  <p className="text-[#F7F6F7] font-semibold text-sm">{r.name}</p>
-                  <div className="flex gap-0.5 mt-1">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} size={12} fill={i < r.rating ? '#B7D31A' : 'none'} stroke={i < r.rating ? '#B7D31A' : '#8A8A85'} />
-                    ))}
-                  </div>
-                  <p className="text-[#C7C7C0] text-sm leading-relaxed mt-3">{r.comment}</p>
-                  <div className="flex items-center gap-1.5 mt-auto pt-1.5">
-                    <div className="w-5 h-5 rounded-full bg-[#B7D31A]/10 border border-[#B7D31A]/20 flex items-center justify-center flex-shrink-0">
-                      <Check size={10} className="text-[#B7D31A]" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-semibold text-sm text-[#F7F6F7]">{review.name}</span>
+                        {review.verified && <span className="text-[10px] text-green-500 bg-green-500/10 px-1.5 py-0.5 rounded-full"><CheckCircle className="w-3 h-3 inline mr-0.5" />Verificado</span>}
+                      </div>
+                      <div className="flex gap-0.5 mb-1.5">
+                        {[1,2,3,4,5].map((s) => <Star key={s} className={'w-3 h-3 ' + (s <= review.rating ? 'text-[#B7D31A] fill-[#B7D31A]' : 'text-[#1A1F21]')} />)}
+                      </div>
+                      <p className="text-sm text-[#C7C7C0] leading-relaxed">{review.comment}</p>
+                      <p className="text-xs text-[#8A8A85] mt-1.5">{new Date(review.createdAt).toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                     </div>
-                    <span className="text-[#B7D31A] text-xs font-medium">Comprador verificado</span>
                   </div>
                 </div>
-              </div>
+              ))}
             </div>
-          );
-        })}
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

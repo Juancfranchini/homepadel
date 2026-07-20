@@ -1,4 +1,4 @@
-﻿import { Injectable, NotFoundException } from '@nestjs/common';
+﻿import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import slugify from 'slugify';
 
@@ -33,6 +33,13 @@ export class BrandsService {
   async remove(id: string) {
     const brand = await this.prisma.brand.findUnique({ where: { id } });
     if (!brand) throw new NotFoundException('Marca no encontrada');
-    return this.prisma.brand.delete({ where: { id } });
+    try {
+      return await this.prisma.brand.delete({ where: { id } });
+    } catch (error: any) {
+      if (error.code === 'P2003' || error.code === 'P2014') {
+        throw new BadRequestException('No se puede eliminar esta marca porque tiene productos asociados.');
+      }
+      throw error;
+    }
   }
 }

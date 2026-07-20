@@ -1,16 +1,17 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
-import { User, Mail, Lock, Eye, EyeOff, Package, LogOut, ChevronRight, CheckCircle, Heart, MapPin, FileText } from 'lucide-react';
+import { User, Mail, Lock, Eye, EyeOff, Package, LogOut, ChevronRight, CheckCircle, Heart, MapPin, FileText, MessageSquare } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { login, register as registerUser, getMyOrders } from '@/lib/api';
 import { formatPrice } from '@/lib/utils';
 import { Order } from '@/types';
 import BrandLogo from '@/components/ui/BrandLogo';
+import MisResenasTab from '@/components/account/MisResenasTab';
 
 const loginSchema = z.object({
   email: z.string().email('Email invalido'),
@@ -35,10 +36,11 @@ const ORDER_STATUS_MAP: Record<string, { label: string; color: string }> = {
   CANCELLED: { label: 'Cancelado', color: 'bg-red-500/20 text-red-400' },
 };
 
-type TabKey = 'pedidos' | 'favoritos' | 'datos' | 'direcciones';
+type TabKey = 'pedidos' | 'resenas' | 'favoritos' | 'datos' | 'direcciones';
 
 const TABS: { key: TabKey; label: string; icon: any }[] = [
   { key: 'pedidos', label: 'Mis pedidos', icon: Package },
+  { key: 'resenas', label: 'Mis resenas', icon: MessageSquare },
   { key: 'favoritos', label: 'Favoritos', icon: Heart },
   { key: 'datos', label: 'Mis datos', icon: FileText },
   { key: 'direcciones', label: 'Direcciones', icon: MapPin },
@@ -101,7 +103,7 @@ export default function CuentaPage() {
           </div>
 
           {/* Tabs */}
-          <div className="grid grid-cols-4 gap-3 mb-6">
+          <div className="grid grid-cols-5 gap-3 mb-6">
             {TABS.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.key;

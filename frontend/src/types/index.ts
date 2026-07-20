@@ -1,4 +1,4 @@
-// Tipos globales del frontend — espejo de los modelos Prisma del backend
+// Tipos globales del frontend â€” espejo de los modelos Prisma del backend
 
 export interface Category {
   id: string;
@@ -75,7 +75,7 @@ export interface Banner {
   order: number;
 }
 
-// ─── Nuevos tipos para homepage dinámica ────────────────────────────────────
+// â”€â”€â”€ Nuevos tipos para homepage dinÃ¡mica â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export interface HeroSlide {
   id: string;
@@ -126,6 +126,17 @@ export interface InstagramConfig {
 }
 
 export interface FinalMessageData {
+  text?: string;
+  buttonText?: string;
+  buttonUrl?: string;
+  footerText?: string;
+  secondaryButtonText?: string;
+  secondaryButtonUrl?: string;
+  newsletterTitle?: string;
+  newsletterText?: string;
+  newsletterPlaceholder?: string;
+  newsletterButtonText?: string;
+  newsletterFooterText?: string;
   title?: string;
   subtitle?: string;
   ctaText?: string;

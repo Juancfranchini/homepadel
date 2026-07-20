@@ -16,11 +16,13 @@ import {
   Receipt,
   Settings,
   PlaySquare,
-  Sparkles,
+  Sparkles, Shield,
   MessageSquare,
   Info,
   Instagram,
   Megaphone,
+  Star,
+  FileEdit, FileText, RefreshCw,
 } from 'lucide-react';
 
 interface NavItem {
@@ -41,12 +43,14 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
-    title: 'Tienda',
+    title: 'Ecommerce',
     items: [
       { label: 'Productos', href: '/productos', icon: Package },
-      { label: 'Categorías', href: '/categorias', icon: Tags },
+      { label: 'Contenido Productos', href: '/productos-contenido', icon: FileEdit },
+      { label: 'Categorias', href: '/categorias', icon: Tags },
       { label: 'Marcas', href: '/marcas', icon: Award },
       { label: 'Pedidos', href: '/pedidos', icon: ShoppingBag },
+      { label: 'Reviews', href: '/reviews', icon: Star },
       { label: 'Clientes', href: '/clientes', icon: Users },
     ],
   },
@@ -54,27 +58,30 @@ const navGroups: NavGroup[] = [
     title: 'Marketing',
     items: [
       { label: 'Promociones', href: '/promociones', icon: Percent },
-      { label: 'Banners', href: '/banners', icon: Image },
       { label: 'Cupones', href: '/cupones', icon: Tag },
     ],
   },
   {
-    title: 'Contenido Home',
+    title: 'Landing Page',
     items: [
       { label: 'Hero Slider', href: '/hero', icon: PlaySquare },
       { label: 'Beneficios', href: '/beneficios', icon: Sparkles },
+      { label: 'Banners', href: '/banners', icon: Image },
+      { label: 'Sobre Nosotros', href: '/configuracion/about', icon: Info },
       { label: 'Testimonios', href: '/testimonios', icon: MessageSquare },
       { label: 'FAQ', href: '/faq', icon: HelpCircle },
-      { label: 'Sobre Nosotros', href: '/configuracion/about', icon: Info },
       { label: 'Instagram', href: '/configuracion/instagram', icon: Instagram },
-      { label: 'Mensaje Final', href: '/configuracion/mensaje-final', icon: Megaphone },
+      { label: 'CTA & Newsletter', href: '/configuracion/mensaje-final', icon: Megaphone },
+      { label: 'Confianza Productos', href: '/configuracion/confianza-productos', icon: Shield },
+      { label: 'Politica de Devolucion', href: '/configuracion/paginas', icon: RefreshCw },
     ],
   },
   {
     title: 'Sistema',
     items: [
       { label: 'Gastos', href: '/gastos', icon: Receipt },
-      { label: 'Configuración', href: '/configuracion', icon: Settings },
+      { label: 'Configuracion', href: '/configuracion', icon: Settings },
+      
     ],
   },
 ];
@@ -84,30 +91,26 @@ export function Sidebar() {
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/';
-    // Exact match for /configuracion (not /configuracion/*)
+    if (href === '/productos') return pathname === '/productos';
     if (href === '/configuracion') return pathname === '/configuracion';
     return pathname.startsWith(href);
   };
 
   return (
     <aside className="w-64 min-h-screen bg-[#0f172a] flex flex-col shrink-0">
-      {/* Logo / Brand */}
       <div className="px-6 py-5 border-b border-white/10">
         <div className="flex items-center gap-2">
-          <span className="text-white font-bold text-lg tracking-wide">HOME PÁDEL</span>
+          <span className="text-white font-bold text-lg tracking-wide">HOME PADEL</span>
           <span className="w-2 h-2 rounded-full bg-[#C8FF00] shrink-0" />
         </div>
-        <p className="text-slate-400 text-xs mt-0.5">Panel de Administración</p>
+        <p className="text-slate-400 text-xs mt-0.5">Panel de Administracion</p>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-4">
         {navGroups.map((group, gi) => (
           <div key={gi}>
             {group.title && (
-              <p className="px-3 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-600">
-                {group.title}
-              </p>
+              <p className="px-3 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-600">{group.title}</p>
             )}
             <ul className="space-y-0.5">
               {group.items.map((item) => {
@@ -115,18 +118,10 @@ export function Sidebar() {
                 const Icon = item.icon;
                 return (
                   <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      className={`
-                        flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150
-                        ${
-                          active
-                            ? 'bg-[#1e293b] text-white border-l-2 border-[#C8FF00] pl-[10px]'
-                            : 'text-slate-400 hover:bg-[#1e293b] hover:text-white border-l-2 border-transparent pl-[10px]'
-                        }
-                      `}
-                    >
-                      <Icon className={`w-4 h-4 shrink-0 ${active ? 'text-[#C8FF00]' : 'text-slate-500'}`} />
+                    <Link href={item.href}
+                      className={'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ' +
+                        (active ? 'bg-[#1e293b] text-white border-l-2 border-[#C8FF00] pl-[10px]' : 'text-slate-400 hover:bg-[#1e293b] hover:text-white border-l-2 border-transparent pl-[10px]')}>
+                      <Icon className={'w-4 h-4 shrink-0 ' + (active ? 'text-[#C8FF00]' : 'text-slate-500')} />
                       {item.label}
                     </Link>
                   </li>
@@ -137,9 +132,8 @@ export function Sidebar() {
         ))}
       </nav>
 
-      {/* Footer */}
       <div className="px-6 py-4 border-t border-white/10">
-        <p className="text-slate-600 text-xs">BackOffice v1.1.0</p>
+        <p className="text-slate-600 text-xs">BackOffice v1.2.0</p>
       </div>
     </aside>
   );

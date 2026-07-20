@@ -3,17 +3,25 @@
 import { useState } from 'react';
 import { Star } from 'lucide-react';
 
-const BRANDS = ['Bullpadel', 'NOX', 'Siux', 'Black Crown'];
+interface CompareField {
+  label: string;
+  type: 'stars' | 'text';
+}
 
-const PARAMETERS = [
-  { label: 'Control', stars: [4, 4.5, 3.5, 4] },
-  { label: 'Potencia', stars: [3.5, 4, 4.5, 3.5] },
-  { label: 'Salida de bola', stars: [4, 3.5, 4, 4.5] },
-  { label: 'Manejabilidad', stars: [4.5, 4, 3.5, 4] },
-];
+interface CompareProduct {
+  name: string;
+  image?: string;
+  values: (number | string)[];
+}
 
-const LEVELS = ['Avanzado', 'Intermedio', 'Avanzado', 'Iniciante'];
-const BALANCES = ['Medio', 'Alto', 'Bajo', 'Medio'];
+interface CompareData {
+  fields: CompareField[];
+  products: CompareProduct[];
+}
+
+interface Props {
+  data: CompareData | null;
+}
 
 function StarRating({ value }: { value: number }) {
   const fullStars = Math.floor(value);
@@ -30,8 +38,23 @@ function StarRating({ value }: { value: number }) {
   );
 }
 
-export default function CompareModels() {
+export default function CompareModels({ data }: Props) {
   const [hoveredCol, setHoveredCol] = useState<number | null>(null);
+
+  if (!data || !data.fields || data.fields.length === 0 || !data.products || data.products.length < 2) return null;
+
+  // Filtrar productos que tengan al menos un valor con estrellas > 0 o texto no vacio
+  const validProducts = data.products.filter((p) => p.name && p.values.some((v) => v !== 0 && v !== ''));
+  if (validProducts.length < 2) return null;
+
+  // Filtrar campos que tengan al menos un valor con estrellas > 0
+  const validFields = data.fields.filter((f, fi) => {
+    return validProducts.some((p) => {
+      const v = p.values[fi];
+      return f.type === 'stars' ? (typeof v === 'number' && v > 0) : (typeof v === 'string' && v.trim() !== '');
+    });
+  });
+  if (validFields.length === 0) return null;
 
   return (
     <section className="border-t border-[#0D0F0F] py-10">
@@ -47,58 +70,42 @@ export default function CompareModels() {
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#8A8A85] border-r border-[#B7D31A]/30">
                   Caracteristicas
                 </th>
-                {BRANDS.map((brand, i) => (
+                {validProducts.map((prod, i) => (
                   <th key={i}
                     className={'px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider transition-colors border-x border-[#B7D31A]/30 ' +
                       (hoveredCol === i ? 'text-[#B7D31A] bg-[#242A05]' : 'text-[#F7F6F7]')}
                     onMouseEnter={() => setHoveredCol(i)}
                     onMouseLeave={() => setHoveredCol(null)}>
-                    {brand}
+                    {prod.name}
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {PARAMETERS.map((param, rowIdx) => (
-                <tr key={rowIdx} className="border-b border-[#B7D31A]/30">
-                  <td className="px-4 py-3 text-left text-[#C7C7C0] text-xs font-medium border-r border-[#B7D31A]/30">
-                    {param.label}
-                  </td>
-                  {param.stars.map((star, colIdx) => (
-                    <td key={colIdx}
-                      className={'px-4 py-3 text-center transition-colors border-x border-[#B7D31A]/30 ' +
-                        (hoveredCol === colIdx ? 'bg-[#242A05]' : '')}
-                      onMouseEnter={() => setHoveredCol(colIdx)}
-                      onMouseLeave={() => setHoveredCol(null)}>
-                      <StarRating value={star} />
-                    </td>
-                  ))}
-                </tr>
-              ))}
-              <tr className="border-b border-[#B7D31A]/30">
-                <td className="px-4 py-3 text-left text-[#C7C7C0] text-xs font-medium border-r border-[#B7D31A]/30">Balance</td>
-                {BALANCES.map((b, colIdx) => (
-                  <td key={colIdx}
-                    className={'px-4 py-3 text-center text-sm transition-colors border-x border-[#B7D31A]/30 ' +
-                      (hoveredCol === colIdx ? 'text-[#B7D31A] bg-[#242A05]' : 'text-[#C7C7C0]')}
-                    onMouseEnter={() => setHoveredCol(colIdx)}
-                    onMouseLeave={() => setHoveredCol(null)}>
-                    {b}
-                  </td>
-                ))}
-              </tr>
-              <tr>
-                <td className="px-4 py-3 text-left text-[#C7C7C0] text-xs font-medium border-r border-[#B7D31A]/30">Nivel del jugador</td>
-                {LEVELS.map((l, colIdx) => (
-                  <td key={colIdx}
-                    className={'px-4 py-3 text-center text-sm transition-colors border-x border-[#B7D31A]/30 ' +
-                      (hoveredCol === colIdx ? 'text-[#B7D31A] bg-[#242A05]' : 'text-[#C7C7C0]')}
-                    onMouseEnter={() => setHoveredCol(colIdx)}
-                    onMouseLeave={() => setHoveredCol(null)}>
-                    {l}
-                  </td>
-                ))}
-              </tr>
+              {validFields.map((field, fi) => {
+                const originalIndex = data.fields.indexOf(field);
+                return (
+                  <tr key={fi} className="border-b border-[#B7D31A]/30">
+                    <td className="px-4 py-3 text-left text-[#C7C7C0] text-xs font-medium border-r border-[#B7D31A]/30">{field.label}</td>
+                    {validProducts.map((prod, pi) => {
+                      const val = prod.values[originalIndex];
+                      return (
+                        <td key={pi}
+                          className={'px-4 py-3 text-center transition-colors border-x border-[#B7D31A]/30 ' +
+                            (hoveredCol === pi ? 'bg-[#242A05]' : '')}
+                          onMouseEnter={() => setHoveredCol(pi)}
+                          onMouseLeave={() => setHoveredCol(null)}>
+                          {field.type === 'stars' ? (
+                            <StarRating value={typeof val === 'number' ? val : 0} />
+                          ) : (
+                            <span className="text-sm text-[#C7C7C0]">{typeof val === 'string' ? val : '-'}</span>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,6 +7,7 @@ import { Upload, ImageIcon, Star } from 'lucide-react';
 import { useState } from 'react';
 import api from '@/lib/api';
 import Toggle from '../../testimonios/components/Toggle';
+import ImageGalleryInput from './ImageGalleryInput';
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000').replace(/\/api\/?$/, '');
 
@@ -29,9 +30,9 @@ const schema = z.object({
   categoryId: z.string().min(1, 'Categoria requerida'),
   brandId: z.string().min(1, 'Marca requerida'),
   description: z.string().optional(),
-  images: z.string().optional(),
+  images: z.array(z.string()).optional(),
 });
-export type ProductFormData = z.infer<typeof schema>;
+export type ProductFormData = z.infer<typeof schema> & { images?: string[] };
 
 interface Category { id: string; name: string }
 interface Brand { id: string; name: string }
@@ -50,12 +51,14 @@ const labelClass = 'text-xs font-medium text-gray-400 uppercase tracking-wider';
 
 export default function ProductForm({ defaultValues, onSave, onCancel, saving, categories, brands }: Props) {
   const [uploading, setUploading] = useState(false);
+  const [galleryImages, setGalleryImages] = useState<string[]>(Array.isArray(defaultValues?.images) ? (defaultValues.images as string[]).slice(1) : []);
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<ProductFormData>({
     resolver: zodResolver(schema),
     defaultValues: defaultValues || { active: true, featured: false, isNew: false, isOffer: false, stock: 0, price: 0 },
   });
 
-  const imageUrl = watch('images');
+  const imagesArray = watch('images') || [];
+  const imageUrl = imagesArray[0] || '';
   const previewUrl = getImageUrl(imageUrl);
   const featured = watch('featured');
   const active = watch('active');
@@ -77,14 +80,15 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
           headers: { 'Content-Type': 'multipart/form-data' },
         });
         const url = res.data?.url || res.data?.imageUrl || '';
-        setValue('images', url, { shouldDirty: true });
+        const currentImages = watch('images') || []; currentImages[0] = url; setValue('images', [...currentImages].filter(Boolean), { shouldDirty: true });
       } catch {} finally { setUploading(false); }
     };
     input.click();
   };
 
   return (
-    <form onSubmit={handleSubmit(onSave)} className="flex gap-0">
+    <form onSubmit={handleSubmit((data) => { const mainImage = typeof data.images === 'string' ? data.images : (Array.isArray(data.images) ? data.images[0] : '');
+const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[]; onSave({ ...data, images: allImages }); })} className="flex gap-0">
       {/* Columna izquierda - Imagen */}
       <div className="flex-shrink-0 w-[200px] flex flex-col gap-3">
         <div className="w-full h-[200px] rounded-xl bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200">
@@ -114,10 +118,11 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
             <Upload className="w-3 h-3" />{uploading ? '...' : 'Subir'}
           </button>
         </div>
+        <ImageGalleryInput images={galleryImages} onChange={setGalleryImages} />
       </div>
 
       {/* Linea vertical */}
-      <div className="mx-6 w-px bg-gray-200 self-stretch my-2" />
+      <div className="ml-7 mr-5 w-px bg-gray-200 self-stretch my-2" />
 
       {/* Columna derecha - Campos del formulario */}
       <div className="flex-1 grid grid-cols-3 gap-4 content-start">
@@ -215,7 +220,7 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
         </div>
 
         {/* Botones - ocupa 3 columnas */}
-        <div className="col-span-3 flex justify-end gap-3 pt-2 border-t border-gray-100">
+        <div className="col-span-3 flex justify-end gap-3 pt-12 border-t border-gray-100">
           <button type="button" onClick={onCancel} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">Cancelar</button>
           <button type="submit" disabled={saving} className="px-4 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg text-sm font-semibold hover:bg-[#b8ef00] disabled:opacity-50 transition-colors">
             {saving ? 'Guardando...' : 'Guardar'}

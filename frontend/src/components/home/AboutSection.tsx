@@ -1,31 +1,30 @@
-import { AboutSection as AboutData } from '@/types';
+﻿import { AboutSection as AboutData } from '@/types';
 import { getImageUrl } from '@/lib/utils';
-import { Truck, Shield, Users } from 'lucide-react';
+import { Heart, Users, Shield, Star, Award, Zap, CheckCircle, Truck } from 'lucide-react';
+import { createElement } from 'react';
+
+const ICON_MAP: Record<string, any> = { Heart, Users, Shield, Star, Award, Zap, CheckCircle, Truck };
 
 interface Props {
   data: AboutData | null;
 }
 
 const FALLBACK: AboutData = {
-  title: 'SOMOS HOME PADEL',
-  description: 'En Home Padel somos apasionados por este deporte. Ofrecemos las mejores marcas con atencion personalizada y envios a todo el pais.',
+  title: 'Somos Home Padel',
+  description: 'En Home Padel vivimos este deporte con la misma pasion que vos. Ofrecemos las mejores marcas con atencion personalizada y envios a todo el pais.',
   image: undefined,
   benefits: [
-    { icon: 'truck', title: 'Envios a todo el pais', description: 'Llegamos a cada rincon del pais' },
-    { icon: 'shield', title: 'Productos originales', description: 'Garantia oficial de fabrica' },
-    { icon: 'users', title: 'Atencion personalizada', description: 'Te asesoramos en tu compra' },
+    { icon: 'Truck', title: 'Envios a todo el pais', description: 'Llegamos a cada rincon de Argentina' },
+    { icon: 'Shield', title: 'Productos originales', description: 'Garantia oficial de fabrica' },
+    { icon: 'Users', title: 'Atencion personalizada', description: 'Te asesoramos segun tu nivel y estilo' },
   ],
 };
 
-const FEATURES = [
-  { icon: <Truck size={20} />, text: 'Envios a todo el pais' },
-  { icon: <Shield size={20} />, text: 'Productos originales' },
-  { icon: <Users size={20} />, text: 'Atencion personalizada' },
-];
-
 export default function AboutSection({ data }: Props) {
-  const d = data || FALLBACK;
-  const bgImage = d.image ? getImageUrl(d.image) : null;
+  const d = data?.title ? data : FALLBACK;
+  const bgImage = d.image ? getImageUrl(d.image!) : null;
+  const benefits = d.benefits && d.benefits.length > 0 ? d.benefits : FALLBACK.benefits;
+  const hasAnyDescription = benefits.some((b) => b.description && b.description.trim().length > 0);
 
   return (
     <section className="section-gradient relative bg-[#061E29] overflow-hidden py-16 md:py-20">
@@ -40,18 +39,25 @@ export default function AboutSection({ data }: Props) {
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8">
         <div className="max-w-2xl">
           <h2 className="text-2xl md:text-3xl font-semibold uppercase tracking-tight text-[#F7F6F7] mb-4">
-            SOMOS <span className="text-[#B7D31A]">HOME PADEL</span>
+            {d.title}
           </h2>
           <p className="text-[#C7C7C0] text-sm md:text-base leading-relaxed mb-8">{d.description}</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            {FEATURES.map((f, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-[#242A05] flex items-center justify-center flex-shrink-0">
-                  <span className="text-[#B7D31A]">{f.icon}</span>
+            {benefits.map((b, i) => {
+              const IconComp = ICON_MAP[b.icon] || Truck;
+              const hasDesc = b.description && b.description.trim().length > 0;
+              return (
+                <div key={i} className={'flex gap-3 ' + (hasDesc ? 'items-start' : 'items-center')}>
+                  <div className={'rounded-lg bg-[#242A05] flex items-center justify-center flex-shrink-0 ' + (hasDesc ? 'w-12 h-12' : 'w-10 h-10')}>
+                    {createElement(IconComp, { size: hasDesc ? 22 : 20, className: 'text-[#B7D31A]' })}
+                  </div>
+                  <div>
+                    <span className="text-[#C7C7C0] text-sm font-medium block">{b.title}</span>
+                    {hasDesc && <span className="text-[#8A8A85] text-xs mt-0.5 block">{b.description}</span>}
+                  </div>
                 </div>
-                <span className="text-[#C7C7C0] text-sm font-medium">{f.text}</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

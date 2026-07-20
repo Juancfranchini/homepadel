@@ -1,4 +1,4 @@
-﻿import { Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { PrismaModule } from './prisma/prisma.module';
@@ -19,6 +19,7 @@ import { TestimonialsModule } from './testimonials/testimonials.module';
 import { FaqModule } from './faq/faq.module';
 import { SiteSectionsModule } from './site-sections/site-sections.module';
 import { InstagramModule } from './instagram/instagram.module';
+import { ReviewsModule } from './reviews/reviews.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { InstagramModule } from './instagram/instagram.module';
     FaqModule,
     SiteSectionsModule,
     InstagramModule,
+    ReviewsModule,
   ],
 })
 export class AppModule {}

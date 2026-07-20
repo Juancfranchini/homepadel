@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, Edit2, Trash2, ArrowUpDown, ArrowRight, ImageIcon, Star } from 'lucide-react';
@@ -86,7 +86,7 @@ export default function ProductosPage() {
   const handleSave = async (data: ProductFormData) => {
     setSaving(true);
     try {
-      const payload = { ...data, images: data.images ? [data.images] : [] };
+      const payload = { ...data, images: data.images || [] };
       if (editItem) {
         await api.patch('/products/' + editItem.id, payload);
         toast('Producto actualizado', 'success');
@@ -154,7 +154,7 @@ export default function ProductosPage() {
     categoryId: editItem.category?.id || editItem.categoryId || '',
     brandId: editItem.brand?.id || editItem.brandId || '',
     description: editItem.description || '',
-    images: editItem.images?.[0] || '',
+    images: editItem.images || [],
   } : undefined;
 
   if (loading) return <PageLoader />;

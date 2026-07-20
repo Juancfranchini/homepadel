@@ -18,6 +18,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   orders    Order[]
+  reviews   ProductReview[]
 }
 
 model Category {
@@ -66,11 +67,17 @@ model Product {
   features          Json?
   performanceStats  Json?
   relatedProductIds String[]
+  relatedVideos   Json?
+  compareData     Json?
+  specs           Json?
   videoUrl          String?
   highlights        Json?
+  highlightsTitle   String?
+  highlightsDescription String?
   paymentMethods    Json?
   transferPrice     Float?
   orderItems        OrderItem[]
+  reviews           ProductReview[]
   brand             Brand       @relation(fields: [brandId], references: [id])
   category          Category    @relation(fields: [categoryId], references: [id])
 }
@@ -215,6 +222,9 @@ model FAQ {
 }
 
 model ProductReview {
+  product    Product   @relation(fields: [productId], references: [id])
+  userId     String?
+  user       User?       @relation(fields: [userId], references: [id])
   id        String   @id @default(cuid())
   productId String
   name      String

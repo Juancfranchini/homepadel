@@ -69,7 +69,7 @@ export default function TestimonialsSection({ testimonials }: Props) {
 
         {activeItems.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-[#8A8A85] text-sm">Se el primero en dejar tu resena.</p>
+            <p className="text-[#8A8A85] text-sm">Se el primero en dejar tu reseña.</p>
           </div>
         ) : (
           <div className="relative">
@@ -122,7 +122,7 @@ export default function TestimonialsSection({ testimonials }: Props) {
               className="inline-flex items-center gap-2 px-12 py-4 bg-[#B7D31A] text-[#050606] rounded-xl font-semibold text-sm uppercase tracking-wider btn-primary-glow transition-all"
             >
               <MessageSquare className="w-5 h-5" />
-              Deja tu resena
+              Deja tu reseña
             </button>
           </div>
         )}

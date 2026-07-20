@@ -1,8 +1,4 @@
-// Servicio de categorías
-// El slug se genera automáticamente a partir del nombre con slugify
-// normalizeDto: mapea isActive → active (campo real en Prisma)
-
-import { Injectable, NotFoundException } from '@nestjs/common';
+﻿import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import slugify from 'slugify';
 
@@ -28,7 +24,7 @@ export class CategoriesService {
 
   async update(id: string, dto: any) {
     const cat = await this.prisma.category.findUnique({ where: { id } });
-    if (!cat) throw new NotFoundException('Categoría no encontrada');
+    if (!cat) throw new NotFoundException('Categoria no encontrada');
     const data = normalizeDto(dto);
     if (data.name) data.slug = slugify(data.name, { lower: true, strict: true });
     return this.prisma.category.update({ where: { id }, data });
@@ -36,7 +32,14 @@ export class CategoriesService {
 
   async remove(id: string) {
     const cat = await this.prisma.category.findUnique({ where: { id } });
-    if (!cat) throw new NotFoundException('Categoría no encontrada');
-    return this.prisma.category.delete({ where: { id } });
+    if (!cat) throw new NotFoundException('Categoria no encontrada');
+    try {
+      return await this.prisma.category.delete({ where: { id } });
+    } catch (error: any) {
+      if (error.code === 'P2003' || error.code === 'P2014') {
+        throw new BadRequestException('No se puede eliminar esta categoria porque tiene productos asociados.');
+      }
+      throw error;
+    }
   }
 }
