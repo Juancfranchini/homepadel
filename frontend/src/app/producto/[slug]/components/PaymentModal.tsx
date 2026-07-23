@@ -2,6 +2,7 @@
 
 import { X, CreditCard } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
+import { usePaymentMethods } from '@/hooks/usePaymentMethods';
 
 interface PaymentDef { label: string; group: string; color: string }
 
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export default function PaymentModal({ onClose, methods, displayPrice, transferPrice }: Props) {
+  const { mercadopago, transferencia, visa } = usePaymentMethods();
   const hasTransfer = methods.some((m) => ['transferencia', 'banelco', 'link'].includes(m));
   const creditMethods = methods.filter((m) => PAYMENT_CATALOG[m]?.group === 'credit');
   const cuota3 = Math.ceil(displayPrice / 3);
@@ -73,7 +75,7 @@ export default function PaymentModal({ onClose, methods, displayPrice, transferP
             return (
               <div key={group}>
                 <p className="text-xs font-semibold uppercase tracking-widest text-[#8A8A85] mb-3">
-                  {group === 'credit' ? 'Tarjetas de credito' : group === 'transfer' ? 'Transferencia' : 'Billetera virtual'}
+                  {group === 'credit' ? 'visas de credito' : group === 'transfer' ? 'Transferencia' : 'Billetera virtual'}
                 </p>
                 <div className="bg-[#050606] border border-[#0D0F0F] rounded-xl p-4">
                   <div className="flex flex-wrap gap-2">

@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import * as fs from 'fs';
 import * as path from 'path';
 
-export type SectionKey = 'about' | 'instagram' | 'final_message' | 'branding' | 'settings' | 'trust_bottom' | 'politica_devolucion' | 'envios' | 'medios_pago' | 'terminos' | 'privacidad' | 'contacto' | 'talles';
+export type SectionKey = 'about' | 'instagram' | 'final_message' | 'branding' | 'settings' | 'trust_bottom' | 'politica_devolucion' | 'envios' | 'medios_pago' | 'terminos' | 'privacidad' | 'contacto' | 'talles' | 'reviews_info' | 'payment_methods';
 
 @Injectable()
 export class SiteSectionsService {
@@ -72,6 +72,8 @@ export class SiteSectionsService {
     'privacidad': { title: 'Politica de Privacidad', content: '' },
     'contacto': { title: 'Contacto', content: '' },
     'talles': { title: 'Guia de Talles', content: '' },
+    'payment_methods': { mercadopago: { active: true, publicKey: '', accessToken: '' }, transferencia: { active: true, cbu: '', alias: '', titular: '', banco: '' }, tarjeta: { active: false } },
+    'reviews_info': { content: 'Las opiniones son realizadas por clientes verificados que compraron el producto. El promedio se calcula en base a todas las resenas aprobadas.' },
       about: {
         title: 'Somos Home Padel',
         description: 'Vivimos el padel tanto como vos.',

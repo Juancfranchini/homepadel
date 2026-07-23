@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -8,9 +8,10 @@ import { z } from 'zod';
 import { CheckCircle, CreditCard, Truck, User, ChevronRight, Lock } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
+import { usePaymentMethods } from '@/hooks/usePaymentMethods';
+import { getImageUrl } from '@/lib/utils';
 import { formatPrice } from '@/lib/utils';
 import { createOrder } from '@/lib/api';
-import { getImageUrl } from '@/lib/utils';
 
 const checkoutSchema = z.object({
   name: z.string().min(2, 'El nombre es requerido'),
@@ -37,6 +38,7 @@ const errorInputClass = 'w-full bg-[#161818] border border-red-500/50 rounded-lg
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCartStore();
   const { user } = useAuthStore();
+  const { mercadopago, transferencia, visa, mastercard, amex } = usePaymentMethods();
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
 
@@ -63,6 +65,37 @@ export default function CheckoutPage() {
   }
 
   const onSubmit = async (data: CheckoutFormData) => {
+    if (data.paymentMethod === "mercadopago") {
+      try {
+        const orderItems = items.map((i) => ({
+          productId: i.product.id,
+          name: i.product.name,
+          quantity: i.quantity,
+          price: i.product.salePrice ?? i.product.price,
+        }));
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
+        const res = await fetch(API_URL + "/payments/create-preference", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderNumber: "HP-" + Date.now(),
+            items: orderItems,
+            payer: { name: data.name, email: data.email },
+            externalReference: "order_" + Date.now(),
+          }),
+        });
+        const pref = await res.json();
+        if (pref?.init_point) {
+          window.location.href = pref.init_point;
+          return;
+        }
+      } catch (err) {
+        console.error("Error MP:", err);
+        alert("Error al conectar con Mercado Pago");
+        return;
+      }
+    }
+
     try {
       const address = data.street + ', ' + data.city + ', ' + data.province + ' (' + data.postalCode + ')';
       const orderData = {
@@ -191,7 +224,7 @@ export default function CheckoutPage() {
                         {selectedPayment === pm.value && <div className="w-2.5 h-2.5 rounded-full bg-[#B7D31A]" />}
                       </div>
                       <div className="flex-1"><p className="font-bold text-sm text-[#F7F6F7]">{pm.label}</p><p className="text-xs text-[#8A8A85]">{pm.desc}</p></div>
-                      {pm.badge.length > 0 && <div className="flex gap-1">{pm.badge.map((b) => <span key={b} className="text-xs border border-[#0D0F0F] px-1.5 py-0.5 rounded font-bold text-[#8A8A85] bg-[#1A1F21]">{b}</span>)}</div>}
+                      {pm.badge.length > 0 && <div className="flex gap-1">{pm.value === "card" ? <div className="flex gap-1">{visa?.active !== false && visa?.logo && <img src={getImageUrl(visa.logo)} alt="VISA" className="w-10 h-7 object-cover rounded" />}{mastercard?.active !== false && mastercard?.logo && <img src={getImageUrl(mastercard.logo)} alt="MC" className="w-10 h-7 object-cover rounded" />}{amex?.active !== false && amex?.logo && <img src={getImageUrl(amex.logo)} alt="AMEX" className="w-10 h-7 object-cover rounded" />}</div> : pm.value === "mercadopago" ? <div className="flex gap-1">{mercadopago?.logo && <img src={getImageUrl(mercadopago.logo)} alt="MP" className="w-10 h-7 object-cover rounded" />}</div> : null}</div>}
                     </label>
                   ))}
                 </div>

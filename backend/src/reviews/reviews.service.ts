@@ -13,7 +13,7 @@ export class ReviewsService {
   }
 
   findAllAdmin() {
-    return this.prisma.productReview.findMany({ orderBy: { createdAt: 'desc' } });
+    return this.prisma.productReview.findMany({ include: { product: { select: { id: true, name: true, images: true } } }, orderBy: { createdAt: 'desc' } });
   }
 
   findByUser(userId: string) {
@@ -42,6 +42,12 @@ export class ReviewsService {
     const review = await this.prisma.productReview.findUnique({ where: { id } });
     if (!review) throw new NotFoundException('Review no encontrada');
     return this.prisma.productReview.update({ where: { id }, data: { active: true } });
+  }
+
+  async update(id: string, dto: any) {
+    const review = await this.prisma.productReview.findUnique({ where: { id } });
+    if (!review) throw new NotFoundException('Review no encontrada');
+    return this.prisma.productReview.update({ where: { id }, data: dto });
   }
 
   async remove(id: string) {

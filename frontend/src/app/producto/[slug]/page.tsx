@@ -143,12 +143,32 @@ export default function ProductoPage() {
       
 
       {(embedUrl || highlights.length > 0) && (
-        <ProductReviews productId={product.id} />
+        <section className="border-t border-[#0D0F0F] py-6">
+          <div className="max-w-7xl mx-auto px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-stretch">
+              <VideoSection embedUrl={embedUrl} />
+              <HighlightsSection highlights={highlights} highlightsTitle={highlightsTitle} highlightsDescription={highlightsDescription} relatedVideos={relatedVideos} />
+            </div>
+          </div>
+        </section>
       )}
-
       <CompareModels data={compareData} />
 
-      <ProductReviews productId={product.id} />
+      <section className="border-t border-[#0D0F0F] py-6">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-tight text-[#F7F6F7] mb-6">
+            LO QUE DICEN NUESTROS CLIENTES
+          </h2>
+          <div className="flex flex-col lg:flex-row gap-6">
+            <div className="lg:w-[30%] flex-shrink-0">
+              <OverallCustomerOpinions productId={product.id} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <ProductReviews productId={product.id} />
+            </div>
+          </div>
+        </div>
+      </section>
 
       <RelatedProducts products={related} />
 
@@ -156,3 +176,4 @@ export default function ProductoPage() {
     </div>
   );
 }
+

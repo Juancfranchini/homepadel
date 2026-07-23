@@ -20,6 +20,7 @@ import { FaqModule } from './faq/faq.module';
 import { SiteSectionsModule } from './site-sections/site-sections.module';
 import { InstagramModule } from './instagram/instagram.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { ReviewsModule } from './reviews/reviews.module';
     SiteSectionsModule,
     InstagramModule,
     ReviewsModule,
+    PaymentsModule,
   ],
 })
 export class AppModule {}

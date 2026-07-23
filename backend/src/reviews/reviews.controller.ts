@@ -47,6 +47,15 @@ export class ReviewsController {
     return this.reviewsService.approve(id);
   }
 
+  @Patch(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  update(@Param('id') id: string, @Body() dto: any) {
+    return this.reviewsService.update(id, dto);
+    return this.reviewsService.approve(id);
+  }
+
   @Delete(':id')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
