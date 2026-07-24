@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import {usePathname } from 'next/navigation';
 import {
-  HelpCircle,
+  HelpCircle, Mail,
   LayoutDashboard,
   Package,
   Tags,
@@ -59,6 +59,7 @@ const navGroups: NavGroup[] = [
     items: [
       { label: 'Promociones', href: '/promociones', icon: Percent },
       { label: 'Cupones', href: '/cupones', icon: Tag },
+      { label: 'Suscriptores', href: '/newsletter', icon: Mail },
     ],
   },
   {
@@ -70,6 +71,7 @@ const navGroups: NavGroup[] = [
       { label: 'Sobre Nosotros', href: '/configuracion/about', icon: Info },
       { label: 'Testimonios', href: '/testimonios', icon: MessageSquare },
       { label: 'FAQ', href: '/faq', icon: HelpCircle },
+      { label: 'Contacto', href: '/contacto', icon: FileText },
       { label: 'Instagram', href: '/configuracion/instagram', icon: Instagram },
       { label: 'CTA & Newsletter', href: '/configuracion/mensaje-final', icon: Megaphone },
       { label: 'Confianza Productos', href: '/configuracion/confianza-productos', icon: Shield },

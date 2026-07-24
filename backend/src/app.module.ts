@@ -18,6 +18,9 @@ import { BenefitsModule } from './benefits/benefits.module';
 import { TestimonialsModule } from './testimonials/testimonials.module';
 import { FaqModule } from './faq/faq.module';
 import { SiteSectionsModule } from './site-sections/site-sections.module';
+import { ContactModule } from './contact/contact.module';
+import { ContactChannelsModule } from './contact-channels/contact-channels.module';
+import { NewsletterModule } from './newsletter/newsletter.module';
 import { InstagramModule } from './instagram/instagram.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { PaymentsModule } from './payments/payments.module';
@@ -44,8 +47,14 @@ import { PaymentsModule } from './payments/payments.module';
     FaqModule,
     SiteSectionsModule,
     InstagramModule,
+    ContactModule,
+    ContactChannelsModule,
+    NewsletterModule,
     ReviewsModule,
     PaymentsModule,
   ],
 })
 export class AppModule {}
+
+
+
