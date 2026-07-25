@@ -4,13 +4,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Save, ArrowLeft, FileText, Plus, Trash2, MessageCircle, Mail, Clock, MapPin } from 'lucide-react';
+import { Save, FileText, Plus, Trash2, MessageCircle, Mail, Clock, MapPin, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { useToast } from '@/components/ui/Toast';
 import { createElement } from 'react';
-import ImageUpload from '@/components/ui/ImageUpload';
+import ImageUpload, { getImageUrl } from '@/components/ui/ImageUpload';
 
 const inputClass = 'w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00]';
 const labelClass = 'block text-xs font-medium text-gray-400 uppercase tracking-wider';
@@ -24,12 +24,12 @@ const ICON_OPTIONS = [
 
 const ICON_MAP: Record<string, any> = { MessageCircle, Mail, Clock, MapPin };
 
-export default function ContactoConfigPage() {
+export default function ContactoPage() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const { register, handleSubmit, reset, control, watch, setValue } = useForm<any>({ resolver: zodResolver(z.object({}).passthrough()) });
+  const { register, handleSubmit, reset, control, watch, setValue, formState: { errors } } = useForm<any>({ resolver: zodResolver(z.object({}).passthrough()) });
   const cardsArray = useFieldArray({ control, name: 'cards' });
 
   const load = useCallback(async () => {
@@ -70,18 +70,27 @@ export default function ContactoConfigPage() {
   return (
     <div className="space-y-6 w-full">
       <div className="flex items-center gap-3">
-        <Link href="/configuracion" className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"><ArrowLeft className="w-4 h-4" /></Link>
-        <div><h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><FileText className="w-5 h-5 text-[#C8FF00]" />Contacto</h1><p className="text-gray-500 text-sm mt-0.5">Configuracion de la pagina de contacto</p></div>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><FileText className="w-5 h-5 text-[#C8FF00]" />Pagina de Contacto</h1>
+          <p className="text-gray-500 text-sm mt-0.5">Configura todas las secciones de la pagina /contacto</p>
+        </div>
+        <Link href="/configuracion/canales-contacto" className="ml-auto flex items-center gap-2 px-4 py-2 border border-[#C8FF00]/50 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+          <ExternalLink className="w-4 h-4" />Gestionar Canales de Contacto
+        </Link>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Hero */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-          <h3 className="text-sm font-semibold text-gray-800 border-b border-gray-100 pb-3">Hero</h3>
-          <div><label className={labelClass}>Chip</label><input {...register('chip')} className={inputClass} /></div>
-          <div><label className={labelClass}>Titulo</label><input {...register('title')} className={inputClass} /></div>
+          <h3 className="text-sm font-semibold text-gray-800 border-b border-gray-100 pb-3">Hero Principal</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div><label className={labelClass}>Chip</label><input {...register('chip')} className={inputClass} /></div>
+            <div className="md:col-span-2"><label className={labelClass}>Titulo</label><input {...register('title')} className={inputClass} /></div>
+          </div>
           <div><label className={labelClass}>Descripcion</label><textarea {...register('description')} rows={2} className={inputClass} /></div>
         </div>
 
+        {/* Imagen de fondo del Hero */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
           <h3 className="text-sm font-semibold text-gray-800 border-b border-gray-100 pb-3">Imagen de Fondo del Hero</h3>
           <ImageUpload
@@ -93,9 +102,10 @@ export default function ContactoConfigPage() {
           />
         </div>
 
+        {/* Cards de info de contacto */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-3">
           <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-            <h3 className="text-sm font-semibold text-gray-800">Cards de contacto</h3>
+            <h3 className="text-sm font-semibold text-gray-800">Informacion de Contacto (columna izquierda)</h3>
             <button type="button" onClick={() => cardsArray.append({ icon: 'MessageCircle', bg: 'bg-white/5 border-[#0D0F0F]', title: '', desc: '', detail: '', href: '' })}
               className="flex items-center gap-1 text-xs font-semibold px-2 py-1 bg-[#C8FF00] text-[#0f172a] rounded-lg hover:bg-[#b8ef00]"><Plus size={12} />Agregar</button>
           </div>
@@ -125,6 +135,7 @@ export default function ContactoConfigPage() {
           })}
         </div>
 
+        {/* Mapa */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
           <h3 className="text-sm font-semibold text-gray-800 border-b border-gray-100 pb-3">Mapa</h3>
           <div>
@@ -134,10 +145,11 @@ export default function ContactoConfigPage() {
           </div>
         </div>
 
+        {/* Newsletter */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-          <h3 className="text-sm font-semibold text-gray-800 border-b border-gray-100 pb-3">Newsletter</h3>
-          <div><label className={labelClass}>Titulo del Newsletter</label><input {...register('newsletterTitle')} className={inputClass} /></div>
-          <div><label className={labelClass}>Texto del Newsletter</label><input {...register('newsletterText')} className={inputClass} /></div>
+          <h3 className="text-sm font-semibold text-gray-800 border-b border-gray-100 pb-3">Seccion Newsletter</h3>
+          <div><label className={labelClass}>Titulo</label><input {...register('newsletterTitle')} className={inputClass} /></div>
+          <div><label className={labelClass}>Descripcion</label><input {...register('newsletterText')} className={inputClass} /></div>
         </div>
 
         <div className="flex justify-end">

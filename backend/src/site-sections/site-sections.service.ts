@@ -70,7 +70,7 @@ export class SiteSectionsService {
     'medios_pago': { title: 'Medios de Pago', content: '' },
     'terminos': { title: 'Terminos y Condiciones', content: '' },
     'privacidad': { title: 'Politica de Privacidad', content: '' },
-    'contacto': { title: 'Contacto', content: '' },
+    'contacto': { chip: 'ESTAMOS PARA AYUDARTE', title: 'Contactanos', description: 'Tenes dudas sobre nuestros productos, envios o pagos? Nuestro equipo esta para ayudarte.', heroImage: '', mapUrl: '', newsletterTitle: 'ENTERATE DE LAS NOVEDADES', newsletterText: 'Suscribite y recibi ofertas exclusivas y lanzamientos.' },
     'talles': { title: 'Guia de Talles', content: '' },
     'payment_methods': { mercadopago: { active: true, publicKey: '', accessToken: '' }, transferencia: { active: true, cbu: '', alias: '', titular: '', banco: '' }, tarjeta: { active: false } },
     'reviews_info': { content: 'Las opiniones son realizadas por clientes verificados que compraron el producto. El promedio se calcula en base a todas las resenas aprobadas.' },
@@ -110,3 +110,6 @@ export class SiteSectionsService {
     return defaults[key];
   }
 }
+
+
+

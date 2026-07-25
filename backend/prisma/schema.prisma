@@ -249,3 +249,24 @@ enum OrderStatus {
   DELIVERED
   CANCELLED
 }
+
+model Newsletter {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model ContactChannel {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  logo        String
+  url         String
+  buttonText  String   @default("Ir al canal")
+  order       Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
