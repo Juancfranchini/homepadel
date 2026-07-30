@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -36,6 +36,7 @@ export default function ProductoPage() {
   const [related, setRelated] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const [hasSizeGuide, setHasSizeGuide] = useState(false);
   const [wished, setWished] = useState(false);
   const [added, setAdded] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -47,6 +48,17 @@ export default function ProductoPage() {
       .then(([prodRes, relRes]) => {
         const p = prodRes.status === 'fulfilled' ? (prodRes.value?.data ?? prodRes.value) : null;
         setProduct(p ?? null);
+        // Verificar guia de talles
+        if (p) {
+          fetch(process.env.NEXT_PUBLIC_API_URL + '/size-guides?categoryId=' + p.categoryId)
+            .then(r => r.json())
+            .then(data => {
+              const guides = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
+              const hasGuide = guides.some((g: any) => g.productIds?.length === 0 || g.productIds?.includes(p.id));
+              setHasSizeGuide(hasGuide);
+            })
+            .catch(() => setHasSizeGuide(false));
+        }
         if (relRes.status === 'fulfilled') {
           const all: Product[] = Array.isArray(relRes.value) ? relRes.value : (relRes.value as any)?.items ?? (relRes.value as any)?.data ?? [];
           const relatedIds: string[] = (p as any)?.relatedProductIds || []; if (relatedIds.length > 0) { setRelated(all.filter((x) => relatedIds.includes(x.id))); } else { setRelated(all.filter((x) => x.slug !== params.slug).slice(0, 6)); }
@@ -129,9 +141,7 @@ export default function ProductoPage() {
             <div className="h-px bg-[#0D0F0F]" />
             <TrustBadges />
             <ProductActions stock={product.stock} quantity={quantity} onQuantityChange={setQuantity} onBuyNow={handleBuyNow} onAddToCart={handleAddToCart} added={added} wished={wished} onWish={() => setWished(!wished)} />
-            <Link href="/talles" className="inline-flex items-center gap-2 px-4 py-2 bg-[#1A1F21] border border-[#0D0F0F] rounded-lg text-[#B7D31A] text-xs font-semibold hover:border-[#B7D31A]/50 transition-all w-fit">
-              <Ruler size={14} />Guia de talles
-            </Link>
+            {hasSizeGuide && (<Link href="/talles" className="inline-flex items-center gap-2 px-4 py-2 bg-[#1A1F21] border border-[#0D0F0F] rounded-lg text-[#B7D31A] text-xs font-semibold hover:border-[#B7D31A]/50 transition-all w-fit"><Ruler size={14} />Guia de talles</Link>)}
             <ShippingCalc />
             <p className="text-[10px] text-[#8A8A85]">SKU: {product.sku}</p>
           </div>
