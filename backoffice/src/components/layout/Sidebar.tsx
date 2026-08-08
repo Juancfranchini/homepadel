@@ -22,7 +22,7 @@ import {
   Instagram,
   Megaphone,
   Star,
-  FileEdit, FileText, RefreshCw, CreditCard, Ruler,
+  FileEdit, FileText, RefreshCw, CreditCard, Ruler, Truck,
 } from 'lucide-react';
 
 interface NavItem {
@@ -77,6 +77,7 @@ const navGroups: NavGroup[] = [
       
       { label: 'Politica de Devolucion', href: '/configuracion/paginas', icon: RefreshCw },
       { label: 'Guia de Talles', href: '/configuracion/talles', icon: Ruler },
+      { label: 'Envios', href: '/configuracion/envios', icon: Truck },
     ],
   },
   {

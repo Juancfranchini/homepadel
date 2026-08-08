@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+﻿import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import * as fs from 'fs';
@@ -66,7 +66,7 @@ export class SiteSectionsService {
   private getDefault(key: SectionKey): Record<string, unknown> {
     const defaults: Record<SectionKey, Record<string, unknown>> = {
     'politica_devolucion': { title: 'Politica de Devolucion', content: '' },
-    'envios': { title: 'Envios', content: '' },
+    'envios': { title: 'Envios', sections: [{ title: 'Tiempos y costos', content: '' }] },
     'medios_pago': { title: 'Medios de Pago', content: '' },
     'terminos': { title: 'Terminos y Condiciones', content: '' },
     'privacidad': { title: 'Politica de Privacidad', content: '' },
