@@ -153,3 +153,40 @@ p, a, li, span, input, textarea, select, label { font-weight: 400; }
   75% { transform: translate(-2%, -2%) rotate(1deg); }
   100% { transform: translate(0, 0) rotate(0deg); }
 }
+
+
+/* Guia de Talles - estilos del contenido HTML */
+.size-guide-content {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: #C7C7C0;
+  line-height: 1.7;
+  letter-spacing: 0.01em;
+}
+.size-guide-content h1, .size-guide-content h2, .size-guide-content h3, .size-guide-content h4 {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: #F7F6F7;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.size-guide-content h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; }
+.size-guide-content h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+.size-guide-content p {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.75;
+  margin-bottom: 1rem;
+  color: #C7C7C0;
+}
+.size-guide-content strong {
+  font-weight: 600;
+  color: #F7F6F7;
+}
+.size-guide-content li {
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  margin-bottom: 0.375rem;
+}
+.size-guide-content table {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 0.875rem;
+}

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+﻿import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { PrismaModule } from './prisma/prisma.module';
@@ -20,6 +20,7 @@ import { FaqModule } from './faq/faq.module';
 import { SiteSectionsModule } from './site-sections/site-sections.module';
 import { ContactModule } from './contact/contact.module';
 import { ContactChannelsModule } from './contact-channels/contact-channels.module';
+import { SizeGuidesModule } from './size-guides/size-guides.module';
 import { NewsletterModule } from './newsletter/newsletter.module';
 import { InstagramModule } from './instagram/instagram.module';
 import { ReviewsModule } from './reviews/reviews.module';
@@ -49,6 +50,7 @@ import { PaymentsModule } from './payments/payments.module';
     InstagramModule,
     ContactModule,
     ContactChannelsModule,
+    SizeGuidesModule,
     NewsletterModule,
     ReviewsModule,
     PaymentsModule,

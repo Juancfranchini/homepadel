@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import {usePathname } from 'next/navigation';
 import {
-  HelpCircle, Mail,
+  HelpCircle,
   LayoutDashboard,
   Package,
   Tags,
@@ -22,7 +22,7 @@ import {
   Instagram,
   Megaphone,
   Star,
-  FileEdit, FileText, RefreshCw, CreditCard,
+  FileEdit, FileText, RefreshCw, CreditCard, Ruler, Truck, UserCheck, FileCheck,
 } from 'lucide-react';
 
 interface NavItem {
@@ -59,7 +59,6 @@ const navGroups: NavGroup[] = [
     items: [
       { label: 'Promociones', href: '/promociones', icon: Percent },
       { label: 'Cupones', href: '/cupones', icon: Tag },
-      { label: 'Suscriptores', href: '/newsletter', icon: Mail },
     ],
   },
   {
@@ -71,13 +70,16 @@ const navGroups: NavGroup[] = [
       { label: 'Sobre Nosotros', href: '/configuracion/about', icon: Info },
       { label: 'Testimonios', href: '/testimonios', icon: MessageSquare },
       { label: 'FAQ', href: '/faq', icon: HelpCircle },
-      { label: 'Contacto', href: '/contacto', icon: FileText },
       { label: 'Instagram', href: '/configuracion/instagram', icon: Instagram },
       { label: 'CTA & Newsletter', href: '/configuracion/mensaje-final', icon: Megaphone },
       { label: 'Confianza Productos', href: '/configuracion/confianza-productos', icon: Shield },
       { label: 'Medios de Pago', href: '/configuracion/medios-pago', icon: CreditCard },
       
       { label: 'Politica de Devolucion', href: '/configuracion/paginas', icon: RefreshCw },
+      { label: 'Guia de Talles', href: '/configuracion/talles', icon: Ruler },
+      { label: 'Envios', href: '/configuracion/envios', icon: Truck },
+      { label: 'Politica de Privacidad', href: '/configuracion/privacidad', icon: UserCheck },
+      { label: 'Terminos y Condiciones', href: '/configuracion/terminos', icon: FileCheck },
     ],
   },
   {
