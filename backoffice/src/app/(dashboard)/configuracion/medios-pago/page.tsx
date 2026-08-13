@@ -119,7 +119,7 @@ export default function MediosPagoPage() {
                   </button>
                 </div>
               </div>
-              <div className="col-span-2"><label className={labelClass}>Logo</label><ImageUpload value={mpLogo} onChange={(url) => setValue('mercadopagoLogo', url, { shouldDirty: true })} width={200} height={80} /></div>
+              <div className="col-span-2"><label className={labelClass}>Logo</label><ImageUpload suggestion="Medida recomendada: 200x80px. Logo horizontal, fondo transparente" value={mpLogo} onChange={(url) => setValue('mercadopagoLogo', url, { shouldDirty: true })} width={200} height={80} /></div>
             </div>
           )}
         </div>
@@ -152,7 +152,7 @@ export default function MediosPagoPage() {
               </div>
               <div><label className={labelClass}>Titular</label><input {...register('transferenciaTitular')} className={inputClass} /></div>
               <div><label className={labelClass}>Banco</label><input {...register('transferenciaBanco')} className={inputClass} /></div>
-              <div className="col-span-2"><label className={labelClass}>Logo</label><ImageUpload value={transfLogo} onChange={(url) => setValue('transferenciaLogo', url, { shouldDirty: true })} width={200} height={80} /></div>
+              <div className="col-span-2"><label className={labelClass}>Logo</label><ImageUpload suggestion="Medida recomendada: 200x80px. Logo horizontal, fondo transparente" value={transfLogo} onChange={(url) => setValue('transferenciaLogo', url, { shouldDirty: true })} width={200} height={80} /></div>
             </div>
           )}
         </div>
@@ -169,7 +169,7 @@ export default function MediosPagoPage() {
                   <span className="text-sm font-medium text-gray-700">{item.label}</span>
                   <Toggle checked={item.active} onChange={() => setValue((item.key + 'Active') as any, !item.active, { shouldDirty: true })} />
                 </div>
-                {item.active && <ImageUpload value={item.logo} onChange={(url) => setValue((item.key + 'Logo') as any, url, { shouldDirty: true })} width={200} height={80} />}
+                {item.active && <ImageUpload suggestion="Medida recomendada: 200x80px. Logo horizontal, fondo transparente" value={item.logo} onChange={(url) => setValue((item.key + 'Logo') as any, url, { shouldDirty: true })} width={200} height={80} />}
               </div>
             ))}
           </div>
@@ -187,7 +187,7 @@ export default function MediosPagoPage() {
                   <span className="text-sm font-medium text-gray-700">{item.label}</span>
                   <Toggle checked={item.active} onChange={() => setValue((item.key + 'Active') as any, !item.active, { shouldDirty: true })} />
                 </div>
-                {item.active && <ImageUpload value={item.logo} onChange={(url) => setValue((item.key + 'Logo') as any, url, { shouldDirty: true })} width={200} height={80} />}
+                {item.active && <ImageUpload suggestion="Medida recomendada: 200x80px. Logo horizontal, fondo transparente" value={item.logo} onChange={(url) => setValue((item.key + 'Logo') as any, url, { shouldDirty: true })} width={200} height={80} />}
               </div>
             ))}
           </div>

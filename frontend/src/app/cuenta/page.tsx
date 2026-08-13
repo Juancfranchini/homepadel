@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
-import { User, Mail, Lock, Eye, EyeOff, Package, LogOut, ChevronRight, CheckCircle, Heart, MapPin, FileText, MessageSquare } from 'lucide-react';
+import { User, Mail, Lock, Eye, EyeOff, Package, LogOut, ChevronRight, CheckCircle, Heart, MapPin, FileText, MessageSquare, Truck } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { login, register as registerUser, getMyOrders } from '@/lib/api';
 import { formatPrice } from '@/lib/utils';
@@ -123,7 +123,12 @@ export default function CuentaPage() {
             {/* Pedidos */}
             {activeTab === 'pedidos' && (
               <div>
-                <h2 className="font-black text-lg uppercase tracking-tight text-[#F7F6F7] flex items-center gap-2 mb-5"><Package size={20} className="text-[#B7D31A]" />Mis pedidos</h2>
+                <div className="flex items-center justify-between mb-5">
+                  <h2 className="font-black text-lg uppercase tracking-tight text-[#F7F6F7] flex items-center gap-2"><Package size={20} className="text-[#B7D31A]" />Mis pedidos</h2>
+                  <Link href="/rastrear" className="inline-flex items-center gap-2 text-sm text-[#B7D31A] hover:text-[#c8e81f] transition-colors border border-[#B7D31A]/30 rounded-xl px-4 py-2">
+                    <Truck size={16} /> Rastrear pedido
+                  </Link>
+                </div>
                 {loadingOrders ? (
                   <div className="space-y-3">{[1, 2].map((i) => <div key={i} className="h-16 bg-[#1A1F21] rounded-lg animate-pulse" />)}</div>
                 ) : orders.length === 0 ? (

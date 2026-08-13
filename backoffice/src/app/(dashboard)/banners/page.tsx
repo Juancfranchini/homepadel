@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
@@ -193,11 +193,11 @@ export default function BannersPage() {
             <div className="flex-shrink-0 flex flex-col gap-4" style={{ width: 200 }}>
               <div>
                 <p className={labelClass + ' mb-2'}>Desktop</p>
-                <ImageUpload value={imageDesktop} onChange={(url) => setValue('image', url, { shouldDirty: true })} placeholder="URL desktop" width={200} height={100} />
+                <ImageUpload value={imageDesktop} onChange={(url) => setValue('image', url, { shouldDirty: true })} placeholder="URL desktop" width={200} height={100} suggestion="Medida recomendada: 1200x400px (ratio 3:1). Peso maximo: 300KB" />
               </div>
               <div>
                 <p className={labelClass + ' mb-2'}>Mobile</p>
-                <ImageUpload value={imageMobile} onChange={(url) => setValue('imageMobile', url, { shouldDirty: true })} placeholder="URL mobile" width={200} height={100} />
+                <ImageUpload value={imageMobile} onChange={(url) => setValue('imageMobile', url, { shouldDirty: true })} placeholder="URL mobile" width={200} height={100} suggestion="Medida recomendada: 768x500px. Peso maximo: 200KB" />
               </div>
             </div>
 

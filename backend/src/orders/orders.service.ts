@@ -1,16 +1,32 @@
-﻿import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { EmailService } from '../email/email.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderStatus } from '@prisma/client';
 
 @Injectable()
 export class OrdersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private emailService: EmailService,
+  ) {}
 
-  findAll() {
-    return this.prisma.order.findMany({
-      include: { items: { include: { product: true } } },
+  async findAll() {
+    const orders = await this.prisma.order.findMany({
+      include: { items: { include: { product: true } }, user: { select: { id: true, name: true, email: true } } },
       orderBy: { createdAt: 'desc' },
+    });
+
+    return orders.map(order => {
+      let buyerInfo: any = {};
+      try { buyerInfo = order.notes ? JSON.parse(order.notes) : {}; } catch {}
+      return {
+        ...order,
+        buyerName: buyerInfo.buyerName || order.user?.name || null,
+        buyerEmail: buyerInfo.buyerEmail || order.user?.email || null,
+        buyerPhone: buyerInfo.buyerPhone || null,
+        paymentMethod: buyerInfo.paymentMethod || null,
+      };
     });
   }
 
@@ -25,7 +41,7 @@ export class OrdersService {
   async findOne(id: string) {
     const order = await this.prisma.order.findUnique({
       where: { id },
-      include: { items: { include: { product: true } } },
+      include: { items: { include: { product: true } }, user: { select: { id: true, name: true, email: true } } },
     });
     if (!order) throw new NotFoundException('Pedido no encontrado');
     return order;
@@ -78,7 +94,7 @@ export class OrdersService {
       buyerName: dto.buyerName || null,
     };
 
-    return this.prisma.order.create({
+    const order = await this.prisma.order.create({
       data: {
         number,
         userId: userId || null,
@@ -91,12 +107,53 @@ export class OrdersService {
         notes: JSON.stringify(buyerInfo),
         items: { create: dto.items },
       },
-      include: { items: { include: { product: true } } },
+      include: { items: { include: { product: true } }, user: { select: { id: true, name: true, email: true } } },
     });
+
+    const customerEmail = dto.buyerEmail || order.user?.email;
+    if (customerEmail) {
+      const itemsForEmail = order.items.map(item => ({
+        name: item.product.name,
+        quantity: item.quantity,
+        price: item.price,
+      }));
+      this.emailService.sendOrderConfirmation(customerEmail, number, buyerInfo.buyerName || order.user?.name || 'Cliente', itemsForEmail, total).catch(err =>
+        console.error('Error enviando email de confirmacion:', err.message)
+      );
+    }
+
+    return order;
   }
 
-  async updateStatus(id: string, status: OrderStatus) {
+  async updateStatus(id: string, status: OrderStatus, trackingNumber?: string, trackingUrl?: string) {
     await this.findOne(id);
-    return this.prisma.order.update({ where: { id }, data: { status } });
+
+    const data: any = { status };
+    if (trackingNumber) data.trackingNumber = trackingNumber;
+    if (trackingUrl) data.trackingUrl = trackingUrl;
+
+    const updated = await this.prisma.order.update({ where: { id }, data });
+
+    if (status === 'SHIPPED') {
+      const order = await this.prisma.order.findUnique({
+        where: { id },
+        include: { user: { select: { id: true, name: true, email: true } } },
+      });
+      if (order) {
+        let buyerInfo: any = {};
+        try { buyerInfo = order.notes ? JSON.parse(order.notes) : {}; } catch {}
+        const customerEmail = buyerInfo.buyerEmail || order.user?.email;
+
+        if (customerEmail) {
+          const tracking = trackingNumber || order.trackingNumber || 'Pendiente';
+          const url = trackingUrl || order.trackingUrl || null;
+          this.emailService.sendOrderShipped(customerEmail, order.number, buyerInfo.buyerName || order.user?.name || 'Cliente', tracking, url).catch(err =>
+            console.error('Error enviando email de despacho:', err.message)
+          );
+        }
+      }
+    }
+
+    return updated;
   }
 }

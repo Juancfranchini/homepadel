@@ -118,6 +118,9 @@ const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[]; onS
             <Upload className="w-3 h-3" />{uploading ? '...' : 'Subir'}
           </button>
         </div>
+        <p className="text-[10px] text-gray-400 leading-tight mt-1">
+          Medida recomendada: 800x800px (cuadrada). Fondo blanco. Peso maximo: 500KB. Primera imagen es la principal.
+        </p>
         <ImageGalleryInput images={galleryImages} onChange={setGalleryImages} />
       </div>
 

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
@@ -148,7 +148,7 @@ export default function MarcasPage() {
       {modalOpen && (
         <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editItem ? 'Editar marca' : 'Nueva marca'} size="xl">
           <form onSubmit={handleSubmit(onSubmit)} className="flex gap-0">
-            <ImageUpload value={logoValue} onChange={(url) => setValue('logo', url, { shouldDirty: true })} placeholder="URL del logo" />
+            <ImageUpload value={logoValue} onChange={(url) => setValue('logo', url, { shouldDirty: true })} placeholder="URL del logo" suggestion="Medida recomendada: 300x150px. Logo horizontal, fondo transparente." />
             <div className="mx-6 w-px bg-gray-200 self-stretch my-2" />
             <div className="flex-1 grid grid-cols-2 gap-4 content-start">
               <div><label className={labelClass}>Nombre *</label><input {...register('name')} className={inputClass + ' mt-1'} placeholder="Ej: Bullpadel" />{errors.name && <p className="text-xs text-red-600 mt-0.5">{errors.name.message}</p>}</div>

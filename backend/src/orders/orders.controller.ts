@@ -1,4 +1,4 @@
-﻿import { Controller, Get, Post, Patch, Param, Body, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Body, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -41,7 +41,12 @@ export class OrdersController {
   @Patch(':id/status')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard) @Roles(Role.ADMIN)
-  updateStatus(@Param('id') id: string, @Body('status') status: string) {
-    return this.ordersService.updateStatus(id, status as any);
+  updateStatus(
+    @Param('id') id: string,
+    @Body('status') status: string,
+    @Body('trackingNumber') trackingNumber?: string,
+    @Body('trackingUrl') trackingUrl?: string,
+  ) {
+    return this.ordersService.updateStatus(id, status as any, trackingNumber, trackingUrl);
   }
 }

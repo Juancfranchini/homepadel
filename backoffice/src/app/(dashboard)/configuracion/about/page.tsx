@@ -112,7 +112,7 @@ export default function AboutConfigPage() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-6">
           <div className="flex gap-6">
-            <ImageUpload value={imageValue} onChange={(url) => setValue('image', url, { shouldDirty: true })} placeholder="URL de imagen" width={200} height={160} />
+            <ImageUpload  value={imageValue}  onChange={(url) => setValue('image', url, { shouldDirty: true })} placeholder="URL de imagen" width={200} height={160}  />
             <div className="flex-1 space-y-4">
               <div>
                 <label className={labelClass + ' mb-1'}>Titulo *</label>
