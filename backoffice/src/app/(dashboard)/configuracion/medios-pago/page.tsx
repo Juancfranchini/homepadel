@@ -18,7 +18,8 @@ const schema = z.object({
   visaActive: z.boolean(), visaLogo: z.string().optional(),
   mastercardActive: z.boolean(), mastercardLogo: z.string().optional(),
   amexActive: z.boolean(), amexLogo: z.string().optional(),
-  caActive: z.boolean(), caLogo: z.string().optional(),
+  caActive: z.boolean(), caLogo: z.string().optional(), caUsuario: z.string().optional(), caPassword: z.string().optional(), caApiKey: z.string().optional(), caAgreement: z.string().optional(),
+  caRemitenteNombre: z.string().optional(), caRemitenteCalle: z.string().optional(), caRemitenteNumero: z.string().optional(), caRemitenteCiudad: z.string().optional(), caRemitenteCP: z.string().optional(), caRemitenteProvincia: z.string().optional(), caRemitenteTelefono: z.string().optional(),
   ocaActive: z.boolean(), ocaLogo: z.string().optional(),
   andreaniActive: z.boolean(), andreaniLogo: z.string().optional(),
 });
@@ -35,6 +36,7 @@ export default function MediosPagoPage() {
   const [showKey, setShowKey] = useState(false);
   const [showCbu, setShowCbu] = useState(false);
   const [showAlias, setShowAlias] = useState(false);
+  const [showCaPassword, setShowCaPassword] = useState(false);
 
   const { register, handleSubmit, reset, setValue, watch } = useForm<FormData>({ resolver: zodResolver(schema) });
 
@@ -46,13 +48,15 @@ export default function MediosPagoPage() {
       const mp = data.mercadopago || {}; const tf = data.transferencia || {};
       const vi = data.visa || {}; const mc = data.mastercard || {}; const ax = data.amex || {};
       const ca = data.ca || {}; const oc = data.oca || {}; const an = data.andreani || {};
+      const caRem = ca.remitente || {};
       reset({
         mercadopagoActive: mp.active !== false, mercadopagoPublicKey: mp.publicKey || '', mercadopagoAccessToken: mp.accessToken || '', mercadopagoLogo: mp.logo || '',
         transferenciaActive: tf.active !== false, transferenciaCbu: tf.cbu || '', transferenciaAlias: tf.alias || '', transferenciaTitular: tf.titular || '', transferenciaBanco: tf.banco || '', transferenciaLogo: tf.logo || '',
         visaActive: vi.active !== false, visaLogo: vi.logo || '',
         mastercardActive: mc.active !== false, mastercardLogo: mc.logo || '',
         amexActive: ax.active !== false, amexLogo: ax.logo || '',
-        caActive: ca.active !== false, caLogo: ca.logo || '',
+        caActive: ca.active !== false, caLogo: ca.logo || '', caUsuario: ca.usuario || '', caPassword: ca.password || '', caApiKey: ca.apiKey || '', caAgreement: ca.agreement || '',
+        caRemitenteNombre: caRem.nombre || '', caRemitenteCalle: caRem.calle || '', caRemitenteNumero: caRem.numero || '', caRemitenteCiudad: caRem.ciudad || '', caRemitenteCP: caRem.codigoPostal || '', caRemitenteProvincia: caRem.provincia || '', caRemitenteTelefono: caRem.telefono || '',
         ocaActive: oc.active !== false, ocaLogo: oc.logo || '',
         andreaniActive: an.active !== false, andreaniLogo: an.logo || '',
       });
@@ -70,7 +74,7 @@ export default function MediosPagoPage() {
         visa: { active: data.visaActive, logo: data.visaLogo },
         mastercard: { active: data.mastercardActive, logo: data.mastercardLogo },
         amex: { active: data.amexActive, logo: data.amexLogo },
-        ca: { active: data.caActive, logo: data.caLogo },
+        ca: { active: data.caActive, logo: data.caLogo, usuario: data.caUsuario, password: data.caPassword, apiKey: data.caApiKey, agreement: data.caAgreement, remitente: { nombre: data.caRemitenteNombre, calle: data.caRemitenteCalle, numero: data.caRemitenteNumero, ciudad: data.caRemitenteCiudad, codigoPostal: data.caRemitenteCP, provincia: data.caRemitenteProvincia, telefono: data.caRemitenteTelefono } },
         oca: { active: data.ocaActive, logo: data.ocaLogo },
         andreani: { active: data.andreaniActive, logo: data.andreaniLogo },
       };
@@ -178,18 +182,74 @@ export default function MediosPagoPage() {
         {/* Envios */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
           <h2 className="text-sm font-semibold text-gray-800 border-b border-gray-100 pb-3 flex items-center gap-2"><Truck className="w-4 h-4 text-[#C8FF00]" />Medios de Envio</h2>
-          <div className="grid grid-cols-3 gap-4">
-            {[{ key: 'ca', label: 'Correo Argentino', logo: caLogo, active: watch('caActive') },
-            { key: 'oca', label: 'OCA', logo: ocaLogo, active: watch('ocaActive') },
-            { key: 'andreani', label: 'Andreani', logo: andreaniLogo, active: watch('andreaniActive') }].map((item) => (
-              <div key={item.key} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">{item.label}</span>
-                  <Toggle checked={item.active} onChange={() => setValue((item.key + 'Active') as any, !item.active, { shouldDirty: true })} />
+
+          {/* Correo Argentino - Panel completo */}
+          <div className="border border-gray-100 rounded-xl p-4 space-y-4">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+              <h3 className="text-sm font-semibold text-gray-800">Correo Argentino</h3>
+              <Toggle checked={watch('caActive')} onChange={() => setValue('caActive', !watch('caActive'), { shouldDirty: true })} />
+            </div>
+            {watch('caActive') && (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className={labelClass}>Usuario (email)</label>
+                    <input {...register('caUsuario')} className={inputClass} placeholder="facucrespo_97@hotmail.com" />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Contrasena</label>
+                    <div className="relative">
+                      <input {...register('caPassword')} className={inputClass + ' pr-8'} type={showCaPassword ? 'text' : 'password'} placeholder="********" />
+                      <button type="button" onClick={() => setShowCaPassword(!showCaPassword)} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                        {showCaPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <label className={labelClass}>API Key</label>
+                    <input {...register('caApiKey')} className={inputClass} placeholder="Pendiente de gestionar" />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Agreement</label>
+                    <input {...register('caAgreement')} className={inputClass} placeholder="Pendiente de gestionar" />
+                  </div>
                 </div>
-                {item.active && <ImageUpload suggestion="Medida recomendada: 200x80px. Logo horizontal, fondo transparente" value={item.logo} onChange={(url) => setValue((item.key + 'Logo') as any, url, { shouldDirty: true })} width={200} height={80} />}
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Datos del remitente</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div><label className={labelClass}>Nombre / Empresa</label><input {...register('caRemitenteNombre')} className={inputClass} placeholder="Home Padel" /></div>
+                    <div><label className={labelClass}>Calle</label><input {...register('caRemitenteCalle')} className={inputClass} placeholder="Av. Corrientes" /></div>
+                    <div><label className={labelClass}>Numero</label><input {...register('caRemitenteNumero')} className={inputClass} placeholder="1234" /></div>
+                    <div><label className={labelClass}>Ciudad</label><input {...register('caRemitenteCiudad')} className={inputClass} placeholder="CABA" /></div>
+                    <div><label className={labelClass}>Codigo Postal</label><input {...register('caRemitenteCP')} className={inputClass} placeholder="1043" /></div>
+                    <div><label className={labelClass}>Provincia</label><input {...register('caRemitenteProvincia')} className={inputClass} placeholder="Buenos Aires" /></div>
+                    <div><label className={labelClass}>Telefono</label><input {...register('caRemitenteTelefono')} className={inputClass} placeholder="11-5555-6666" /></div>
+                  </div>
+                </div>
+                <div>
+                  <label className={labelClass}>Logo</label>
+                  <ImageUpload suggestion="Medida recomendada: 200x80px. Logo horizontal, fondo transparente" value={caLogo} onChange={(url) => setValue('caLogo', url, { shouldDirty: true })} width={200} height={80} />
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* OCA y Andreani */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="border border-gray-100 rounded-xl p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-700">OCA</span>
+                <Toggle checked={watch('ocaActive')} onChange={() => setValue('ocaActive', !watch('ocaActive'), { shouldDirty: true })} />
               </div>
-            ))}
+              {watch('ocaActive') && <ImageUpload suggestion="Medida recomendada: 200x80px. Logo horizontal, fondo transparente" value={ocaLogo} onChange={(url) => setValue('ocaLogo', url, { shouldDirty: true })} width={200} height={80} />}
+            </div>
+            <div className="border border-gray-100 rounded-xl p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-700">Andreani</span>
+                <Toggle checked={watch('andreaniActive')} onChange={() => setValue('andreaniActive', !watch('andreaniActive'), { shouldDirty: true })} />
+              </div>
+              {watch('andreaniActive') && <ImageUpload suggestion="Medida recomendada: 200x80px. Logo horizontal, fondo transparente" value={andreaniLogo} onChange={(url) => setValue('andreaniLogo', url, { shouldDirty: true })} width={200} height={80} />}
+            </div>
           </div>
         </div>
 
