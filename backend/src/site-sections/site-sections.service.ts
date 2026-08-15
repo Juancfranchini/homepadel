@@ -1,10 +1,10 @@
-﻿import { Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import * as fs from 'fs';
 import * as path from 'path';
 
-export type SectionKey = 'about' | 'instagram' | 'final_message' | 'branding' | 'settings' | 'trust_bottom' | 'politica_devolucion' | 'envios' | 'medios_pago' | 'terminos' | 'privacidad' | 'contacto' | 'talles' | 'reviews_info' | 'payment_methods';
+export type SectionKey = 'about' | 'instagram' | 'final_message' | 'branding' | 'settings' | 'trust_bottom' | 'politica_devolucion' | 'envios' | 'medios_pago' | 'terminos' | 'privacidad' | 'contacto' | 'talles' | 'reviews_info' | 'payment_methods' | 'email_settings';
 
 @Injectable()
 export class SiteSectionsService {
@@ -72,7 +72,17 @@ export class SiteSectionsService {
     'privacidad': { title: 'Politica de Privacidad', content: '' },
     'contacto': { chip: 'ESTAMOS PARA AYUDARTE', title: 'Contactanos', description: 'Tenes dudas sobre nuestros productos, envios o pagos? Nuestro equipo esta para ayudarte.', heroImage: '', mapUrl: '', newsletterTitle: 'ENTERATE DE LAS NOVEDADES', newsletterText: 'Suscribite y recibi ofertas exclusivas y lanzamientos.' },
     'talles': { title: 'Guia de Talles', content: '' },
-    'payment_methods': { mercadopago: { active: true, publicKey: '', accessToken: '' }, transferencia: { active: true, cbu: '', alias: '', titular: '', banco: '' }, tarjeta: { active: false } },
+    'payment_methods': { mercadopago: { active: true, publicKey: '', accessToken: '' }, transferencia: { active: true, cbu: '', alias: '', titular: '', banco: '' }, tarjeta: { active: false }, correo_argentino: { active: true, usuario: '', password: '', apiKey: '', agreement: '', remitente: { nombre: '', calle: '', numero: '', ciudad: '', codigoPostal: '', provincia: '', telefono: '' } }, oca: { active: false, usuario: '', password: '' }, andreani: { active: false, usuario: '', password: '' } },
+    'email_settings': {
+      resendApiKey: '',
+      fromEmail: 'Home Padel <noreply@homepadel.com.ar>',
+      adminEmail: 'contactohomepadel@gmail.com',
+      notifications: {
+        newOrder: true,
+        shippedOrder: true,
+        contactForm: true
+      }
+    },
     'reviews_info': { content: 'Las opiniones son realizadas por clientes verificados que compraron el producto. El promedio se calcula en base a todas las resenas aprobadas.' },
       about: {
         title: 'Somos Home Padel',

@@ -1,4 +1,4 @@
-﻿import { Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { PrismaModule } from './prisma/prisma.module';
@@ -25,6 +25,7 @@ import { NewsletterModule } from './newsletter/newsletter.module';
 import { InstagramModule } from './instagram/instagram.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { PaymentsModule } from './payments/payments.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { PaymentsModule } from './payments/payments.module';
     NewsletterModule,
     ReviewsModule,
     PaymentsModule,
+    EmailModule,
   ],
 })
 export class AppModule {}

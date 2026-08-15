@@ -29,7 +29,6 @@ const schema = z.object({
   isOffer: z.boolean().default(false),
   categoryId: z.string().min(1, 'Categoria requerida'),
   brandId: z.string().min(1, 'Marca requerida'),
-  description: z.string().optional(),
   images: z.array(z.string()).optional(),
 });
 export type ProductFormData = z.infer<typeof schema> & { images?: string[] };
@@ -89,9 +88,9 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
   return (
     <form onSubmit={handleSubmit((data) => { const mainImage = typeof data.images === 'string' ? data.images : (Array.isArray(data.images) ? data.images[0] : '');
 const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[]; onSave({ ...data, images: allImages }); })} className="flex gap-0">
-      {/* Columna izquierda - Imagen */}
-      <div className="flex-shrink-0 w-[200px] flex flex-col gap-3">
-        <div className="w-full h-[200px] rounded-xl bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200">
+      {/* Columna izquierda - Imagen principal + galeria */}
+      <div className="flex-shrink-0 w-[220px] flex flex-col gap-3">
+        <div className="w-full h-[220px] rounded-xl bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200">
           {previewUrl ? (
             <img
               src={previewUrl}
@@ -118,14 +117,22 @@ const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[]; onS
             <Upload className="w-3 h-3" />{uploading ? '...' : 'Subir'}
           </button>
         </div>
-        <ImageGalleryInput images={galleryImages} onChange={setGalleryImages} />
+        <p className="text-[10px] text-gray-400 leading-tight">
+          Medida recomendada: 800x800px (cuadrada). Fondo blanco. Peso maximo: 500KB.
+        </p>
+        <div className="mt-2">
+          <label className={labelClass}>Imagenes secundarias</label>
+          <div className="mt-1">
+            <ImageGalleryInput images={galleryImages} onChange={setGalleryImages} />
+          </div>
+        </div>
       </div>
 
       {/* Linea vertical */}
       <div className="ml-7 mr-5 w-px bg-gray-200 self-stretch my-2" />
 
-      {/* Columna derecha - Campos del formulario */}
-      <div className="flex-1 grid grid-cols-3 gap-4 content-start">
+      {/* Columna derecha - Formulario en 2 columnas */}
+      <div className="flex-1 grid grid-cols-2 gap-x-4 gap-y-6 content-start flex flex-col">
         {/* Fila 1 */}
         <div>
           <label className={labelClass}>Nombre *</label>
@@ -137,17 +144,19 @@ const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[]; onS
           <input {...register('sku')} className={inputClass + ' mt-1'} />
           {errors.sku && <p className="text-xs text-red-600 mt-0.5">{errors.sku.message}</p>}
         </div>
+
+        {/* Fila 2 */}
         <div>
           <label className={labelClass}>Precio *</label>
           <input type="number" step="0.01" {...register('price')} className={inputClass + ' mt-1'} />
           {errors.price && <p className="text-xs text-red-600 mt-0.5">{errors.price.message}</p>}
         </div>
-
-        {/* Fila 2 */}
         <div>
           <label className={labelClass}>Precio Oferta</label>
           <input type="number" step="0.01" {...register('salePrice')} className={inputClass + ' mt-1'} />
         </div>
+
+        {/* Fila 3 */}
         <div>
           <label className={labelClass}>Stock</label>
           <input type="number" {...register('stock')} className={inputClass + ' mt-1'} />
@@ -161,8 +170,8 @@ const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[]; onS
           {errors.categoryId && <p className="text-xs text-red-600 mt-0.5">{errors.categoryId.message}</p>}
         </div>
 
-        {/* Fila 3 - 2 columnas: Marca (1 col) | Toggles (2 cols) */}
-        <div>
+        {/* Fila 4 - Marca sola */}
+        <div className="col-span-2">
           <label className={labelClass}>Marca *</label>
           <select {...register('brandId')} className={inputClass + ' mt-1'}>
             <option value="">Seleccionar</option>
@@ -170,57 +179,41 @@ const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[]; onS
           </select>
           {errors.brandId && <p className="text-xs text-red-600 mt-0.5">{errors.brandId.message}</p>}
         </div>
-        <div className="col-span-2">
-          <div className="grid grid-cols-4 gap-4">
-            {/* Activo */}
-            <div>
-              <label className={labelClass}>Activo</label>
-              <div className="flex items-center gap-2 mt-1">
-                <Toggle checked={active} onChange={() => setValue('active', !active, { shouldDirty: true })} />
-                <span className={'text-xs font-medium ' + (active ? 'text-green-600' : 'text-gray-400')}>{active ? 'Si' : 'No'}</span>
-              </div>
+
+        {/* Fila 5 - 4 toggles */}
+        <div className="col-span-2 flex items-center gap-8 pt-1">
+          <div>
+            <label className={labelClass}>Activo</label>
+            <div className="flex items-center gap-2 mt-1">
+              <Toggle checked={active} onChange={() => setValue('active', !active, { shouldDirty: true })} />
+              <span className={'text-xs font-medium ' + (active ? 'text-green-600' : 'text-gray-400')}>{active ? 'Si' : 'No'}</span>
             </div>
-            {/* Nuevo */}
-            <div>
-              <label className={labelClass}>Nuevo</label>
-              <div className="flex items-center gap-2 mt-1">
-                <Toggle checked={isNew} onChange={() => setValue('isNew', !isNew, { shouldDirty: true })} />
-                <span className={'text-xs font-medium ' + (isNew ? 'text-blue-600' : 'text-gray-400')}>{isNew ? 'Si' : 'No'}</span>
-              </div>
+          </div>
+          <div>
+            <label className={labelClass}>Nuevo</label>
+            <div className="flex items-center gap-2 mt-1">
+              <Toggle checked={isNew} onChange={() => setValue('isNew', !isNew, { shouldDirty: true })} />
+              <span className={'text-xs font-medium ' + (isNew ? 'text-blue-600' : 'text-gray-400')}>{isNew ? 'Si' : 'No'}</span>
             </div>
-            {/* Oferta */}
-            <div>
-              <label className={labelClass}>Oferta</label>
-              <div className="flex items-center gap-2 mt-1">
-                <Toggle checked={isOffer} onChange={() => setValue('isOffer', !isOffer, { shouldDirty: true })} />
-                <span className={'text-xs font-medium ' + (isOffer ? 'text-amber-600' : 'text-gray-400')}>{isOffer ? 'Si' : 'No'}</span>
-              </div>
+          </div>
+          <div>
+            <label className={labelClass}>Oferta</label>
+            <div className="flex items-center gap-2 mt-1">
+              <Toggle checked={isOffer} onChange={() => setValue('isOffer', !isOffer, { shouldDirty: true })} />
+              <span className={'text-xs font-medium ' + (isOffer ? 'text-amber-600' : 'text-gray-400')}>{isOffer ? 'Si' : 'No'}</span>
             </div>
-            {/* Destacado */}
-            <div>
-              <label className={labelClass}>Destacado</label>
-              <div className="mt-1">
-                <button
-                  type="button"
-                  onClick={() => setValue('featured', !featured, { shouldDirty: true })}
-                  className="focus:outline-none"
-                  title={featured ? 'Quitar destacado' : 'Destacar'}
-                >
-                  <Star className={'w-6 h-6 transition-colors ' + (featured ? 'text-[#C8FF00] fill-[#C8FF00]' : 'text-gray-300')} />
-                </button>
-              </div>
+          </div>
+          <div>
+            <label className={labelClass}>Destacado</label>
+            <div className="flex items-center gap-2 mt-1">
+              <Toggle checked={featured} onChange={() => setValue('featured', !featured, { shouldDirty: true })} />
+              <Star className={'w-5 h-5 transition-colors ' + (featured ? 'text-[#C8FF00] fill-[#C8FF00]' : 'text-gray-300')} />
             </div>
           </div>
         </div>
 
-        {/* Descripcion - ocupa 3 columnas */}
-        <div className="col-span-3">
-          <label className={labelClass}>Descripcion</label>
-          <textarea {...register('description')} rows={3} className={inputClass + ' mt-1'} />
-        </div>
-
-        {/* Botones - ocupa 3 columnas */}
-        <div className="col-span-3 flex justify-end gap-3 pt-12 border-t border-gray-100">
+        {/* Botones - alineados abajo con espacio flexible */}
+        <div className="col-span-2 flex-1 flex items-end justify-end gap-3 pt-6 border-t border-gray-100 mt-12">
           <button type="button" onClick={onCancel} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">Cancelar</button>
           <button type="submit" disabled={saving} className="px-4 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg text-sm font-semibold hover:bg-[#b8ef00] disabled:opacity-50 transition-colors">
             {saving ? 'Guardando...' : 'Guardar'}

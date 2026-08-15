@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useRef, useCallback } from 'react';
 import { Upload, ImageIcon, X, Loader2 } from 'lucide-react';
@@ -18,9 +18,10 @@ interface Props {
   placeholder?: string;
   width?: number;
   height?: number;
+  suggestion?: string;
 }
 
-export default function ImageUpload({ value, onChange, placeholder = 'URL de imagen', width = 200, height = 200 }: Props) {
+export default function ImageUpload({ value, onChange, placeholder = 'URL de imagen', width = 200, height = 200, suggestion }: Props) {
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -132,6 +133,9 @@ export default function ImageUpload({ value, onChange, placeholder = 'URL de ima
           <Upload className="w-3 h-3" />{uploading ? '...' : 'Subir'}
         </button>
       </div>
+      {suggestion && (
+        <p className="text-[10px] text-gray-400 leading-tight">{suggestion}</p>
+      )}
 
       <input
         ref={inputRef}

@@ -276,6 +276,7 @@ export default function CategoriasPage() {
                   <Upload className="w-3 h-3" />{uploading ? '...' : 'Subir'}
                 </button>
               </div>
+                <p className="text-[10px] text-gray-400 leading-tight mt-1">Medida recomendada: 400x400px (cuadrada). Fondo transparente o blanco. Peso maximo: 300KB</p>
             </div>
 
             <div className="mx-6 w-px bg-gray-200 self-stretch my-2" />

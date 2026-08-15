@@ -24,19 +24,26 @@ interface Order {
   shipping: number;
   discount: number;
   createdAt: string;
+  address: string;
+  trackingNumber?: string;
+  trackingUrl?: string;
+  buyerName?: string;
+  buyerEmail?: string;
+  buyerPhone?: string;
+  paymentMethod?: string;
   user?: { name: string; email: string };
   items?: OrderItem[];
 }
 
 type StatusFilter = 'ALL' | 'PENDING' | 'PAID' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
 
-const STATUS_TABS: { value: StatusFilter; label: string; color: string }[] = [
-  { value: 'ALL', label: 'Todos', color: 'bg-gray-100 text-gray-600' },
-  { value: 'PENDING', label: 'Pendiente', color: 'bg-amber-100 text-amber-700' },
-  { value: 'PAID', label: 'Pagado', color: 'bg-blue-100 text-blue-700' },
-  { value: 'SHIPPED', label: 'Enviado', color: 'bg-purple-100 text-purple-700' },
-  { value: 'DELIVERED', label: 'Entregado', color: 'bg-green-100 text-green-700' },
-  { value: 'CANCELLED', label: 'Cancelado', color: 'bg-red-100 text-red-700' },
+const STATUS_TABS: { value: StatusFilter; label: string; color: string; bgActive: string; icon: string }[] = [
+  { value: 'ALL', label: 'Todos', color: 'bg-gray-50 text-gray-600 border-gray-200', bgActive: 'bg-[#0f172a] border-[#0f172a]', icon: '' },
+  { value: 'PENDING', label: 'Pendiente', color: 'bg-amber-50 text-amber-700 border-amber-200', bgActive: 'bg-amber-500 border-amber-500', icon: '' },
+  { value: 'PAID', label: 'Pagado', color: 'bg-blue-50 text-blue-700 border-blue-200', bgActive: 'bg-blue-500 border-blue-500', icon: '' },
+  { value: 'SHIPPED', label: 'Enviado', color: 'bg-purple-50 text-purple-700 border-purple-200', bgActive: 'bg-purple-500 border-purple-500', icon: '' },
+  { value: 'DELIVERED', label: 'Entregado', color: 'bg-green-50 text-green-700 border-green-200', bgActive: 'bg-green-500 border-green-500', icon: '' },
+  { value: 'CANCELLED', label: 'Cancelado', color: 'bg-red-50 text-red-700 border-red-200', bgActive: 'bg-red-500 border-red-500', icon: '' },
 ];
 
 const STATUS_OPTIONS = ['PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
@@ -70,13 +77,13 @@ export default function PedidosPage() {
   const totalPages = Math.ceil(filtered.length / pageSize);
   const paginated = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
-  const handleStatusChange = async (orderId: string, newStatus: string) => {
+  const handleStatusChange = async (orderId: string, newStatus: string, trackingNumber?: string, trackingUrl?: string) => {
     setUpdatingStatus(true);
     try {
-      await api.patch('/orders/' + orderId + '/status', { status: newStatus });
+      await api.patch('/orders/' + orderId + '/status', { status: newStatus, trackingNumber, trackingUrl });
       toast('Estado actualizado', 'success');
-      setOrders((prev) => prev.map((o) => o.id === orderId ? { ...o, status: newStatus } : o));
-      if (selectedOrder?.id === orderId) setSelectedOrder((prev) => prev ? { ...prev, status: newStatus } : prev);
+      setOrders((prev) => prev.map((o) => o.id === orderId ? { ...o, status: newStatus, trackingNumber, trackingUrl } : o));
+      if (selectedOrder?.id === orderId) setSelectedOrder((prev) => prev ? { ...prev, status: newStatus, trackingNumber, trackingUrl } : prev);
     } catch { toast('Error', 'error'); } finally { setUpdatingStatus(false); }
   };
 
@@ -89,28 +96,43 @@ export default function PedidosPage() {
         <p className="text-gray-500 text-sm mt-0.5">{filtered.length} pedidos</p>
       </div>
 
-      <div className="flex gap-2 flex-wrap">
-        {STATUS_TABS.map((tab) => (
-          <button key={tab.value} onClick={() => { setStatusFilter(tab.value); setCurrentPage(1); }}
-            className={'px-4 py-2 rounded-lg text-sm font-medium transition-all ' +
-              (statusFilter === tab.value ? 'bg-[#C8FF00] text-[#0f172a]' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50')}>
-            {tab.label}
-            <span className="ml-2 text-xs opacity-60">({tab.value === 'ALL' ? orders.length : orders.filter((o) => o.status === tab.value).length})</span>
-          </button>
-        ))}
+      <div className="grid grid-cols-6 gap-2 w-full">
+        {STATUS_TABS.map((tab) => {
+          const count = tab.value === 'ALL' ? orders.length : orders.filter((o) => o.status === tab.value).length;
+          const isActive = statusFilter === tab.value;
+          return (
+            <button
+              key={tab.value}
+              onClick={() => { setStatusFilter(tab.value); setCurrentPage(1); }}
+              className={'flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 border ' +
+                (isActive
+                  ? 'bg-[#0f172a] text-white border-[#0f172a] shadow-sm'
+                  : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:border-gray-300')}
+            >
+              <span className="flex items-center gap-2 truncate">
+                <span className="text-sm leading-none shrink-0">{tab.icon}</span>
+                <span className="truncate">{tab.label}</span>
+              </span>
+              <span className={'text-xs font-bold px-2 py-0.5 rounded-full shrink-0 ml-2 ' + (isActive ? 'bg-[#C8FF00] text-[#0f172a]' : 'bg-gray-100 text-gray-500')}>
+                {count}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-100">
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Numero</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Cliente</th>
-              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Items</th>
-              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
-              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Fecha</th>
-              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
+              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Numero</th>
+              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Cliente</th>
+              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Telefono</th>
+              <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Items</th>
+              <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
+              <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
+              <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden xl:table-cell">Fecha</th>
+              <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
             </tr>
           </thead>
           <tbody>
@@ -118,20 +140,21 @@ export default function PedidosPage() {
               const statusInfo = STATUS_TABS.find((t) => t.value === o.status);
               return (
                 <tr key={o.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3"><code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-900 font-semibold">{o.number}</code></td>
-                  <td className="px-4 py-3">
-                    <p className="text-gray-900 font-medium text-sm">{o.user?.name || 'Invitado'}</p>
-                    <p className="text-xs text-gray-400">{o.user?.email || '-'}</p>
+                  <td className="px-3 py-3"><code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-900 font-semibold">{o.number}</code></td>
+                  <td className="px-3 py-3">
+                    <p className="text-gray-900 font-medium text-sm">{o.buyerName || o.user?.name || 'Invitado'}</p>
+                    <p className="text-xs text-gray-400">{o.buyerEmail || o.user?.email || '-'}</p>
                   </td>
-                  <td className="px-4 py-3 text-center text-sm text-gray-500">{(o.items || []).length} items</td>
-                  <td className="px-4 py-3 text-center font-semibold text-sm">{formatPrice(o.total)}</td>
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-3 py-3 text-sm text-gray-500 hidden lg:table-cell">{o.buyerPhone || '-'}</td>
+                  <td className="px-3 py-3 text-center text-sm text-gray-500">{(o.items || []).length} items</td>
+                  <td className="px-3 py-3 text-center font-semibold text-sm">{formatPrice(o.total)}</td>
+                  <td className="px-3 py-3 text-center">
                     <span className={'text-xs font-medium px-2 py-1 rounded-full ' + (statusInfo?.color || 'bg-gray-100')}>
                       {STATUS_LABELS[o.status] || o.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-center text-xs text-gray-500">{formatDate(o.createdAt)}</td>
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-3 py-3 text-center text-xs text-gray-500 hidden xl:table-cell">{formatDate(o.createdAt)}</td>
+                  <td className="px-3 py-3 text-center">
                     <button onClick={() => { setSelectedOrder(o); setDetailOpen(true); }}
                       className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors" title="Ver detalle">
                       <ArrowRight className="w-4 h-4" />
@@ -155,11 +178,26 @@ export default function PedidosPage() {
       {detailOpen && selectedOrder && (
         <Modal isOpen={detailOpen} onClose={() => setDetailOpen(false)} title={'Pedido ' + selectedOrder.number} size="lg">
           <div className="space-y-5">
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div className="bg-gray-50 rounded-lg p-4">
                 <p className="text-xs font-semibold text-gray-400 uppercase mb-1">Cliente</p>
-                <p className="font-semibold text-gray-900">{selectedOrder.user?.name || 'Invitado'}</p>
-                <p className="text-sm text-gray-500">{selectedOrder.user?.email || '-'}</p>
+                <p className="font-semibold text-gray-900">{selectedOrder.buyerName || selectedOrder.user?.name || 'Invitado'}</p>
+                <p className="text-sm text-gray-500">{selectedOrder.buyerEmail || selectedOrder.user?.email || '-'}</p>
+                <p className="text-sm text-gray-500">{selectedOrder.buyerPhone || '-'}</p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <p className="text-xs font-semibold text-gray-400 uppercase mb-1">Direccion</p>
+                <p className="text-sm text-gray-700">{selectedOrder.address}</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-gray-50 rounded-lg p-4">
+                <p className="text-xs font-semibold text-gray-400 uppercase mb-1">Medio de pago</p>
+                <p className="text-sm text-gray-700">{selectedOrder.paymentMethod || 'No especificado'}</p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <p className="text-xs font-semibold text-gray-400 uppercase mb-1">Fecha</p>
+                <p className="font-medium text-gray-900">{formatDate(selectedOrder.createdAt)}</p>
               </div>
               <div className="bg-gray-50 rounded-lg p-4">
                 <p className="text-xs font-semibold text-gray-400 uppercase mb-1">Estado</p>
@@ -168,10 +206,6 @@ export default function PedidosPage() {
                   className="mt-1 w-full text-sm border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40">
                   {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
                 </select>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <p className="text-xs font-semibold text-gray-400 uppercase mb-1">Fecha</p>
-                <p className="font-medium text-gray-900">{formatDate(selectedOrder.createdAt)}</p>
               </div>
             </div>
 
