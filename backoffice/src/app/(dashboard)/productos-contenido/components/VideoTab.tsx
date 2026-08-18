@@ -1,5 +1,6 @@
 import { useFieldArray, UseFormRegister } from 'react-hook-form';
 import { Plus, Trash2 } from 'lucide-react';
+import Toggle from '../../testimonios/components/Toggle';
 
 const inputClass = 'w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00]';
 const labelClass = 'text-xs font-medium text-gray-400 uppercase tracking-wider';
@@ -7,15 +8,20 @@ const labelClass = 'text-xs font-medium text-gray-400 uppercase tracking-wider';
 interface Props {
   register: UseFormRegister<any>;
   control: any;
+  showVideo: boolean;
+  onToggleShowVideo: () => void;
 }
 
-export default function VideoTab({ register, control }: Props) {
+export default function VideoTab({ register, control, showVideo, onToggleShowVideo }: Props) {
   const relatedVideosArray = useFieldArray({ control, name: 'relatedVideos' });
 
   return (
     <div className="space-y-4">
       <div>
-        <label className={labelClass}>Video Principal (YouTube/Vimeo)</label>
+        <div className="flex items-center justify-between">
+          <label className={labelClass}>Video Principal (YouTube/Vimeo)</label>
+          <div className="flex items-center gap-2"><Toggle checked={showVideo} onChange={onToggleShowVideo} /><span className="text-xs text-gray-400">{showVideo ? "Activado" : "Desactivado"}</span></div>
+        </div>
         <input {...register('videoUrl')} className={inputClass + ' mt-1'} placeholder="https://youtu.be/abc123" />
       </div>
       <div className="border-t border-gray-100 pt-4">

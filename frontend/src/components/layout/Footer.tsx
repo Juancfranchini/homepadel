@@ -27,11 +27,11 @@ export default function Footer() {
 
   return (
     <footer className="bg-[#141A1D] text-[#C7C7C0] border-t border-[#0D0F0F]">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-10">
-          <div className="lg:col-span-2">
+      <div className="max-w-7xl mx-auto px-4 lg:px-6 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <BrandLogo variant="light" size="sm" showText={!branding.logoFooter} imageUrl={branding.logoFooter || undefined} />
+              <BrandLogo variant="light" size="md" showText={!branding.logoFooter} imageUrl={branding.logoFooter || undefined} />
             </Link>
             <p className="text-sm leading-relaxed mb-6">Equipamiento profesional para jugadores apasionados. Las mejores marcas, los mejores precios.</p>
             <div className="flex gap-3">
@@ -63,7 +63,7 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold text-sm uppercase tracking-widest text-[#F7F6F7] mb-4">Contacto</h3>
             <ul className="space-y-4">
-              <li><a href={'mailto:' + email} className="flex items-center gap-3 group"><div className="w-8 h-8 rounded-lg bg-[#242A05] flex items-center justify-center flex-shrink-0 transition-colors group-hover:bg-[#B7D31A]"><Mail size={14} className="text-[#B7D31A] transition-colors group-hover:text-[#141A1D]" /></div><span className="text-sm group-hover:text-[#B7D31A] transition-colors">{email}</span></a></li>
+              <li><a href={'mailto:' + email} className="flex items-center gap-3 group"><div className="w-8 h-8 rounded-lg bg-[#242A05] flex items-center justify-center flex-shrink-0 transition-colors group-hover:bg-[#B7D31A]"><Mail size={14} className="text-[#B7D31A] transition-colors group-hover:text-[#141A1D]" /></div><span className="text-sm group-hover:text-[#B7D31A] transition-colors whitespace-nowrap">{email}</span></a></li>
               <li><a href={'tel:' + phone} className="flex items-center gap-3 group"><div className="w-8 h-8 rounded-lg bg-[#242A05] flex items-center justify-center flex-shrink-0 transition-colors group-hover:bg-[#B7D31A]"><Phone size={14} className="text-[#B7D31A] transition-colors group-hover:text-[#141A1D]" /></div><span className="text-sm group-hover:text-[#B7D31A] transition-colors">{phone}</span></a></li>
               <li className="flex items-center gap-3 group"><div className="w-8 h-8 rounded-lg bg-[#242A05] flex items-center justify-center flex-shrink-0 transition-colors group-hover:bg-[#B7D31A]"><MapPin size={14} className="text-[#B7D31A] transition-colors group-hover:text-[#141A1D]" /></div><span className="text-sm">{address}</span></li>
               <li className="flex items-center gap-3 group"><div className="w-8 h-8 rounded-lg bg-[#242A05] flex items-center justify-center flex-shrink-0 transition-colors group-hover:bg-[#B7D31A]"><Clock size={14} className="text-[#B7D31A] transition-colors group-hover:text-[#141A1D]" /></div><span className="text-sm">Lunes a Viernes<br />9 a 18 hs</span></li>
@@ -89,9 +89,9 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-8"><div className="h-[0.5px] bg-white/20" /></div>
+      <div className="max-w-7xl mx-auto px-4 lg:px-6"><div className="h-[0.5px] bg-white/20" /></div>
       <div className="border-t border-transparent">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className="max-w-7xl mx-auto px-4 lg:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <p className="text-[#8A8A85] text-xs">&copy; 2026 Home Padel - Todos los derechos reservados.</p>
           <div className="flex gap-4">
             <Link href="/terminos" className="text-[#8A8A85] text-xs hover:text-[#C7C7C0] transition-colors">Terminos y condiciones</Link>

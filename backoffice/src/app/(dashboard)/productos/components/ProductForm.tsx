@@ -30,6 +30,10 @@ const schema = z.object({
   categoryId: z.string().min(1, 'Categoria requerida'),
   brandId: z.string().min(1, 'Marca requerida'),
   images: z.array(z.string()).optional(),
+  discountPercentage: z.coerce.number().min(0).max(100).optional(),
+  installments: z.coerce.number().int().min(0).max(12).optional(),
+  installmentsInterest: z.coerce.number().min(0).optional(),
+  hasInstallmentsInterest: z.boolean().default(false),
 });
 export type ProductFormData = z.infer<typeof schema> & { images?: string[] };
 
@@ -63,6 +67,9 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
   const active = watch('active');
   const isNew = watch('isNew');
   const isOffer = watch('isOffer');
+  const hasInstallmentsInterest = watch('hasInstallmentsInterest');
+  const discountPercentage = watch('discountPercentage');
+  const installments = watch('installments');
 
   const handleUpload = async () => {
     const input = document.createElement('input');
@@ -154,6 +161,41 @@ const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[]; onS
         <div>
           <label className={labelClass}>Precio Oferta</label>
           <input type="number" step="0.01" {...register('salePrice')} className={inputClass + ' mt-1'} />
+        </div>
+
+        {/* Fila 2.5 - Descuento y Cuotas */}
+        <div>
+          <label className={labelClass}>% Descuento</label>
+          <input type="number" step="0.1" min="0" max="100" {...register('discountPercentage')} className={inputClass + ' mt-1'} placeholder="Ej: 15" />
+        </div>
+        <div>
+          <label className={labelClass}>Cuotas (Mercado Pago)</label>
+          <select {...register('installments')} className={inputClass + ' mt-1'}>
+            <option value="">Sin cuotas</option>
+            <option value="3">3 cuotas</option>
+            <option value="6">6 cuotas</option>
+            <option value="9">9 cuotas</option>
+            <option value="12">12 cuotas</option>
+          </select>
+        </div>
+
+        {/* Fila 3 - Interes en cuotas */}
+        <div className="col-span-2">
+          <div className="flex items-center gap-4">
+            <div>
+              <label className={labelClass}>Interes en cuotas</label>
+              <div className="flex items-center gap-2 mt-1">
+                <Toggle checked={hasInstallmentsInterest} onChange={() => setValue('hasInstallmentsInterest', !hasInstallmentsInterest, { shouldDirty: true })} />
+                <span className={'text-xs font-medium ' + (hasInstallmentsInterest ? 'text-red-600' : 'text-gray-400')}>{hasInstallmentsInterest ? 'Con interes' : 'Sin interes'}</span>
+              </div>
+            </div>
+            {hasInstallmentsInterest && (
+              <div>
+                <label className={labelClass}>% Interes</label>
+                <input type="number" step="0.1" min="0" {...register('installmentsInterest')} className={inputClass + ' mt-1'} placeholder="Ej: 5" />
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Fila 3 */}

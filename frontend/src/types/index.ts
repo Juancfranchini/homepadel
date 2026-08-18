@@ -1,4 +1,4 @@
-// Tipos globales del frontend â€” espejo de los modelos Prisma del backend
+// Tipos globales del frontend
 
 export interface Category {
   id: string;
@@ -38,6 +38,12 @@ export interface Product {
   features?: unknown;
   highlights?: unknown;
   transferPrice?: number;
+  discountPercentage?: number;
+  installments?: number;
+  installmentsInterest?: number;
+  hasInstallmentsInterest?: boolean;
+  rating?: number;
+  reviewCount?: number;
   paymentMethods?: unknown;
   category: Category;
   brand: Brand;
@@ -48,18 +54,37 @@ export interface CartItem {
   quantity: number;
 }
 
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: 'CUSTOMER' | 'ADMIN';
-}
-
 export interface Order {
   id: string;
   number: string;
-  status: 'PENDING' | 'PAID' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+  status: string;
   total: number;
+  subtotal: number;
+  shipping: number;
+  discount: number;
+  createdAt: string;
+  trackingNumber?: string;
+  trackingUrl?: string;
+  buyerName?: string;
+  buyerEmail?: string;
+  buyerPhone?: string;
+  address?: string;
+  items?: {
+    id: string;
+    quantity: number;
+    price: number;
+    product: { name: string; sku: string; images?: string[] };
+  }[];
+}
+
+export interface Review {
+  id: string;
+  productId: string;
+  name: string;
+  rating: number;
+  comment: string;
+  verified: boolean;
+  active: boolean;
   createdAt: string;
 }
 
@@ -74,8 +99,6 @@ export interface Banner {
   active: boolean;
   order: number;
 }
-
-// â”€â”€â”€ Nuevos tipos para homepage dinÃ¡mica â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export interface HeroSlide {
   id: string;
@@ -93,12 +116,12 @@ export interface HeroSlide {
 }
 
 export interface Benefit {
-  id: string;
+  id?: string;
   icon: string;
   title: string;
   description?: string;
-  order: number;
-  active: boolean;
+  order?: number;
+  active?: boolean;
 }
 
 export interface Testimonial {
@@ -108,47 +131,6 @@ export interface Testimonial {
   rating: number;
   photo?: string;
   order: number;
-  active: boolean;
-}
-
-export interface AboutSection {
-  title: string;
-  description: string;
-  image?: string;
-  benefits: Array<{ icon: string; title: string; description: string }>;
-}
-
-export interface InstagramConfig {
-  title: string;
-  username: string;
-  buttonText: string;
-  buttonUrl: string;
-}
-
-export interface FinalMessageData {
-  text?: string;
-  buttonText?: string;
-  buttonUrl?: string;
-  footerText?: string;
-  secondaryButtonText?: string;
-  secondaryButtonUrl?: string;
-  newsletterTitle?: string;
-  newsletterText?: string;
-  newsletterPlaceholder?: string;
-  newsletterButtonText?: string;
-  newsletterFooterText?: string;
-  title?: string;
-  subtitle?: string;
-  ctaText?: string;
-  ctaUrl?: string;
-  ctaSecondaryText?: string;
-  ctaSecondaryUrl?: string;
-  active?: boolean;
-}
-
-export interface SiteSection {
-  key: string;
-  data: Record<string, unknown>;
   active: boolean;
 }
 
@@ -162,4 +144,50 @@ export interface Promotion {
   active: boolean;
   startDate: string;
   endDate: string;
+}
+
+export interface AboutSection {
+  title: string;
+  description?: string;
+  image?: string;
+  benefits: Benefit[];
+}
+
+export interface InstagramConfig {
+  title: string;
+  username: string;
+  buttonText: string;
+  buttonUrl: string;
+  active?: boolean;
+  posts?: unknown;
+}
+
+export interface FinalMessageData {
+  title: string;
+  text?: string;
+  buttonText?: string;
+  buttonUrl?: string;
+  active?: boolean;
+  footerText?: string;
+  secondaryButtonText?: string;
+  secondaryButtonUrl?: string;
+  newsletterTitle?: string;
+  newsletterText?: string;
+  newsletterPlaceholder?: string;
+  newsletterFooterText?: string;
+}
+
+export interface SiteSection {
+  key: string;
+  data: unknown;
+  active: boolean;
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  phone?: string;
+  address?: string;
 }

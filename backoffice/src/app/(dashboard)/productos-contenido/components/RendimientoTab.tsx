@@ -1,4 +1,5 @@
 import { useFieldArray, UseFormRegister } from 'react-hook-form';
+import Toggle from '../../testimonios/components/Toggle';
 import { createElement } from 'react';
 import { Plus, Trash2, Target, Circle, Scale, Ruler, User, Zap, Star, Shield, Award, Gauge, Wind, Package, Thermometer, Droplets, Maximize, Layers, Scissors, TrendingUp, Footprints } from 'lucide-react';
 
@@ -24,15 +25,20 @@ interface Props {
   register: UseFormRegister<any>;
   control: any;
   watch: any;
+  showPerformance: boolean;
+  onToggleShowPerformance: () => void;
 }
 
-export default function RendimientoTab({ register, control, watch }: Props) {
+export default function RendimientoTab({ register, control, watch, showPerformance, onToggleShowPerformance }: Props) {
   const specsArray = useFieldArray({ control, name: 'specs' });
 
   return (
     <div className="space-y-4">
       <div>
-        <label className={labelClass + ' mb-2'}>Barras de Rendimiento (0-100)</label>
+        <div className="flex items-center justify-between mb-2">
+          <label className={labelClass}>Barras de Rendimiento (0-100)</label>
+          <div className="flex items-center gap-2"><Toggle checked={showPerformance} onChange={onToggleShowPerformance} /><span className="text-xs text-gray-400">{showPerformance ? "Activado" : "Desactivado"}</span></div>
+        </div>
         {PERF_LABELS.map((label, i) => (
           <div key={i} className="flex items-center gap-3 mb-2">
             <span className="w-28 text-sm text-gray-600 flex-shrink-0">{label}</span>

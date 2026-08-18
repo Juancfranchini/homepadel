@@ -1,13 +1,14 @@
 'use client';
 
 import { Plus, Trash2, Star, Minus } from 'lucide-react';
+import Toggle from '../../testimonios/components/Toggle';
 
 const inputClass = 'px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00]';
 
 interface CompareField { label: string; type: 'stars' | 'text'; }
 interface CompareProduct { name: string; image?: string; values: number[]; }
 interface CompareData { fields: CompareField[]; products: CompareProduct[]; }
-interface Props { value: CompareData; onChange: (data: CompareData) => void; }
+interface Props { value: CompareData; onChange: (data: CompareData) => void; showCompare: boolean; onToggleShowCompare: () => void; }
 
 function StarIcon({ filled, half }: { filled: boolean; half: boolean }) {
   if (filled) return <Star size={12} fill="#C8FF00" stroke="#C8FF00" />;
@@ -28,7 +29,7 @@ function StarIcon({ filled, half }: { filled: boolean; half: boolean }) {
   return <Star size={12} fill="none" stroke="#D1D5DB" />;
 }
 
-export default function ComparaTab({ value, onChange }: Props) {
+export default function ComparaTab({ value, onChange, showCompare, onToggleShowCompare }: Props) {
   const data: CompareData = value || { fields: [], products: [] };
 
   const addField = () => onChange({ ...data, fields: [...data.fields, { label: '', type: 'stars' }] });
@@ -42,7 +43,7 @@ export default function ComparaTab({ value, onChange }: Props) {
   };
 
   const addProduct = () => {
-    const vals = data.fields.map((f) => f.type === 'stars' ? 0 : 0);
+    const vals = data.fields.map(() => 0);
     onChange({ ...data, products: [...data.products, { name: '', image: '', values: vals }] });
   };
   const removeProduct = (i: number) => {
@@ -74,10 +75,7 @@ export default function ComparaTab({ value, onChange }: Props) {
         </button>
         <div className="flex gap-0.5">
           {[1,2,3,4,5].map((s) => (
-            <StarIcon key={s}
-              filled={val >= s}
-              half={val >= s - 0.5 && val < s}
-            />
+            <StarIcon key={s} filled={val >= s} half={val >= s - 0.5 && val < s} />
           ))}
         </div>
       </div>
@@ -86,18 +84,29 @@ export default function ComparaTab({ value, onChange }: Props) {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Comparar Modelos</span>
+        <div className="flex items-center gap-2">
+          <Toggle checked={showCompare} onChange={onToggleShowCompare} />
+          <span className="text-xs text-gray-400">{showCompare ? "Activado" : "Desactivado"}</span>
+        </div>
+      </div>
+
+      {/* Caracteristicas */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Caracteristicas</span>
+          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Caracteristicas a comparar</span>
           <button type="button" onClick={addField}
-            className="flex items-center gap-1 text-xs font-semibold px-2 py-1 bg-[#C8FF00] text-[#0f172a] rounded-lg hover:bg-[#b8ef00]"><Plus size={12} />Agregar</button>
+            className="flex items-center gap-1 text-xs font-semibold px-2 py-1 bg-[#C8FF00] text-[#0f172a] rounded-lg hover:bg-[#b8ef00]">
+            <Plus size={12} />Agregar caracteristica
+          </button>
         </div>
         {data.fields.map((field, i) => (
           <div key={i} className="flex gap-2 mb-2 items-center">
             <input value={field.label} onChange={(e) => updateField(i, { label: e.target.value })}
               className={inputClass + ' flex-1'} placeholder="Ej: Control" />
             <select value={field.type} onChange={(e) => updateField(i, { type: e.target.value as 'stars' | 'text' })}
-              className={inputClass + ' flex-1 text-xs'}>
+              className={inputClass + ' w-28 text-xs'}>
               <option value="stars">Estrellas</option>
               <option value="text">Texto</option>
             </select>
@@ -106,26 +115,44 @@ export default function ComparaTab({ value, onChange }: Props) {
         ))}
       </div>
 
+      {/* Productos a comparar */}
       {data.fields.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Productos a comparar</span>
+            <div className="flex items-center gap-2"><span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Productos a comparar</span><span className="text-[10px] text-gray-400">(minimo 2)</span></div>
             <button type="button" onClick={addProduct}
-              className="flex items-center gap-1 text-xs font-semibold px-2 py-1 bg-[#C8FF00] text-[#0f172a] rounded-lg hover:bg-[#b8ef00]"><Plus size={12} />Agregar</button>
+              className="flex items-center gap-1 text-xs font-semibold px-2 py-1 bg-[#C8FF00] text-[#0f172a] rounded-lg hover:bg-[#b8ef00]">
+              <Plus size={12} />Agregar producto
+            </button>
           </div>
-          <div className="space-y-3">
+          
+          <div className="space-y-4">
             {data.products.map((prod, pi) => (
-              <div key={pi} className="border border-gray-200 rounded-lg p-4">
-                <div className="flex items-start gap-4">
-                  <input value={prod.name} onChange={(e) => {
-                    const products = [...data.products];
-                    products[pi] = { ...products[pi], name: e.target.value };
-                    onChange({ ...data, products });
-                  }} className={inputClass + ' flex-1'} placeholder="Nombre del producto" />
-                  <div className="flex-1 flex items-center gap-3 flex-wrap">
-                    {data.fields.map((field, fi) => (
-                      <div key={fi} className="flex items-center gap-2 bg-gray-50 border border-gray-100 rounded-lg px-3 py-1.5">
-                        <span className="text-xs text-gray-500 font-medium">{field.label}</span>
+              <div key={pi} className="border border-gray-200 rounded-lg p-4 space-y-3">
+                {/* Fila 1: Nombre (3/4) + Eliminar (1/4) */}
+                <div className="flex items-center gap-3">
+                  <input 
+                    value={prod.name} 
+                    onChange={(e) => {
+                      const products = [...data.products];
+                      products[pi] = { ...products[pi], name: e.target.value };
+                      onChange({ ...data, products });
+                    }} 
+                    className={inputClass + ' flex-1'} 
+                    placeholder="Nombre del producto" 
+                  />
+                  <button type="button" onClick={() => removeProduct(pi)} 
+                    className="p-2 text-red-400 hover:bg-red-50 rounded-lg flex-shrink-0">
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+                
+                {/* Fila 2+: Caracteristicas en 2 columnas */}
+                <div className="grid grid-cols-2 gap-3">
+                  {data.fields.map((field, fi) => (
+                    <div key={fi} className="flex items-center gap-2 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2">
+                      <span className="text-xs text-gray-500 font-medium flex-shrink-0">{field.label}</span>
+                      <div className="flex-1 flex justify-end">
                         {field.type === 'stars' ? (
                           <StarDisplay pi={pi} fi={fi} />
                         ) : (
@@ -140,12 +167,13 @@ export default function ComparaTab({ value, onChange }: Props) {
                               });
                               onChange({ ...data, products });
                             }}
-                            className="w-24 text-xs px-2 py-1.5 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#C8FF00]/40 bg-white" placeholder="Ej: Medio" />
+                            className="w-24 text-xs px-2 py-1.5 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#C8FF00]/40 bg-white" 
+                            placeholder="Ej: Medio" 
+                          />
                         )}
                       </div>
-                    ))}
-                  </div>
-                  <button type="button" onClick={() => removeProduct(pi)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg flex-shrink-0 self-center"><Trash2 size={14} /></button>
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
@@ -37,10 +37,10 @@ export default function Header() {
 
   return (
     <>
-      <header className="w-full sticky top-0 z-50 glass border-b border-[#0D0F0F]">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
+      <header className="w-full sticky top-0 z-50 bg-[#050606] border-b border-[#0D0F0F]">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-2.5 flex items-center justify-between gap-4">
           <Link href="/" className="flex-shrink-0">
-            <BrandLogo variant="light" size="lg" showText={!branding.logoHeader} imageUrl={(isMobile ? (branding.logoMobile || branding.logoHeader) : branding.logoHeader) || undefined} />
+            <BrandLogo variant="light" size="lg" showText={!branding.logoHeader} imageUrl={(isMobile ? (branding.logoMobile || branding.logoHeader) : branding.logoHeader) || undefined}  />
           </Link>
 
           <nav className="hidden lg:flex items-center gap-1">

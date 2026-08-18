@@ -1,8 +1,3 @@
-// Servicio de productos
-// findAll: paginación + filtros por categoría, marca, búsqueda de texto y rango de precio
-// El slug se genera automáticamente a partir del nombre con slugify
-// findFeatured: retorna hasta 8 productos destacados para el home
-
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -17,7 +12,6 @@ export class ProductsService {
     const { page = 1, limit = 20, category, brand, search, minPrice, maxPrice, showAll, isOffer } = query;
     const skip = (Number(page) - 1) * Number(limit);
 
-    // showAll=1 omite el filtro active:true — usado por el backoffice admin
     const where: any = showAll === '1' ? {} : { active: true };
     if (category) where.category = { slug: category };
     if (brand) where.brand = { slug: brand };
@@ -52,19 +46,34 @@ export class ProductsService {
   }
 
   async findBySlug(slugOrId: string) {
-    // Busca por slug primero; si no existe, intenta por ID (uso del backoffice)
     const product = await this.prisma.product.findFirst({
       where: { OR: [{ slug: slugOrId }, { id: slugOrId }] },
-      include: { category: true, brand: true },
+      include: {
+        category: true,
+        brand: true,
+        reviews: { where: { active: true } },
+      },
     });
     if (!product) throw new NotFoundException('Producto no encontrado');
-    return product;
+
+    const reviews = (product as any).reviews || [];
+    const totalReviews = reviews.length;
+    const averageRating = totalReviews > 0
+      ? reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / totalReviews
+      : 0;
+
+    const { reviews: _, ...rest } = product as any;
+    return {
+      ...rest,
+      rating: Math.round(averageRating * 10) / 10,
+      reviewCount: totalReviews,
+    };
   }
 
   create(dto: CreateProductDto) {
     const { categoryId, brandId, ...rest } = dto as any;
     if (!categoryId) throw new NotFoundException('categoryId es requerido');
-    if (!brandId)    throw new NotFoundException('brandId es requerido');
+    if (!brandId) throw new NotFoundException('brandId es requerido');
     const slug = slugify(rest.name, { lower: true, strict: true });
     return this.prisma.product.create({
       data: { ...rest, slug, categoryId, brandId },

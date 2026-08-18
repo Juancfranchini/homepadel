@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -22,6 +22,7 @@ import ProductStars from './components/ProductStars';
 import PerformanceSection from './components/PerformanceSection';
 import HighlightsSection from './components/HighlightsSection';
 import VideoSection from './components/VideoSection';
+import RelatedVideos from './components/RelatedVideos';
 
 import ProductReviews from './components/ProductReviews';
 import CompareModels from './components/CompareModels';
@@ -44,7 +45,7 @@ export default function ProductoPage() {
   useEffect(() => {
     if (!params.slug) return;
     setLoading(true);
-    Promise.allSettled([getProduct(params.slug), getProducts({ showAll: 1, limit: 50 })])
+    Promise.allSettled([getProduct(params.slug + '?t=' + Date.now()), getProducts({ showAll: 1, limit: 50 })])
       .then(([prodRes, relRes]) => {
         const p = prodRes.status === 'fulfilled' ? (prodRes.value?.data ?? prodRes.value) : null;
         setProduct(p ?? null);
@@ -93,8 +94,11 @@ export default function ProductoPage() {
   const discountPct = hasDiscount ? getDiscountPercent(product.price, product.salePrice!) : 0;
   const displayPrice = hasDiscount ? product.salePrice! : product.price;
   const images = product.images?.length > 0 ? product.images : [];
-  const cuota = Math.ceil(displayPrice / 9);
-  const transferPrice = product.transferPrice && product.transferPrice > 0 ? product.transferPrice : Math.ceil(displayPrice * 0.8);
+  const installments = product.installments || 0;
+  const hasInstallmentsInterest = product.hasInstallmentsInterest || false;
+  const installmentsInterest = product.installmentsInterest || 0;
+  const cuota = installments > 0 ? Math.ceil((displayPrice * (1 + (hasInstallmentsInterest ? installmentsInterest / 100 : 0))) / installments) : 0;
+  const transferPrice = product.transferPrice && product.transferPrice > 0 ? product.transferPrice : 0;
   const paymentMethods: string[] = Array.isArray(product.paymentMethods) ? product.paymentMethods.filter((m): m is string => typeof m === 'string') : [];
   const performanceStats = Array.isArray(product.performanceStats) ? product.performanceStats : [];
   const highlights = Array.isArray(product.highlights) ? product.highlights.filter((h): h is string => typeof h === 'string') : [];
@@ -102,6 +106,11 @@ export default function ProductoPage() {
   const relatedVideos = (product as any).relatedVideos || [];
   const compareData = (product as any).compareData || null;
   const highlightsTitle = (product as any).highlightsTitle || '';
+  const showVideo = (product as any).showVideo !== false;
+  const showPerformance = (product as any).showPerformance !== false;
+  const showHighlights = (product as any).showHighlights !== false;
+  const showCompare = (product as any).showCompare !== false;
+  const showRelated = (product as any).showRelated !== false;
   const highlightsDescription = (product as any).highlightsDescription || '';
 
   const getVideoEmbedUrl = (url?: string) => {
@@ -135,8 +144,8 @@ export default function ProductoPage() {
 
           <div className="flex flex-col gap-5 bg-[#0C0C0C] rounded-2xl p-6 border border-[#0D0F0F]">
             <ProductInfo brandName={product.brand.name} brandSlug={product.brand.slug} productName={product.name} />
-            <ProductStars rating={4} count={0} />
-            <ProductPrice displayPrice={displayPrice} transferPrice={transferPrice} hasDiscount={hasDiscount} originalPrice={product.price} cuota={cuota} paymentMethods={paymentMethods} onShowPaymentModal={() => setShowPaymentModal(true)} />
+            <ProductStars rating={product.rating || 0} count={product.reviewCount || 0} />
+            <ProductPrice displayPrice={displayPrice} transferPrice={transferPrice} hasDiscount={hasDiscount} originalPrice={product.price} cuota={cuota} installments={installments} hasInstallmentsInterest={hasInstallmentsInterest} installmentsInterest={installmentsInterest} paymentMethods={paymentMethods} onShowPaymentModal={() => setShowPaymentModal(true)} />
             <StockAlert stock={product.stock} />
             <div className="h-px bg-[#0D0F0F]" />
             <TrustBadges />
@@ -148,21 +157,60 @@ export default function ProductoPage() {
         </div>
       </div>
 
-      <PerformanceSection stats={performanceStats} specs={specs} />
+      {showPerformance && <PerformanceSection stats={performanceStats} specs={specs} />}
 
       
 
-      {(embedUrl || highlights.length > 0) && (
+      {showVideo && showHighlights && (embedUrl || relatedVideos.length > 0) && highlights.length > 0 ? (
         <section className="border-t border-[#0D0F0F] py-6">
           <div className="max-w-7xl mx-auto px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-stretch">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
               <VideoSection embedUrl={embedUrl} />
-              <HighlightsSection highlights={highlights} highlightsTitle={highlightsTitle} highlightsDescription={highlightsDescription} relatedVideos={relatedVideos} />
+              <div className="flex flex-col h-full">
+                <HighlightsSection highlights={highlights} highlightsTitle={highlightsTitle} highlightsDescription={highlightsDescription} />
+                {relatedVideos.length > 0 && (
+                  <div className="mt-auto">
+                    <h3 className="text-lg font-semibold uppercase tracking-tight text-[#F7F6F7] mb-2">Videos Relacionados</h3>
+                    <RelatedVideos videos={relatedVideos} />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </section>
-      )}
-      <CompareModels data={compareData} />
+      ) : showVideo && (embedUrl || relatedVideos.length > 0) ? (
+        <section className="border-t border-[#0D0F0F] py-6">
+          <div className="max-w-7xl mx-auto px-6 lg:px-8">
+            {embedUrl && relatedVideos.length > 0 ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                <VideoSection embedUrl={embedUrl} />
+                <div className="flex flex-col h-full">
+                  <h3 className="text-lg font-semibold uppercase tracking-tight text-[#F7F6F7] mb-2">Videos Relacionados</h3>
+                  <div className="flex-1">
+                    <RelatedVideos videos={relatedVideos} />
+                  </div>
+                </div>
+              </div>
+            ) : embedUrl ? (
+              <VideoSection embedUrl={embedUrl} />
+            ) : (
+              <div>
+                <h3 className="text-lg font-semibold uppercase tracking-tight text-[#F7F6F7] mb-2">Videos Relacionados</h3>
+                <RelatedVideos videos={relatedVideos} />
+              </div>
+            )}
+          </div>
+        </section>
+      ) : !showVideo && showHighlights && highlights.length > 0 ? (
+        <section className="border-t border-[#0D0F0F] py-6">
+          <div className="max-w-7xl mx-auto px-6 lg:px-8">
+            <HighlightsSection highlights={highlights} highlightsTitle={highlightsTitle} highlightsDescription={highlightsDescription} />
+          </div>
+        </section>
+      ) : null}
+
+
+      {showCompare && <CompareModels data={compareData} />}
 
       <section className="border-t border-[#0D0F0F] py-6">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
@@ -180,7 +228,7 @@ export default function ProductoPage() {
         </div>
       </section>
 
-      <RelatedProducts products={related} />
+      {showRelated && <RelatedProducts products={related} />}
 
       <TrustBottom />
     </div>
