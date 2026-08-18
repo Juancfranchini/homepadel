@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Edit2, Trash2, ArrowRight, ImageIcon, Youtube, BarChart3, ListChecks, ArrowLeftRight, Save, GitCompare } from 'lucide-react';
+
 import api from '@/lib/api';
 import { Modal, ConfirmDialog } from '@/components/ui/Modal';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
@@ -36,6 +37,11 @@ const schema = z.object({
   relatedVideos: z.array(z.object({ title: z.string(), url: z.string() })).optional(),
   relatedProductIds: z.array(z.string()).optional(),
   compareData: z.any().optional(),
+  showVideo: z.boolean().default(true),
+  showPerformance: z.boolean().default(true),
+  showHighlights: z.boolean().default(true),
+  showCompare: z.boolean().default(true),
+  showRelated: z.boolean().default(true),
 });
 type FormData = z.infer<typeof schema>;
 
@@ -48,6 +54,11 @@ interface Product {
   relatedVideos?: { title: string; url: string }[];
   relatedProductIds?: string[];
   compareData?: any;
+  showVideo?: boolean;
+  showPerformance?: boolean;
+  showHighlights?: boolean;
+  showCompare?: boolean;
+  showRelated?: boolean;
 }
 
 export default function ProductosContenidoPage() {
@@ -85,6 +96,7 @@ export default function ProductosContenidoPage() {
       relatedVideos: p.relatedVideos || [],
       relatedProductIds: p.relatedProductIds || [],
       compareData: p.compareData || { fields: [], products: [] },
+      showVideo: p.showVideo !== false, showPerformance: p.showPerformance !== false, showHighlights: p.showHighlights !== false, showCompare: p.showCompare !== false, showRelated: p.showRelated !== false,
     });
     setModalOpen(true);
   };
@@ -101,6 +113,7 @@ export default function ProductosContenidoPage() {
         performanceStats: data.performanceStats || [], specs: data.specs || [],
         relatedVideos: data.relatedVideos || [], relatedProductIds: data.relatedProductIds || [],
         compareData: data.compareData || { fields: [], products: [] },
+        showVideo: data.showVideo, showPerformance: data.showPerformance, showHighlights: data.showHighlights, showCompare: data.showCompare, showRelated: data.showRelated,
       });
       toast('Contenido actualizado', 'success'); setModalOpen(false); load();
     } catch { toast('Error', 'error'); } finally { setSaving(false); }
@@ -177,14 +190,16 @@ export default function ProductosContenidoPage() {
             </div>
             <div className="flex-1 pl-6">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                {activeTab === 'video' && <VideoTab register={register} control={control} />}
-                {activeTab === 'rendimiento' && <RendimientoTab register={register} control={control} watch={watch} />}
-                {activeTab === 'highlights' && <HighlightsTab register={register} control={control} />}
-                {activeTab === 'relacionados' && <RelacionadosTab products={products} selectedId={selected.id} register={register} setValue={setValue} control={control} />}
+                {activeTab === 'video' && <VideoTab register={register} control={control} showVideo={watch('showVideo')} onToggleShowVideo={() => setValue('showVideo', !watch('showVideo'), { shouldDirty: true })} />}
+                {activeTab === 'rendimiento' && <RendimientoTab register={register} control={control} watch={watch} showPerformance={watch('showPerformance')} onToggleShowPerformance={() => setValue('showPerformance', !watch('showPerformance'), { shouldDirty: true })} />}
+                {activeTab === 'highlights' && <HighlightsTab register={register} control={control} showHighlights={watch('showHighlights')} onToggleShowHighlights={() => setValue('showHighlights', !watch('showHighlights'), { shouldDirty: true })} />}
+                {activeTab === 'relacionados' && <RelacionadosTab products={products} selectedId={selected.id} register={register} setValue={setValue} control={control} showRelated={watch('showRelated')} onToggleShowRelated={() => setValue('showRelated', !watch('showRelated'), { shouldDirty: true })} />}
                 {activeTab === 'compara' && (
                   <ComparaTab
                     value={watch('compareData') || { fields: [], products: [] }}
                     onChange={(data) => setValue('compareData', data, { shouldDirty: true })}
+                    showCompare={watch('showCompare')}
+                    onToggleShowCompare={() => setValue('showCompare', !watch('showCompare'), { shouldDirty: true })}
                   />
                 )}
                 <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">

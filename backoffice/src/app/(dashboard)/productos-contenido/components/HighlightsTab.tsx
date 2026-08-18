@@ -1,4 +1,5 @@
 import { useFieldArray, UseFormRegister } from 'react-hook-form';
+import Toggle from '../../testimonios/components/Toggle';
 import { Plus, Trash2 } from 'lucide-react';
 
 const inputClass = 'w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00]';
@@ -7,15 +8,20 @@ const labelClass = 'text-xs font-medium text-gray-400 uppercase tracking-wider';
 interface Props {
   register: UseFormRegister<any>;
   control: any;
+  showHighlights: boolean;
+  onToggleShowHighlights: () => void;
 }
 
-export default function HighlightsTab({ register, control }: Props) {
+export default function HighlightsTab({ register, control, showHighlights, onToggleShowHighlights }: Props) {
   const highlightsArray = useFieldArray({ control, name: 'highlights' });
 
   return (
     <div className="space-y-3">
       <div>
-        <label className={labelClass}>Titulo de la seccion</label>
+        <div className="flex items-center justify-between">
+          <label className={labelClass}>Titulo de la seccion</label>
+          <div className="flex items-center gap-2"><Toggle checked={showHighlights} onChange={onToggleShowHighlights} /><span className="text-xs text-gray-400">{showHighlights ? "Activado" : "Desactivado"}</span></div>
+        </div>
         <input {...register('highlightsTitle')} className={inputClass + ' mt-1'} placeholder="POR QUE ELEGIR ESTE PRODUCTO" />
       </div>
       <div>

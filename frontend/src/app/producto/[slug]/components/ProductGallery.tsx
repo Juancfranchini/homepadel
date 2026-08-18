@@ -50,7 +50,7 @@ export default function ProductGallery({ images, productName, hasDiscount, disco
         )}
 
         <div className="absolute top-4 left-4 flex flex-col gap-2">
-          {hasDiscount && <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">-{discountPct}%</span>}
+          {hasDiscount && <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">-{discountPct % 1 === 0 ? discountPct.toFixed(0) : discountPct.toFixed(1)}%</span>}
           {isNew && <span className="bg-[#B7D31A] text-[#050606] text-xs font-bold px-3 py-1 rounded-full">NUEVO</span>}
         </div>
       </div>

@@ -45,7 +45,7 @@ export default function CompareModels({ data }: Props) {
 
   // Filtrar productos que tengan al menos un valor con estrellas > 0 o texto no vacio
   const validProducts = data.products.filter((p) => p.name && p.values.some((v) => v !== 0 && v !== ''));
-  if (validProducts.length < 2) return null;
+  if (validProducts.length < 1) return null;
 
   // Filtrar campos que tengan al menos un valor con estrellas > 0
   const validFields = data.fields.filter((f, fi) => {

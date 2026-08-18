@@ -1,13 +1,9 @@
 import { Check } from 'lucide-react';
-import RelatedVideos from './RelatedVideos';
-
-interface RelatedVideo { title: string; url: string; }
 
 interface Props {
   highlights: string[];
   highlightsTitle?: string;
   highlightsDescription?: string;
-  relatedVideos?: RelatedVideo[];
 }
 
 const PLACEHOLDER_HIGHLIGHTS = [
@@ -17,7 +13,7 @@ const PLACEHOLDER_HIGHLIGHTS = [
   'Balance perfecto entre control y potencia para jugadores exigentes',
 ];
 
-export default function HighlightsSection({ highlights, highlightsTitle, highlightsDescription, relatedVideos }: Props) {
+export default function HighlightsSection({ highlights, highlightsTitle, highlightsDescription }: Props) {
   const items = highlights && highlights.length > 0 ? highlights : PLACEHOLDER_HIGHLIGHTS;
 
   return (
@@ -38,9 +34,6 @@ export default function HighlightsSection({ highlights, highlightsTitle, highlig
           </li>
         ))}
       </ul>
-      <div className="mt-auto pt-4">
-        <RelatedVideos videos={relatedVideos || []} />
-      </div>
     </div>
   );
 }

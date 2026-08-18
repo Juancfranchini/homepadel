@@ -54,6 +54,10 @@ model Product {
   description       String?
   price             Float
   salePrice         Float?
+  discountPercentage Float?
+  installments       Int?
+  installmentsInterest Float?
+  hasInstallmentsInterest Boolean @default(false)
   sku               String      @unique
   stock             Int         @default(0)
   images            String[]
@@ -72,6 +76,11 @@ model Product {
   compareData     Json?
   specs           Json?
   videoUrl          String?
+  showVideo         Boolean @default(true)
+  showPerformance   Boolean @default(true)
+  showHighlights    Boolean @default(true)
+  showCompare       Boolean @default(true)
+  showRelated       Boolean @default(true)
   highlights        Json?
   highlightsTitle   String?
   highlightsDescription String?
