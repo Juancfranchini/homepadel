@@ -1,8 +1,14 @@
 interface Props {
   stock: number;
+  isMadeToOrder?: boolean;
+  estimatedDays?: number;
 }
 
-export default function StockAlert({ stock }: Props) {
+export default function StockAlert({ stock, isMadeToOrder, estimatedDays }: Props) {
+  if (isMadeToOrder) {
+    return null;
+  }
+
   if (stock === 0) {
     return (
       <div className="inline-flex items-center gap-2 bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold px-3 py-2 rounded-lg w-fit">
