@@ -145,8 +145,8 @@ export default function ProductoPage() {
           <div className="flex flex-col gap-5 bg-[#0C0C0C] rounded-2xl p-6 border border-[#0D0F0F]">
             <ProductInfo brandName={product.brand.name} brandSlug={product.brand.slug} productName={product.name} />
             <ProductStars rating={product.rating || 0} count={product.reviewCount || 0} />
-            <ProductPrice displayPrice={displayPrice} transferPrice={transferPrice} hasDiscount={hasDiscount} originalPrice={product.price} cuota={cuota} installments={installments} hasInstallmentsInterest={hasInstallmentsInterest} installmentsInterest={installmentsInterest} paymentMethods={paymentMethods} onShowPaymentModal={() => setShowPaymentModal(true)} />
-            <StockAlert stock={product.stock} />
+            <ProductPrice displayPrice={displayPrice} transferPrice={transferPrice} hasDiscount={hasDiscount} originalPrice={product.price} cuota={cuota} installments={installments} hasInstallmentsInterest={hasInstallmentsInterest} installmentsInterest={installmentsInterest} paymentMethods={paymentMethods} onShowPaymentModal={() => setShowPaymentModal(true)} isMadeToOrder={product.isMadeToOrder} estimatedDays={product.estimatedDays} requiredDeposit={product.requiredDeposit} />
+            <StockAlert stock={product.stock} isMadeToOrder={product.isMadeToOrder} estimatedDays={product.estimatedDays} />
             <div className="h-px bg-[#0D0F0F]" />
             <TrustBadges />
             <ProductActions stock={product.stock} quantity={quantity} onQuantityChange={setQuantity} onBuyNow={handleBuyNow} onAddToCart={handleAddToCart} added={added} wished={wished} onWish={() => setWished(!wished)} />

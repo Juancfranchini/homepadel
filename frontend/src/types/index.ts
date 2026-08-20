@@ -42,6 +42,9 @@ export interface Product {
   installments?: number;
   installmentsInterest?: number;
   hasInstallmentsInterest?: boolean;
+  isMadeToOrder?: boolean;
+  estimatedDays?: number;
+  requiredDeposit?: number;
   rating?: number;
   reviewCount?: number;
   paymentMethods?: unknown;

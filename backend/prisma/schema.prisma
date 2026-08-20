@@ -58,6 +58,9 @@ model Product {
   installments       Int?
   installmentsInterest Float?
   hasInstallmentsInterest Boolean @default(false)
+  isMadeToOrder     Boolean @default(false)
+  estimatedDays     Int?
+  requiredDeposit   Float?
   sku               String      @unique
   stock             Int         @default(0)
   images            String[]

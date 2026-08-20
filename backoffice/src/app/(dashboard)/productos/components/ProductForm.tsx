@@ -34,6 +34,9 @@ const schema = z.object({
   installments: z.coerce.number().int().min(0).max(12).optional(),
   installmentsInterest: z.coerce.number().min(0).optional(),
   hasInstallmentsInterest: z.boolean().default(false),
+  isMadeToOrder: z.boolean().default(false),
+  estimatedDays: z.coerce.number().int().optional(),
+  requiredDeposit: z.coerce.number().min(0).max(100).optional(),
 });
 export type ProductFormData = z.infer<typeof schema> & { images?: string[] };
 
@@ -68,8 +71,7 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
   const isNew = watch('isNew');
   const isOffer = watch('isOffer');
   const hasInstallmentsInterest = watch('hasInstallmentsInterest');
-  const discountPercentage = watch('discountPercentage');
-  const installments = watch('installments');
+  const isMadeToOrder = watch('isMadeToOrder');
 
   const handleUpload = async () => {
     const input = document.createElement('input');
@@ -139,7 +141,7 @@ const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[]; onS
       <div className="ml-7 mr-5 w-px bg-gray-200 self-stretch my-2" />
 
       {/* Columna derecha - Formulario en 2 columnas */}
-      <div className="flex-1 grid grid-cols-2 gap-x-4 gap-y-6 content-start flex flex-col">
+      <div className="flex-1 grid grid-cols-2 gap-x-4 gap-y-5 content-start">
         {/* Fila 1 */}
         <div>
           <label className={labelClass}>Nombre *</label>
@@ -163,46 +165,56 @@ const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[]; onS
           <input type="number" step="0.01" {...register('salePrice')} className={inputClass + ' mt-1'} />
         </div>
 
-        {/* Fila 2.5 - Descuento y Cuotas */}
-        <div>
-          <label className={labelClass}>% Descuento</label>
-          <input type="number" step="0.1" min="0" max="100" {...register('discountPercentage')} className={inputClass + ' mt-1'} placeholder="Ej: 15" />
-        </div>
-        <div>
-          <label className={labelClass}>Cuotas (Mercado Pago)</label>
-          <select {...register('installments')} className={inputClass + ' mt-1'}>
-            <option value="">Sin cuotas</option>
-            <option value="3">3 cuotas</option>
-            <option value="6">6 cuotas</option>
-            <option value="9">9 cuotas</option>
-            <option value="12">12 cuotas</option>
-          </select>
-        </div>
-
-        {/* Fila 3 - Interes en cuotas */}
-        <div className="col-span-2">
-          <div className="flex items-center gap-4">
+        {/* Descuento y Cuotas - solo para productos regulares */}
+        {!isMadeToOrder && (
+          <>
             <div>
-              <label className={labelClass}>Interes en cuotas</label>
-              <div className="flex items-center gap-2 mt-1">
-                <Toggle checked={hasInstallmentsInterest} onChange={() => setValue('hasInstallmentsInterest', !hasInstallmentsInterest, { shouldDirty: true })} />
-                <span className={'text-xs font-medium ' + (hasInstallmentsInterest ? 'text-red-600' : 'text-gray-400')}>{hasInstallmentsInterest ? 'Con interes' : 'Sin interes'}</span>
+              <label className={labelClass}>% Descuento</label>
+              <input type="number" step="0.1" min="0" max="100" {...register('discountPercentage')} className={inputClass + ' mt-1'} placeholder="Ej: 15" />
+            </div>
+            <div>
+              <label className={labelClass}>Cuotas (Mercado Pago)</label>
+              <select {...register('installments')} className={inputClass + ' mt-1'}>
+                <option value="">Sin cuotas</option>
+                <option value="3">3 cuotas</option>
+                <option value="6">6 cuotas</option>
+                <option value="9">9 cuotas</option>
+                <option value="12">12 cuotas</option>
+              </select>
+            </div>
+
+            <div className="col-span-2">
+              <div className="flex items-center gap-4">
+                <div>
+                  <label className={labelClass}>Interes en cuotas</label>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Toggle checked={hasInstallmentsInterest} onChange={() => setValue('hasInstallmentsInterest', !hasInstallmentsInterest, { shouldDirty: true })} />
+                    <span className={'text-xs font-medium ' + (hasInstallmentsInterest ? 'text-red-600' : 'text-gray-400')}>{hasInstallmentsInterest ? 'Con interes' : 'Sin interes'}</span>
+                  </div>
+                </div>
+                {hasInstallmentsInterest && (
+                  <div>
+                    <label className={labelClass}>% Interes</label>
+                    <input type="number" step="0.1" min="0" {...register('installmentsInterest')} className={inputClass + ' mt-1'} placeholder="Ej: 5" />
+                  </div>
+                )}
               </div>
             </div>
-            {hasInstallmentsInterest && (
-              <div>
-                <label className={labelClass}>% Interes</label>
-                <input type="number" step="0.1" min="0" {...register('installmentsInterest')} className={inputClass + ' mt-1'} placeholder="Ej: 5" />
-              </div>
-            )}
-          </div>
-        </div>
+          </>
+        )}
 
-        {/* Fila 3 */}
-        <div>
-          <label className={labelClass}>Stock</label>
-          <input type="number" {...register('stock')} className={inputClass + ' mt-1'} />
-        </div>
+        {/* Fila 5 - Stock o Por encargo */}
+        {!isMadeToOrder ? (
+          <div>
+            <label className={labelClass}>Stock</label>
+            <input type="number" {...register('stock')} className={inputClass + ' mt-1'} />
+          </div>
+        ) : (
+          <div>
+            <label className={labelClass}>Dias estimados de fabricacion</label>
+            <input type="number" {...register('estimatedDays')} className={inputClass + ' mt-1'} placeholder="Ej: 20" />
+          </div>
+        )}
         <div>
           <label className={labelClass}>Categoria *</label>
           <select {...register('categoryId')} className={inputClass + ' mt-1'}>
@@ -212,7 +224,24 @@ const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[]; onS
           {errors.categoryId && <p className="text-xs text-red-600 mt-0.5">{errors.categoryId.message}</p>}
         </div>
 
-        {/* Fila 4 - Marca sola */}
+        {/* Fila 6 - Producto por encargo */}
+        <div className="col-span-2">
+          <div className="flex items-center justify-between">
+            <label className={labelClass}>Producto por encargo</label>
+            <div className="flex items-center gap-2">
+              <Toggle checked={isMadeToOrder} onChange={() => setValue('isMadeToOrder', !isMadeToOrder, { shouldDirty: true })} />
+              <span className={'text-xs font-medium ' + (isMadeToOrder ? 'text-amber-600' : 'text-gray-400')}>{isMadeToOrder ? 'Si' : 'No'}</span>
+            </div>
+          </div>
+          {isMadeToOrder && (
+            <div className="mt-2">
+              <label className={labelClass}>% de pago adelantado (0 = pago total)</label>
+              <input type="number" step="0.1" min="0" max="100" {...register('requiredDeposit')} className={inputClass + ' mt-1'} placeholder="Ej: 30" />
+            </div>
+          )}
+        </div>
+
+        {/* Fila 7 - Marca */}
         <div className="col-span-2">
           <label className={labelClass}>Marca *</label>
           <select {...register('brandId')} className={inputClass + ' mt-1'}>
@@ -222,7 +251,7 @@ const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[]; onS
           {errors.brandId && <p className="text-xs text-red-600 mt-0.5">{errors.brandId.message}</p>}
         </div>
 
-        {/* Fila 5 - 4 toggles */}
+        {/* Fila 8 - Toggles */}
         <div className="col-span-2 flex items-center gap-8 pt-1">
           <div>
             <label className={labelClass}>Activo</label>
@@ -249,13 +278,13 @@ const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[]; onS
             <label className={labelClass}>Destacado</label>
             <div className="flex items-center gap-2 mt-1">
               <Toggle checked={featured} onChange={() => setValue('featured', !featured, { shouldDirty: true })} />
-              <Star className={'w-5 h-5 transition-colors ' + (featured ? 'text-[#C8FF00] fill-[#C8FF00]' : 'text-gray-300')} />
+              <Star className={'w-5 h-5 ' + (featured ? 'text-[#C8FF00] fill-[#C8FF00]' : 'text-gray-300')} />
             </div>
           </div>
         </div>
 
-        {/* Botones - alineados abajo con espacio flexible */}
-        <div className="col-span-2 flex-1 flex items-end justify-end gap-3 pt-6 border-t border-gray-100 mt-12">
+        {/* Botones */}
+        <div className="col-span-2 flex justify-end gap-3 pt-6 border-t border-gray-100">
           <button type="button" onClick={onCancel} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">Cancelar</button>
           <button type="submit" disabled={saving} className="px-4 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg text-sm font-semibold hover:bg-[#b8ef00] disabled:opacity-50 transition-colors">
             {saving ? 'Guardando...' : 'Guardar'}

@@ -35,4 +35,7 @@ export class CreateProductDto {
   @ApiPropertyOptional()    @IsBoolean() @IsOptional() showHighlights?: boolean;
   @ApiPropertyOptional()    @IsBoolean() @IsOptional() showCompare?: boolean;
   @ApiPropertyOptional()    @IsBoolean() @IsOptional() showRelated?: boolean;
+  @ApiPropertyOptional()    @IsBoolean() @IsOptional() isMadeToOrder?: boolean;
+  @ApiPropertyOptional()    @IsNumber()  @IsOptional() estimatedDays?: number;
+  @ApiPropertyOptional()    @IsNumber()  @Min(0) @Max(100) @IsOptional() requiredDeposit?: number;
 }
