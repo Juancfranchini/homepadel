@@ -28,6 +28,14 @@ interface Product {
   sku: string;
   price: number;
   salePrice?: number;
+  transferPrice?: number;
+  discountPercentage?: number;
+  installments?: number;
+  installmentsInterest?: number;
+  hasInstallmentsInterest?: boolean;
+  isMadeToOrder?: boolean;
+  estimatedDays?: number;
+  requiredDeposit?: number;
   stock: number;
   active: boolean;
   featured: boolean;
@@ -148,13 +156,21 @@ export default function ProductosPage() {
   const paginated = sorted.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const defaultFormValues = editItem ? {
-    name: editItem.name, sku: editItem.sku, price: editItem.price, salePrice: editItem.salePrice || 0,
+    name: editItem.name, sku: editItem.sku, price: editItem.price, salePrice: editItem.salePrice || undefined,
+      transferPrice: editItem.transferPrice || undefined,
     stock: editItem.stock, active: editItem.active, featured: editItem.featured,
     isNew: editItem.isNew || false, isOffer: editItem.isOffer || false,
     categoryId: editItem.category?.id || editItem.categoryId || '',
     brandId: editItem.brand?.id || editItem.brandId || '',
     description: editItem.description || '',
     images: editItem.images || [],
+      discountPercentage: editItem.discountPercentage || undefined,
+      installments: editItem.installments || undefined,
+      installmentsInterest: editItem.installmentsInterest || undefined,
+      hasInstallmentsInterest: editItem.hasInstallmentsInterest || false,
+      isMadeToOrder: editItem.isMadeToOrder || false,
+      estimatedDays: editItem.estimatedDays || undefined,
+      requiredDeposit: editItem.requiredDeposit || undefined,
   } : undefined;
 
   if (loading) return <PageLoader />;
@@ -187,21 +203,22 @@ export default function ProductosPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Imagen</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-2 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Imagen</th>
+                <th className="text-left px-2 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   <span className="inline-flex items-center gap-1">Nombre {sortIcon('name')}</span>
                 </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Categoria</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-2 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Categoria</th>
+                <th className="text-center px-2 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   <span className="inline-flex items-center gap-1">Precio {sortIcon('price')}</span>
                 </th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Precio Oferta</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="text-center px-2 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Precio Promocional</th>
+                <th className="text-center px-2 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Transf./Dep.</th>
+                <th className="text-center px-2 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   <span className="inline-flex items-center gap-1">Stock {sortIcon('stock')}</span>
                 </th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Destacado</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Activo</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
+                <th className="text-center px-2 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Destacado</th>
+                <th className="text-center px-2 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Activo</th>
+                <th className="text-center px-2 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
               </tr>
             </thead>
             <tbody>
@@ -209,7 +226,7 @@ export default function ProductosPage() {
                 const imgSrc = getImageUrl(p.images?.[0]);
                 return (
                 <tr key={p.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3">
+                  <td className="px-2 py-2.5">
                     {imgSrc ? (
                       <img
                         src={imgSrc}
@@ -221,18 +238,25 @@ export default function ProductosPage() {
                       <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center"><ImageIcon className="w-4 h-4 text-gray-400" /></div>
                     )}
                   </td>
-                  <td className="px-4 py-3"><p className="text-gray-900 font-medium text-sm">{p.name}</p></td>
-                  <td className="px-4 py-3 text-sm text-gray-500 hidden md:table-cell">{p.category?.name || '-'}</td>
-                  <td className="px-4 py-3 text-center"><p className="text-gray-900 font-semibold text-sm">{formatPrice(p.price)}</p></td>
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-2 py-2.5"><p className="text-gray-900 font-medium text-sm">{p.name}</p></td>
+                  <td className="px-2 py-2.5 text-sm text-gray-500 hidden md:table-cell">{p.category?.name || '-'}</td>
+                  <td className="px-2 py-2.5 text-center"><p className="text-gray-900 font-semibold text-sm">{formatPrice(p.price)}</p></td>
+                  <td className="px-2 py-2.5 text-center">
                     {p.salePrice && p.salePrice < p.price ? (
                       <p className="text-green-600 font-semibold text-sm">{formatPrice(p.salePrice)}</p>
                     ) : (
                       <span className="text-gray-400 text-sm">-</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-center"><span className={'text-sm font-medium ' + (p.stock <= 5 ? 'text-red-500' : 'text-gray-700')}>{p.stock}</span></td>
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-2 py-2.5 text-center">
+                    {p.transferPrice && p.transferPrice > 0 ? (
+                      <p className="text-blue-600 font-semibold text-sm">{formatPrice(p.transferPrice)}</p>
+                    ) : (
+                      <span className="text-gray-400 text-sm">-</span>
+                    )}
+                  </td>
+                  <td className="px-2 py-2.5 text-center"><span className={'text-sm font-medium ' + (p.stock <= 5 ? 'text-red-500' : 'text-gray-700')}>{p.stock}</span></td>
+                  <td className="px-2 py-2.5 text-center">
                     <button onClick={() => toggleFeatured(p)} className="focus:outline-none" title={p.featured ? 'Quitar destacado' : 'Destacar'}>
                       {p.featured ? (
                         <Star className="w-5 h-5 text-[#C8FF00] fill-[#C8FF00]" />
@@ -241,13 +265,13 @@ export default function ProductosPage() {
                       )}
                     </button>
                   </td>
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-2 py-2.5 text-center">
                     <div className="flex items-center justify-center gap-2">
                       <Toggle checked={p.active} onChange={() => toggleActive(p)} />
                       <span className={'text-xs font-medium ' + (p.active ? 'text-green-600' : 'text-gray-400')}>{p.active ? 'Activo' : 'Inactivo'}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-2 py-2.5">
                     <div className="flex items-center justify-center gap-1">
                       <button onClick={() => openEdit(p)} className="p-1.5 rounded-lg text-[#C8FF00] hover:bg-[#C8FF00]/10 transition-colors" title="Editar"><Edit2 className="w-4 h-4" /></button>
                       <button onClick={() => setDeleteTarget(p)} className="p-1.5 rounded-lg text-red-400 hover:bg-red-400/10 transition-colors" title="Eliminar"><Trash2 className="w-4 h-4" /></button>
@@ -275,6 +299,7 @@ export default function ProductosPage() {
       {modalOpen && (
         <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editItem ? 'Editar producto' : 'Nuevo producto'} size="xl">
           <ProductForm
+            key={editItem?.id || 'nuevo'}
             defaultValues={defaultFormValues}
             onSave={handleSave}
             onCancel={() => setModalOpen(false)}

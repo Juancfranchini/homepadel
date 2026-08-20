@@ -15,9 +15,9 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
   const [wished, setWished] = useState(false);
   const [adding, setAdding] = useState(false);
 
-  const hasDiscount = product.salePrice !== undefined && product.salePrice < product.price;
-  const discountPct = hasDiscount ? getDiscountPercent(product.price, product.salePrice!) : 0;
   const isMadeToOrder = product.isMadeToOrder === true;
+  const hasDiscount = !isMadeToOrder && product.salePrice !== undefined && product.salePrice < product.price;
+  const discountPct = hasDiscount ? getDiscountPercent(product.price, product.salePrice!) : 0;
 
   const initials = product.name
     .split(' ')
@@ -121,7 +121,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
 
         {/* Stock bajo - solo para regulares */}
         {!isMadeToOrder && product.stock > 0 && product.stock <= 5 && (
-          <p className="text-[10px] text-orange-400 font-semibold">Â¡Solo quedan {product.stock}!</p>
+          <p className="text-[10px] text-orange-400 font-semibold">Ãƒâ€šÃ‚Â¡Solo quedan {product.stock}!</p>
         )}
 
         {/* Fabricacion - por encargo */}
@@ -131,7 +131,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
           </p>
         )}
 
-        {/* BotÃ³n agregar al carrito */}
+        {/* BotÃƒÆ’Ã‚Â³n agregar al carrito */}
         <button
           onClick={handleAddToCart}
           disabled={(!isMadeToOrder && product.stock === 0) || adding}
@@ -143,7 +143,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
               : 'bg-[#B7D31A] text-[#050606] btn-primary-glow hover:bg-[#CAE52E] active:scale-95')}
         >
           <ShoppingCart size={13} />
-          {(!isMadeToOrder && product.stock === 0) ? 'SIN STOCK' : adding ? 'Â¡AGREGADO!' : 'AGREGAR AL CARRITO'}
+          {(!isMadeToOrder && product.stock === 0) ? 'SIN STOCK' : adding ? 'Ãƒâ€šÃ‚Â¡AGREGADO!' : 'AGREGAR AL CARRITO'}
         </button>
       </div>
     </div>

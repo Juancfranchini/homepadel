@@ -90,7 +90,7 @@ export default function ProductoPage() {
     );
   }
 
-  const hasDiscount = product.salePrice !== undefined && product.salePrice > 0 && product.salePrice < product.price;
+  const hasDiscount = !product.isMadeToOrder && product.salePrice !== undefined && product.salePrice > 0 && product.salePrice < product.price;
   const discountPct = hasDiscount ? getDiscountPercent(product.price, product.salePrice!) : 0;
   const displayPrice = hasDiscount ? product.salePrice! : product.price;
   const images = product.images?.length > 0 ? product.images : [];

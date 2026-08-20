@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Upload, ImageIcon, Star } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import Toggle from '../../testimonios/components/Toggle';
 import ImageGalleryInput from './ImageGalleryInput';
@@ -22,6 +22,7 @@ const schema = z.object({
   sku: z.string().min(2, 'SKU requerido'),
   price: z.coerce.number().min(1, 'Precio requerido'),
   salePrice: z.coerce.number().optional(),
+  transferPrice: z.coerce.number().optional(),
   stock: z.coerce.number().int().min(0).default(0),
   active: z.boolean().default(true),
   featured: z.boolean().default(false),
@@ -58,10 +59,17 @@ const labelClass = 'text-xs font-medium text-gray-400 uppercase tracking-wider';
 export default function ProductForm({ defaultValues, onSave, onCancel, saving, categories, brands }: Props) {
   const [uploading, setUploading] = useState(false);
   const [galleryImages, setGalleryImages] = useState<string[]>(Array.isArray(defaultValues?.images) ? (defaultValues.images as string[]).slice(1) : []);
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<ProductFormData>({
+  const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<ProductFormData>({
     resolver: zodResolver(schema),
     defaultValues: defaultValues || { active: true, featured: false, isNew: false, isOffer: false, stock: 0, price: 0 },
   });
+
+  useEffect(() => {
+    if (defaultValues) {
+      reset(defaultValues);
+      setGalleryImages(Array.isArray(defaultValues.images) ? (defaultValues.images as string[]).slice(1) : []);
+    }
+  }, [defaultValues, reset]);
 
   const imagesArray = watch('images') || [];
   const imageUrl = imagesArray[0] || '';
@@ -72,6 +80,8 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
   const isOffer = watch('isOffer');
   const hasInstallmentsInterest = watch('hasInstallmentsInterest');
   const isMadeToOrder = watch('isMadeToOrder');
+
+
 
   const handleUpload = async () => {
     const input = document.createElement('input');
@@ -97,52 +107,30 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
   return (
     <form onSubmit={handleSubmit((data) => { const mainImage = typeof data.images === 'string' ? data.images : (Array.isArray(data.images) ? data.images[0] : '');
 const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[]; onSave({ ...data, images: allImages }); })} className="flex gap-0">
-      {/* Columna izquierda - Imagen principal + galeria */}
       <div className="flex-shrink-0 w-[220px] flex flex-col gap-3">
         <div className="w-full h-[220px] rounded-xl bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200">
           {previewUrl ? (
-            <img
-              src={previewUrl}
-              alt="Preview"
-              className="w-full h-full object-contain"
-              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-            />
+            <img src={previewUrl} alt="Preview" className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
           ) : (
             <ImageIcon className="w-12 h-12 text-gray-300" />
           )}
         </div>
         <div className="flex gap-2">
-          <input
-            {...register('images')}
-            className="flex-1 px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00]"
-            placeholder="URL de imagen"
-          />
-          <button
-            type="button"
-            onClick={handleUpload}
-            disabled={uploading}
-            className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all border border-[#C8FF00]/50 text-gray-600 hover:bg-gray-50 disabled:opacity-50"
-          >
+          <input {...register('images')} className="flex-1 px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00]" placeholder="URL de imagen" />
+          <button type="button" onClick={handleUpload} disabled={uploading} className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all border border-[#C8FF00]/50 text-gray-600 hover:bg-gray-50 disabled:opacity-50">
             <Upload className="w-3 h-3" />{uploading ? '...' : 'Subir'}
           </button>
         </div>
-        <p className="text-[10px] text-gray-400 leading-tight">
-          Medida recomendada: 800x800px (cuadrada). Fondo blanco. Peso maximo: 500KB.
-        </p>
+        <p className="text-[10px] text-gray-400 leading-tight">Medida recomendada: 800x800px (cuadrada). Fondo blanco. Peso maximo: 500KB.</p>
         <div className="mt-2">
           <label className={labelClass}>Imagenes secundarias</label>
-          <div className="mt-1">
-            <ImageGalleryInput images={galleryImages} onChange={setGalleryImages} />
-          </div>
+          <div className="mt-1"><ImageGalleryInput images={galleryImages} onChange={setGalleryImages} /></div>
         </div>
       </div>
 
-      {/* Linea vertical */}
       <div className="ml-7 mr-5 w-px bg-gray-200 self-stretch my-2" />
 
-      {/* Columna derecha - Formulario en 2 columnas */}
       <div className="flex-1 grid grid-cols-2 gap-x-4 gap-y-5 content-start">
-        {/* Fila 1 */}
         <div>
           <label className={labelClass}>Nombre *</label>
           <input {...register('name')} className={inputClass + ' mt-1'} />
@@ -154,25 +142,27 @@ const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[]; onS
           {errors.sku && <p className="text-xs text-red-600 mt-0.5">{errors.sku.message}</p>}
         </div>
 
-        {/* Fila 2 */}
         <div>
-          <label className={labelClass}>Precio *</label>
+          <label className={labelClass}>Precio de Venta *</label>
           <input type="number" step="0.01" {...register('price')} className={inputClass + ' mt-1'} />
           {errors.price && <p className="text-xs text-red-600 mt-0.5">{errors.price.message}</p>}
         </div>
         <div>
-          <label className={labelClass}>Precio Oferta</label>
+          <label className={labelClass}>Precio Promocional</label>
           <input type="number" step="0.01" {...register('salePrice')} className={inputClass + ' mt-1'} />
         </div>
+        <div>
+          <label className={labelClass}>Precio Transferencia/Deposito</label>
+          <input type="number" step="0.01" {...register('transferPrice')} className={inputClass + ' mt-1'} placeholder="Opcional" />
+        </div>
 
-        {/* Descuento y Cuotas - solo para productos regulares */}
         {!isMadeToOrder && (
           <>
             <div>
               <label className={labelClass}>% Descuento</label>
               <input type="number" step="0.1" min="0" max="100" {...register('discountPercentage')} className={inputClass + ' mt-1'} placeholder="Ej: 15" />
             </div>
-            <div>
+            <div className="col-span-2">
               <label className={labelClass}>Cuotas (Mercado Pago)</label>
               <select {...register('installments')} className={inputClass + ' mt-1'}>
                 <option value="">Sin cuotas</option>
@@ -184,26 +174,23 @@ const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[]; onS
             </div>
 
             <div className="col-span-2">
-              <div className="flex items-center gap-4">
-                <div>
-                  <label className={labelClass}>Interes en cuotas</label>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Toggle checked={hasInstallmentsInterest} onChange={() => setValue('hasInstallmentsInterest', !hasInstallmentsInterest, { shouldDirty: true })} />
-                    <span className={'text-xs font-medium ' + (hasInstallmentsInterest ? 'text-red-600' : 'text-gray-400')}>{hasInstallmentsInterest ? 'Con interes' : 'Sin interes'}</span>
-                  </div>
+              <div className="flex items-center justify-between">
+                <label className={labelClass}>Interes en cuotas</label>
+                <div className="flex items-center gap-2">
+                  <Toggle checked={hasInstallmentsInterest} onChange={() => setValue('hasInstallmentsInterest', !hasInstallmentsInterest, { shouldDirty: true })} />
+                  <span className={'text-xs font-medium ' + (hasInstallmentsInterest ? 'text-red-600' : 'text-gray-400')}>{hasInstallmentsInterest ? 'Con interes' : 'Sin interes'}</span>
                 </div>
-                {hasInstallmentsInterest && (
-                  <div>
-                    <label className={labelClass}>% Interes</label>
-                    <input type="number" step="0.1" min="0" {...register('installmentsInterest')} className={inputClass + ' mt-1'} placeholder="Ej: 5" />
-                  </div>
-                )}
               </div>
+              {hasInstallmentsInterest && (
+                <div className="mt-2">
+                  <label className={labelClass}>% Interes</label>
+                  <input type="number" step="0.1" min="0" {...register('installmentsInterest')} className={inputClass + ' mt-1'} placeholder="Ej: 5" />
+                </div>
+              )}
             </div>
           </>
         )}
 
-        {/* Fila 5 - Stock o Por encargo */}
         {!isMadeToOrder ? (
           <div>
             <label className={labelClass}>Stock</label>
@@ -224,7 +211,6 @@ const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[]; onS
           {errors.categoryId && <p className="text-xs text-red-600 mt-0.5">{errors.categoryId.message}</p>}
         </div>
 
-        {/* Fila 6 - Producto por encargo */}
         <div className="col-span-2">
           <div className="flex items-center justify-between">
             <label className={labelClass}>Producto por encargo</label>
@@ -241,7 +227,6 @@ const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[]; onS
           )}
         </div>
 
-        {/* Fila 7 - Marca */}
         <div className="col-span-2">
           <label className={labelClass}>Marca *</label>
           <select {...register('brandId')} className={inputClass + ' mt-1'}>
@@ -251,7 +236,6 @@ const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[]; onS
           {errors.brandId && <p className="text-xs text-red-600 mt-0.5">{errors.brandId.message}</p>}
         </div>
 
-        {/* Fila 8 - Toggles */}
         <div className="col-span-2 flex items-center gap-8 pt-1">
           <div>
             <label className={labelClass}>Activo</label>
@@ -283,7 +267,6 @@ const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[]; onS
           </div>
         </div>
 
-        {/* Botones */}
         <div className="col-span-2 flex justify-end gap-3 pt-6 border-t border-gray-100">
           <button type="button" onClick={onCancel} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">Cancelar</button>
           <button type="submit" disabled={saving} className="px-4 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg text-sm font-semibold hover:bg-[#b8ef00] disabled:opacity-50 transition-colors">
