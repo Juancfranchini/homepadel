@@ -1,132 +1,74 @@
-// Main Dashboard page — the home screen of the BackOffice.
-// Shows KPI stat cards, a weekly sales bar chart (Recharts),
-// the 5 most recent orders, and the top 5 selling products.
-// Data is currently static/mock; replace fetch calls with real API calls in production.
-
 'use client';
 
+import { useState, useEffect, useCallback } from 'react';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { OrderStatusBadge } from '@/components/ui/Badge';
-import {
-  TrendingUp,
-  ShoppingBag,
-  BarChart2,
-  DollarSign,
-  ArrowUpRight,
-} from 'lucide-react';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
+import { TrendingUp, ShoppingBag, BarChart2, DollarSign, Package, Users, Star, Megaphone, AlertTriangle, Truck } from 'lucide-react';
+import { PageLoader } from '@/components/ui/LoadingSpinner';
+import api from '@/lib/api';
 
-// ─── Mock data ────────────────────────────────────────────────────────────────
-const stats = [
-  {
-    label: 'Ventas (30 días)',
-    value: formatPrice(847500),
-    change: '+12.4%',
-    icon: TrendingUp,
-    color: 'bg-green-50 text-green-600',
-    border: 'border-green-200',
-  },
-  {
-    label: 'Total Pedidos',
-    value: '164',
-    change: '+8.1%',
-    icon: ShoppingBag,
-    color: 'bg-blue-50 text-blue-600',
-    border: 'border-blue-200',
-  },
-  {
-    label: 'Ticket Promedio',
-    value: formatPrice(5167),
-    change: '+3.7%',
-    icon: BarChart2,
-    color: 'bg-purple-50 text-purple-600',
-    border: 'border-purple-200',
-  },
-  {
-    label: 'Ganancia estimada',
-    value: formatPrice(254250),
-    change: '+15.2%',
-    icon: DollarSign,
-    color: 'bg-yellow-50 text-yellow-600',
-    border: 'border-yellow-200',
-  },
-];
-
-const weeklyData = [
-  { day: 'Lun', ventas: 42000 },
-  { day: 'Mar', ventas: 78500 },
-  { day: 'Mié', ventas: 55000 },
-  { day: 'Jue', ventas: 91000 },
-  { day: 'Vie', ventas: 125000 },
-  { day: 'Sáb', ventas: 148000 },
-  { day: 'Dom', ventas: 67000 },
-];
-
-const recentOrders = [
-  { id: '#ORD-0041', customer: 'Martín López', total: 12900, status: 'PAID', date: '2024-11-10T10:00:00Z' },
-  { id: '#ORD-0040', customer: 'Sofía García', total: 8750, status: 'SHIPPED', date: '2024-11-09T14:30:00Z' },
-  { id: '#ORD-0039', customer: 'Lucía Fernández', total: 34500, status: 'DELIVERED', date: '2024-11-09T09:15:00Z' },
-  { id: '#ORD-0038', customer: 'Diego Torres', total: 5200, status: 'PENDING', date: '2024-11-08T18:00:00Z' },
-  { id: '#ORD-0037', customer: 'Ana Martínez', total: 16800, status: 'CANCELLED', date: '2024-11-08T11:45:00Z' },
-];
-
-const topProducts = [
-  { rank: 1, name: 'Pala Bullpadel Vertex 03', units: 38, revenue: 760000 },
-  { rank: 2, name: 'Zapatillas Nox AT10 Lux', units: 52, revenue: 624000 },
-  { rank: 3, name: 'Pelotas Dunlop Pro x3', units: 120, revenue: 180000 },
-  { rank: 4, name: 'Bolso Adidas Padel', units: 29, revenue: 145000 },
-  { rank: 5, name: 'Grip Overgrip Pack x10', units: 94, revenue: 94000 },
-];
-
-// ─── Custom tooltip for the chart ────────────────────────────────────────────
-function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: { value: number }[]; label?: string }) {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-[#0f172a] text-white px-3 py-2 rounded-lg text-sm shadow-xl">
-        <p className="font-semibold mb-0.5">{label}</p>
-        <p className="text-[#C8FF00]">{formatPrice(payload[0].value)}</p>
-      </div>
-    );
-  }
-  return null;
-}
-
-// ─── Page component ──────────────────────────────────────────────────────────
 export default function DashboardPage() {
+  const [loading, setLoading] = useState(true);
+  const [kpis, setKpis] = useState({ ventas30: 0, totalPedidos: 0, ticketPromedio: 0, ganancia: 0 });
+  const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [topProducts, setTopProducts] = useState<any[]>([]);
+  const [productsStats, setProductsStats] = useState({ total: 0, active: 0, outOfStock: 0, lowStock: 0, madeToOrder: 0 });
+  const [ordersByStatus, setOrdersByStatus] = useState({ PENDING: 0, PAID: 0, SHIPPED: 0, DELIVERED: 0, CANCELLED: 0 });
+  const [reviewsStats, setReviewsStats] = useState({ total: 0, pending: 0, avgRating: 0 });
+  const [marketingStats, setMarketingStats] = useState({ newsletterSubscribers: 0, activePromotions: 0, activeCoupons: 0 });
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await api.get('/dashboard/stats');
+      const data = res.data;
+      setKpis(data.kpis || {});
+      setRecentOrders(data.recentOrders || []);
+      setTopProducts(data.topProducts || []);
+      setProductsStats(data.productsStats || {});
+      setOrdersByStatus(data.ordersByStatus || {});
+      setReviewsStats(data.reviewsStats || {});
+      setMarketingStats(data.marketingStats || {});
+    } catch (error) {
+      console.error('Error cargando dashboard:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  if (loading) return <PageLoader />;
+
+  const kpiCards = [
+    { label: 'Ventas (30 dias)', value: formatPrice(kpis.ventas30), icon: TrendingUp, color: 'bg-green-50 text-green-600', border: 'border-green-200' },
+    { label: 'Total Pedidos', value: String(kpis.totalPedidos), icon: ShoppingBag, color: 'bg-blue-50 text-blue-600', border: 'border-blue-200' },
+    { label: 'Ticket Promedio', value: formatPrice(kpis.ticketPromedio), icon: BarChart2, color: 'bg-purple-50 text-purple-600', border: 'border-purple-200' },
+    { label: 'Ganancia estimada', value: formatPrice(kpis.ganancia), icon: DollarSign, color: 'bg-yellow-50 text-yellow-600', border: 'border-yellow-200' },
+  ];
+
+  const statusLabels: Record<string, string> = {
+    PENDING: 'Pendientes', PAID: 'Pagados', SHIPPED: 'Enviados', DELIVERED: 'Entregados', CANCELLED: 'Cancelados',
+  };
+
   return (
     <div className="space-y-6">
-      {/* Page title */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
         <p className="text-gray-500 text-sm mt-0.5">Resumen de actividad del negocio</p>
       </div>
 
-      {/* ── KPI Cards ─────────────────────────────────────────────────── */}
+      {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        {stats.map((stat) => {
+        {kpiCards.map((stat) => {
           const Icon = stat.icon;
           return (
-            <div
-              key={stat.label}
-              className={`bg-white rounded-xl border ${stat.border} p-5 flex items-start justify-between shadow-sm`}
-            >
+            <div key={stat.label} className={'bg-white rounded-xl border ' + stat.border + ' p-5 flex items-start justify-between shadow-sm'}>
               <div>
                 <p className="text-sm text-gray-500 font-medium">{stat.label}</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
-                <span className="inline-flex items-center gap-1 text-green-600 text-xs font-medium mt-1">
-                  <ArrowUpRight className="w-3 h-3" />
-                  {stat.change} vs. mes anterior
-                </span>
+                <p className="text-2xl font-bold text-gray-900 mt-2">{stat.value}</p>
               </div>
-              <div className={`p-3 rounded-xl ${stat.color}`}>
+              <div className={'p-3 rounded-xl ' + stat.color}>
                 <Icon className="w-5 h-5" />
               </div>
             </div>
@@ -134,96 +76,96 @@ export default function DashboardPage() {
         })}
       </div>
 
-      {/* ── Chart + Top Products ─────────────────────────────────────── */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Bar chart */}
-        <div className="xl:col-span-2 bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-          <h2 className="text-base font-semibold text-gray-900 mb-4">Ventas últimos 7 días</h2>
-          <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={weeklyData} barSize={32}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis
-                dataKey="day"
-                tick={{ fontSize: 12, fill: '#94a3b8' }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
-                tick={{ fontSize: 11, fill: '#94a3b8' }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f8fafc' }} />
-              <Bar dataKey="ventas" fill="#C8FF00" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Top products */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-          <h2 className="text-base font-semibold text-gray-900 mb-4">Top Productos</h2>
-          <div className="space-y-3">
-            {topProducts.map((p) => (
-              <div key={p.rank} className="flex items-center gap-3">
-                <span
-                  className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                    p.rank === 1
-                      ? 'bg-[#C8FF00] text-[#0f172a]'
-                      : 'bg-gray-100 text-gray-500'
-                  }`}
-                >
-                  {p.rank}
-                </span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-800 truncate">{p.name}</p>
-                  <p className="text-xs text-gray-400">{p.units} unidades</p>
-                </div>
-                <span className="text-sm font-semibold text-gray-700 shrink-0">
-                  {formatPrice(p.revenue)}
-                </span>
-              </div>
-            ))}
-          </div>
+      {/* Pedidos por estado */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2"><Truck className="w-4 h-4 text-gray-500" />Pedidos por estado</h2>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          {Object.entries(ordersByStatus).map(([status, count]) => (
+            <div key={status} className="bg-gray-50 rounded-lg p-3 text-center">
+              <p className="text-2xl font-bold text-gray-900">{count}</p>
+              <p className="text-xs text-gray-500">{statusLabels[status] || status}</p>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* ── Recent Orders ─────────────────────────────────────────────── */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-base font-semibold text-gray-900">Pedidos recientes</h2>
-          <a href="/pedidos" className="text-sm text-[#0f172a] font-medium hover:text-[#C8FF00] transition-colors">
-            Ver todos →
-          </a>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                {['Número', 'Cliente', 'Total', 'Estado', 'Fecha'].map((h) => (
-                  <th
-                    key={h}
-                    className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        {/* Pedidos recientes */}
+        <div className="xl:col-span-2 bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+          <h2 className="text-base font-semibold text-gray-900 mb-4">Pedidos recientes</h2>
+          {recentOrders.length > 0 ? (
+            <div className="space-y-3">
               {recentOrders.map((order) => (
-                <tr key={order.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-3.5 font-mono font-medium text-gray-900">{order.id}</td>
-                  <td className="px-6 py-3.5 text-gray-700">{order.customer}</td>
-                  <td className="px-6 py-3.5 font-semibold text-gray-900">{formatPrice(order.total)}</td>
-                  <td className="px-6 py-3.5">
+                <div key={order.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+                  <div>
+                    <p className="font-semibold text-gray-900 text-sm">{order.number}</p>
+                    <p className="text-xs text-gray-400">{order.customer} - {formatDate(order.date)}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
                     <OrderStatusBadge status={order.status} />
-                  </td>
-                  <td className="px-6 py-3.5 text-gray-500">{formatDate(order.date)}</td>
-                </tr>
+                    <span className="font-bold text-gray-900">{formatPrice(order.total)}</span>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          ) : (
+            <p className="text-gray-400 text-sm text-center py-10">No hay pedidos todavia</p>
+          )}
+        </div>
+
+        {/* Top productos */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+          <h2 className="text-base font-semibold text-gray-900 mb-4">Top Productos</h2>
+          {topProducts.length > 0 ? (
+            <div className="space-y-3">
+              {topProducts.map((p) => (
+                <div key={p.rank} className="flex items-center gap-3">
+                  <span className={'w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ' + (p.rank === 1 ? 'bg-[#C8FF00] text-[#0f172a]' : 'bg-gray-100 text-gray-500')}>
+                    {p.rank}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-800 truncate">{p.name}</p>
+                    <p className="text-xs text-gray-400">{p.units} unidades</p>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-700 shrink-0">{formatPrice(p.revenue)}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-400 text-sm text-center py-10">No hay ventas todavia</p>
+          )}
+        </div>
+      </div>
+
+      {/* Productos / Reviews / Marketing */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+          <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2"><Package className="w-4 h-4 text-gray-500" />Productos</h2>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between"><span className="text-gray-500">Total</span><span className="font-semibold">{productsStats.total}</span></div>
+            <div className="flex justify-between"><span className="text-gray-500">Activos</span><span className="font-semibold text-green-600">{productsStats.active}</span></div>
+            <div className="flex justify-between"><span className="text-gray-500">Sin stock</span><span className="font-semibold text-red-600">{productsStats.outOfStock}</span></div>
+            <div className="flex justify-between"><span className="text-gray-500">Stock bajo</span><span className="font-semibold text-orange-600">{productsStats.lowStock}</span></div>
+            <div className="flex justify-between"><span className="text-gray-500">Por encargo</span><span className="font-semibold text-purple-600">{productsStats.madeToOrder}</span></div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+          <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2"><Star className="w-4 h-4 text-gray-500" />Reviews</h2>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between"><span className="text-gray-500">Total</span><span className="font-semibold">{reviewsStats.total}</span></div>
+            <div className="flex justify-between"><span className="text-gray-500">Pendientes</span><span className="font-semibold text-amber-600">{reviewsStats.pending}</span></div>
+            <div className="flex justify-between"><span className="text-gray-500">Promedio</span><span className="font-semibold">{reviewsStats.avgRating} / 5</span></div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+          <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2"><Megaphone className="w-4 h-4 text-gray-500" />Marketing</h2>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between"><span className="text-gray-500">Newsletter</span><span className="font-semibold">{marketingStats.newsletterSubscribers}</span></div>
+            <div className="flex justify-between"><span className="text-gray-500">Promociones activas</span><span className="font-semibold">{marketingStats.activePromotions}</span></div>
+            <div className="flex justify-between"><span className="text-gray-500">Cupones activos</span><span className="font-semibold">{marketingStats.activeCoupons}</span></div>
+          </div>
         </div>
       </div>
     </div>

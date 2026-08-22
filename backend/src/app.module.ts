@@ -26,6 +26,8 @@ import { InstagramModule } from './instagram/instagram.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { PaymentsModule } from './payments/payments.module';
 import { EmailModule } from './email/email.module';
+import { ShippingModule } from './shipping/shipping.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -56,6 +58,8 @@ import { EmailModule } from './email/email.module';
     ReviewsModule,
     PaymentsModule,
     EmailModule,
+    ShippingModule,
+    DashboardModule,
   ],
 })
 export class AppModule {}

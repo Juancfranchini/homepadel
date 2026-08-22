@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import { InstagramConfig } from '@/types';
@@ -78,15 +78,15 @@ export default function InstagramSection({ config }: Props) {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          {(hasRealPosts ? posts : PLACEHOLDER_POSTS).map((item) => {
-            if (hasRealPosts) {
+          {[...posts, ...PLACEHOLDER_POSTS].slice(0, 6).map((item, idx) => {
+            if (idx < posts.length) {
               const post = item as InstagramPost;
               return (
                 <a key={post.id} href={post.url} target="_blank" rel="noopener noreferrer"
                   className="aspect-square rounded-xl overflow-hidden relative group cursor-pointer"
                   aria-label={'Ver post de Instagram'}>
                   {post.thumbnail_url ? (
-                    <img src={post.thumbnail_url} alt="" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                    <img src={post.thumbnail_url} alt="" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onError={(e) => { e.currentTarget.style.display = "none"; }} />
                   ) : (
                     <div className="absolute inset-0 bg-gradient-to-br from-[#1A1F21] to-[#242A05] transition-transform duration-500 group-hover:scale-110" />
                   )}
