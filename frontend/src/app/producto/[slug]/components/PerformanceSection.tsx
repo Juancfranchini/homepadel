@@ -11,18 +11,13 @@ interface Props {
 
 const ICON_MAP: Record<string, any> = { Target, Circle, Scale, Ruler, User, Zap };
 
-const DEFAULT_SPECS: Spec[] = [
-  { icon: 'Target', title: 'Carbono', value: '18 K' },
-  { icon: 'Circle', title: 'Forma', value: 'Redonda' },
-  { icon: 'Scale', title: 'Balance', value: 'Medio' },
-  { icon: 'Ruler', title: 'Peso', value: '360-375 gr' },
-  { icon: 'User', title: 'Jugador', value: 'Avanzado' },
-  { icon: 'Zap', title: 'Control', value: 'Superior' },
-];
+
 
 export default function PerformanceSection({ stats, specs }: Props) {
-  const displaySpecs = specs && specs.length > 0 ? specs : DEFAULT_SPECS;
+  const displaySpecs = specs && specs.length > 0 ? specs : [];
   const hasStats = stats && stats.length > 0;
+
+  if (!hasStats && displaySpecs.length === 0) return null;
 
   return (
     <section className="border-t border-[#0D0F0F] py-10 bg-[#242A05]">
