@@ -15,6 +15,7 @@ const NAV_LINKS = [
   { label: 'Politica de Devolucion', href: '/politica-de-devolucion' },
   { label: 'Preguntas Frecuentes',   href: '/faq' },
   { label: 'Contacto',              href: '/contacto' },
+  { label: 'Rastrear Pedido',       href: '/rastrear' },
 ];
 
 export default function Header() {
