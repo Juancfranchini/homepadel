@@ -79,11 +79,11 @@ model Product {
   compareData     Json?
   specs           Json?
   videoUrl          String?
-  showVideo         Boolean @default(true)
-  showPerformance   Boolean @default(true)
-  showHighlights    Boolean @default(true)
-  showCompare       Boolean @default(true)
-  showRelated       Boolean @default(true)
+  showVideo         Boolean @default(false)
+  showPerformance   Boolean @default(false)
+  showHighlights    Boolean @default(false)
+  showCompare       Boolean @default(false)
+  showRelated       Boolean @default(false)
   highlights        Json?
   highlightsTitle   String?
   highlightsDescription String?

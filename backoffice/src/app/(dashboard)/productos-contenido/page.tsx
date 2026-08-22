@@ -37,11 +37,11 @@ const schema = z.object({
   relatedVideos: z.array(z.object({ title: z.string(), url: z.string() })).optional(),
   relatedProductIds: z.array(z.string()).optional(),
   compareData: z.any().optional(),
-  showVideo: z.boolean().default(true),
-  showPerformance: z.boolean().default(true),
-  showHighlights: z.boolean().default(true),
-  showCompare: z.boolean().default(true),
-  showRelated: z.boolean().default(true),
+  showVideo: z.boolean().default(false),
+  showPerformance: z.boolean().default(false),
+  showHighlights: z.boolean().default(false),
+  showCompare: z.boolean().default(false),
+  showRelated: z.boolean().default(false),
 });
 type FormData = z.infer<typeof schema>;
 
