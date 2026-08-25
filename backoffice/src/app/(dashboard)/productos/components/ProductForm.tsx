@@ -28,7 +28,7 @@ const schema = z.object({
   featured: z.boolean().default(false),
   isNew: z.boolean().default(false),
   isOffer: z.boolean().default(false),
-  categoryId: z.string().min(1, 'Categoria requerida'),
+  categoryId: z.string().min(1, 'Categoría requerida'),
   brandId: z.string().min(1, 'Marca requerida'),
   images: z.array(z.string()).optional(),
   discountPercentage: z.coerce.number().min(0).max(100).optional(),
@@ -148,12 +148,12 @@ const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[]; onS
           {errors.price && <p className="text-xs text-red-600 mt-0.5">{errors.price.message}</p>}
         </div>
         <div>
-          <label className={labelClass}>Precio Promocional</label>
+          <label className={labelClass}>Precio Promociónal</label>
           <input type="number" step="0.01" {...register('salePrice')} className={inputClass + ' mt-1'} />
         </div>
         <div>
           <label className={labelClass}>Precio Transferencia/Deposito</label>
-          <input type="number" step="0.01" {...register('transferPrice')} className={inputClass + ' mt-1'} placeholder="Opcional" />
+          <input type="number" step="0.01" {...register('transferPrice')} className={inputClass + ' mt-1'} placeholder="Opciónal" />
         </div>
 
         {!isMadeToOrder && (
@@ -198,12 +198,12 @@ const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[]; onS
           </div>
         ) : (
           <div>
-            <label className={labelClass}>Dias estimados de fabricacion</label>
+            <label className={labelClass}>Días estimados de fabricacion</label>
             <input type="number" {...register('estimatedDays')} className={inputClass + ' mt-1'} placeholder="Ej: 20" />
           </div>
         )}
         <div>
-          <label className={labelClass}>Categoria *</label>
+          <label className={labelClass}>Categoría *</label>
           <select {...register('categoryId')} className={inputClass + ' mt-1'}>
             <option value="">Seleccionar</option>
             {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}

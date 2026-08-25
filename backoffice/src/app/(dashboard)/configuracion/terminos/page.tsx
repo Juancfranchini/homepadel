@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
@@ -54,13 +54,13 @@ export default function TerminosPage() {
         <Link href="/configuracion" className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"><ArrowLeft className="w-4 h-4" /></Link>
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><FileCheck className="w-5 h-5 text-[#C8FF00]" />Terminos y Condiciones</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Configura la pagina /terminos</p>
+          <p className="text-gray-500 text-sm mt-0.5">Configura la página /terminos</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
         <div>
-          <label className={labelClass}>Titulo de la pagina</label>
+          <label className={labelClass}>Titulo de la página</label>
           <input {...register('title')} className={inputClass} placeholder="Terminos y Condiciones" />
         </div>
         <div>

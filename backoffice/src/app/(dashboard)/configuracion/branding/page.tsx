@@ -13,6 +13,7 @@ const schema = z.object({
   logoFooter: z.string().optional().or(z.literal('')),
   isotipo: z.string().optional().or(z.literal('')),
   logoMobile: z.string().optional().or(z.literal('')),
+  logoLogin: z.string().optional().or(z.literal('')),
 });
 type FormData = z.infer<typeof schema>;
 
@@ -32,6 +33,7 @@ export default function BrandingPage() {
   const logoFooter = watch('logoFooter');
   const isotipo = watch('isotipo');
   const logoMobile = watch('logoMobile');
+  const logoLogin = watch('logoLogin');
 
   useEffect(() => {
     api.get('/site-sections/branding')
@@ -42,6 +44,7 @@ export default function BrandingPage() {
           logoFooter: data.logoFooter || '',
           isotipo: data.isotipo || '',
           logoMobile: data.logoMobile || '',
+          logoLogin: data.logoLogin || '',
         });
       })
       .catch(() => {})
@@ -52,7 +55,7 @@ export default function BrandingPage() {
     setSaving(true);
     try {
       await api.put('/site-sections/branding', { data });
-      toast('Configuracion guardada', 'success');
+      toast('ConfiguraciÃƒÂ³n guardada', 'success');
     } catch {
       toast('Error al guardar', 'error');
     } finally {
@@ -88,7 +91,7 @@ export default function BrandingPage() {
             <label className={labelClass}>
               <span className="flex items-center gap-2"><Image className="w-4 h-4 text-[#C8FF00]" />Logo Footer</span>
             </label>
-            <input {...register('logoFooter')} className={inputClass} placeholder="https://... (opcional, si es diferente al header)" />
+            <input {...register('logoFooter')} className={inputClass} placeholder="https://... (opciÃƒÂ³nal, si es diferente al header)" />
             {logoFooter && (
               <div className="mt-3 p-4 bg-gray-900 rounded-lg inline-block">
                 <img src={logoFooter} alt="Logo Footer" className="h-8 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
@@ -100,7 +103,7 @@ export default function BrandingPage() {
             <label className={labelClass}>
               <span className="flex items-center gap-2"><Image className="w-4 h-4 text-[#C8FF00]" />Isotipo (solo icono)</span>
             </label>
-            <input {...register('isotipo')} className={inputClass} placeholder="https://... (opcional)" />
+            <input {...register('isotipo')} className={inputClass} placeholder="https://... (opciÃƒÂ³nal)" />
             {isotipo && (
               <div className="mt-3 p-4 bg-gray-900 rounded-lg inline-block">
                 <img src={isotipo} alt="Isotipo" className="h-10 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
@@ -111,9 +114,22 @@ export default function BrandingPage() {
 
           <div>
             <label className={labelClass}>
+              <span className="flex items-center gap-2"><Image className="w-4 h-4 text-[#C8FF00]" />Logo Login (Formulario)</span>
+            </label>
+            <input {...register('logoLogin')} className={inputClass} placeholder="https://... (opcional, para formulario de login)" />
+            {logoLogin && (
+              <div className="mt-3 p-4 bg-gray-900 rounded-lg inline-block">
+                <img src={logoLogin} alt="Logo Login" className="h-8 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+              </div>
+            )}
+            <p className="text-xs text-gray-400 mt-1">Se muestra en el formulario de login/registro. Recomendado: 200x60px.</p>
+          </div>
+
+          <div>
+            <label className={labelClass}>
               <span className="flex items-center gap-2"><Image className="w-4 h-4 text-[#C8FF00]" />Logo Mobile</span>
             </label>
-            <input {...register('logoMobile')} className={inputClass} placeholder="https://... (opcional, version reducida para moviles)" />
+            <input {...register('logoMobile')} className={inputClass} placeholder="https://... (opciÃƒÂ³nal, version reducida para moviles)" />
             {logoMobile && (
               <div className="mt-3 p-4 bg-gray-900 rounded-lg inline-block">
                 <img src={logoMobile} alt="Logo Mobile" className="h-8 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />

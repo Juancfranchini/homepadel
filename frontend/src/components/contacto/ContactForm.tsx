@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { Send, Shield, Check } from 'lucide-react';
@@ -38,12 +38,12 @@ export default function ContactForm() {
         <input type="text" placeholder="Nombre completo" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={inputClass} />
         <input type="email" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={inputClass} />
       </div>
-      <input type="tel" placeholder="Telefono (opcional)" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className={inputClass} />
+      <input type="tel" placeholder="Teléfono (opciónal)" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className={inputClass} />
       <select value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} className={inputClass + " appearance-none"}>
         <option value="">En que podemos ayudarte?</option>
         <option value="consulta-producto">Consulta sobre un producto</option>
         <option value="seguimiento-pedido">Seguimiento de pedido</option>
-        <option value="cambio-devolucion">Cambio o devolucion</option>
+        <option value="cambio-devolución">Cambio o devolución</option>
         <option value="mayorista">Consulta mayorista</option>
         <option value="otro">Otro</option>
       </select>

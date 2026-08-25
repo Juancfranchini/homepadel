@@ -53,7 +53,7 @@ export class ShippingService {
       },
     });
 
-    this.logger.log('Envio creado (pendiente de API): ' + shipment.id);
+    this.logger.log('Envío creado (pendiente de API): ' + shipment.id);
     return shipment;
   }
 

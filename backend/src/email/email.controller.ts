@@ -54,7 +54,7 @@ export class EmailController {
     return this.prisma.emailTemplate.delete({ where: { id } });
   }
 
-  // === CAMPAÃƒâ€˜AS ===
+  // === CAMPAÑAS ===
   @Get('campaigns')
   async getCampaigns() {
     return this.prisma.emailCampaign.findMany({

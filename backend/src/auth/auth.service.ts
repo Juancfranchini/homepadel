@@ -65,14 +65,14 @@ export class AuthService {
       const resetUrl = (process.env.FRONTEND_URL || 'http://localhost:3000') + '/reset-password?token=' + resetToken;
       await this.emailService.sendEmail(
         email,
-        'Recuperar contrasena - Home Padel',
-        '<h1>Recuperar contrasena</h1><p>Hace click en el siguiente link:</p><p><a href="' + resetUrl + '">Resetear contrasena</a></p>',
+        'Recuperar contraseña - Home Padel',
+        '<h1>Recuperar contraseña</h1><p>Hace click en el siguiente link:</p><p><a href="' + resetUrl + '">Resetear contraseña</a></p>',
       );
     } catch (e) {
       console.error('No se pudo enviar email de reset:', e);
     }
 
-    return { success: true, message: 'Se envio un email con instrucciones para resetear la contrasena' };
+    return { success: true, message: 'Se envío un email con instrucciones para resetear la contraseña' };
   }
 
   async resetPassword(token: string, newPassword: string) {
@@ -86,7 +86,7 @@ export class AuthService {
       const hashed = await bcrypt.hash(newPassword, 10);
       await this.prisma.user.update({ where: { id: user.id }, data: { password: hashed } });
 
-      return { success: true, message: 'Contrasena actualizada correctamente' };
+      return { success: true, message: 'Contraseña actualizada correctamente' };
     } catch (e) {
       throw new UnauthorizedException('Token invalido o expirado');
     }
@@ -97,12 +97,12 @@ export class AuthService {
     if (!user) throw new NotFoundException('Usuario no encontrado');
 
     const valid = await bcrypt.compare(currentPassword, user.password);
-    if (!valid) throw new UnauthorizedException('Contrasena actual incorrecta');
+    if (!valid) throw new UnauthorizedException('Contraseña actual incorrecta');
 
     const hashed = await bcrypt.hash(newPassword, 10);
     await this.prisma.user.update({ where: { id: userId }, data: { password: hashed } });
 
-    return { success: true, message: 'Contrasena actualizada correctamente' };
+    return { success: true, message: 'Contraseña actualizada correctamente' };
   }
 
   async me(userId: string) {

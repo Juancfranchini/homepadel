@@ -1,6 +1,6 @@
 'use client';
 
-// ProductForm â€” formulario completo de creación/edición de producto
+// ProductForm - formulario completo de creación/edición de producto
 // Cubre todos los campos del spec: info básica, precios, stock, imágenes,
 // rendimiento (6 barras), caracterí­sticas dinámicas, video y SEO.
 
@@ -16,8 +16,6 @@ import {
 } from 'lucide-react';
 import api from '@/lib/api';
 import { useToast } from '@/components/ui/Toast';
-
-// â”€â”€â”€ Schema â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const perfStatSchema = z.object({
   label: z.string().min(1),
@@ -71,8 +69,6 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-// â”€â”€â”€ Defaults â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
 const DEFAULT_PERF: z.infer<typeof perfStatSchema>[] = [
   { label: 'Control', value: 85 },
   { label: 'Potencia', value: 75 },
@@ -86,8 +82,6 @@ const DEFAULT_FEATURES: z.infer<typeof featureSchema>[] = [
   { icon: 'âš¡', title: 'Material', subtitle: 'Carbono 18K' },
   { icon: 'ðŸŽ¯', title: 'Forma', subtitle: 'Redonda' },
 ];
-
-// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function SectionCard({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
   return (
@@ -118,7 +112,7 @@ function ErrorMsg({ msg }: { msg?: string }) {
   return <p className="text-xs text-red-600 mt-1">{msg}</p>;
 }
 
-// â”€â”€â”€ Catálogo de medios de pago â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+//Catálogo de medios de pago
 
 interface PaymentMethodDef { label: string; group: 'credit' | 'debit' | 'transfer' | 'wallet'; color: string }
 
@@ -147,7 +141,7 @@ const PAYMENT_GROUPS: { key: 'credit' | 'debit' | 'transfer' | 'wallet'; label: 
   { key: 'wallet', label: 'Billetera virtual' },
 ];
 
-// â”€â”€â”€ Props â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+//Props
 
 interface Props {
   mode: 'create' | 'edit';
@@ -157,8 +151,7 @@ interface Props {
 interface Category { id: string; name: string }
 interface Brand { id: string; name: string }
 
-// â”€â”€â”€ Main component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
+//Main component 
 export default function ProductForm({ mode, productId }: Props) {
   const { toast } = useToast();
   const router = useRouter();
@@ -198,7 +191,7 @@ export default function ProductForm({ mode, productId }: Props) {
   const highlightsWatch = watch('highlights') ?? [];
   const paymentWatch = watch('paymentMethods') ?? [];
 
-  // â”€â”€ Load catalogs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  //Load catalogs
   const loadCatalogs = useCallback(async () => {
     try {
       const [cRes, bRes] = await Promise.all([
@@ -215,7 +208,7 @@ export default function ProductForm({ mode, productId }: Props) {
     }
   }, []);
 
-  // â”€â”€ Load product for edit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  //Load product for edit 
   const loadProduct = useCallback(async () => {
     if (mode !== 'edit' || !productId) return;
     setLoading(true);
@@ -256,7 +249,7 @@ export default function ProductForm({ mode, productId }: Props) {
     loadProduct();
   }, [loadCatalogs, loadProduct]);
 
-  // â”€â”€ Image helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  //Image helpers 
   const addImage = () => {
     const url = newImageUrl.trim();
     if (!url) return;
@@ -268,7 +261,7 @@ export default function ProductForm({ mode, productId }: Props) {
     setValue('images', imagesWatch.filter((_, i) => i !== idx));
   };
 
-  // â”€â”€ Submit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  //Submit
   const onSubmit = async (data: FormValues) => {
     setSaving(true);
     try {
@@ -312,7 +305,7 @@ export default function ProductForm({ mode, productId }: Props) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      {/* â”€â”€ Top bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/*Top bar*/}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <button
@@ -348,7 +341,7 @@ export default function ProductForm({ mode, productId }: Props) {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
-        {/* â”€â”€ LEFT COLUMN (2/3) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/*LEFT COLUMN (2/3)*/}
         <div className="xl:col-span-2 space-y-6">
 
           {/* Información básica */}
@@ -411,12 +404,12 @@ export default function ProductForm({ mode, productId }: Props) {
                 <ErrorMsg msg={errors.price?.message} />
               </div>
               <div>
-                <Label>Precio oferta ($) <span className="text-gray-400 font-normal">(opcional)</span></Label>
+                <Label>Precio oferta ($) <span className="text-gray-400 font-normal">(opciónal)</span></Label>
                 <input type="number" min={0} step={100} {...register('salePrice')} className="input-field" placeholder="0" />
                 <p className="text-xs text-gray-400 mt-1">Se muestra tachado el precio normal cuando es menor</p>
               </div>
               <div>
-                <Label>Precio por transferencia ($) <span className="text-gray-400 font-normal">(opcional)</span></Label>
+                <Label>Precio por transferencia ($) <span className="text-gray-400 font-normal">(opciónal)</span></Label>
                 <input type="number" min={0} step={100} {...register('transferPrice')} className="input-field" placeholder="0" />
                 <p className="text-xs text-gray-400 mt-1">Si no se configura, se muestra 80% del precio activo</p>
               </div>
@@ -673,8 +666,8 @@ export default function ProductForm({ mode, productId }: Props) {
                             setValue('paymentMethods', updated);
                           }}
                           className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${checked
-                              ? `${def.color} border-current ring-2 ring-offset-1 ring-current/30`
-                              : 'bg-gray-50 text-gray-500 border-gray-200 hover:border-gray-300'
+                            ? `${def.color} border-current ring-2 ring-offset-1 ring-current/30`
+                            : 'bg-gray-50 text-gray-500 border-gray-200 hover:border-gray-300'
                             }`}
                         >
                           {def.label}
@@ -687,14 +680,14 @@ export default function ProductForm({ mode, productId }: Props) {
             })}
             {paymentWatch.length === 0 && (
               <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mt-1">
-                Sin medios de pago configurados â€” el botón &quot;Ver más detalles&quot; no se mostrará en el frontend.
+                Sin medios de pago configurados - el botón &quot;Ver más detalles&quot; no se mostrará en el frontend.
               </p>
             )}
           </SectionCard>
 
         </div>
 
-        {/* â”€â”€ RIGHT COLUMN (1/3) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/*RIGHT COLUMN (1/3)*/}
         <div className="space-y-6">
 
           {/* Estado y visibilidad */}

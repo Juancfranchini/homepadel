@@ -59,7 +59,7 @@ export default function RendimientoTab({ register, control, watch, showPerforman
           <div className="flex gap-2 mb-1 px-1">
             <span className="text-[10px] font-semibold text-gray-400 uppercase w-[130px] flex-shrink-0">Icono</span>
             <span className="text-[10px] font-semibold text-gray-400 uppercase w-[90px] flex-shrink-0">Titulo</span>
-            <span className="text-[10px] font-semibold text-gray-400 uppercase flex-1">Descripcion</span>
+            <span className="text-[10px] font-semibold text-gray-400 uppercase flex-1">Descripción</span>
             <span className="w-8 flex-shrink-0"></span>
           </div>
         )}

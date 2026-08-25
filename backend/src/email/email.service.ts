@@ -122,8 +122,8 @@ export class EmailService {
         '<h1 style="color: #C8FF00; text-align: center;">¡Tu pedido fue despachado!</h1>' +
         '<p style="color: #C7C7C0;">Tu pedido <strong style="color: #C8FF00;">' + orderNumber + '</strong> esta en camino.</p>' +
         '<div style="background-color: #0C0C0C; padding: 15px; border-radius: 5px; margin: 20px 0;">' +
-        '<p style="color: #C7C7C0;">Numero de seguimiento: <strong style="color: #C8FF00;">' + trackingNumber + '</strong></p>' +
-        (trackingUrl ? '<p style="color: #C7C7C0;">Podes seguir tu envio <a href="' + trackingUrl + '" style="color: #C8FF00;">aca</a></p>' : '') +
+        '<p style="color: #C7C7C0;">Número de seguimiento: <strong style="color: #C8FF00;">' + trackingNumber + '</strong></p>' +
+        (trackingUrl ? '<p style="color: #C7C7C0;">Podes seguir tu envío <a href="' + trackingUrl + '" style="color: #C8FF00;">aca</a></p>' : '') +
         '</div></div></body></html>';
       subject = 'Tu Pedido ' + orderNumber + ' fue despachado - Home Padel';
     }
@@ -157,7 +157,7 @@ export class EmailService {
         '<h1 style="color: #C8FF00;">Nuevo mensaje de contacto</h1>' +
         '<p><strong style="color: #C8FF00;">Nombre:</strong> ' + data.name + '</p>' +
         '<p><strong style="color: #C8FF00;">Email:</strong> ' + data.email + '</p>' +
-        '<p><strong style="color: #C8FF00;">Telefono:</strong> ' + (data.phone || 'No proporcionado') + '</p>' +
+        '<p><strong style="color: #C8FF00;">Teléfono:</strong> ' + (data.phone || 'No proporcionado') + '</p>' +
         '<p><strong style="color: #C8FF00;">Asunto:</strong> ' + (data.subject || 'Sin asunto') + '</p>' +
         '<div style="background-color: #0C0C0C; padding: 15px; border-radius: 5px; margin: 20px 0;">' +
         '<p style="color: #C7C7C0;">' + data.message.replace(/\n/g, '<br>') + '</p></div>' +

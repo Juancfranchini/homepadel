@@ -10,7 +10,7 @@ interface NotificacionesTabProps {
 
 const NOTIFICATIONS = [
   { key: 'newOrder' as const, label: 'Nuevo pedido recibido', desc: 'Email al cliente cuando se crea un pedido' },
-  { key: 'shippedOrder' as const, label: 'Pedido despachado', desc: 'Email al cliente con el numero de tracking' },
+  { key: 'shippedOrder' as const, label: 'Pedido despachado', desc: 'Email al cliente con el número de tracking' },
   { key: 'contactForm' as const, label: 'Formulario de contacto', desc: 'Email al admin cuando llega un mensaje' },
 ];
 

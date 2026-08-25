@@ -13,7 +13,7 @@ const passwordSchema = z.object({
   currentPassword: z.string().min(6),
   newPassword: z.string().min(8),
   confirmPassword: z.string(),
-}).refine((d) => d.newPassword === d.confirmPassword, { message: 'Las contrasenas no coinciden', path: ['confirmPassword'] });
+}).refine((d) => d.newPassword === d.confirmPassword, { message: 'Las contraseñas no coinciden', path: ['confirmPassword'] });
 
 type PasswordForm = z.infer<typeof passwordSchema>;
 
@@ -33,7 +33,7 @@ export default function SeguridadTab({ toast }: SeguridadTabProps) {
     setSavingPassword(true);
     try {
       await api.post('/auth/change-password', { currentPassword: data.currentPassword, newPassword: data.newPassword });
-      toast('Contrasena actualizada', 'success');
+      toast('Contraseña actualizada', 'success');
       passwordForm.reset();
     } catch { toast('Error', 'error'); } finally { setSavingPassword(false); }
   };
@@ -42,11 +42,11 @@ export default function SeguridadTab({ toast }: SeguridadTabProps) {
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
       <h2 className="text-sm font-semibold text-gray-800 mb-5 flex items-center gap-2">
         <Shield className="w-4 h-4 text-gray-500" />
-        Cambiar contrasena
+        Cambiar contraseña
       </h2>
       <form onSubmit={passwordForm.handleSubmit(onChangePassword)} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">Contrasena actual *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">Contraseña actual *</label>
           <div className="relative">
             <input
               type={showCurrent ? 'text' : 'password'}
@@ -59,7 +59,7 @@ export default function SeguridadTab({ toast }: SeguridadTabProps) {
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">Nueva contrasena *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">Nueva contraseña *</label>
           <div className="relative">
             <input
               type={showNew ? 'text' : 'password'}
@@ -73,7 +73,7 @@ export default function SeguridadTab({ toast }: SeguridadTabProps) {
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirmar contrasena *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirmar contraseña *</label>
           <div className="relative">
             <input
               type={showConfirm ? 'text' : 'password'}
@@ -92,7 +92,7 @@ export default function SeguridadTab({ toast }: SeguridadTabProps) {
             className="flex items-center gap-2 px-5 py-2.5 bg-[#C8FF00] text-[#0f172a] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] disabled:opacity-50 transition-colors"
           >
             <Shield className="w-4 h-4" />
-            {savingPassword ? 'Actualizando...' : 'Cambiar contrasena'}
+            {savingPassword ? 'Actualizando...' : 'Cambiar contraseña'}
           </button>
         </div>
       </form>

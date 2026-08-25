@@ -121,17 +121,17 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
 
         {/* Stock bajo - solo para regulares */}
         {!isMadeToOrder && product.stock > 0 && product.stock <= 5 && (
-          <p className="text-[10px] text-orange-400 font-semibold">Ãƒâ€šÃ‚Â¡Solo quedan {product.stock}!</p>
+          <p className="text-[10px] text-orange-400 font-semibold">Solo quedan {product.stock}!</p>
         )}
 
         {/* Fabricacion - por encargo */}
         {isMadeToOrder && product.estimatedDays && (
           <p className="text-[10px] font-semibold text-[#B7D31A]">
-            Fabricacion: {product.estimatedDays} dias
+            Fabricacion: {product.estimatedDays} días
           </p>
         )}
 
-        {/* BotÃƒÆ’Ã‚Â³n agregar al carrito */}
+        {/* Botón agregar al carrito */}
         <button
           onClick={handleAddToCart}
           disabled={(!isMadeToOrder && product.stock === 0) || adding}
@@ -143,7 +143,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
               : 'bg-[#B7D31A] text-[#050606] btn-primary-glow hover:bg-[#CAE52E] active:scale-95')}
         >
           <ShoppingCart size={13} />
-          {(!isMadeToOrder && product.stock === 0) ? 'SIN STOCK' : adding ? 'Ãƒâ€šÃ‚Â¡AGREGADO!' : 'AGREGAR AL CARRITO'}
+          {(!isMadeToOrder && product.stock === 0) ? 'SIN STOCK' : adding ? '¡AGREGADO!' : 'AGREGAR AL CARRITO'}
         </button>
       </div>
     </div>

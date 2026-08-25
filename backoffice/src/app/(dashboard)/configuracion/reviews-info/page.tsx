@@ -40,7 +40,7 @@ export default function ReviewsInfoPage() {
     setSaving(true);
     try {
       await api.put('/site-sections/reviews_info', { data, active: true });
-      toast('Informacion guardada', 'success');
+      toast('Información guardada', 'success');
     } catch { toast('Error al guardar', 'error'); } finally { setSaving(false); }
   };
 

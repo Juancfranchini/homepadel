@@ -25,7 +25,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pr
   return (
     <div className="flex items-center justify-between pt-4">
       <p className="text-sm text-gray-500">
-        Pagina {currentPage} de {totalPages}
+        Página {currentPage} de {totalPages}
       </p>
       <div className="flex items-center gap-1">
         <button

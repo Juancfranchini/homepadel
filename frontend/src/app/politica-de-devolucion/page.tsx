@@ -4,22 +4,22 @@ import { getSiteSection } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
-export default async function PoliticaDevolucionPage() {
+export default async function PoliticaDevoluciónPage() {
   let data: any = {};
 
   try {
-    const res = await getSiteSection('politica_devolucion');
+    const res = await getSiteSection('politica_devolución');
     data = res?.data || {};
   } catch {}
 
   const hero = {
     chip: data.chip || 'DEVOLUCIONES Y CAMBIOS',
-    title: data.title || 'Politica de Devolucion',
+    title: data.title || 'Politica de Devolución',
     description: data.description || 'En Home Padel queremos que estes 100% satisfecho con tu compra.',
   };
 
   const benefits = data.benefits?.length > 0 ? data.benefits : [
-    { icon: 'RefreshCw', title: '30 DIAS', desc: 'Tenes hasta 30 dias corridos desde que recibis tu pedido.' },
+    { icon: 'RefreshCw', title: '30 DIAS', desc: 'Tenes hasta 30 días corridos desde que recibis tu pedido.' },
     { icon: 'Package', title: 'PRODUCTO SIN USO', desc: 'El producto debe estar sin uso, con etiquetas y en su embalaje original.' },
     { icon: 'Shield', title: 'CAMBIO O REINTEGRO', desc: 'Podes elegir entre cambio por otro producto o reintegro del dinero.' },
     { icon: 'Check', title: 'COMPRA SEGURA', desc: 'Proceso simple, rapido y 100% seguro.' },
@@ -28,10 +28,10 @@ export default async function PoliticaDevolucionPage() {
   const conditionsOk = data.conditionsOk?.length > 0 ? data.conditionsOk : [
     'El producto debe estar sin uso y en perfectas condiciones.',
     'Debe incluir su embalaje original, etiquetas, manuales y accesorios.',
-    'La solicitud debe realizarse dentro de los 30 dias corridos desde la recepcion.',
+    'La solicitud debe realizarse dentro de los 30 días corridos desde la recepcion.',
     'El producto no debe presentar signos de uso, desgaste o dano.',
-    'En caso de devolucion por falla o error nuestro, nos hacemos cargo del envio.',
-    'En caso de devolucion por arrepentimiento, el costo del envio corre por cuenta del cliente.',
+    'En caso de devolución por falla o error nuestro, nos hacemos cargo del envío.',
+    'En caso de devolución por arrepentimiento, el costo del envío corre por cuenta del cliente.',
   ];
 
   const conditionsNo = data.conditionsNo?.length > 0 ? data.conditionsNo : [
@@ -53,7 +53,7 @@ export default async function PoliticaDevolucionPage() {
 
   const help = {
     title: data.helpTitle || 'Necesitas ayuda?',
-    description: data.helpDescription || 'Nuestro equipo esta listo para ayudarte con tu devolucion.',
+    description: data.helpDescription || 'Nuestro equipo esta listo para ayudarte con tu devolución.',
     schedule: data.helpSchedule || 'Lunes a Viernes de 9 a 18 hs. | Sabados de 9 a 13 hs.',
     whatsapp: data.helpWhatsapp || '5491131813297',
     email: data.helpEmail || 'hola@homepadel.com.ar',
@@ -67,7 +67,7 @@ export default async function PoliticaDevolucionPage() {
       <div className="border-b border-[#0D0F0F]">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-2.5 flex items-center gap-1.5 text-[11px] text-[#8A8A85]">
           <Link href="/" className="hover:text-[#F7F6F7] transition-colors">Inicio</Link><span>/</span>
-          <span className="text-[#F7F6F7]">Politica de Devolucion</span>
+          <span className="text-[#F7F6F7]">Politica de Devolución</span>
         </div>
       </div>
 

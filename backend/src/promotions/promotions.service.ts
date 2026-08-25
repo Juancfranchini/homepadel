@@ -1,5 +1,5 @@
-// Servicio de promociones
-// Las promociones tienen startDate y endDate para controlar su vigencia
+// Servicio de promociónes
+// Las promociónes tienen startDate y endDate para controlar su vigencia
 
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';

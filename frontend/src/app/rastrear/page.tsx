@@ -41,8 +41,8 @@ function RastrearContent() {
 
   const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!orderNumber.trim()) { setError('Ingresa un numero de orden'); return; }
-    if (!email.trim() && !phone.trim()) { setError('Ingresa tu email o telefono para verificar'); return; }
+    if (!orderNumber.trim()) { setError('Ingresa un número de orden'); return; }
+    if (!email.trim() && !phone.trim()) { setError('Ingresa tu email o teléfono para verificar'); return; }
     setLoading(true); setError(''); setOrder(null); setSearched(false);
     try {
       const params = new URLSearchParams();
@@ -66,14 +66,14 @@ function RastrearContent() {
             <Truck className="w-8 h-8 text-[#B7D31A]" />
           </div>
           <h1 className="text-2xl font-black uppercase tracking-tight text-[#F7F6F7]">Rastrear mi pedido</h1>
-          <p className="text-[#8A8A85] text-sm mt-1">Ingresa tu numero de orden y email o telefono</p>
+          <p className="text-[#8A8A85] text-sm mt-1">Ingresa tu número de orden y email o teléfono</p>
         </div>
 
         <form onSubmit={handleTrack} className="mb-8 space-y-3">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8A8A85]" />
             <input type="text" value={orderNumber} onChange={(e) => setOrderNumber(e.target.value.toUpperCase())}
-              placeholder="Numero de orden: HP-1234567890"
+              placeholder="Número de orden: HP-1234567890"
               className="w-full pl-12 pr-4 py-4 bg-[#0F1111] border border-[#B7D31A]/50 rounded-xl text-lg font-bold text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A] focus:shadow-[0_0_20px_rgba(183,211,26,0.1)] transition-all uppercase tracking-wider text-center" />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -86,7 +86,7 @@ function RastrearContent() {
             <div className="relative">
               <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8A8A85]" />
               <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)}
-                placeholder="Telefono"
+                placeholder="Teléfono"
                 className="w-full pl-10 pr-4 py-3 bg-[#0F1111] border border-[#B7D31A]/40 rounded-xl text-sm text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A]/60 transition-colors" />
             </div>
           </div>
@@ -101,7 +101,7 @@ function RastrearContent() {
           <div className="bg-[#0F1111] rounded-2xl border border-red-500/20 p-10 text-center">
             <div className="w-20 h-20 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4"><XCircle className="w-10 h-10 text-red-500" /></div>
             <h2 className="text-xl font-bold text-[#F7F6F7] mb-2">Pedido no encontrado</h2>
-            <p className="text-[#8A8A85] text-sm mb-6">Verifica el numero de orden y los datos ingresados.</p>
+            <p className="text-[#8A8A85] text-sm mb-6">Verifica el número de orden y los datos ingresados.</p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button onClick={() => { setOrderNumber(''); setEmail(''); setPhone(''); setError(''); setSearched(false); }} className="px-6 py-2.5 border border-[#B7D31A]/30 text-[#F7F6F7] rounded-xl text-sm font-semibold hover:bg-[#B7D31A]/5 transition-colors">Intentar de nuevo</button>
               <Link href="/contacto" className="px-6 py-2.5 bg-[#B7D31A] text-[#050606] rounded-xl text-sm font-semibold hover:bg-[#c8e81f] transition-colors">Contactar soporte</Link>
@@ -131,7 +131,7 @@ function RastrearContent() {
             </div>
 
             <div className="bg-[#0F1111] rounded-2xl border border-[#B7D31A]/20 p-6">
-              <h3 className="text-sm font-semibold text-[#F7F6F7] mb-6">Estado del envio</h3>
+              <h3 className="text-sm font-semibold text-[#F7F6F7] mb-6">Estado del envío</h3>
               <div className="relative">
                 {STATUS_STEPS.filter((s) => s.key !== 'CANCELLED' || isCancelled).map((step, index, arr) => {
                   const isActive = index <= currentStepIndex && !isCancelled;
@@ -174,7 +174,7 @@ function RastrearContent() {
           <div className="bg-[#0F1111] rounded-2xl border border-[#B7D31A]/20 p-10 text-center">
             <div className="w-20 h-20 rounded-full bg-[#1A1F21] flex items-center justify-center mx-auto mb-4"><MapPin className="w-10 h-10 text-[#8A8A85]" /></div>
             <h2 className="text-lg font-bold text-[#F7F6F7] mb-2">Encontra tu pedido</h2>
-            <p className="text-[#8A8A85] text-sm">El numero de orden lo encontras en el email de confirmacion que te enviamos al finalizar tu compra.</p>
+            <p className="text-[#8A8A85] text-sm">El número de orden lo encontras en el email de confirmacion que te enviamos al finalizar tu compra.</p>
           </div>
         )}
       </div>

@@ -16,7 +16,7 @@ function SuccessContent() {
           <CheckCircle size={32} className="text-green-500" />
         </div>
         <h1 className="text-2xl font-black text-[#F7F6F7] mb-2">Pago aprobado!</h1>
-        <p className="text-[#8A8A85] text-sm mb-1">Numero de orden:</p>
+        <p className="text-[#8A8A85] text-sm mb-1">Número de orden:</p>
         <p className="text-2xl font-black text-[#B7D31A] bg-[#1A1F21] px-6 py-2 rounded-lg mb-5 inline-block">#{orderNumber}</p>
         <p className="text-[#8A8A85] text-sm mb-8">Tu pago fue procesado exitosamente. Te enviamos un email con los detalles.</p>
         <div className="flex flex-col gap-3">

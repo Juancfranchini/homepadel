@@ -109,7 +109,7 @@ export default function InstagramConfigPage() {
           .map((u: any) => ({ url: u.url.trim(), thumbnail: u.thumbnail || '' })),
       };
       await api.put('/site-sections/instagram', { data: payload, active: data.active });
-      toast('Configuracion de Instagram guardada', 'success');
+      toast('Configuración de Instagram guardada', 'success');
     } catch { toast('Error al guardar', 'error'); } finally { setSaving(false); }
   };
 
@@ -145,7 +145,7 @@ export default function InstagramConfigPage() {
         </Link>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Instagram</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Configuracion de la seccion Instagram del inicio</p>
+          <p className="text-gray-500 text-sm mt-0.5">Configuración de la sección Instagram del inicio</p>
         </div>
       </div>
 
@@ -250,7 +250,7 @@ export default function InstagramConfigPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <input type="checkbox" id="igActive" {...register('active')} className="w-4 h-4 rounded accent-[#C8FF00]" />
-            <label htmlFor="igActive" className="text-sm text-gray-700 font-medium">Seccion activa (visible en el inicio)</label>
+            <label htmlFor="igActive" className="text-sm text-gray-700 font-medium">Sección activa (visible en el inicio)</label>
           </div>
           <button type="submit" disabled={saving}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#C8FF00] text-[#0f172a] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] disabled:opacity-50 transition-colors">

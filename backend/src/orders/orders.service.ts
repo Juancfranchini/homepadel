@@ -52,7 +52,7 @@ export class OrdersService {
       where: { number },
       include: { items: { include: { product: true } }, user: { select: { id: true, name: true, email: true } } },
     });
-    if (!order) throw new NotFoundException('Pedido no encontrado. Verifica el numero de orden.');
+    if (!order) throw new NotFoundException('Pedido no encontrado. Verifica el número de orden.');
 
     if (email || phone) {
       let buyerInfo: any = {};
@@ -66,7 +66,7 @@ export class OrdersService {
         }
       }
       if (phone && buyerInfo.buyerPhone !== phone) {
-        throw new NotFoundException('El telefono no coincide con el pedido.');
+        throw new NotFoundException('El teléfono no coincide con el pedido.');
       }
     }
 

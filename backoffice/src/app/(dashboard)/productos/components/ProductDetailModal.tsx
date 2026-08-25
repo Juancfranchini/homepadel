@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { X, Star, ImageIcon } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
@@ -75,7 +75,7 @@ export default function ProductDetailModal({ product, onClose }: Props) {
               <p className="text-sm font-semibold text-gray-900 mt-1">{product.brand?.name || '-'}</p>
             </div>
             <div>
-              <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Categoria</p>
+              <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Categoría</p>
               <p className="text-sm font-semibold text-gray-900 mt-1">{product.category?.name || '-'}</p>
             </div>
             <div>
@@ -103,7 +103,7 @@ export default function ProductDetailModal({ product, onClose }: Props) {
             </div>
             {product.description && (
               <div className="col-span-3">
-                <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Descripcion</p>
+                <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Descripción</p>
                 <p className="text-sm text-gray-600 mt-1 line-clamp-3">{product.description}</p>
               </div>
             )}

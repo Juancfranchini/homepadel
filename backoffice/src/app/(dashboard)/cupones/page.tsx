@@ -24,7 +24,7 @@ interface Coupon {
 }
 
 const schema = z.object({
-  code: z.string().min(3, 'El codigo es requerido').toUpperCase(),
+  code: z.string().min(3, 'El código es requerido').toUpperCase(),
   discount: z.coerce.number().min(1, 'Minimo 1'),
   type: z.enum(['PERCENTAGE', 'FIXED']),
   minAmount: z.coerce.number().min(0).optional(),
@@ -110,11 +110,11 @@ export default function CuponesPage() {
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
           <table className="w-full">
             <thead><tr className="border-b border-gray-100">
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Codigo</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Código</th>
               <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Descuento</th>
               <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Usos</th>
               <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
+              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciónes</th>
             </tr></thead>
             <tbody>
               {coupons.map((c) => (
@@ -149,7 +149,7 @@ export default function CuponesPage() {
         <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editItem ? 'Editar cupon' : 'Nuevo cupon'} size="sm">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Codigo *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Código *</label>
               <input {...register('code')} className={inputClass} placeholder="EJ: VERANO10" />
               {errors.code && <p className="text-xs text-red-600 mt-1">{errors.code.message}</p>}
             </div>
@@ -169,7 +169,7 @@ export default function CuponesPage() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Monto minimo</label>
-                <input type="number" {...register('minAmount')} className={inputClass} placeholder="Opcional" />
+                <input type="number" {...register('minAmount')} className={inputClass} placeholder="Opciónal" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Usos maximos</label>

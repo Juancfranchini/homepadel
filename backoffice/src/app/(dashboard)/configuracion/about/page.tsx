@@ -31,7 +31,7 @@ const benefitSchema = z.object({
 
 const schema = z.object({
   title: z.string().min(2, 'El titulo es requerido'),
-  description: z.string().min(10, 'La descripcion es requerida'),
+  description: z.string().min(10, 'La descripción es requerida'),
   image: z.string().optional().or(z.literal('')),
   benefits: z.array(benefitSchema).min(1, 'Agrega al menos un item'),
   active: z.boolean().default(true),
@@ -52,7 +52,7 @@ export default function AboutConfigPage() {
       title: 'Somos Home Padel',
       description: 'En Home Padel vivimos este deporte con la misma pasion que vos.',
       benefits: [
-        { icon: 'Truck', title: 'Envios a todo el pais', description: 'Llegamos a cada rincon de Argentina' },
+        { icon: 'Truck', title: 'Envíos a todo el pais', description: 'Llegamos a cada rincon de Argentina' },
         { icon: 'Shield', title: 'Productos originales', description: 'Garantia oficial de fabrica' },
         { icon: 'Users', title: 'Atencion personalizada', description: 'Te asesoramos segun tu nivel y estilo' },
       ],
@@ -75,7 +75,7 @@ export default function AboutConfigPage() {
           description: data.description ?? '',
           image: data.image ?? '',
           benefits: data.benefits?.length > 0 ? data.benefits : [
-            { icon: 'Truck', title: 'Envios a todo el pais', description: 'Llegamos a cada rincon de Argentina' },
+            { icon: 'Truck', title: 'Envíos a todo el pais', description: 'Llegamos a cada rincon de Argentina' },
             { icon: 'Shield', title: 'Productos originales', description: 'Garantia oficial de fabrica' },
             { icon: 'Users', title: 'Atencion personalizada', description: 'Te asesoramos segun tu nivel y estilo' },
           ],
@@ -91,7 +91,7 @@ export default function AboutConfigPage() {
     setSaving(true);
     try {
       await api.put('/site-sections/about', { data, active: data.active });
-      toast('Seccion guardada', 'success');
+      toast('Sección guardada', 'success');
     } catch { toast('Error al guardar', 'error'); } finally { setSaving(false); }
   };
 
@@ -105,7 +105,7 @@ export default function AboutConfigPage() {
         </Link>
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><Info className="w-5 h-5 text-[#C8FF00]" />Sobre Nosotros</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Seccion del inicio</p>
+          <p className="text-gray-500 text-sm mt-0.5">Sección del inicio</p>
         </div>
       </div>
 
@@ -120,7 +120,7 @@ export default function AboutConfigPage() {
                 {errors.title && <p className="text-xs text-red-600 mt-0.5">{errors.title.message}</p>}
               </div>
               <div>
-                <label className={labelClass + ' mb-1'}>Descripcion *</label>
+                <label className={labelClass + ' mb-1'}>Descripción *</label>
                 <textarea {...register('description')} rows={3} className={inputClass + ' mt-1'} />
                 {errors.description && <p className="text-xs text-red-600 mt-0.5">{errors.description.message}</p>}
               </div>
@@ -157,10 +157,10 @@ export default function AboutConfigPage() {
                     </div>
                     <div className="flex-1">
                       <label className="block text-xs font-medium text-gray-500 mb-1">Titulo *</label>
-                      <input {...register(('benefits.' + i + '.title') as any)} className={inputClass} placeholder="Ej: Envios a todo el pais" />
+                      <input {...register(('benefits.' + i + '.title') as any)} className={inputClass} placeholder="Ej: Envíos a todo el pais" />
                     </div>
                     <div className="flex-1">
-                      <label className="block text-xs font-medium text-gray-500 mb-1">Descripcion (opcional)</label>
+                      <label className="block text-xs font-medium text-gray-500 mb-1">Descripción (opciónal)</label>
                       <input {...register(('benefits.' + i + '.description') as any)} className={inputClass} placeholder="Ej: Llegamos a cada rincon" />
                     </div>
                     <button type="button" onClick={() => remove(i)} className="p-2 mt-5 text-red-400 hover:bg-red-50 rounded-lg transition-colors shrink-0">
@@ -176,7 +176,7 @@ export default function AboutConfigPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <input type="checkbox" id="aboutActive" {...register('active')} className="w-4 h-4 rounded accent-[#C8FF00]" />
-            <label htmlFor="aboutActive" className="text-sm text-gray-700 font-medium">Seccion activa</label>
+            <label htmlFor="aboutActive" className="text-sm text-gray-700 font-medium">Sección activa</label>
           </div>
           <button type="submit" disabled={saving}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#C8FF00] text-[#0f172a] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] disabled:opacity-50 transition-colors">

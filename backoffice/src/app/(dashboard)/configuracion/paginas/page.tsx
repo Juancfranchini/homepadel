@@ -23,7 +23,7 @@ const ICON_OPTIONS = [
 
 const ICON_MAP: Record<string, any> = { RefreshCw, Package, Shield, Check };
 
-export default function PoliticaDevolucionPage() {
+export default function PoliticaDevoluciónPage() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -38,23 +38,23 @@ export default function PoliticaDevolucionPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await api.get('/site-sections/politica_devolucion');
+      const res = await api.get('/site-sections/politica_devolución');
       const data = res.data?.data ?? res.data ?? {};
       reset({
         chip: data.chip || 'DEVOLUCIONES Y CAMBIOS',
-        title: data.title || 'Politica de Devolucion',
+        title: data.title || 'Politica de Devolución',
         description: data.description || 'En Home Padel queremos que estes 100% satisfecho con tu compra.',
         benefits: data.benefits?.length >= 4 ? data.benefits : [
-          { icon: 'RefreshCw', title: '30 DIAS', desc: 'Tenes hasta 30 dias corridos desde que recibis tu pedido.' },
+          { icon: 'RefreshCw', title: '30 DIAS', desc: 'Tenes hasta 30 días corridos desde que recibis tu pedido.' },
           { icon: 'Package', title: 'PRODUCTO SIN USO', desc: 'El producto debe estar sin uso, con etiquetas y en su embalaje original.' },
           { icon: 'Shield', title: 'CAMBIO O REINTEGRO', desc: 'Podes elegir entre cambio por otro producto o reintegro del dinero.' },
           { icon: 'Check', title: 'COMPRA SEGURA', desc: 'Proceso simple, rapido y 100% seguro.' },
         ],
-        conditionsOk: data.conditionsOk?.length > 0 ? data.conditionsOk : ['El producto debe estar sin uso y en perfectas condiciones.','Debe incluir su embalaje original, etiquetas, manuales y accesorios.','La solicitud debe realizarse dentro de los 30 dias corridos desde la recepcion.','El producto no debe presentar signos de uso, desgaste o dano.','En caso de devolucion por falla o error nuestro, nos hacemos cargo del envio.','En caso de devolucion por arrepentimiento, el costo del envio corre por cuenta del cliente.'],
+        conditionsOk: data.conditionsOk?.length > 0 ? data.conditionsOk : ['El producto debe estar sin uso y en perfectas condiciones.','Debe incluir su embalaje original, etiquetas, manuales y accesorios.','La solicitud debe realizarse dentro de los 30 días corridos desde la recepcion.','El producto no debe presentar signos de uso, desgaste o dano.','En caso de devolución por falla o error nuestro, nos hacemos cargo del envío.','En caso de devolución por arrepentimiento, el costo del envío corre por cuenta del cliente.'],
         conditionsNo: data.conditionsNo?.length > 0 ? data.conditionsNo : ['Productos usados o con signos de desgaste.','Productos que no incluyan su embalaje original, etiquetas o accesorios.','Productos en oferta o con descuento especial (salvo fallas de fabrica).','Productos personalizados o a pedido.','Productos que hayan sido alterados o modificados.','Pelotas, grips, overgrips u otros accesorios que hayan sido abiertos.'],
         steps: data.steps?.length > 0 ? data.steps : [{ title: 'CONTACTANOS', desc: 'Escribinos por WhatsApp, email o completa el formulario de contacto.' },{ title: 'PREPARA EL PRODUCTO', desc: 'Te indicaremos como y a donde enviar el producto.' },{ title: 'ENVIALO', desc: 'Despacha el producto segun las instrucciones que te dimos.' },{ title: 'REVISION', desc: 'Una vez recibido, revisaremos el estado del producto.' },{ title: 'CAMBIO O REINTEGRO', desc: 'Procesamos el cambio o el reintegro segun tu eleccion.' }],
         helpTitle: data.helpTitle || 'Necesitas ayuda?',
-        helpDescription: data.helpDescription || 'Nuestro equipo esta listo para ayudarte con tu devolucion.',
+        helpDescription: data.helpDescription || 'Nuestro equipo esta listo para ayudarte con tu devolución.',
         helpSchedule: data.helpSchedule || 'Lunes a Viernes de 9 a 18 hs. | Sabados de 9 a 13 hs.',
         helpWhatsapp: data.helpWhatsapp || '5491131813297',
         helpEmail: data.helpEmail || 'hola@homepadel.com.ar',
@@ -67,8 +67,8 @@ export default function PoliticaDevolucionPage() {
   const onSubmit = async (data: any) => {
     setSaving(true);
     try {
-      await api.put('/site-sections/politica_devolucion', { data, active: true });
-      toast('Politica de Devolucion guardada', 'success');
+      await api.put('/site-sections/politica_devolución', { data, active: true });
+      toast('Politica de Devolución guardada', 'success');
     } catch { toast('Error al guardar', 'error'); } finally { setSaving(false); }
   };
 
@@ -78,7 +78,7 @@ export default function PoliticaDevolucionPage() {
     <div className="space-y-6 w-full">
       <div className="flex items-center gap-3">
         <Link href="/configuracion" className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"><ArrowLeft className="w-4 h-4" /></Link>
-        <div><h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><FileText className="w-5 h-5 text-[#C8FF00]" />Politica de Devolucion</h1><p className="text-gray-500 text-sm mt-0.5">Contenido de la pagina de devoluciones y cambios</p></div>
+        <div><h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><FileText className="w-5 h-5 text-[#C8FF00]" />Politica de Devolución</h1><p className="text-gray-500 text-sm mt-0.5">Contenido de la página de devoluciónes y cambios</p></div>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -86,8 +86,8 @@ export default function PoliticaDevolucionPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
           <h3 className="text-sm font-semibold text-gray-800 border-b border-gray-100 pb-3">Hero Principal</h3>
           <div><label className={labelClass}>Chip (texto verde)</label><input {...register('chip')} className={inputClass} placeholder="DEVOLUCIONES Y CAMBIOS" /></div>
-          <div><label className={labelClass}>Titulo</label><input {...register('title')} className={inputClass} placeholder="Politica de Devolucion" /></div>
-          <div><label className={labelClass}>Descripcion</label><textarea {...register('description')} rows={3} className={inputClass} /></div>
+          <div><label className={labelClass}>Titulo</label><input {...register('title')} className={inputClass} placeholder="Politica de Devolución" /></div>
+          <div><label className={labelClass}>Descripción</label><textarea {...register('description')} rows={3} className={inputClass} /></div>
         </div>
 
         {/* Beneficios */}
@@ -101,7 +101,7 @@ export default function PoliticaDevolucionPage() {
             <div className="flex gap-2 mb-1 px-1">
               <span className="text-[10px] font-semibold text-gray-400 uppercase" style={{width: '25%'}}>Icono</span>
               <span className="text-[10px] font-semibold text-gray-400 uppercase" style={{width: '35%'}}>Titulo</span>
-              <span className="text-[10px] font-semibold text-gray-400 uppercase" style={{width: '40%'}}>Descripcion</span>
+              <span className="text-[10px] font-semibold text-gray-400 uppercase" style={{width: '40%'}}>Descripción</span>
               <span style={{width: 32}}></span>
             </div>
           )}
@@ -119,7 +119,7 @@ export default function PoliticaDevolucionPage() {
                   </span>
                 </div>
                 <input {...register(('benefits.' + i + '.title') as any)} className={inputClass} style={{width: '35%'}} placeholder="Titulo" />
-                <input {...register(('benefits.' + i + '.desc') as any)} className={inputClass} style={{width: '40%'}} placeholder="Descripcion" />
+                <input {...register(('benefits.' + i + '.desc') as any)} className={inputClass} style={{width: '40%'}} placeholder="Descripción" />
                 <button type="button" onClick={() => benefitsArray.remove(i)} className="p-1.5 text-red-400 hover:bg-red-50 rounded-lg flex-shrink-0"><Trash2 size={14} /></button>
               </div>
             );
@@ -129,7 +129,7 @@ export default function PoliticaDevolucionPage() {
         {/* Condiciones OK */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-3">
           <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-            <h3 className="text-sm font-semibold text-gray-800">Condiciones para devolucion</h3>
+            <h3 className="text-sm font-semibold text-gray-800">Condiciones para devolución</h3>
             <button type="button" onClick={() => conditionsOkArray.append('')}
               className="flex items-center gap-1 text-xs font-semibold px-2 py-1 bg-[#C8FF00] text-[#0f172a] rounded-lg hover:bg-[#b8ef00]"><Plus size={12} />Agregar</button>
           </div>
@@ -145,7 +145,7 @@ export default function PoliticaDevolucionPage() {
         {/* Pasos */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-3">
           <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-            <h3 className="text-sm font-semibold text-gray-800">Como solicitar una devolucion</h3>
+            <h3 className="text-sm font-semibold text-gray-800">Como solicitar una devolución</h3>
             <button type="button" onClick={() => stepsArray.append({ title: '', desc: '' })}
               className="flex items-center gap-1 text-xs font-semibold px-2 py-1 bg-[#C8FF00] text-[#0f172a] rounded-lg hover:bg-[#b8ef00]"><Plus size={12} />Agregar</button>
           </div>
@@ -153,7 +153,7 @@ export default function PoliticaDevolucionPage() {
             <div key={field.id} className="flex gap-2">
               <span className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 flex-shrink-0">{i + 1}</span>
               <input {...register('steps.' + i + '.title')} className={inputClass + ' flex-1'} placeholder="Titulo del paso" />
-              <input {...register('steps.' + i + '.desc')} className={inputClass + ' flex-1'} placeholder="Descripcion" />
+              <input {...register('steps.' + i + '.desc')} className={inputClass + ' flex-1'} placeholder="Descripción" />
               <button type="button" onClick={() => stepsArray.remove(i)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg"><Trash2 size={14} /></button>
             </div>
           ))}
@@ -177,9 +177,9 @@ export default function PoliticaDevolucionPage() {
 
         {/* Ayuda */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-          <h3 className="text-sm font-semibold text-gray-800 border-b border-gray-100 pb-3">Seccion de Ayuda</h3>
+          <h3 className="text-sm font-semibold text-gray-800 border-b border-gray-100 pb-3">Sección de Ayuda</h3>
           <div><label className={labelClass}>Titulo</label><input {...register('helpTitle')} className={inputClass} /></div>
-          <div><label className={labelClass}>Descripcion</label><input {...register('helpDescription')} className={inputClass} /></div>
+          <div><label className={labelClass}>Descripción</label><input {...register('helpDescription')} className={inputClass} /></div>
           <div><label className={labelClass}>Horario</label><input {...register('helpSchedule')} className={inputClass} /></div>
           <div className="grid grid-cols-2 gap-3">
             <div><label className={labelClass}>WhatsApp</label><input {...register('helpWhatsapp')} className={inputClass} /></div>

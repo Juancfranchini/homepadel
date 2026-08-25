@@ -45,7 +45,7 @@ export default function CatalogFilters({
 
       {categories.length > 0 && (
         <div className="mb-5 pb-5 border-b border-[#0D0F0F]">
-          <h3 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#8A8A85] mb-3">Categorias</h3>
+          <h3 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#8A8A85] mb-3">Categorías</h3>
           <ul className="space-y-2">
             {categories.map((cat) => (
               <li key={cat.id}>

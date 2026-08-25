@@ -75,7 +75,7 @@ export default function PedidosPage() {
 
   const filtered = statusFilter === 'ALL' ? orders : orders.filter((o) => o.status === statusFilter);
   const totalPages = Math.ceil(filtered.length / pageSize);
-  const paginated = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const páginated = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleStatusChange = async (orderId: string, newStatus: string, trackingNumber?: string, trackingUrl?: string) => {
     setUpdatingStatus(true);
@@ -125,18 +125,18 @@ export default function PedidosPage() {
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-100">
-              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Numero</th>
+              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Número</th>
               <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Cliente</th>
-              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Telefono</th>
+              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Teléfono</th>
               <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Items</th>
               <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
               <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
               <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden xl:table-cell">Fecha</th>
-              <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
+              <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciónes</th>
             </tr>
           </thead>
           <tbody>
-            {paginated.map((o) => {
+            {páginated.map((o) => {
               const statusInfo = STATUS_TABS.find((t) => t.value === o.status);
               return (
                 <tr key={o.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
@@ -186,7 +186,7 @@ export default function PedidosPage() {
                 <p className="text-sm text-gray-500">{selectedOrder.buyerPhone || '-'}</p>
               </div>
               <div className="bg-gray-50 rounded-lg p-4">
-                <p className="text-xs font-semibold text-gray-400 uppercase mb-1">Direccion</p>
+                <p className="text-xs font-semibold text-gray-400 uppercase mb-1">Dirección</p>
                 <p className="text-sm text-gray-700">{selectedOrder.address}</p>
               </div>
             </div>
@@ -227,14 +227,14 @@ export default function PedidosPage() {
             <div className="bg-[#0f172a] rounded-xl p-4 text-white space-y-2">
               <div className="flex justify-between text-sm"><span className="text-slate-400">Subtotal</span><span>{formatPrice(selectedOrder.subtotal)}</span></div>
               {selectedOrder.discount > 0 && <div className="flex justify-between text-sm text-green-400"><span>Descuento</span><span>-{formatPrice(selectedOrder.discount)}</span></div>}
-              <div className="flex justify-between text-sm"><span className="text-slate-400">Envio</span><span>{selectedOrder.shipping > 0 ? formatPrice(selectedOrder.shipping) : 'GRATIS'}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-slate-400">Envío</span><span>{selectedOrder.shipping > 0 ? formatPrice(selectedOrder.shipping) : 'GRATIS'}</span></div>
               <div className="flex justify-between font-bold text-base pt-2 border-t border-white/10"><span>Total</span><span className="text-[#C8FF00]">{formatPrice(selectedOrder.total)}</span></div>
             </div>
           </div>
         </Modal>
       )}
 
-      {paginated.length === 0 && (
+      {páginated.length === 0 && (
         <div className="bg-white rounded-xl border border-gray-200 py-20 text-center">
           <p className="text-gray-400 text-sm">No se encontraron pedidos</p>
         </div>

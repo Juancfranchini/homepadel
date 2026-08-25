@@ -144,7 +144,7 @@ export default function HeroPage() {
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Titulo</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Subtitulo</th>
                 <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
+                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciónes</th>
               </tr>
             </thead>
             <tbody>
@@ -213,7 +213,7 @@ export default function HeroPage() {
                 <input type="number" min={0} {...register('order')} className={inputClass + ' mt-1'} />
               </div>
               <div className="col-span-2">
-                <label className={labelClass}>Descripcion</label>
+                <label className={labelClass}>Descripción</label>
                 <textarea {...register('description')} rows={2} className={inputClass + ' mt-1'} placeholder="Texto descriptivo bajo el titulo..." />
               </div>
               <div>

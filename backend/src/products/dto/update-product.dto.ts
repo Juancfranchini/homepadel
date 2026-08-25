@@ -1,4 +1,4 @@
-// DTO para actualizar producto — todos los campos son opcionales
+// DTO para actualizar producto — todos los campos son opciónales
 // Extiende CreateProductDto con PartialType de Swagger para generar docs correctamente
 
 import { PartialType } from '@nestjs/swagger';

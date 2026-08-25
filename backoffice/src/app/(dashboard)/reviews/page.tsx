@@ -133,7 +133,7 @@ export default function ReviewsPage() {
   });
 
   const totalPages = Math.ceil(sorted.length / pageSize);
-  const paginated = sorted.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const páginated = sorted.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   if (loading) return <PageLoader />;
 
@@ -150,7 +150,7 @@ export default function ReviewsPage() {
         </div>
       </div>
 
-      {paginated.length === 0 ? (
+      {páginated.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 py-20 text-center"><p className="text-gray-400 text-sm">No se encontraron resenas</p></div>
       ) : (
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
@@ -161,10 +161,10 @@ export default function ReviewsPage() {
               <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Punt. {sortIcon('rating')}</th>
               <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Comentario</th>
               <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
+              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciónes</th>
             </tr></thead>
             <tbody>
-              {paginated.map((r) => (
+              {páginated.map((r) => (
                 <tr key={r.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3 text-sm text-gray-900">{r.product?.name || r.productId}</td>
                   <td className="px-4 py-3"><div className="flex items-center gap-2"><div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center"><User className="w-3.5 h-3.5 text-gray-400" /></div><span className="text-sm font-medium text-gray-900">{r.name}</span></div></td>
@@ -226,7 +226,7 @@ export default function ReviewsPage() {
               </div>
               <div className="flex justify-end gap-2 pt-2">
                 <button onClick={() => setShowInfoModal(false)} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">Cancelar</button>
-                <button onClick={async () => { await api.put("/site-sections/reviews_info", { data: infoData, active: true }); toast("Informacion guardada", "success"); setShowInfoModal(false); }} className="px-4 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg text-sm font-semibold hover:bg-[#b8ef00] transition-colors">Actualizar</button>
+                <button onClick={async () => { await api.put("/site-sections/reviews_info", { data: infoData, active: true }); toast("Información guardada", "success"); setShowInfoModal(false); }} className="px-4 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg text-sm font-semibold hover:bg-[#b8ef00] transition-colors">Actualizar</button>
               </div>
             </div>
           </div>

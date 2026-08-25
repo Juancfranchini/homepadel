@@ -1,5 +1,5 @@
 import LegalPage from '@/components/pages/LegalPage';
 
 export default function Page() {
-  return <LegalPage sectionKey="envios" fallbackTitle="Envios" />;
+  return <LegalPage sectionKey="envíos" fallbackTitle="Envíos" />;
 }

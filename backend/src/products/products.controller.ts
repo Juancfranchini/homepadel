@@ -1,5 +1,5 @@
 // CRUD completo de productos
-// GET    /api/products           — lista paginada con filtros (público)
+// GET    /api/products           — lista páginada con filtros (público)
 // GET    /api/products/featured  — productos destacados para el home (público)
 // GET    /api/products/:slug     — detalle por slug (público)
 // POST   /api/products           — crear producto (ADMIN)

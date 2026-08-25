@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { X, Tag, Layers } from 'lucide-react';
@@ -15,7 +15,7 @@ interface Props {
 }
 
 const menuItems = [
-  { id: 'category', label: 'Categoria', icon: Layers },
+  { id: 'category', label: 'Categoría', icon: Layers },
   { id: 'active', label: 'Estado', icon: Tag },
 ];
 
@@ -74,7 +74,7 @@ export default function FaqAdvancedSearchModal({ isOpen, onClose, onApply }: Pro
           </div>
 
           <div className="flex-1 p-6 overflow-y-auto">
-            <p className="text-sm text-gray-500 mb-4">Escoja una opcion para filtrar</p>
+            <p className="text-sm text-gray-500 mb-4">Escoja una opción para filtrar</p>
             <div className="w-full h-px bg-gray-200 mb-4" />
 
             {activeSection === 'category' && (

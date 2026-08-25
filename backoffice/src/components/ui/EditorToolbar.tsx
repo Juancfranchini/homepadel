@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useRef, useState } from 'react';
 import { type Editor } from '@tiptap/react';
@@ -67,7 +67,7 @@ export default function EditorToolbar({ editor, showLinkInput, setShowLinkInput,
       {sep}
       <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()} className={editor.isActive('bulletList') ? btnActive : btn} title="Lista"><List size={16} /></button>
       <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={editor.isActive('orderedList') ? btnActive : btn} title="Lista numerada"><ListOrdered size={16} /></button>
-      <button type="button" onClick={() => editor.chain().focus().toggleCodeBlock().run()} className={editor.isActive('codeBlock') ? btnActive : btn} title="Codigo"><Code size={16} /></button>
+      <button type="button" onClick={() => editor.chain().focus().toggleCodeBlock().run()} className={editor.isActive('codeBlock') ? btnActive : btn} title="Código"><Code size={16} /></button>
       <button type="button" onClick={() => editor.chain().focus().toggleBlockquote().run()} className={editor.isActive('blockquote') ? btnActive : btn} title="Cita"><Quote size={16} /></button>
       {sep}
       <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} className={btn} title="Subir imagen desde PC">{uploading ? '...' : <ImageIcon size={16} />}</button>

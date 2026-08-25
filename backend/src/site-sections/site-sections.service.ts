@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import * as fs from 'fs';
 import * as path from 'path';
 
-export type SectionKey = 'about' | 'instagram' | 'final_message' | 'branding' | 'settings' | 'trust_bottom' | 'politica_devolucion' | 'envios' | 'medios_pago' | 'terminos' | 'privacidad' | 'contacto' | 'talles' | 'reviews_info' | 'payment_methods' | 'email_settings';
+export type SectionKey = 'about' | 'instagram' | 'final_message' | 'branding' | 'settings' | 'trust_bottom' | 'politica_devolución' | 'envíos' | 'medios_pago' | 'terminos' | 'privacidad' | 'contacto' | 'talles' | 'reviews_info' | 'payment_methods' | 'email_settings';
 
 @Injectable()
 export class SiteSectionsService {
@@ -65,14 +65,14 @@ export class SiteSectionsService {
 
   private getDefault(key: SectionKey): Record<string, unknown> {
     const defaults: Record<SectionKey, Record<string, unknown>> = {
-    'politica_devolucion': { title: 'Politica de Devolucion', content: '' },
-    'envios': { title: 'Envios', sections: [{ title: 'Tiempos y costos', content: '' }] },
+    'politica_devolución': { title: 'Politica de Devolución', content: '' },
+    'envíos': { title: 'Envíos', sections: [{ title: 'Tiempos y costos', content: '' }] },
     'medios_pago': { title: 'Medios de Pago', content: '' },
     'terminos': { title: 'Terminos y Condiciones', content: '' },
     'privacidad': { title: 'Politica de Privacidad', content: '' },
-    'contacto': { chip: 'ESTAMOS PARA AYUDARTE', title: 'Contactanos', description: 'Tenes dudas sobre nuestros productos, envios o pagos? Nuestro equipo esta para ayudarte.', heroImage: '', mapUrl: '', newsletterTitle: 'ENTERATE DE LAS NOVEDADES', newsletterText: 'Suscribite y recibi ofertas exclusivas y lanzamientos.' },
+    'contacto': { chip: 'ESTAMOS PARA AYUDARTE', title: 'Contactanos', description: 'Tenes dudas sobre nuestros productos, envíos o pagos? Nuestro equipo esta para ayudarte.', heroImage: '', mapUrl: '', newsletterTitle: 'ENTERATE DE LAS NOVEDADES', newsletterText: 'Suscribite y recibi ofertas exclusivas y lanzamientos.' },
     'talles': { title: 'Guia de Talles', content: '' },
-    'payment_methods': { mercadopago: { active: true, publicKey: '', accessToken: '' }, transferencia: { active: true, cbu: '', alias: '', titular: '', banco: '' }, tarjeta: { active: false }, correo_argentino: { active: true, usuario: '', password: '', apiKey: '', agreement: '', remitente: { nombre: '', calle: '', numero: '', ciudad: '', codigoPostal: '', provincia: '', telefono: '' } }, oca: { active: false, usuario: '', password: '' }, andreani: { active: false, usuario: '', password: '' } },
+    'payment_methods': { mercadopago: { active: true, publicKey: '', accessToken: '' }, transferencia: { active: true, cbu: '', alias: '', titular: '', banco: '' }, tarjeta: { active: false }, correo_argentino: { active: true, usuario: '', password: '', apiKey: '', agreement: '', remitente: { nombre: '', calle: '', número: '', ciudad: '', códigoPostal: '', provincia: '', teléfono: '' } }, oca: { active: false, usuario: '', password: '' }, andreani: { active: false, usuario: '', password: '' } },
     'email_settings': {
       resendApiKey: '',
       fromEmail: 'Home Padel <noreply@homepadel.com.ar>',
@@ -113,8 +113,8 @@ export class SiteSectionsService {
       final_message: {
         title: 'Un mensaje para vos',
         text: 'Gracias por elegir Home Padel.',
-        buttonText: 'Ver catalogo',
-        buttonUrl: '/catalogo',
+        buttonText: 'Ver catálogo',
+        buttonUrl: '/catálogo',
       },
     };
     return defaults[key];
