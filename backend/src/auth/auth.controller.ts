@@ -1,9 +1,4 @@
-// Endpoints de autenticación: registro, login, perfil
-// POST /api/auth/register  — crear cuenta nueva
-// POST /api/auth/login     — iniciar sesión, retorna JWT
-// GET  /api/auth/me        — obtener datos del usuario autenticado
-
-import { Controller, Post, Get, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, BadRequestException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -23,16 +18,45 @@ export class AuthController {
   }
 
   @Post('login')
-  @ApiOperation({ summary: 'Iniciar sesión' })
+  @ApiOperation({ summary: 'Iniciar sesion' })
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
+  }
+
+  @Post('google')
+  @ApiOperation({ summary: 'Iniciar sesion con Google' })
+  googleLogin(@Body() body: { credential: string }) {
+    return this.authService.googleLogin(body.credential);
+  }
+
+  @Post('forgot-password')
+  @ApiOperation({ summary: 'Solicitar recuperacion de contrasena' })
+  forgotPassword(@Body() body: { email: string }) {
+    return this.authService.forgotPassword(body.email);
+  }
+
+  @Post('reset-password')
+  @ApiOperation({ summary: 'Resetear contrasena con token' })
+  resetPassword(@Body() body: { token: string; newPassword: string }) {
+    return this.authService.resetPassword(body.token, body.newPassword);
+  }
+
+  @Post('change-password')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Cambiar contrasena' })
+  changePassword(
+    @CurrentUser() user: any,
+    @Body() body: { currentPassword: string; newPassword: string },
+  ) {
+    return this.authService.changePassword(user.id, body.currentPassword, body.newPassword);
   }
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Obtener perfil del usuario autenticado' })
+  @ApiOperation({ summary: 'Obtener usuario autenticado' })
   me(@CurrentUser() user: any) {
-    return user;
+    return this.authService.me(user.id);
   }
 }

@@ -79,11 +79,11 @@ model Product {
   compareData     Json?
   specs           Json?
   videoUrl          String?
-  showVideo         Boolean @default(true)
-  showPerformance   Boolean @default(true)
-  showHighlights    Boolean @default(true)
-  showCompare       Boolean @default(true)
-  showRelated       Boolean @default(true)
+  showVideo         Boolean @default(false)
+  showPerformance   Boolean @default(false)
+  showHighlights    Boolean @default(false)
+  showCompare       Boolean @default(false)
+  showRelated       Boolean @default(false)
   highlights        Json?
   highlightsTitle   String?
   highlightsDescription String?
@@ -113,6 +113,19 @@ model Order {
   updatedAt  DateTime    @updatedAt
   user       User?       @relation(fields: [userId], references: [id])
   items      OrderItem[]
+  shipments  Shipment[]
+}
+
+model Shipment {
+  id             String   @id @default(cuid())
+  orderId        String   @unique
+  trackingNumber String?
+  carrier        String   @default("CORREO_ARGENTINO")
+  status         String   @default("PENDING")
+  labelUrl       String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  order          Order    @relation(fields: [orderId], references: [id])
 }
 
 model OrderItem {

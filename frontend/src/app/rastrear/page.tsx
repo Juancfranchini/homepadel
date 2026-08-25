@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
@@ -74,20 +74,20 @@ function RastrearContent() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8A8A85]" />
             <input type="text" value={orderNumber} onChange={(e) => setOrderNumber(e.target.value.toUpperCase())}
               placeholder="Numero de orden: HP-1234567890"
-              className="w-full pl-12 pr-4 py-4 bg-[#0F1111] border border-[#B7D31A]/20 rounded-xl text-lg font-bold text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A] focus:shadow-[0_0_20px_rgba(183,211,26,0.1)] transition-all uppercase tracking-wider text-center" />
+              className="w-full pl-12 pr-4 py-4 bg-[#0F1111] border border-[#B7D31A]/50 rounded-xl text-lg font-bold text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A] focus:shadow-[0_0_20px_rgba(183,211,26,0.1)] transition-all uppercase tracking-wider text-center" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8A8A85]" />
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                 placeholder="Email de la compra"
-                className="w-full pl-10 pr-4 py-3 bg-[#0F1111] border border-[#1A1F21] rounded-xl text-sm text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A]/60 transition-colors" />
+                className="w-full pl-10 pr-4 py-3 bg-[#0F1111] border border-[#B7D31A]/40 rounded-xl text-sm text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A]/60 transition-colors" />
             </div>
             <div className="relative">
               <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8A8A85]" />
               <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)}
                 placeholder="Telefono"
-                className="w-full pl-10 pr-4 py-3 bg-[#0F1111] border border-[#1A1F21] rounded-xl text-sm text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A]/60 transition-colors" />
+                className="w-full pl-10 pr-4 py-3 bg-[#0F1111] border border-[#B7D31A]/40 rounded-xl text-sm text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A]/60 transition-colors" />
             </div>
           </div>
           <button type="submit" disabled={loading}
@@ -117,7 +117,9 @@ function RastrearContent() {
                 <div className="text-right"><p className="text-xs text-[#8A8A85] uppercase tracking-wide">Fecha</p><p className="text-sm font-semibold text-[#F7F6F7]">{new Date(order.createdAt).toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' })}</p></div>
               </div>
               <div className="flex items-center justify-between pt-4 border-t border-[#0D0F0F]">
-                <div><p className="text-xs text-[#8A8A85] uppercase tracking-wide">Productos</p><p className="text-sm font-semibold text-[#F7F6F7]">{order.items.length} {order.items.length === 1 ? 'item' : 'items'}</p></div>
+                <div><p className="text-xs text-[#8A8A85] uppercase tracking-wide">Productos</p><p className="text-sm font-semibold text-[#F7F6F7]">{order.items.map((item, i) => (
+                  <span key={i} className="text-sm font-semibold text-[#F7F6F7]">{item.product.name} <span className="text-[#8A8A85] font-normal">x {item.quantity}</span>{i < order.items.length - 1 ? ", " : ""}</span>
+                ))}</p></div>
                 <div className="text-right"><p className="text-xs text-[#8A8A85] uppercase tracking-wide">Total</p><p className="text-lg font-black text-[#F7F6F7]">{formatPrice(order.total)}</p></div>
               </div>
               {(order.buyerEmail || order.buyerPhone) && (
@@ -159,19 +161,10 @@ function RastrearContent() {
               </div>
             </div>
 
-            <div className="bg-[#0F1111] rounded-2xl border border-[#B7D31A]/20 p-6">
-              <h3 className="text-sm font-semibold text-[#F7F6F7] mb-4 flex items-center gap-2"><ShoppingBag size={16} className="text-[#B7D31A]" />Productos en este pedido</h3>
-              <div className="space-y-3">
-                {order.items.map((item, i) => (
-                  <div key={i} className="flex items-center justify-between py-2 border-b border-[#0D0F0F] last:border-0">
-                    <div className="flex items-center gap-3"><span className="w-8 h-8 rounded-lg bg-[#1A1F21] flex items-center justify-center text-xs font-bold text-[#B7D31A]">{item.quantity}x</span><span className="text-sm text-[#C7C7C0]">{item.product.name}</span></div>
-                  </div>
-                ))}
-              </div>
-            </div>
+
 
             <div className="flex flex-col sm:flex-row gap-3">
-              <Link href="/" className="flex-1 py-3 border border-[#0D0F0F] rounded-xl text-sm font-semibold text-[#C7C7C0] text-center hover:bg-[#0C0C0C] transition-colors">Volver al inicio</Link>
+              <Link href="/" className="flex-1 py-3 bg-[#0A2D3D] text-[#F7F6F7] rounded-xl font-semibold text-sm uppercase tracking-wider text-center hover:bg-[#0D3D52] transition-colors">Volver al inicio</Link>
               <Link href="/contacto" className="flex-1 py-3 border border-[#B7D31A]/30 rounded-xl text-sm font-semibold text-[#B7D31A] text-center hover:bg-[#B7D31A]/5 transition-colors">Necesito ayuda</Link>
             </div>
           </div>

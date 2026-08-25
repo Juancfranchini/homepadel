@@ -1,4 +1,4 @@
-﻿import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { InstagramService } from './instagram.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -13,7 +13,24 @@ export class InstagramController {
 
   @Get('posts')
   async getPosts(@Query('limit') limit: string) {
-    return this.instagramService.getRecentPosts(parseInt(limit) || 6);
+    const posts = await this.instagramService.getRecentPosts(parseInt(limit) || 6);
+    if (posts.length > 0) return posts;
+
+    // Fallback: devolver thumbnails de URLs manuales
+    const config = await this.instagramService.getConfig();
+    if (config?.manualUrls && Array.isArray(config.manualUrls)) {
+      return config.manualUrls.slice(0, parseInt(limit) || 6).map((item: any) => {
+        const url = typeof item === 'string' ? item : item.url;
+        const thumbnail = typeof item === 'object' ? item.thumbnail : null;
+        return {
+          id: url,
+          url: url,
+          thumbnail_url: thumbnail || this.instagramService.getThumbnailUrl(url) || '',
+          author_name: config.username || '@home.padel',
+        };
+      });
+    }
+    return [];
   }
 
   @Post('test-connection')

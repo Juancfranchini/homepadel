@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { PrismaService } from '../prisma/prisma.service';
@@ -39,7 +39,8 @@ export class InstagramService {
         const posts = await Promise.all(
           config.manualUrls.slice(0, limit).map((url: string) => this.fetchOEmbed(url, accessToken)),
         );
-        return posts.filter((p): p is InstagramPost => p !== null);
+        const validPosts = posts.filter((p): p is InstagramPost => p !== null);
+        if (validPosts.length > 0) return validPosts;
       }
       return [];
     } catch {
@@ -64,6 +65,14 @@ export class InstagramService {
     } catch {
       return null;
     }
+  }
+
+  getThumbnailUrl(postUrl: string): string | null {
+    const match = postUrl.match(/instagram\.com\/(reel|p)\/([a-zA-Z0-9_-]+)/);
+    if (!match) return null;
+    const type = match[1];
+    const code = match[2];
+    return `https://www.instagram.com/${type}/${code}/media/?size=m`;
   }
 
   async testConnection(appId: string, appSecret: string, postUrl: string): Promise<boolean> {

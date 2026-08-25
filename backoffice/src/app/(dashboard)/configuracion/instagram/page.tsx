@@ -1,10 +1,10 @@
-﻿'use client';
+'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Save, ArrowLeft, ExternalLink, Plus, Trash2, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { Save, ArrowLeft, ExternalLink, Plus, Trash2, CheckCircle, XCircle, Loader2, Upload } from 'lucide-react';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
@@ -18,7 +18,7 @@ const schema = z.object({
   appId: z.string().optional().or(z.literal('')),
   appSecret: z.string().optional().or(z.literal('')),
   active: z.boolean().default(true),
-  manualUrls: z.array(z.object({ url: z.string() })).optional(),
+  manualUrls: z.array(z.object({ url: z.string(), thumbnail: z.string().optional() })).optional(),
 });
 type FormData = z.infer<typeof schema>;
 
@@ -31,8 +31,10 @@ export default function InstagramConfigPage() {
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<boolean | null>(null);
+  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
-  const { register, handleSubmit, reset, watch, control, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, reset, watch, control, setValue, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       title: 'No te pierdas ninguna publicacion',
@@ -42,7 +44,7 @@ export default function InstagramConfigPage() {
       appId: '',
       appSecret: '',
       active: true,
-      manualUrls: [{ url: '' }, { url: '' }, { url: '' }, { url: '' }, { url: '' }, { url: '' }],
+      manualUrls: [{ url: '', thumbnail: '' }, { url: '', thumbnail: '' }, { url: '', thumbnail: '' }, { url: '', thumbnail: '' }, { url: '', thumbnail: '' }, { url: '', thumbnail: '' }],
     },
   });
 
@@ -67,8 +69,8 @@ export default function InstagramConfigPage() {
           appSecret: data.appSecret ?? '',
           active: data.active !== false,
           manualUrls: data.manualUrls && data.manualUrls.length > 0
-            ? data.manualUrls.map((u: string) => ({ url: u }))
-            : [{ url: '' }, { url: '' }, { url: '' }, { url: '' }, { url: '' }, { url: '' }],
+            ? data.manualUrls.map((u: any) => ({ url: typeof u === 'string' ? u : u.url, thumbnail: typeof u === 'object' ? u.thumbnail : '' }))
+            : [{ url: '', thumbnail: '' }],
         });
       }
     } catch {} finally { setLoading(false); }
@@ -76,12 +78,35 @@ export default function InstagramConfigPage() {
 
   useEffect(() => { load(); }, [load]);
 
+  const handleUploadThumbnail = async (index: number) => {
+    const file = fileRef.current?.files?.[0];
+    if (!file) return;
+    setUploadingIndex(index);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await api.post('/uploads/image', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      const url = res.data?.url || res.data?.imageUrl || '';
+      setValue(('manualUrls.' + index + '.thumbnail') as any, url, { shouldDirty: true });
+      toast('Imagen subida correctamente', 'success');
+    } catch {
+      toast('Error al subir la imagen', 'error');
+    } finally {
+      setUploadingIndex(null);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
+
   const onSubmit = async (data: FormData) => {
     setSaving(true);
     try {
       const payload = {
         ...data,
-        manualUrls: data.manualUrls?.map((u) => u.url).filter(Boolean) || [],
+        manualUrls: (data.manualUrls || [])
+          .filter((u: any) => u.url && u.url.trim())
+          .map((u: any) => ({ url: u.url.trim(), thumbnail: u.thumbnail || '' })),
       };
       await api.put('/site-sections/instagram', { data: payload, active: data.active });
       toast('Configuracion de Instagram guardada', 'success');
@@ -103,7 +128,7 @@ export default function InstagramConfigPage() {
         postUrl: testUrl,
       });
       setTestResult(res.data?.success === true);
-      toast(res.data?.success ? 'Conexion exitosa' : 'Error de conexion', res.data?.success ? 'success' : 'error');
+      toast(res.data?.success ? 'Conexion exitosa' : 'Error de conexion. Verifica oEmbed Read en Meta Developers.', res.data?.success ? 'success' : 'error');
     } catch {
       setTestResult(false);
       toast('Error al probar conexion', 'error');
@@ -143,22 +168,18 @@ export default function InstagramConfigPage() {
             <div>
               <label className={labelClass}>Titulo *</label>
               <input {...register('title')} className={inputClass} placeholder="No te pierdas ninguna publicacion" />
-              {errors.title && <p className="text-xs text-red-600 mt-1">{errors.title.message}</p>}
             </div>
             <div>
               <label className={labelClass}>Usuario *</label>
               <input {...register('username')} className={inputClass} placeholder="@home.padel" />
-              {errors.username && <p className="text-xs text-red-600 mt-1">{errors.username.message}</p>}
             </div>
             <div>
               <label className={labelClass}>Texto del boton *</label>
               <input {...register('buttonText')} className={inputClass} placeholder="Seguinos en Instagram" />
-              {errors.buttonText && <p className="text-xs text-red-600 mt-1">{errors.buttonText.message}</p>}
             </div>
             <div>
               <label className={labelClass}>URL del perfil *</label>
               <input {...register('buttonUrl')} className={inputClass} placeholder="https://instagram.com/home.padel" />
-              {errors.buttonUrl && <p className="text-xs text-red-600 mt-1">{errors.buttonUrl.message}</p>}
             </div>
           </div>
         </div>
@@ -172,7 +193,7 @@ export default function InstagramConfigPage() {
               {testing ? 'Probando...' : 'Probar conexion'}
             </button>
           </div>
-          <p className="text-xs text-gray-400">Necesitas crear una App en Meta for Developers y obtener las credenciales. La app debe tener la funcion oEmbed Read activada.</p>
+          <p className="text-xs text-gray-400">Necesitas crear una App en Meta for Developers y activar oEmbed Read. Si la API no funciona, las imagenes subidas manualmente se usaran en el frontend.</p>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>Meta App ID</label>
@@ -183,25 +204,38 @@ export default function InstagramConfigPage() {
               <input {...register('appSecret')} type="password" className={inputClass} placeholder="abc123..." />
             </div>
           </div>
+          {testResult === false && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-700">
+              La API de Meta no esta funcionando. Las miniaturas subidas manualmente se usaran en el frontend. Si no hay miniatura, se mostrara un card degradado.
+            </div>
+          )}
         </div>
 
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
           <div className="flex items-center justify-between border-b border-gray-100 pb-3">
             <h2 className="text-sm font-semibold text-gray-800">URLs de posts ({fields.length})</h2>
-            <button type="button" onClick={() => append({ url: '' })}
+            <button type="button" onClick={() => append({ url: '', thumbnail: '' })}
               className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#C8FF00] text-[#0f172a] hover:bg-[#b8ef00] transition-colors">
               <Plus className="w-3 h-3" />Agregar
             </button>
           </div>
-          <p className="text-xs text-gray-400">Pega las URLs de las publicaciones de Instagram que queres mostrar (maximo 6 visibles). Ej: https://www.instagram.com/p/abc123/</p>
-          <div className="space-y-2">
+          <p className="text-xs text-gray-400">Pega las URLs de Instagram. Si la API no funciona, subi una imagen miniatura para que se muestre en el frontend. Sin imagen, se mostrara un card degradado.</p>
+          <input type="file" ref={fileRef} className="hidden" accept="image/*" onChange={() => { if (uploadingIndex !== null) handleUploadThumbnail(uploadingIndex); }} />
+          <div className="space-y-3">
             {fields.map((field, index) => (
-              <div key={field.id} className="flex gap-2">
-                <input
-                  {...register(('manualUrls.' + index + '.url') as any)}
-                  className={inputClass}
-                  placeholder={'Post #' + (index + 1) + ' - https://www.instagram.com/p/...'}
-                />
+              <div key={field.id} className="flex gap-2 items-start">
+                <div className="flex-1 space-y-2">
+                  <input
+                    {...register(('manualUrls.' + index + '.url') as any)}
+                    className={inputClass}
+                    placeholder={'Post #' + (index + 1) + ' - https://www.instagram.com/p/...'}
+                  />
+                  
+                </div>
+                <button type="button" onClick={() => { setUploadingIndex(index); fileRef.current?.click(); }} disabled={uploadingIndex !== null}
+                  className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium border border-[#C8FF00]/50 text-gray-600 hover:bg-gray-50 disabled:opacity-50 whitespace-nowrap">
+                  <Upload className="w-3 h-3" />{uploadingIndex === index ? 'Subiendo...' : 'Subir imagen'}
+                </button>
                 {fields.length > 1 && (
                   <button type="button" onClick={() => remove(index)}
                     className="p-2 rounded-lg text-red-400 hover:bg-red-50 transition-colors">
