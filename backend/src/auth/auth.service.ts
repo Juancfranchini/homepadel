@@ -1,24 +1,22 @@
-// Lógica de autenticación
-// register: hashea password con bcrypt, guarda usuario, retorna JWT
-// login: verifica credenciales, retorna usuario (sin password) + JWT
-
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private emailService: EmailService,
   ) {}
 
   async register(dto: RegisterDto) {
     const exists = await this.prisma.user.findUnique({ where: { email: dto.email } });
-    if (exists) throw new ConflictException('El email ya está registrado');
+    if (exists) throw new ConflictException('El email ya esta registrado');
 
     const hashed = await bcrypt.hash(dto.password, 10);
     const user = await this.prisma.user.create({
@@ -29,14 +27,90 @@ export class AuthService {
     return { user, token: this.jwtService.sign({ sub: user.id, role: user.role }) };
   }
 
-  async login(dto: LoginDto) {
-    const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
-    if (!user) throw new UnauthorizedException('Credenciales inválidas');
+  async googleLogin(credential: string) {
+    const payload = JSON.parse(Buffer.from(credential.split('.')[1], 'base64').toString());
+    const { email, name, sub } = payload;
 
-    const valid = await bcrypt.compare(dto.password, user.password);
-    if (!valid) throw new UnauthorizedException('Credenciales inválidas');
+    let user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      const randomPassword = 'google_' + Math.random().toString(36).slice(2) + Date.now();
+      const hashed = await bcrypt.hash(randomPassword, 10);
+      user = await this.prisma.user.create({
+        data: { email, name, password: hashed, role: 'CUSTOMER' },
+      });
+    }
 
     const { password: _, ...userData } = user;
     return { user: userData, token: this.jwtService.sign({ sub: user.id, role: user.role }) };
+  }
+
+  async login(dto: LoginDto) {
+    const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    if (!user) throw new UnauthorizedException('Credenciales invalidas');
+
+    const valid = await bcrypt.compare(dto.password, user.password);
+    if (!valid) throw new UnauthorizedException('Credenciales invalidas');
+
+    const { password: _, ...userData } = user;
+    return { user: userData, token: this.jwtService.sign({ sub: user.id, role: user.role }) };
+  }
+
+  async forgotPassword(email: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) throw new NotFoundException('No existe cuenta con ese email');
+
+    const resetToken = this.jwtService.sign({ sub: user.id, type: 'reset' }, { expiresIn: '1h' });
+
+    try {
+      const resetUrl = (process.env.FRONTEND_URL || 'http://localhost:3000') + '/reset-password?token=' + resetToken;
+      await this.emailService.sendEmail(
+        email,
+        'Recuperar contrasena - Home Padel',
+        '<h1>Recuperar contrasena</h1><p>Hace click en el siguiente link:</p><p><a href="' + resetUrl + '">Resetear contrasena</a></p>',
+      );
+    } catch (e) {
+      console.error('No se pudo enviar email de reset:', e);
+    }
+
+    return { success: true, message: 'Se envio un email con instrucciones para resetear la contrasena' };
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    try {
+      const payload = this.jwtService.verify(token);
+      if (payload.type !== 'reset') throw new UnauthorizedException('Token invalido');
+
+      const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
+      if (!user) throw new NotFoundException('Usuario no encontrado');
+
+      const hashed = await bcrypt.hash(newPassword, 10);
+      await this.prisma.user.update({ where: { id: user.id }, data: { password: hashed } });
+
+      return { success: true, message: 'Contrasena actualizada correctamente' };
+    } catch (e) {
+      throw new UnauthorizedException('Token invalido o expirado');
+    }
+  }
+
+  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+
+    const valid = await bcrypt.compare(currentPassword, user.password);
+    if (!valid) throw new UnauthorizedException('Contrasena actual incorrecta');
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await this.prisma.user.update({ where: { id: userId }, data: { password: hashed } });
+
+    return { success: true, message: 'Contrasena actualizada correctamente' };
+  }
+
+  async me(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, name: true, role: true, phone: true, address: true },
+    });
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+    return user;
   }
 }

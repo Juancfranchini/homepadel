@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { User, ShoppingCart, Menu, X } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
+import { useAuthStore } from '@/store/authStore';
+import api from '@/lib/api';
 import { usePathname } from 'next/navigation';
 import BrandLogo from '@/components/ui/BrandLogo';
 import { useBranding } from '@/hooks/useBranding';
@@ -20,6 +22,7 @@ const NAV_LINKS = [
 
 export default function Header() {
   const branding = useBranding();
+  const { user, setAuth, isAuthenticated } = useAuthStore();
   const [isMobile, setIsMobile] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
 
@@ -35,6 +38,47 @@ export default function Header() {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !user) {
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      script.onload = () => {
+        if ((window as any).google) {
+          (window as any).google.accounts.id.initialize({
+            client_id: '295795847498-dfja9kjp9klivohbrgacnl6iueo1jm4h.apps.googleusercontent.com',
+            callback: handleGoogleResponse,
+          });
+          const btnRef = document.getElementById('google-login-btn');
+          if (btnRef) {
+            (window as any).google.accounts.id.renderButton(btnRef, {
+              theme: 'outline',
+              size: 'medium',
+              text: 'signin_with',
+              shape: 'rectangular',
+              width: 200,
+            });
+          }
+        }
+      };
+      document.body.appendChild(script);
+    }
+  }, [user]);
+
+  const handleGoogleResponse = async (response: any) => {
+    try {
+      const payload = JSON.parse(atob(response.credential.split('.')[1]));
+      const { email, name, sub } = payload;
+      const res = await api.post('/auth/google', { email, name, googleId: sub });
+      if (res.data?.user && res.data?.token) {
+        setAuth(res.data.user, res.data.token);
+      }
+    } catch (error) {
+      console.error('Error login Google:', error);
+    }
+  };
 
   return (
     <>
@@ -59,9 +103,16 @@ export default function Header() {
           </nav>
 
           <div className="flex items-center gap-4 flex-shrink-0">
-            <Link href="/cuenta" className="hidden sm:block text-[#C7C7C0] hover:text-[#F7F6F7] transition-colors" aria-label="Mi cuenta">
-              <User size={20} />
-            </Link>
+            {user ? (
+              <Link href="/cuenta" className="hidden sm:flex items-center gap-2 text-[#C7C7C0] hover:text-[#F7F6F7] border border-[#B7D31A]/30 rounded-full px-3 py-1.5 transition-colors" aria-label="Mi cuenta">
+                <User size={18} />
+                <span className="text-xs font-semibold truncate max-w-[120px]">{user.name}</span>
+              </Link>
+            ) : (
+              <Link href="/cuenta" className="hidden sm:flex items-center gap-2 bg-[#B7D31A] text-[#050606] rounded-full px-4 py-1.5 font-bold text-xs uppercase tracking-wide transition-colors hover:bg-[#CAE52E]">
+                Login
+              </Link>
+            )}
             <button onClick={() => setCartOpen(true)} className="relative text-[#C7C7C0] hover:text-[#F7F6F7] transition-colors" aria-label="Carrito">
               <ShoppingCart size={20} />
               {mounted && totalItems() > 0 && (
