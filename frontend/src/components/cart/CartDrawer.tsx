@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect } from 'react';
 import Link from 'next/link';
@@ -116,7 +116,7 @@ export default function CartDrawer({ isOpen, onClose }: Props) {
               <span className="text-sm text-[#C7C7C0]">Subtotal</span>
               <span className="text-lg font-bold text-[#F7F6F7]">{formatPrice(subtotal)}</span>
             </div>
-            <p className="text-[10px] text-[#8A8A85] text-right">Envio calculado en el checkout</p>
+            <p className="text-[10px] text-[#8A8A85] text-right">Envío calculado en el checkout</p>
 
             <div className="grid grid-cols-2 gap-2">
               <Link

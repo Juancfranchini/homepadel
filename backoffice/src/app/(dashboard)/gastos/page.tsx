@@ -21,9 +21,9 @@ interface Expense {
 const CATEGORIES = ['Marketing', 'Logistica', 'Administracion', 'Impuestos', 'Servicios', 'Otros'];
 
 const schema = z.object({
-  description: z.string().min(2, 'Descripcion requerida'),
+  description: z.string().min(2, 'Descripción requerida'),
   amount: z.coerce.number().min(1, 'Monto requerido'),
-  category: z.string().min(1, 'Categoria requerida'),
+  category: z.string().min(1, 'Categoría requerida'),
   date: z.string().min(1, 'Fecha requerida'),
 });
 type FormData = z.infer<typeof schema>;
@@ -61,7 +61,7 @@ export default function GastosPage() {
 
   const total = expenses.reduce((acc, e) => acc + e.amount, 0);
   const totalPages = Math.ceil(expenses.length / pageSize);
-  const paginated = expenses.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const páginated = expenses.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const openCreate = () => { setEditItem(null); reset({ description: '', amount: 0, category: 'Marketing', date: new Date().toISOString().slice(0, 10) }); setModalOpen(true); };
   const openEdit = (e: Expense) => { setEditItem(e); reset({ description: e.description, amount: e.amount, category: e.category, date: e.date.slice(0, 10) }); setModalOpen(true); };
@@ -102,14 +102,14 @@ export default function GastosPage() {
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
           <table className="w-full">
             <thead><tr className="border-b border-gray-100">
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Descripcion</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Categoria</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Descripción</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Categoría</th>
               <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Monto</th>
               <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Fecha</th>
-              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
+              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciónes</th>
             </tr></thead>
             <tbody>
-              {paginated.map((e) => (
+              {páginated.map((e) => (
                 <tr key={e.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3"><p className="text-gray-900 font-medium text-sm">{e.description}</p></td>
                   <td className="px-4 py-3 hidden md:table-cell"><span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{e.category}</span></td>
@@ -140,8 +140,8 @@ export default function GastosPage() {
         <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editItem ? 'Editar gasto' : 'Nuevo gasto'} size="sm">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Descripcion *</label>
-              <input {...register('description')} className={inputClass} placeholder="Ej: Envio de mercaderia" />
+              <label className="block text-sm font-medium text-gray-700 mb-1">Descripción *</label>
+              <input {...register('description')} className={inputClass} placeholder="Ej: Envío de mercaderia" />
               {errors.description && <p className="text-xs text-red-600 mt-1">{errors.description.message}</p>}
             </div>
             <div>
@@ -150,7 +150,7 @@ export default function GastosPage() {
               {errors.amount && <p className="text-xs text-red-600 mt-1">{errors.amount.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
               <select {...register('category')} className={inputClass}>
                 {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>

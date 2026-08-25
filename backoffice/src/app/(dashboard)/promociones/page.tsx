@@ -37,7 +37,7 @@ type FormData = z.infer<typeof schema>;
 
 const inputClass = 'w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00]';
 
-export default function PromocionesPage() {
+export default function PromociónesPage() {
   const { toast } = useToast();
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,8 +67,8 @@ export default function PromocionesPage() {
     setSaving(true);
     try {
       const payload = { ...data, startDate: new Date(data.startDate).toISOString(), endDate: new Date(data.endDate).toISOString() };
-      if (editItem) { await api.patch('/promotions/' + editItem.id, payload); toast('Promocion actualizada', 'success'); }
-      else { await api.post('/promotions', payload); toast('Promocion creada', 'success'); }
+      if (editItem) { await api.patch('/promotions/' + editItem.id, payload); toast('Promoción actualizada', 'success'); }
+      else { await api.post('/promotions', payload); toast('Promoción creada', 'success'); }
       setModalOpen(false); load();
     } catch { toast('Error', 'error'); } finally { setSaving(false); }
   };
@@ -91,16 +91,16 @@ export default function PromocionesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Promociones</h1>
-          <p className="text-gray-500 text-sm mt-0.5">{promotions.length} promociones</p>
+          <h1 className="text-2xl font-bold text-gray-900">Promociónes</h1>
+          <p className="text-gray-500 text-sm mt-0.5">{promotions.length} promociónes</p>
         </div>
         <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] transition-colors">
-          <Plus className="w-4 h-4" />Nueva promocion
+          <Plus className="w-4 h-4" />Nueva promoción
         </button>
       </div>
 
       {promotions.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 py-20 text-center"><p className="text-gray-400 text-sm">No hay promociones</p></div>
+        <div className="bg-white rounded-xl border border-gray-200 py-20 text-center"><p className="text-gray-400 text-sm">No hay promociónes</p></div>
       ) : (
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
           <table className="w-full">
@@ -109,7 +109,7 @@ export default function PromocionesPage() {
               <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Descuento</th>
               <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Vigencia</th>
               <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
+              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciónes</th>
             </tr></thead>
             <tbody>
               {promotions.map((p) => (
@@ -140,7 +140,7 @@ export default function PromocionesPage() {
       )}
 
       {modalOpen && (
-        <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editItem ? 'Editar promocion' : 'Nueva promocion'} size="md">
+        <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editItem ? 'Editar promoción' : 'Nueva promoción'} size="md">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Titulo *</label>
@@ -148,7 +148,7 @@ export default function PromocionesPage() {
               {errors.title && <p className="text-xs text-red-600 mt-1">{errors.title.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Descripcion</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
               <textarea {...register('description')} rows={2} className={inputClass} />
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -177,7 +177,7 @@ export default function PromocionesPage() {
             </div>
             <div className="flex items-center gap-3">
               <input type="checkbox" {...register('active')} className="w-4 h-4 rounded accent-[#C8FF00]" />
-              <label className="text-sm text-gray-700">Promocion activa</label>
+              <label className="text-sm text-gray-700">Promoción activa</label>
             </div>
             <div className="flex justify-end gap-3 pt-2 border-t border-gray-100">
               <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancelar</button>
@@ -187,7 +187,7 @@ export default function PromocionesPage() {
         </Modal>
       )}
 
-      <ConfirmDialog isOpen={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} title="Eliminar promocion" description={'Eliminar "' + (deleteTarget?.title || '') + '"?'} isLoading={deleting} />
+      <ConfirmDialog isOpen={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} title="Eliminar promoción" description={'Eliminar "' + (deleteTarget?.title || '') + '"?'} isLoading={deleting} />
     </div>
   );
 }

@@ -62,7 +62,7 @@ export default function ProductPrice({
           </p>
           {estimatedDays && (
             <p className="text-[#C7C7C0] text-sm">
-              Tiempo estimado: <span className="font-semibold text-[#F7F6F7]">{estimatedDays} dias</span>
+              Tiempo estimado: <span className="font-semibold text-[#F7F6F7]">{estimatedDays} días</span>
             </p>
           )}
           {depositAmount > 0 ? (

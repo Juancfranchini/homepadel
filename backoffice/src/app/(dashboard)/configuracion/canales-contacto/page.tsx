@@ -136,10 +136,10 @@ export default function CanalesContactoPage() {
                 <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Orden</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Logo</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Titulo</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Descripcion</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Descripción</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">URL</th>
                 <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
+                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciónes</th>
               </tr>
             </thead>
             <tbody>
@@ -193,8 +193,8 @@ export default function CanalesContactoPage() {
             </div>
           </div>
           <div>
-            <label className={labelClass}>Descripcion</label>
-            <input {...register('description')} className={inputClass} placeholder="Breve descripcion" />
+            <label className={labelClass}>Descripción</label>
+            <input {...register('description')} className={inputClass} placeholder="Breve descripción" />
           </div>
           <div>
             <label className={labelClass}>URL *</label>

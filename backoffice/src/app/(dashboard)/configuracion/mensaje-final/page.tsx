@@ -41,9 +41,9 @@ export default function CtaNewsletterConfigPage() {
     defaultValues: {
       title: 'Un mensaje para vos',
       text: 'Encontra todo lo que necesitas en un solo lugar. Las mejores marcas, los mejores precios.',
-      buttonText: 'Ver catalogo',
+      buttonText: 'Ver catálogo',
       buttonUrl: '/catalogo',
-      footerText: 'Productos originales. Envios a todo el pais.',
+      footerText: 'Productos originales. Envíos a todo el pais.',
       secondaryButtonText: '',
       secondaryButtonUrl: '',
       newsletterTitle: 'Enterate de las novedades',
@@ -64,9 +64,9 @@ export default function CtaNewsletterConfigPage() {
         reset({
           title: data.title ?? 'Un mensaje para vos',
           text: data.text ?? '',
-          buttonText: data.buttonText ?? 'Ver catalogo',
+          buttonText: data.buttonText ?? 'Ver catálogo',
           buttonUrl: data.buttonUrl ?? '/catalogo',
-          footerText: data.footerText ?? 'Productos originales. Envios a todo el pais.',
+          footerText: data.footerText ?? 'Productos originales. Envíos a todo el pais.',
           secondaryButtonText: data.secondaryButtonText ?? '',
           secondaryButtonUrl: data.secondaryButtonUrl ?? '',
           newsletterTitle: data.newsletterTitle ?? 'Enterate de las novedades',
@@ -86,7 +86,7 @@ export default function CtaNewsletterConfigPage() {
     setSaving(true);
     try {
       await api.put('/site-sections/final_message', { data, active: data.active });
-      toast('Seccion guardada', 'success');
+      toast('Sección guardada', 'success');
     } catch { toast('Error al guardar', 'error'); } finally { setSaving(false); }
   };
 
@@ -102,7 +102,7 @@ export default function CtaNewsletterConfigPage() {
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <Megaphone className="w-5 h-5 text-[#C8FF00]" />CTA & Newsletter
           </h1>
-          <p className="text-gray-500 text-sm mt-0.5">Seccion final del inicio con CTA y formulario de newsletter</p>
+          <p className="text-gray-500 text-sm mt-0.5">Sección final del inicio con CTA y formulario de newsletter</p>
         </div>
       </div>
 
@@ -124,7 +124,7 @@ export default function CtaNewsletterConfigPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Texto del boton *</label>
-              <input {...register('buttonText')} className={inputClass} placeholder="Ver catalogo" />
+              <input {...register('buttonText')} className={inputClass} placeholder="Ver catálogo" />
               {errors.buttonText && <p className="text-xs text-red-600 mt-1">{errors.buttonText.message}</p>}
             </div>
             <div>
@@ -134,16 +134,16 @@ export default function CtaNewsletterConfigPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Texto pequeno debajo del boton</label>
-              <input {...register('footerText')} className={inputClass} placeholder="Productos originales. Envios a todo el pais." />
+              <input {...register('footerText')} className={inputClass} placeholder="Productos originales. Envíos a todo el pais." />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Boton secundario (texto)</label>
-                <input {...register('secondaryButtonText')} className={inputClass} placeholder="Opcional" />
+                <input {...register('secondaryButtonText')} className={inputClass} placeholder="Opciónal" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Boton secundario (URL)</label>
-                <input {...register('secondaryButtonUrl')} className={inputClass} placeholder="Opcional" />
+                <input {...register('secondaryButtonUrl')} className={inputClass} placeholder="Opciónal" />
               </div>
             </div>
           </div>
@@ -180,7 +180,7 @@ export default function CtaNewsletterConfigPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <input type="checkbox" id="fmActive" {...register('active')} className="w-4 h-4 rounded accent-[#C8FF00]" />
-            <label htmlFor="fmActive" className="text-sm text-gray-700 font-medium">Seccion activa</label>
+            <label htmlFor="fmActive" className="text-sm text-gray-700 font-medium">Sección activa</label>
           </div>
           <button type="submit" disabled={saving} className="flex items-center gap-2 px-5 py-2.5 bg-[#C8FF00] text-[#0f172a] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] disabled:opacity-50 transition-colors">
             <Save className="w-4 h-4" />{saving ? 'Guardando...' : 'Guardar cambios'}

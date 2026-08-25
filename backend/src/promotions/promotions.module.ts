@@ -1,4 +1,4 @@
-// Módulo de promociones — ofertas con fecha de inicio y fin
+// Módulo de promociónes — ofertas con fecha de inicio y fin
 
 import { Module } from '@nestjs/common';
 import { PromotionsController } from './promotions.controller';

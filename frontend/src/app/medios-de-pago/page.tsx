@@ -59,7 +59,7 @@ export default function MediosPagoPage() {
 
         {shippingMethods.length > 0 && (
           <>
-            <h2 className="text-xl font-semibold text-[#F7F6F7] mb-4">Medios de Envio</h2>
+            <h2 className="text-xl font-semibold text-[#F7F6F7] mb-4">Medios de Envío</h2>
             <div className="flex flex-wrap gap-4">
               {shippingMethods.map((method) => (
                 <div key={method.name} className="bg-[#0C0C0C] rounded-xl border border-[#0D0F0F] p-4 flex items-center gap-3">

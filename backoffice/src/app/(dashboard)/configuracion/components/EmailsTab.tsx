@@ -19,7 +19,7 @@ export default function EmailsTab({ emailConfig, setEmailConfig, onSave, onTest,
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
-      <h2 className="text-sm font-semibold text-gray-800 flex items-center gap-2"><Mail className="w-4 h-4 text-gray-500" />Configuracion de Resend</h2>
+      <h2 className="text-sm font-semibold text-gray-800 flex items-center gap-2"><Mail className="w-4 h-4 text-gray-500" />Configuración de Resend</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">API Key de Resend</label>
@@ -47,7 +47,7 @@ export default function EmailsTab({ emailConfig, setEmailConfig, onSave, onTest,
       </div>
       <div className="flex justify-end">
         <button onClick={onSave} disabled={saving} className="flex items-center gap-2 px-5 py-2.5 bg-[#C8FF00] text-[#0f172a] hover:bg-[#b8ef00] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] disabled:opacity-50">
-          <Save className="w-4 h-4" />{saving ? 'Guardando...' : 'Guardar configuracion'}
+          <Save className="w-4 h-4" />{saving ? 'Guardando...' : 'Guardar configuración'}
         </button>
       </div>
     </div>

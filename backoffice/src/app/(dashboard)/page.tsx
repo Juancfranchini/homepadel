@@ -41,7 +41,7 @@ export default function DashboardPage() {
   if (loading) return <PageLoader />;
 
   const kpiCards = [
-    { label: 'Ventas (30 dias)', value: formatPrice(kpis.ventas30), icon: TrendingUp, color: 'bg-green-50 text-green-600', border: 'border-green-200' },
+    { label: 'Ventas (30 días)', value: formatPrice(kpis.ventas30), icon: TrendingUp, color: 'bg-green-50 text-green-600', border: 'border-green-200' },
     { label: 'Total Pedidos', value: String(kpis.totalPedidos), icon: ShoppingBag, color: 'bg-blue-50 text-blue-600', border: 'border-blue-200' },
     { label: 'Ticket Promedio', value: formatPrice(kpis.ticketPromedio), icon: BarChart2, color: 'bg-purple-50 text-purple-600', border: 'border-purple-200' },
     { label: 'Ganancia estimada', value: formatPrice(kpis.ganancia), icon: DollarSign, color: 'bg-yellow-50 text-yellow-600', border: 'border-yellow-200' },
@@ -163,7 +163,7 @@ export default function DashboardPage() {
           <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2"><Megaphone className="w-4 h-4 text-gray-500" />Marketing</h2>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between"><span className="text-gray-500">Newsletter</span><span className="font-semibold">{marketingStats.newsletterSubscribers}</span></div>
-            <div className="flex justify-between"><span className="text-gray-500">Promociones activas</span><span className="font-semibold">{marketingStats.activePromotions}</span></div>
+            <div className="flex justify-between"><span className="text-gray-500">Promociónes activas</span><span className="font-semibold">{marketingStats.activePromotions}</span></div>
             <div className="flex justify-between"><span className="text-gray-500">Cupones activos</span><span className="font-semibold">{marketingStats.activeCoupons}</span></div>
           </div>
         </div>

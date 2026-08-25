@@ -40,7 +40,7 @@ type FormData = z.infer<typeof schema>;
 const inputClass = 'w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00]';
 const labelClass = 'text-xs font-medium text-gray-400 uppercase tracking-wider';
 
-export default function CategoriasPage() {
+export default function CategoríasPage() {
   const { toast } = useToast();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -118,10 +118,10 @@ export default function CategoriasPage() {
       };
       if (editItem) {
         await api.patch('/categories/' + editItem.id, payload);
-        toast('Categoria actualizada', 'success');
+        toast('Categoría actualizada', 'success');
       } else {
         await api.post('/categories', payload);
-        toast('Categoria creada', 'success');
+        toast('Categoría creada', 'success');
       }
       setModalOpen(false);
       load();
@@ -147,7 +147,7 @@ export default function CategoriasPage() {
     setDeleting(true);
     try {
       await api.delete('/categories/' + deleteTarget.id);
-      toast('Categoria eliminada', 'success');
+      toast('Categoría eliminada', 'success');
       setDeleteTarget(null);
       load();
     } catch {
@@ -163,7 +163,7 @@ export default function CategoriasPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Categorias</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Categorías</h1>
           <p className="text-gray-500 text-sm mt-0.5">{categories.length} registros</p>
         </div>
         <button
@@ -188,7 +188,7 @@ export default function CategoriasPage() {
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Slug</th>
                 <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Productos</th>
                 <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
+                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciónes</th>
               </tr>
             </thead>
             <tbody>

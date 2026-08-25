@@ -30,7 +30,7 @@ interface Props {
 }
 
 const MENU_ITEMS = [
-  { id: 'categories', icon: SlidersHorizontal, label: 'Categorias' },
+  { id: 'categories', icon: SlidersHorizontal, label: 'Categorías' },
   { id: 'brands', icon: Tags, label: 'Marcas' },
   { id: 'offers', icon: Target, label: 'Ofertas' },
   { id: 'sort', icon: ArrowDownUp, label: 'Ordenar' },
@@ -106,7 +106,7 @@ export default function CatalogSidebar({
 
             {activePanel === 'categories' && (
               <div>
-                <h3 className="text-xs font-semibold text-[#F7F6F7] uppercase tracking-wider mb-3 pr-6">Categorias</h3>
+                <h3 className="text-xs font-semibold text-[#F7F6F7] uppercase tracking-wider mb-3 pr-6">Categorías</h3>
                 <div className="space-y-2">
                   {categories.map((cat) => (
                     <label key={cat.id} className="flex items-center gap-2.5 cursor-pointer group">

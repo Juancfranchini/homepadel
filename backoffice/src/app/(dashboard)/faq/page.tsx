@@ -115,7 +115,7 @@ export default function FaqPage() {
     return sortDir === 'asc' ? String(aVal).localeCompare(String(bVal)) : String(bVal).localeCompare(String(aVal));
   });
   const totalPages = Math.ceil(sorted.length / pageSize);
-  const paginated = sorted.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const páginated = sorted.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   if (loading) return <PageLoader />;
 
@@ -141,7 +141,7 @@ export default function FaqPage() {
             </button>
           ) : (
             <button onClick={() => setShowCategories(true)} className="flex items-center gap-2 px-4 py-2 border border-[#C8FF00]/50 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
-              <Tags className="w-4 h-4" />Categorias FAQ
+              <Tags className="w-4 h-4" />Categorías FAQ
             </button>
           )}
         </div>
@@ -156,7 +156,7 @@ export default function FaqPage() {
         />
       ) : (
         <>
-          {paginated.length === 0 ? (
+          {páginated.length === 0 ? (
             <div className="bg-white rounded-xl border border-gray-200 py-20 text-center"><p className="text-gray-400 text-sm">No se encontraron FAQs</p></div>
           ) : (
             <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
@@ -164,15 +164,15 @@ export default function FaqPage() {
                 <thead>
                   <tr className="border-b border-gray-100">
                     <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Orden {sortIcon('order')}</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Categoria</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Categoría</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Pregunta</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Respuesta</th>
                     <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-                    <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
+                    <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciónes</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {paginated.map((t) => (
+                  {páginated.map((t) => (
                     <tr key={t.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                       <td className="px-4 py-3 text-center text-sm text-gray-500">{t.order}</td>
                       <td className="px-4 py-3"><span className="text-xs font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{t.category || 'GENERAL'}</span></td>
@@ -212,7 +212,7 @@ export default function FaqPage() {
         <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editItem ? 'Editar FAQ' : 'Nueva FAQ'} size="sm">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
               <select {...register('category')} className={inputClass}>
                 {categories.map(cat => (<option key={cat} value={cat}>{cat}</option>))}
               </select>
@@ -252,7 +252,7 @@ export default function FaqPage() {
               <button onClick={() => setDetailItem(null)} className="text-gray-400 hover:text-gray-900"><X className="w-5 h-5" /></button>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-500 mb-1">Categoria</p>
+              <p className="text-sm font-medium text-gray-500 mb-1">Categoría</p>
               <span className="text-xs font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{detailItem.category || 'GENERAL'}</span>
             </div>
             <div>

@@ -1,4 +1,4 @@
-// CRUD de promociones
+// CRUD de promociónes
 // GET    /api/promotions        — listar todas (público)
 // POST   /api/promotions        — crear (ADMIN)
 // PATCH  /api/promotions/:id    — actualizar (ADMIN)

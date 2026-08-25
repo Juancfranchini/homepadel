@@ -12,7 +12,7 @@ import { useToast } from '@/components/ui/Toast';
 import { createElement } from 'react';
 
 const ICON_OPTIONS = [
-  { value: 'Truck', label: 'Envio', icon: Truck },
+  { value: 'Truck', label: 'Envío', icon: Truck },
   { value: 'RefreshCw', label: 'Cambios', icon: RefreshCw },
   { value: 'Shield', label: 'Garantia', icon: Shield },
   { value: 'Check', label: 'Seguridad', icon: Check },
@@ -84,7 +84,7 @@ export default function ConfianzaProductosPage() {
     setSaving(true);
     try {
       await api.put('/site-sections/trust_bottom', { data, active: data.active });
-      toast('Seccion guardada', 'success');
+      toast('Sección guardada', 'success');
     } catch { toast('Error al guardar', 'error'); } finally { setSaving(false); }
   };
 
@@ -100,7 +100,7 @@ export default function ConfianzaProductosPage() {
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <Shield className="w-5 h-5 text-[#C8FF00]" />Confianza Productos
           </h1>
-          <p className="text-gray-500 text-sm mt-0.5">Barra de confianza en la pagina de producto</p>
+          <p className="text-gray-500 text-sm mt-0.5">Barra de confianza en la página de producto</p>
         </div>
       </div>
 
@@ -171,7 +171,7 @@ export default function ConfianzaProductosPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <input type="checkbox" id="ctActive" {...register('active')} className="w-4 h-4 rounded accent-[#C8FF00]" />
-            <label htmlFor="ctActive" className="text-sm text-gray-700 font-medium">Seccion activa</label>
+            <label htmlFor="ctActive" className="text-sm text-gray-700 font-medium">Sección activa</label>
           </div>
           <button type="submit" disabled={saving}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#C8FF00] text-[#0f172a] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] disabled:opacity-50 transition-colors">

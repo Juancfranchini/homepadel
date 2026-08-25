@@ -18,25 +18,25 @@ export class AuthController {
   }
 
   @Post('login')
-  @ApiOperation({ summary: 'Iniciar sesion' })
+  @ApiOperation({ summary: 'Iniciar sesión' })
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
 
   @Post('google')
-  @ApiOperation({ summary: 'Iniciar sesion con Google' })
+  @ApiOperation({ summary: 'Iniciar sesión con Google' })
   googleLogin(@Body() body: { credential: string }) {
     return this.authService.googleLogin(body.credential);
   }
 
   @Post('forgot-password')
-  @ApiOperation({ summary: 'Solicitar recuperacion de contrasena' })
+  @ApiOperation({ summary: 'Solicitar recuperacion de contraseña' })
   forgotPassword(@Body() body: { email: string }) {
     return this.authService.forgotPassword(body.email);
   }
 
   @Post('reset-password')
-  @ApiOperation({ summary: 'Resetear contrasena con token' })
+  @ApiOperation({ summary: 'Resetear contraseña con token' })
   resetPassword(@Body() body: { token: string; newPassword: string }) {
     return this.authService.resetPassword(body.token, body.newPassword);
   }
@@ -44,7 +44,7 @@ export class AuthController {
   @Post('change-password')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Cambiar contrasena' })
+  @ApiOperation({ summary: 'Cambiar contraseña' })
   changePassword(
     @CurrentUser() user: any,
     @Body() body: { currentPassword: string; newPassword: string },

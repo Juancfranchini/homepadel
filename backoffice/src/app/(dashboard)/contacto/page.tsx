@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -49,7 +49,7 @@ export default function ContactoPage() {
           { icon: 'MessageCircle', bg: 'bg-green-500/10 border-green-500/20', title: 'WhatsApp', desc: 'La forma mas rapida.', detail: '11 3181-3297', href: 'https://wa.me/5491131813297' },
           { icon: 'Mail', bg: 'bg-[#B7D31A]/10 border-[#B7D31A]/20', title: 'Email', desc: 'Respondemos tu consulta.', detail: 'hola@homepadel.com.ar', href: 'mailto:hola@homepadel.com.ar' },
           { icon: 'Clock', bg: 'bg-white/5 border-[#0D0F0F]', title: 'Horarios', desc: 'Lunes a Viernes de 9 a 18 hs.', detail: 'Sabados de 9 a 13 hs.', href: '' },
-          { icon: 'MapPin', bg: 'bg-white/5 border-[#0D0F0F]', title: 'Ubicacion', desc: 'Villa Luro, CABA.', detail: 'Envios a todo el pais', href: '' },
+          { icon: 'MapPin', bg: 'bg-white/5 border-[#0D0F0F]', title: 'Ubicacion', desc: 'Villa Luro, CABA.', detail: 'Envíos a todo el pais', href: '' },
         ],
       });
     } catch {} finally { setLoading(false); }
@@ -71,8 +71,8 @@ export default function ContactoPage() {
     <div className="space-y-6 w-full">
       <div className="flex items-center gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><FileText className="w-5 h-5 text-[#C8FF00]" />Pagina de Contacto</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Configura todas las secciones de la pagina /contacto</p>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><FileText className="w-5 h-5 text-[#C8FF00]" />Página de Contacto</h1>
+          <p className="text-gray-500 text-sm mt-0.5">Configura todas las secciónes de la página /contacto</p>
         </div>
         <Link href="/configuracion/canales-contacto" className="ml-auto flex items-center gap-2 px-4 py-2 border border-[#C8FF00]/50 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
           <ExternalLink className="w-4 h-4" />Gestionar Canales de Contacto
@@ -87,7 +87,7 @@ export default function ContactoPage() {
             <div><label className={labelClass}>Chip</label><input {...register('chip')} className={inputClass} /></div>
             <div className="md:col-span-2"><label className={labelClass}>Titulo</label><input {...register('title')} className={inputClass} /></div>
           </div>
-          <div><label className={labelClass}>Descripcion</label><textarea {...register('description')} rows={2} className={inputClass} /></div>
+          <div><label className={labelClass}>Descripción</label><textarea {...register('description')} rows={2} className={inputClass} /></div>
         </div>
 
         {/* Imagen de fondo del Hero */}
@@ -105,7 +105,7 @@ export default function ContactoPage() {
         {/* Cards de info de contacto */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-3">
           <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-            <h3 className="text-sm font-semibold text-gray-800">Informacion de Contacto (columna izquierda)</h3>
+            <h3 className="text-sm font-semibold text-gray-800">Información de Contacto (columna izquierda)</h3>
             <button type="button" onClick={() => cardsArray.append({ icon: 'MessageCircle', bg: 'bg-white/5 border-[#0D0F0F]', title: '', desc: '', detail: '', href: '' })}
               className="flex items-center gap-1 text-xs font-semibold px-2 py-1 bg-[#C8FF00] text-[#0f172a] rounded-lg hover:bg-[#b8ef00]"><Plus size={12} />Agregar</button>
           </div>
@@ -126,9 +126,9 @@ export default function ContactoPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <input {...register(('cards.' + i + '.title') as any)} className={inputClass} placeholder="Titulo" />
-                  <input {...register(('cards.' + i + '.desc') as any)} className={inputClass} placeholder="Descripcion" />
+                  <input {...register(('cards.' + i + '.desc') as any)} className={inputClass} placeholder="Descripción" />
                   <input {...register(('cards.' + i + '.detail') as any)} className={inputClass} placeholder="Detalle" />
-                  <input {...register(('cards.' + i + '.href') as any)} className={inputClass} placeholder="Link (opcional)" />
+                  <input {...register(('cards.' + i + '.href') as any)} className={inputClass} placeholder="Link (opciónal)" />
                 </div>
               </div>
             );
@@ -147,9 +147,9 @@ export default function ContactoPage() {
 
         {/* Newsletter */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-          <h3 className="text-sm font-semibold text-gray-800 border-b border-gray-100 pb-3">Seccion Newsletter</h3>
+          <h3 className="text-sm font-semibold text-gray-800 border-b border-gray-100 pb-3">Sección Newsletter</h3>
           <div><label className={labelClass}>Titulo</label><input {...register('newsletterTitle')} className={inputClass} /></div>
-          <div><label className={labelClass}>Descripcion</label><input {...register('newsletterText')} className={inputClass} /></div>
+          <div><label className={labelClass}>Descripción</label><input {...register('newsletterText')} className={inputClass} /></div>
         </div>
 
         <div className="flex justify-end">

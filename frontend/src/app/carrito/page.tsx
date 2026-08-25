@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { Minus, Plus, X, ShoppingBag, Tag, ArrowRight } from 'lucide-react';
@@ -37,9 +37,9 @@ export default function CarritoPage() {
           <div className="bg-[#0C0C0C] rounded-2xl border border-[#B7D31A]/20 p-16 text-center">
             <ShoppingBag size={56} className="mx-auto text-[#1A1F21] mb-5" />
             <h2 className="text-xl font-bold text-[#8A8A85] mb-2">Tu carrito esta vacio</h2>
-            <p className="text-[#8A8A85] text-sm mb-8">Todavia no agregaste productos. Explora nuestro catalogo!</p>
+            <p className="text-[#8A8A85] text-sm mb-8">Todavia no agregaste productos. Explora nuestro catálogo!</p>
             <Link href="/catalogo" className="inline-flex items-center gap-2 bg-[#B7D31A] text-[#050606] px-8 py-3.5 rounded-xl font-black text-sm uppercase tracking-wider hover:bg-[#c8e81f] transition-colors">
-              Ver catalogo <ArrowRight size={16} />
+              Ver catálogo <ArrowRight size={16} />
             </Link>
           </div>
         </div>
@@ -120,7 +120,7 @@ export default function CarritoPage() {
                     <Tag size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8A8A85]" />
                     <input type="text" value={coupon} onChange={(e) => setCoupon(e.target.value)}
                       className="w-full pl-9 pr-3 py-2 bg-[#1A1F21] border border-[#0D0F0F] rounded-lg text-xs text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A]/50"
-                      placeholder="Codigo de cupon" />
+                      placeholder="Código de cupon" />
                   </div>
                   <button onClick={handleApplyCoupon} className="px-4 py-2 bg-[#B7D31A] text-[#050606] rounded-lg text-xs font-bold hover:bg-[#c8e81f] transition-colors">Aplicar</button>
                 </div>
@@ -132,7 +132,7 @@ export default function CarritoPage() {
                 <div className="flex justify-between text-[#C7C7C0]"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
                 {discount > 0 && <div className="flex justify-between text-green-500"><span>Descuento</span><span>-{formatPrice(discount)}</span></div>}
                 <div className="flex justify-between text-[#C7C7C0]">
-                  <span>Envio</span>
+                  <span>Envío</span>
                   <span className={shippingCost === 0 ? 'text-green-500 font-semibold' : ''}>{shippingCost === 0 ? 'GRATIS' : formatPrice(shippingCost)}</span>
                 </div>
                 <div className="flex justify-between font-black text-base pt-2 border-t border-[#0D0F0F] text-[#F7F6F7]"><span>Total</span><span>{formatPrice(total)}</span></div>
@@ -142,7 +142,7 @@ export default function CarritoPage() {
                 Finalizar compra <ArrowRight size={15} />
               </Link>
 
-              <p className="text-[#8A8A85] text-xs text-center mt-3">Envio gratis en compras superiores a {formatPrice(shippingThreshold)}</p>
+              <p className="text-[#8A8A85] text-xs text-center mt-3">Envío gratis en compras superiores a {formatPrice(shippingThreshold)}</p>
             </div>
           </div>
         </div>

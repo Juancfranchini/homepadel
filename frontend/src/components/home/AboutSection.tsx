@@ -1,4 +1,4 @@
-﻿import { AboutSection as AboutData } from '@/types';
+import { AboutSection as AboutData } from '@/types';
 import { getImageUrl } from '@/lib/utils';
 import { Heart, Users, Shield, Star, Award, Zap, CheckCircle, Truck } from 'lucide-react';
 import { createElement } from 'react';
@@ -11,10 +11,10 @@ interface Props {
 
 const FALLBACK: AboutData = {
   title: 'Somos Home Padel',
-  description: 'En Home Padel vivimos este deporte con la misma pasion que vos. Ofrecemos las mejores marcas con atencion personalizada y envios a todo el pais.',
+  description: 'En Home Padel vivimos este deporte con la misma pasion que vos. Ofrecemos las mejores marcas con atencion personalizada y envíos a todo el pais.',
   image: undefined,
   benefits: [
-    { icon: 'Truck', title: 'Envios a todo el pais', description: 'Llegamos a cada rincon de Argentina' },
+    { icon: 'Truck', title: 'Envíos a todo el pais', description: 'Llegamos a cada rincon de Argentina' },
     { icon: 'Shield', title: 'Productos originales', description: 'Garantia oficial de fabrica' },
     { icon: 'Users', title: 'Atencion personalizada', description: 'Te asesoramos segun tu nivel y estilo' },
   ],

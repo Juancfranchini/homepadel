@@ -7,10 +7,11 @@ import api from '@/lib/api';
 const inputClass = 'w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00] text-gray-900';
 
 const LOGO_MAP = [
-  { key: 'logoUrl', label: 'Logo del sitio (Header)', desc: 'Se muestra arriba a la izquierda en todas las paginas', position: 'Header - Escritorio y tablet', size: 'Recomendado: 200x60px' },
-  { key: 'logoFooter', label: 'Logo del pie de pagina (Footer)', desc: 'Se muestra abajo en todas las paginas', position: 'Footer - Parte inferior del sitio', size: 'Recomendado: 160x50px' },
-  { key: 'logoMobile', label: 'Logo para celulares', desc: 'Version reducida para pantallas chicas', position: 'Header - Pantallas menores a 768px', size: 'Recomendado: 120x40px' },
-  { key: 'isotipo', label: 'Icono de pestaÃ±a (Favicon)', desc: 'Se muestra en la pestaÃ±a del navegador', position: 'PestaÃ±a del navegador y marcadores', size: 'Recomendado: 32x32px o 64x64px' },
+  { key: 'logoUrl', label: 'Logo del sitio (Header)', desc: 'Se muestra arriba a la izquierda en todas las páginas', position: 'Header - Escritorio y tablet', size: 'Recomendado: 200x60px' },
+  { key: 'logoFooter', label: 'Logo del pie de página (Footer)', desc: 'Se muestra abajo en todas las páginas', position: 'Footer - Parte inferior del sitio', size: 'Recomendado: 160x50px' },
+  { key: 'logoMobile', label: 'Logo para celulares', desc: 'Versión reducida para pantallas chicas', position: 'Header - Pantallas menores a 768px', size: 'Recomendado: 120x40px' },
+  { key: 'isotipo', label: 'Icono de pestaña (Favicon)', desc: 'Se muestra en la pestaña del navegador', position: 'Pestaña del navegador y marcadores', size: 'Recomendado: 32x32px o 64x64px' },
+  { key: 'logoLogin', label: 'Logo del formulario (Login)', desc: 'Se muestra en el formulario de login y registro', position: 'Formulario - Login/Registro', size: 'Recomendado: 200x60px' },
 ];
 
 const API_BASE = 'http://localhost:4000';
@@ -63,7 +64,7 @@ export default function GeneralTab({ generalForm, onSave, saving }: GeneralTabPr
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-        <h2 className="text-sm font-semibold text-gray-800 mb-5 flex items-center gap-2"><Store className="w-4 h-4 text-gray-500" />Informacion de la tienda</h2>
+        <h2 className="text-sm font-semibold text-gray-800 mb-5 flex items-center gap-2"><Store className="w-4 h-4 text-gray-500" />Información de la tienda</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Nombre de la tienda *</label>
@@ -76,7 +77,7 @@ export default function GeneralTab({ generalForm, onSave, saving }: GeneralTabPr
             {generalForm.formState.errors.contactEmail && <p className="text-xs text-red-600 mt-1">{generalForm.formState.errors.contactEmail.message}</p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Telefono</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Teléfono</label>
             <input {...generalForm.register('phone')} className={inputClass} />
           </div>
           <div>
@@ -84,7 +85,7 @@ export default function GeneralTab({ generalForm, onSave, saving }: GeneralTabPr
             <input {...generalForm.register('whatsapp')} className={inputClass} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Direccion</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Dirección</label>
             <input {...generalForm.register('address')} className={inputClass} />
           </div>
         </div>
@@ -137,7 +138,7 @@ export default function GeneralTab({ generalForm, onSave, saving }: GeneralTabPr
 
       <div className="flex justify-end">
         <button onClick={generalForm.handleSubmit(onSave)} disabled={!generalForm.formState.isDirty || saving}
-          className={'flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm transition-all ' + (generalForm.formState.isDirty ? 'bg-[#C8FF00] text-[#0f172a] hover:bg-[#b8ef00] hover:bg-[#b8ef00]' : 'bg-gray-200 text-gray-400 cursor-not-allowed')}>
+          className={'flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm transition-all ' + (generalForm.formState.isDirty ? 'bg-[#C8FF00] text-[#0f172a] hover:bg-[#b8ef00]' : 'bg-gray-200 text-gray-400 cursor-not-allowed')}>
           <Store className="w-4 h-4" />{saving ? 'Guardando...' : 'Guardar cambios'}
         </button>
       </div>

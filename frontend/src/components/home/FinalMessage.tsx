@@ -12,9 +12,9 @@ export default function FinalMessage({ data }: Props) {
 
   const title = data?.title ?? 'Un mensaje para vos';
   const text = data?.text ?? 'Encontra todo lo que necesitas en un solo lugar. Las mejores marcas, los mejores precios.';
-  const buttonText = data?.buttonText ?? 'Ver catalogo';
+  const buttonText = data?.buttonText ?? 'Ver catálogo';
   const buttonUrl = data?.buttonUrl ?? '/catalogo';
-  const footerText = data?.footerText ?? 'Productos originales. Envios a todo el pais.';
+  const footerText = data?.footerText ?? 'Productos originales. Envíos a todo el pais.';
 
   return (
     <section className="section-gradient bg-[#050606] py-20 md:py-24">

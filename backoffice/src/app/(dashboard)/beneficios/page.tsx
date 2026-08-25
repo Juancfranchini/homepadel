@@ -22,7 +22,7 @@ interface Benefit {
 }
 
 const ICON_OPTIONS = [
-  { value: 'Truck', label: 'Envio', icon: Truck },
+  { value: 'Truck', label: 'Envío', icon: Truck },
   { value: 'CreditCard', label: 'Pago', icon: CreditCard },
   { value: 'RefreshCw', label: 'Cambios', icon: RefreshCw },
   { value: 'Lock', label: 'Seguridad', icon: Lock },
@@ -130,9 +130,9 @@ export default function BeneficiosPage() {
                 <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-12">#</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Icono</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Titulo</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Descripcion</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Descripción</th>
                 <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
+                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciónes</th>
               </tr>
             </thead>
             <tbody>
@@ -187,11 +187,11 @@ export default function BeneficiosPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Titulo *</label>
-              <input {...register('title')} className={inputClass} placeholder="Ej: Envio gratis" />
+              <input {...register('title')} className={inputClass} placeholder="Ej: Envío gratis" />
               {errors.title && <p className="text-xs text-red-600 mt-1">{errors.title.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Descripcion</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
               <input {...register('description')} className={inputClass} placeholder="En compras mayores a .000" />
             </div>
             <div>

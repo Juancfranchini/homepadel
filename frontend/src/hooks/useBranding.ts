@@ -7,6 +7,7 @@ interface Branding {
   logoFooter: string | null;
   isotipo: string | null;
   logoMobile: string | null;
+  logoLogin: string | null;
   loaded: boolean;
 }
 
@@ -16,6 +17,7 @@ export function useBranding() {
     logoFooter: null,
     isotipo: null,
     logoMobile: null,
+    logoLogin: null,
     loaded: false,
   });
 
@@ -31,6 +33,7 @@ export function useBranding() {
           logoFooter: b.logoFooter ? baseUrl + b.logoFooter : null,
           isotipo: b.isotipo ? baseUrl + b.isotipo : null,
           logoMobile: b.logoMobile ? baseUrl + b.logoMobile : null,
+          logoLogin: b.logoLogin ? baseUrl + b.logoLogin : null,
           loaded: true,
         });
       })

@@ -67,7 +67,7 @@ export default function FaqCategoryManager({ categories, onAdd, onEdit, onDelete
         <div className="flex-1">
           {view === 'list' && (
             <div>
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">Categorias disponibles</h3>
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">Categorías disponibles</h3>
               <div className="flex flex-wrap gap-2">
                 {categories.map(cat => (
                   <span key={cat} className="text-xs font-medium bg-white text-gray-600 px-3 py-1.5 rounded-full border border-gray-200">{cat}</span>

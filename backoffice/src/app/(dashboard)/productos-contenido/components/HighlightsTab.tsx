@@ -19,14 +19,14 @@ export default function HighlightsTab({ register, control, showHighlights, onTog
     <div className="space-y-3">
       <div>
         <div className="flex items-center justify-between">
-          <label className={labelClass}>Titulo de la seccion</label>
+          <label className={labelClass}>Titulo de la sección</label>
           <div className="flex items-center gap-2"><Toggle checked={showHighlights} onChange={onToggleShowHighlights} /><span className="text-xs text-gray-400">{showHighlights ? "Activado" : "Desactivado"}</span></div>
         </div>
         <input {...register('highlightsTitle')} className={inputClass + ' mt-1'} placeholder="POR QUE ELEGIR ESTE PRODUCTO" />
       </div>
       <div>
-        <label className={labelClass}>Descripcion</label>
-        <textarea {...register('highlightsDescription')} rows={2} className={inputClass + ' mt-1'} placeholder="Descubri por que este producto es la mejor opcion..." />
+        <label className={labelClass}>Descripción</label>
+        <textarea {...register('highlightsDescription')} rows={2} className={inputClass + ' mt-1'} placeholder="Descubri por que este producto es la mejor opción..." />
       </div>
       <div className="border-t border-gray-100 pt-3">
         <div className="flex items-center justify-between mb-2">

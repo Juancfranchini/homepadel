@@ -85,7 +85,7 @@ export default function ProductoPage() {
   if (!product) {
     return (
       <div className="min-h-screen bg-[#050606] flex items-center justify-center">
-        <div className="text-center"><p className="text-[#C7C7C0] mb-4">Producto no encontrado</p><Link href="/catalogo" className="text-[#B7D31A] font-semibold underline">Volver al catalogo</Link></div>
+        <div className="text-center"><p className="text-[#C7C7C0] mb-4">Producto no encontrado</p><Link href="/catalogo" className="text-[#B7D31A] font-semibold underline">Volver al catálogo</Link></div>
       </div>
     );
   }
@@ -132,7 +132,7 @@ export default function ProductoPage() {
       <div className="border-b border-[#0D0F0F]">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-2.5 flex items-center gap-1.5 text-[11px] text-[#8A8A85]">
           <Link href="/" className="hover:text-[#F7F6F7] transition-colors">Inicio</Link><span>/</span>
-          <Link href="/catalogo" className="hover:text-[#F7F6F7] transition-colors">Catalogo</Link><span>/</span>
+          <Link href="/catalogo" className="hover:text-[#F7F6F7] transition-colors">Catálogo</Link><span>/</span>
           <Link href={'/catalogo?marca=' + product.brand.slug} className="hover:text-[#F7F6F7] transition-colors">{product.brand.name}</Link><span>/</span>
           <span className="text-[#F7F6F7] truncate">{product.name}</span>
         </div>

@@ -20,6 +20,7 @@ const generalSchema = z.object({
   logoFooter: z.string().optional().or(z.literal('')),
   isotipo: z.string().optional().or(z.literal('')),
   logoMobile: z.string().optional().or(z.literal('')),
+  logoLogin: z.string().optional().or(z.literal('')),
   contactEmail: z.string().email('Email invalido'),
   phone: z.string().optional(),
   address: z.string().optional(),
@@ -123,7 +124,7 @@ export default function ConfiguracionPage() {
     try {
       await Promise.all([
         api.put('/site-sections/settings', { data: { storeName: data.storeName, contactEmail: data.contactEmail, phone: data.phone, address: data.address, whatsapp: data.whatsapp } }),
-        api.put('/site-sections/branding', { data: { logoHeader: data.logoUrl, logoFooter: data.logoFooter, isotipo: data.isotipo, logoMobile: data.logoMobile } }),
+        api.put('/site-sections/branding', { data: { logoHeader: data.logoUrl, logoFooter: data.logoFooter, isotipo: data.isotipo, logoMobile: data.logoMobile, logoLogin: data.logoLogin } }),
       ]);
       toast('Configuracion guardada', 'success');
       generalForm.reset(data);
@@ -134,7 +135,7 @@ export default function ConfiguracionPage() {
     setSavingEmailConfig(true);
     try {
       await api.put('/email/config', { ...emailConfig, notifications: notifs });
-      toast('Configuracion de email guardada', 'success');
+      toast('Configuracion guardada', 'success');
     } catch { toast('Error', 'error'); } finally { setSavingEmailConfig(false); }
   };
 
@@ -172,7 +173,7 @@ export default function ConfiguracionPage() {
   };
 
   const handleDeleteTemplate = async (id: string) => {
-    if (!confirm('Ã‚Â¿Eliminar esta plantilla?')) return;
+    if (!confirm('ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿Eliminar esta plantilla?')) return;
     try {
       await api.delete('/email/templates/' + id);
       toast('Plantilla eliminada', 'success');
@@ -183,18 +184,18 @@ export default function ConfiguracionPage() {
   const handleCreateCampaign = async (data: { name: string; templateId: string; recipients: string[] }) => {
     try {
       await api.post('/email/campaigns', data);
-      toast('CampaÃƒÂ±a creada', 'success');
+      toast('CampaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±a creada', 'success');
       setCampaignModal(false);
       loadEmailData();
-    } catch { toast('Error al crear campaÃƒÂ±a', 'error'); }
+    } catch { toast('Error al crear campaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±a', 'error'); }
   };
 
   const handleSendCampaign = async (id: string) => {
     try {
       await api.post('/email/campaigns/' + id + '/send');
-      toast('CampaÃƒÂ±a enviada', 'success');
+      toast('CampaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±a enviada', 'success');
       loadEmailData();
-    } catch { toast('Error al enviar campaÃƒÂ±a', 'error'); }
+    } catch { toast('Error al enviar campaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±a', 'error'); }
   };
 
   const handleLoadRecipients = async (source: 'all' | 'customers' | 'newsletter') => {

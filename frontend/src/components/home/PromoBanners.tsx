@@ -1,4 +1,4 @@
-﻿import Link from 'next/link';
+import Link from 'next/link';
 import { Banner } from '@/types';
 import { getImageUrl } from '@/lib/utils';
 

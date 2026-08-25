@@ -16,11 +16,11 @@ import { createOrder } from '@/lib/api';
 const checkoutSchema = z.object({
   name: z.string().min(2, 'El nombre es requerido'),
   email: z.string().email('Email invalido'),
-  phone: z.string().min(8, 'Telefono invalido').regex(/^[0-9+\s()-]+$/, 'Telefono invalido'),
-  street: z.string().min(5, 'La direccion es requerida'),
+  phone: z.string().min(8, 'Teléfono invalido').regex(/^[0-9+\s()-]+$/, 'Teléfono invalido'),
+  street: z.string().min(5, 'La dirección es requerida'),
   city: z.string().min(2, 'La ciudad es requerida'),
   province: z.string().min(2, 'La provincia es requerida'),
-  postalCode: z.string().min(4, 'El codigo postal es requerido').max(8, 'Codigo postal invalido'),
+  postalCode: z.string().min(4, 'El código postal es requerido').max(8, 'Código postal invalido'),
   paymentMethod: z.enum(['card', 'mercadopago', 'transfer'], { required_error: 'Selecciona un metodo de pago' }),
 });
 
@@ -58,7 +58,7 @@ export default function CheckoutPage() {
       <div className="min-h-screen bg-[#050606] flex items-center justify-center">
         <div className="text-center">
           <p className="text-[#8A8A85] mb-4">Tu carrito esta vacio</p>
-          <Link href="/catalogo" className="bg-[#B7D31A] text-[#050606] px-6 py-3 rounded-xl font-bold text-sm hover:bg-[#c8e81f] transition-colors">Ir al catalogo</Link>
+          <Link href="/catalogo" className="bg-[#B7D31A] text-[#050606] px-6 py-3 rounded-xl font-bold text-sm hover:bg-[#c8e81f] transition-colors">Ir al catálogo</Link>
         </div>
       </div>
     );
@@ -122,7 +122,7 @@ export default function CheckoutPage() {
             <CheckCircle size={32} className="text-green-500" />
           </div>
           <h1 className="text-2xl font-black text-[#F7F6F7] mb-2">Pedido confirmado!</h1>
-          <p className="text-[#8A8A85] text-sm mb-1">Numero de orden:</p>
+          <p className="text-[#8A8A85] text-sm mb-1">Número de orden:</p>
           <p className="text-2xl font-black text-[#B7D31A] bg-[#1A1F21] px-6 py-2 rounded-lg mb-5 inline-block">#{orderNumber}</p>
           <p className="text-[#8A8A85] text-sm mb-8">Te enviamos un email con los detalles y el link de seguimiento.</p>
           <div className="flex flex-col gap-3">
@@ -168,7 +168,7 @@ export default function CheckoutPage() {
                     {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-[#8A8A85] uppercase tracking-wide mb-1">Telefono *</label>
+                    <label className="block text-xs font-semibold text-[#8A8A85] uppercase tracking-wide mb-1">Teléfono *</label>
                     <input {...register('phone')} type="tel" placeholder="+54 11 1234 5678" className={errors.phone ? errorInputClass : inputClass} />
                     {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>}
                   </div>
@@ -178,11 +178,11 @@ export default function CheckoutPage() {
               <div className="bg-[#0F1111] rounded-2xl border border-[#B7D31A]/20 p-6">
                 <div className="flex items-center gap-3 mb-5">
                   <div className="w-8 h-8 bg-[#B7D31A] rounded-full flex items-center justify-center text-[#050606] font-black text-sm">2</div>
-                  <h2 className="font-black text-base uppercase tracking-wide text-[#F7F6F7] flex items-center gap-2"><Truck size={16} /> Direccion de envio</h2>
+                  <h2 className="font-black text-base uppercase tracking-wide text-[#F7F6F7] flex items-center gap-2"><Truck size={16} /> Dirección de envío</h2>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
-                    <label className="block text-xs font-semibold text-[#8A8A85] uppercase tracking-wide mb-1">Calle y numero *</label>
+                    <label className="block text-xs font-semibold text-[#8A8A85] uppercase tracking-wide mb-1">Calle y número *</label>
                     <input {...register('street')} type="text" placeholder="Av. Corrientes 1234" className={errors.street ? errorInputClass : inputClass} />
                     {errors.street && <p className="text-red-500 text-xs mt-1">{errors.street.message}</p>}
                   </div>
@@ -192,7 +192,7 @@ export default function CheckoutPage() {
                     {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city.message}</p>}
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-[#8A8A85] uppercase tracking-wide mb-1">Codigo postal *</label>
+                    <label className="block text-xs font-semibold text-[#8A8A85] uppercase tracking-wide mb-1">Código postal *</label>
                     <input {...register('postalCode')} type="text" placeholder="1043" className={errors.postalCode ? errorInputClass : inputClass} />
                     {errors.postalCode && <p className="text-red-500 text-xs mt-1">{errors.postalCode.message}</p>}
                   </div>
@@ -252,7 +252,7 @@ export default function CheckoutPage() {
                 </div>
                 <div className="border-t border-[#0D0F0F] pt-4 space-y-2 text-sm">
                   <div className="flex justify-between text-[#C7C7C0]"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
-                  <div className="flex justify-between text-[#C7C7C0]"><span>Envio</span><span className={shippingCost === 0 ? 'text-green-500 font-semibold' : ''}>{shippingCost === 0 ? 'GRATIS' : formatPrice(shippingCost)}</span></div>
+                  <div className="flex justify-between text-[#C7C7C0]"><span>Envío</span><span className={shippingCost === 0 ? 'text-green-500 font-semibold' : ''}>{shippingCost === 0 ? 'GRATIS' : formatPrice(shippingCost)}</span></div>
                   <div className="flex justify-between font-black text-base pt-2 border-t border-[#0D0F0F] text-[#F7F6F7]"><span>Total</span><span>{formatPrice(total)}</span></div>
                 </div>
                 <button type="submit" disabled={isSubmitting}

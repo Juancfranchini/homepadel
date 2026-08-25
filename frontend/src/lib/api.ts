@@ -57,7 +57,7 @@ export const getMyOrders = () =>
 export const getBanners = () =>
   api.get('/banners').then((r) => r.data);
 
-// ── Nuevas secciones homepage ──────────────────────────────────────────────
+// ── Nuevas secciónes homepage ──────────────────────────────────────────────
 export const getHeroSlides = () =>
   api.get('/hero-slides').then((r) => r.data);
 

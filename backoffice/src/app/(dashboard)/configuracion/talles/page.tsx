@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
@@ -165,10 +165,10 @@ export default function TallesPage() {
             <thead>
               <tr className="border-b border-gray-100">
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Nombre</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Categoria</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Categoría</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Productos</th>
                 <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
+                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciónes</th>
               </tr>
             </thead>
             <tbody>
@@ -206,7 +206,7 @@ export default function TallesPage() {
               {errors.name && <p className="text-xs text-red-600 mt-1">{errors.name.message}</p>}
             </div>
             <div>
-              <label className={labelClass}>Categoria *</label>
+              <label className={labelClass}>Categoría *</label>
               <select {...register('categoryId')} className={inputClass}>
                 <option value="">Seleccionar categoria</option>
                 {categories.map(c => (<option key={c.id} value={c.id}>{c.name}</option>))}
@@ -217,7 +217,7 @@ export default function TallesPage() {
 
           {/* Productos asociados */}
           <div>
-            <label className={labelClass}>Productos asociados (opcional)</label>
+            <label className={labelClass}>Productos asociados (opciónal)</label>
             <div className="border border-gray-200 rounded-lg p-3 max-h-48 overflow-y-auto space-y-1">
               <input
                 type="text"

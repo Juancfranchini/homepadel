@@ -17,19 +17,19 @@ import CatalogSkeleton from './components/CatalogSkeleton';
 
 const ITEMS_PER_PAGE = 12;
 
-export default function CatalogoPage() {
+export default function CatálogoPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-[#050606] flex items-center justify-center">
-        <p className="text-[#C7C7C0] text-sm">Cargando catalogo...</p>
+        <p className="text-[#C7C7C0] text-sm">Cargando catálogo...</p>
       </div>
     }>
-      <CatalogoContent />
+      <CatálogoContent />
     </Suspense>
   );
 }
 
-function CatalogoContent() {
+function CatálogoContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const addItem = useCartStore((s) => s.addItem);
@@ -100,7 +100,7 @@ function CatalogoContent() {
   if (searchQuery) activeChips.push({ label: '"' + searchQuery + '"', onRemove: () => setParam('q', null) });
 
   const pageTitle = isOffer ? 'Ofertas' : selectedCategory
-    ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : 'Catalogo';
+    ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : 'Catálogo';
 
   return (
     <div className="min-h-screen bg-waves">

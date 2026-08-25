@@ -5,7 +5,7 @@ export default function TrustBadges() {
     <div className="grid grid-cols-3 gap-2 py-3 border-y border-[#0D0F0F]">
       {[
         { icon: <Shield size={16} />, title: 'Garantia Oficial' },
-        { icon: <Truck size={16} />, title: 'Envios a todo el pais' },
+        { icon: <Truck size={16} />, title: 'Envíos a todo el pais' },
         { icon: <RefreshCw size={16} />, title: 'Cambios gratuitos' },
       ].map((t, i) => (
         <div key={i} className="flex items-center gap-2">

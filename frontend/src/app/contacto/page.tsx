@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -22,7 +22,7 @@ function getFullUrl(path: string): string {
 const ICON_MAP: Record<string, any> = { MessageCircle, Mail, Clock, MapPin };
 
 export default function ContactoPage() {
-  const [hero, setHero] = useState({ chip: 'ESTAMOS PARA AYUDARTE', title: 'Contactanos', description: 'Tenes dudas sobre nuestros productos, envios o pagos? Nuestro equipo esta para ayudarte.' });
+  const [hero, setHero] = useState({ chip: 'ESTAMOS PARA AYUDARTE', title: 'Contactanos', description: 'Tenes dudas sobre nuestros productos, envíos o pagos? Nuestro equipo esta para ayudarte.' });
   const [heroImage, setHeroImage] = useState('');
   const [infoCards, setInfoCards] = useState<any[]>([]);
   const [benefits, setBenefits] = useState([]);

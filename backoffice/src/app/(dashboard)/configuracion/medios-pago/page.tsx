@@ -19,7 +19,7 @@ const schema = z.object({
   mastercardActive: z.boolean(), mastercardLogo: z.string().optional(),
   amexActive: z.boolean(), amexLogo: z.string().optional(),
   caActive: z.boolean(), caLogo: z.string().optional(), caUsuario: z.string().optional(), caPassword: z.string().optional(), caApiKey: z.string().optional(), caAgreement: z.string().optional(),
-  caRemitenteNombre: z.string().optional(), caRemitenteCalle: z.string().optional(), caRemitenteNumero: z.string().optional(), caRemitenteCiudad: z.string().optional(), caRemitenteCP: z.string().optional(), caRemitenteProvincia: z.string().optional(), caRemitenteTelefono: z.string().optional(),
+  caRemitenteNombre: z.string().optional(), caRemitenteCalle: z.string().optional(), caRemitenteNúmero: z.string().optional(), caRemitenteCiudad: z.string().optional(), caRemitenteCP: z.string().optional(), caRemitenteProvincia: z.string().optional(), caRemitenteTeléfono: z.string().optional(),
   ocaActive: z.boolean(), ocaLogo: z.string().optional(),
   andreaniActive: z.boolean(), andreaniLogo: z.string().optional(),
 });
@@ -56,7 +56,7 @@ export default function MediosPagoPage() {
         mastercardActive: mc.active !== false, mastercardLogo: mc.logo || '',
         amexActive: ax.active !== false, amexLogo: ax.logo || '',
         caActive: ca.active !== false, caLogo: ca.logo || '', caUsuario: ca.usuario || '', caPassword: ca.password || '', caApiKey: ca.apiKey || '', caAgreement: ca.agreement || '',
-        caRemitenteNombre: caRem.nombre || '', caRemitenteCalle: caRem.calle || '', caRemitenteNumero: caRem.numero || '', caRemitenteCiudad: caRem.ciudad || '', caRemitenteCP: caRem.codigoPostal || '', caRemitenteProvincia: caRem.provincia || '', caRemitenteTelefono: caRem.telefono || '',
+        caRemitenteNombre: caRem.nombre || '', caRemitenteCalle: caRem.calle || '', caRemitenteNúmero: caRem.número || '', caRemitenteCiudad: caRem.ciudad || '', caRemitenteCP: caRem.códigoPostal || '', caRemitenteProvincia: caRem.provincia || '', caRemitenteTeléfono: caRem.teléfono || '',
         ocaActive: oc.active !== false, ocaLogo: oc.logo || '',
         andreaniActive: an.active !== false, andreaniLogo: an.logo || '',
       });
@@ -74,12 +74,12 @@ export default function MediosPagoPage() {
         visa: { active: data.visaActive, logo: data.visaLogo },
         mastercard: { active: data.mastercardActive, logo: data.mastercardLogo },
         amex: { active: data.amexActive, logo: data.amexLogo },
-        ca: { active: data.caActive, logo: data.caLogo, usuario: data.caUsuario, password: data.caPassword, apiKey: data.caApiKey, agreement: data.caAgreement, remitente: { nombre: data.caRemitenteNombre, calle: data.caRemitenteCalle, numero: data.caRemitenteNumero, ciudad: data.caRemitenteCiudad, codigoPostal: data.caRemitenteCP, provincia: data.caRemitenteProvincia, telefono: data.caRemitenteTelefono } },
+        ca: { active: data.caActive, logo: data.caLogo, usuario: data.caUsuario, password: data.caPassword, apiKey: data.caApiKey, agreement: data.caAgreement, remitente: { nombre: data.caRemitenteNombre, calle: data.caRemitenteCalle, número: data.caRemitenteNúmero, ciudad: data.caRemitenteCiudad, códigoPostal: data.caRemitenteCP, provincia: data.caRemitenteProvincia, teléfono: data.caRemitenteTeléfono } },
         oca: { active: data.ocaActive, logo: data.ocaLogo },
         andreani: { active: data.andreaniActive, logo: data.andreaniLogo },
       };
       await api.put('/site-sections/payment_methods', { data: payload, active: true });
-      toast('Configuracion guardada', 'success');
+      toast('Configuración guardada', 'success');
     } catch { toast('Error al guardar', 'error'); } finally { setSaving(false); }
   };
 
@@ -93,7 +93,7 @@ export default function MediosPagoPage() {
     <div className="space-y-6 w-full">
       <div className="flex items-center gap-3">
         <Link href="/configuracion" className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"><ArrowLeft className="w-4 h-4" /></Link>
-        <div><h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><CreditCard className="w-5 h-5 text-[#C8FF00]" />Medios de Pago y Envio</h1><p className="text-gray-500 text-sm mt-0.5">Configuracion de medios de pago y envio</p></div>
+        <div><h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><CreditCard className="w-5 h-5 text-[#C8FF00]" />Medios de Pago y Envío</h1><p className="text-gray-500 text-sm mt-0.5">Configuración de medios de pago y envío</p></div>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -179,9 +179,9 @@ export default function MediosPagoPage() {
           </div>
         </div>
 
-        {/* Envios */}
+        {/* Envíos */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-          <h2 className="text-sm font-semibold text-gray-800 border-b border-gray-100 pb-3 flex items-center gap-2"><Truck className="w-4 h-4 text-[#C8FF00]" />Medios de Envio</h2>
+          <h2 className="text-sm font-semibold text-gray-800 border-b border-gray-100 pb-3 flex items-center gap-2"><Truck className="w-4 h-4 text-[#C8FF00]" />Medios de Envío</h2>
 
           {/* Correo Argentino - Panel completo */}
           <div className="border border-gray-100 rounded-xl p-4 space-y-4">
@@ -197,7 +197,7 @@ export default function MediosPagoPage() {
                     <input {...register('caUsuario')} className={inputClass} placeholder="facucrespo_97@hotmail.com" />
                   </div>
                   <div>
-                    <label className={labelClass}>Contrasena</label>
+                    <label className={labelClass}>Contraseña</label>
                     <div className="relative">
                       <input {...register('caPassword')} className={inputClass + ' pr-8'} type={showCaPassword ? 'text' : 'password'} placeholder="********" />
                       <button type="button" onClick={() => setShowCaPassword(!showCaPassword)} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -219,11 +219,11 @@ export default function MediosPagoPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div><label className={labelClass}>Nombre / Empresa</label><input {...register('caRemitenteNombre')} className={inputClass} placeholder="Home Padel" /></div>
                     <div><label className={labelClass}>Calle</label><input {...register('caRemitenteCalle')} className={inputClass} placeholder="Av. Corrientes" /></div>
-                    <div><label className={labelClass}>Numero</label><input {...register('caRemitenteNumero')} className={inputClass} placeholder="1234" /></div>
+                    <div><label className={labelClass}>Número</label><input {...register('caRemitenteNúmero')} className={inputClass} placeholder="1234" /></div>
                     <div><label className={labelClass}>Ciudad</label><input {...register('caRemitenteCiudad')} className={inputClass} placeholder="CABA" /></div>
-                    <div><label className={labelClass}>Codigo Postal</label><input {...register('caRemitenteCP')} className={inputClass} placeholder="1043" /></div>
+                    <div><label className={labelClass}>Código Postal</label><input {...register('caRemitenteCP')} className={inputClass} placeholder="1043" /></div>
                     <div><label className={labelClass}>Provincia</label><input {...register('caRemitenteProvincia')} className={inputClass} placeholder="Buenos Aires" /></div>
-                    <div><label className={labelClass}>Telefono</label><input {...register('caRemitenteTelefono')} className={inputClass} placeholder="11-5555-6666" /></div>
+                    <div><label className={labelClass}>Teléfono</label><input {...register('caRemitenteTeléfono')} className={inputClass} placeholder="11-5555-6666" /></div>
                   </div>
                 </div>
                 <div>

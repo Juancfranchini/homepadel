@@ -180,7 +180,7 @@ export default function TestimoniosPage() {
   });
 
   const totalPages = Math.ceil(sorted.length / pageSize);
-  const paginated = sorted.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const páginated = sorted.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   if (loading) return <PageLoader />;
 
@@ -199,7 +199,7 @@ export default function TestimoniosPage() {
         </div>
       </div>
 
-      {paginated.length === 0 ? (
+      {páginated.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 py-20 text-center">
           <p className="text-gray-400 text-sm">No se encontraron testimonios</p>
         </div>
@@ -214,11 +214,11 @@ export default function TestimoniosPage() {
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Modificado{sortIcon('updatedAt')}</th>
                 <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Puntuacion{sortIcon('rating')}</th>
                 <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
+                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciónes</th>
               </tr>
             </thead>
             <tbody>
-              {paginated.map((t) => (
+              {páginated.map((t) => (
                 <tr key={t.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3">
                     {t.photo ? (

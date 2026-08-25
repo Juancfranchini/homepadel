@@ -18,14 +18,14 @@ export default function CampanasTab({ campaigns, templates, recipients, campaign
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-gray-800 flex items-center gap-2"><Users className="w-4 h-4 text-gray-500" />CampaÃ±as</h2>
+        <h2 className="text-sm font-semibold text-gray-800 flex items-center gap-2"><Users className="w-4 h-4 text-gray-500" />Campañas</h2>
         <button onClick={() => setCampaignModal(true)} className="flex items-center gap-2 px-4 py-2 bg-[#C8FF00] text-[#0f172a] hover:bg-[#b8ef00] rounded-lg font-semibold text-sm hover:bg-[#b8ef00]">
-          <Plus className="w-4 h-4" />Nueva campaÃ±a
+          <Plus className="w-4 h-4" />Nueva campaña
         </button>
       </div>
       <div className="space-y-2">
         {campaigns.length === 0 ? (
-          <p className="text-sm text-gray-400 text-center py-8">No hay campaÃ±as creadas</p>
+          <p className="text-sm text-gray-400 text-center py-8">No hay campañas creadas</p>
         ) : (
           campaigns.map((camp) => (
             <div key={camp.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-lg hover:bg-gray-50">
