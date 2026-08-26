@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -39,6 +39,7 @@ const schema = z.object({
   estimatedDays: z.coerce.number().int().optional(),
   requiredDeposit: z.coerce.number().min(0).max(100).optional(),
 });
+
 export type ProductFormData = z.infer<typeof schema> & { images?: string[] };
 
 interface Category { id: string; name: string }
@@ -59,21 +60,30 @@ const labelClass = 'text-xs font-medium text-gray-400 uppercase tracking-wider';
 export default function ProductForm({ defaultValues, onSave, onCancel, saving, categories, brands }: Props) {
   const [uploading, setUploading] = useState(false);
   const [galleryImages, setGalleryImages] = useState<string[]>(Array.isArray(defaultValues?.images) ? (defaultValues.images as string[]).slice(1) : []);
+  const [mainImage, setMainImage] = useState<string>(Array.isArray(defaultValues?.images) ? (defaultValues.images as string[])[0] || '' : '');
+  
   const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<ProductFormData>({
     resolver: zodResolver(schema),
-    defaultValues: defaultValues || { active: true, featured: false, isNew: false, isOffer: false, stock: 0, price: 0 },
+    defaultValues: defaultValues || { 
+      active: true, 
+      featured: false, 
+      isNew: false, 
+      isOffer: false, 
+      stock: 0, 
+      price: 0,
+      categoryId: '',
+      brandId: ''
+    },
   });
 
   useEffect(() => {
     if (defaultValues) {
       reset(defaultValues);
       setGalleryImages(Array.isArray(defaultValues.images) ? (defaultValues.images as string[]).slice(1) : []);
+      setMainImage(Array.isArray(defaultValues.images) ? (defaultValues.images as string[])[0] || '' : '');
     }
   }, [defaultValues, reset]);
 
-  const imagesArray = watch('images') || [];
-  const imageUrl = imagesArray[0] || '';
-  const previewUrl = getImageUrl(imageUrl);
   const featured = watch('featured');
   const active = watch('active');
   const isNew = watch('isNew');
@@ -81,7 +91,7 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
   const hasInstallmentsInterest = watch('hasInstallmentsInterest');
   const isMadeToOrder = watch('isMadeToOrder');
 
-
+  const previewUrl = getImageUrl(mainImage);
 
   const handleUpload = async () => {
     const input = document.createElement('input');
@@ -98,15 +108,19 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
           headers: { 'Content-Type': 'multipart/form-data' },
         });
         const url = res.data?.url || res.data?.imageUrl || '';
-        const currentImages = watch('images') || []; currentImages[0] = url; setValue('images', [...currentImages].filter(Boolean), { shouldDirty: true });
+        setMainImage(url);
       } catch {} finally { setUploading(false); }
     };
     input.click();
   };
 
+  const handleFormSubmit = (data: ProductFormData) => {
+    const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[];
+    onSave({ ...data, images: allImages });
+  };
+
   return (
-    <form onSubmit={handleSubmit((data) => { const mainImage = typeof data.images === 'string' ? data.images : (Array.isArray(data.images) ? data.images[0] : '');
-const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[]; onSave({ ...data, images: allImages }); })} className="flex gap-0">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="flex gap-0">
       <div className="flex-shrink-0 w-[220px] flex flex-col gap-3">
         <div className="w-full h-[220px] rounded-xl bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200">
           {previewUrl ? (
@@ -116,7 +130,13 @@ const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[]; onS
           )}
         </div>
         <div className="flex gap-2">
-          <input {...register('images')} className="flex-1 px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00]" placeholder="URL de imagen" />
+          <input 
+            type="text"
+            value={mainImage}
+            onChange={(e) => setMainImage(e.target.value)}
+            className="flex-1 px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00]" 
+            placeholder="URL de imagen" 
+          />
           <button type="button" onClick={handleUpload} disabled={uploading} className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all border border-[#C8FF00]/50 text-gray-600 hover:bg-gray-50 disabled:opacity-50">
             <Upload className="w-3 h-3" />{uploading ? '...' : 'Subir'}
           </button>
@@ -148,12 +168,12 @@ const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[]; onS
           {errors.price && <p className="text-xs text-red-600 mt-0.5">{errors.price.message}</p>}
         </div>
         <div>
-          <label className={labelClass}>Precio Promociónal</label>
+          <label className={labelClass}>Precio Promocional</label>
           <input type="number" step="0.01" {...register('salePrice')} className={inputClass + ' mt-1'} />
         </div>
         <div>
           <label className={labelClass}>Precio Transferencia/Deposito</label>
-          <input type="number" step="0.01" {...register('transferPrice')} className={inputClass + ' mt-1'} placeholder="Opciónal" />
+          <input type="number" step="0.01" {...register('transferPrice')} className={inputClass + ' mt-1'} placeholder="Opcional" />
         </div>
 
         {!isMadeToOrder && (

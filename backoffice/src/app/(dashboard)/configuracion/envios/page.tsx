@@ -21,7 +21,7 @@ export default function EnvíosPage() {
 
   const { register, handleSubmit, reset, control, watch, setValue } = useForm<any>({
     resolver: zodResolver(z.object({
-      title: z.string().min(1, 'El titulo es requerido'),
+      title: z.string().min(1, 'El título es requerido'),
       sections: z.array(z.object({
         title: z.string().optional().default(''),
         content: z.string().optional().default(''),
@@ -80,7 +80,7 @@ export default function EnvíosPage() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
           <div>
-            <label className={labelClass}>Titulo principal de la página</label>
+            <label className={labelClass}>Título principal de la página</label>
             <input {...register('title')} className={inputClass} placeholder="Envíos" />
           </div>
         </div>
@@ -93,7 +93,7 @@ export default function EnvíosPage() {
                 <span className="text-xs font-semibold text-gray-400 uppercase">Sección {index + 1}</span>
                 <input
                   {...register('sections.' + index + '.title')}
-                  placeholder="Titulo de la sección"
+                  placeholder="Título de la sección"
                   className="px-2 py-1 border border-gray-200 rounded text-sm text-gray-900 focus:outline-none focus:border-[#C8FF00] flex-1 max-w-xs"
                 />
               </div>

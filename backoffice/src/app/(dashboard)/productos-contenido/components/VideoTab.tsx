@@ -33,7 +33,7 @@ export default function VideoTab({ register, control, showVideo, onToggleShowVid
         <p className="text-xs text-gray-400 mb-2">Aparecen debajo de "Por que elegir este producto".</p>
         {relatedVideosArray.fields.map((field, i) => (
           <div key={field.id} className="flex gap-2 mb-2">
-            <input {...register(('relatedVideos.' + i + '.title') as any)} className={inputClass + ' flex-1'} placeholder={'Titulo ' + (i + 1)} />
+            <input {...register(('relatedVideos.' + i + '.title') as any)} className={inputClass + ' flex-1'} placeholder={'Título ' + (i + 1)} />
             <input {...register(('relatedVideos.' + i + '.url') as any)} className={inputClass + ' flex-1'} placeholder="https://youtu.be/..." />
             <button type="button" onClick={() => relatedVideosArray.remove(i)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg"><Trash2 size={14} /></button>
           </div>

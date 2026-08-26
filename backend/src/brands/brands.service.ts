@@ -1,45 +1,102 @@
 ﻿import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import slugify from 'slugify';
-
-function normalizeDto(dto: any): any {
-  const { isActive, logoUrl, logo, ...rest } = dto;
-  if (isActive !== undefined) rest.active = isActive;
-  const finalLogo = logoUrl || logo;
-  if (finalLogo !== undefined) rest.logo = finalLogo;
-  return rest;
-}
+import { CreateBrandDto } from './dto/create-brand.dto';
+import { UpdateBrandDto } from './dto/update-brand.dto';
 
 @Injectable()
 export class BrandsService {
   constructor(private prisma: PrismaService) {}
 
-  findAll() { return this.prisma.brand.findMany({ orderBy: { name: 'asc' } }); }
-
-  create(dto: any) {
-    const data = normalizeDto(dto);
-    const slug = slugify(data.name, { lower: true, strict: true });
-    return this.prisma.brand.create({ data: { ...data, slug } });
+  private generateSlug(name: string): string {
+    return name
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
   }
 
-  async update(id: string, dto: any) {
+  async create(createBrandDto: CreateBrandDto) {
+    // Generar slug automáticamente
+    const baseSlug = this.generateSlug(createBrandDto.name);
+    let slug = baseSlug;
+    let counter = 1;
+    
+    // Asegurar unicidad
+    while (true) {
+      const existing = await this.prisma.brand.findUnique({ where: { slug } });
+      if (!existing) break;
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+
+    return this.prisma.brand.create({
+      data: {
+        ...createBrandDto,
+        slug,
+      },
+    });
+  }
+
+  async findAll() {
+    return this.prisma.brand.findMany({
+      where: { active: true },
+      orderBy: { order: 'asc' },
+    });
+  }
+
+  async findAllAdmin() {
+    return this.prisma.brand.findMany({
+      orderBy: { order: 'asc' },
+    });
+  }
+
+  async findOne(id: string) {
     const brand = await this.prisma.brand.findUnique({ where: { id } });
-    if (!brand) throw new NotFoundException('Marca no encontrada');
-    const data = normalizeDto(dto);
-    if (data.name) data.slug = slugify(data.name, { lower: true, strict: true });
-    return this.prisma.brand.update({ where: { id }, data });
+    if (!brand) {
+      throw new NotFoundException('Marca no encontrada');
+    }
+    return brand;
+  }
+
+  async update(id: string, updateBrandDto: UpdateBrandDto) {
+    const brand = await this.prisma.brand.findUnique({ where: { id } });
+    if (!brand) {
+      throw new NotFoundException('Marca no encontrada');
+    }
+    return this.prisma.brand.update({
+      where: { id },
+      data: updateBrandDto,
+    });
   }
 
   async remove(id: string) {
     const brand = await this.prisma.brand.findUnique({ where: { id } });
-    if (!brand) throw new NotFoundException('Marca no encontrada');
-    try {
-      return await this.prisma.brand.delete({ where: { id } });
-    } catch (error: any) {
-      if (error.code === 'P2003' || error.code === 'P2014') {
-        throw new BadRequestException('No se puede eliminar esta marca porque tiene productos asociados.');
-      }
-      throw error;
+    if (!brand) {
+      throw new NotFoundException('Marca no encontrada');
     }
+
+    const productCount = await this.prisma.product.count({
+      where: { brandId: id },
+    });
+
+    if (productCount > 0) {
+      throw new BadRequestException(
+        'No se puede eliminar la marca porque tiene ' + productCount + ' productos asociados. Utilice la opcion de desactivar.'
+      );
+    }
+
+    return this.prisma.brand.delete({ where: { id } });
+  }
+
+  async deactivate(id: string) {
+    const brand = await this.prisma.brand.findUnique({ where: { id } });
+    if (!brand) {
+      throw new NotFoundException('Marca no encontrada');
+    }
+    return this.prisma.brand.update({
+      where: { id },
+      data: { active: false },
+    });
   }
 }

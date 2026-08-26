@@ -132,7 +132,7 @@ export default function PedidosPage() {
               <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
               <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
               <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden xl:table-cell">Fecha</th>
-              <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciónes</th>
+              <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
             </tr>
           </thead>
           <tbody>

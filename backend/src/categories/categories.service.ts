@@ -1,45 +1,100 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+﻿import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import slugify from 'slugify';
-
-function normalizeDto(dto: any): any {
-  const { isActive, ...rest } = dto;
-  if (isActive !== undefined) rest.active = isActive;
-  return rest;
-}
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Injectable()
 export class CategoriesService {
   constructor(private prisma: PrismaService) {}
 
-  findAll() {
-    return this.prisma.category.findMany({ orderBy: { name: 'asc' } });
+  private generateSlug(name: string): string {
+    return name
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
   }
 
-  create(dto: any) {
-    const data = normalizeDto(dto);
-    const slug = slugify(data.name, { lower: true, strict: true });
-    return this.prisma.category.create({ data: { ...data, slug } });
+  async create(createCategoryDto: CreateCategoryDto) {
+    const baseSlug = this.generateSlug(createCategoryDto.name);
+    let slug = baseSlug;
+    let counter = 1;
+    
+    while (true) {
+      const existing = await this.prisma.category.findUnique({ where: { slug } });
+      if (!existing) break;
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+
+    return this.prisma.category.create({
+      data: {
+        ...createCategoryDto,
+        slug,
+      },
+    });
   }
 
-  async update(id: string, dto: any) {
-    const cat = await this.prisma.category.findUnique({ where: { id } });
-    if (!cat) throw new NotFoundException('Categoría no encontrada');
-    const data = normalizeDto(dto);
-    if (data.name) data.slug = slugify(data.name, { lower: true, strict: true });
-    return this.prisma.category.update({ where: { id }, data });
+  async findAll() {
+    return this.prisma.category.findMany({
+      where: { active: true },
+      orderBy: { order: 'asc' },
+    });
+  }
+
+  async findAllAdmin() {
+    return this.prisma.category.findMany({
+      orderBy: { order: 'asc' },
+    });
+  }
+
+  async findOne(id: string) {
+    const category = await this.prisma.category.findUnique({ where: { id } });
+    if (!category) {
+      throw new NotFoundException('Categoria no encontrada');
+    }
+    return category;
+  }
+
+  async update(id: string, updateCategoryDto: UpdateCategoryDto) {
+    const category = await this.prisma.category.findUnique({ where: { id } });
+    if (!category) {
+      throw new NotFoundException('Categoria no encontrada');
+    }
+    return this.prisma.category.update({
+      where: { id },
+      data: updateCategoryDto,
+    });
   }
 
   async remove(id: string) {
-    const cat = await this.prisma.category.findUnique({ where: { id } });
-    if (!cat) throw new NotFoundException('Categoría no encontrada');
-    try {
-      return await this.prisma.category.delete({ where: { id } });
-    } catch (error: any) {
-      if (error.code === 'P2003' || error.code === 'P2014') {
-        throw new BadRequestException('No se puede eliminar esta categoría porque tiene productos asociados.');
-      }
-      throw error;
+    const category = await this.prisma.category.findUnique({ where: { id } });
+    if (!category) {
+      throw new NotFoundException('Categoria no encontrada');
     }
+
+    const productCount = await this.prisma.product.count({
+      where: { categoryId: id },
+    });
+
+    if (productCount > 0) {
+      throw new BadRequestException(
+        'No se puede eliminar la categoria porque tiene ' + productCount + ' productos asociados. Utilice la opcion de desactivar.'
+      );
+    }
+
+    return this.prisma.category.delete({ where: { id } });
+  }
+
+  async deactivate(id: string) {
+    const category = await this.prisma.category.findUnique({ where: { id } });
+    if (!category) {
+      throw new NotFoundException('Categoria no encontrada');
+    }
+    return this.prisma.category.update({
+      where: { id },
+      data: { active: false },
+    });
   }
 }

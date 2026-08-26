@@ -28,7 +28,7 @@ export default function CategoryCards({ categories }: Props) {
             CATEGORIAS
           </h2>
           <p className="text-[#C7C7C0] text-sm mt-1">
-            Encontra lo que necesitas para tu mejor version en la cancha.
+            Encontra lo que necesitas para tu mejor versión en la cancha.
           </p>
         </div>
 

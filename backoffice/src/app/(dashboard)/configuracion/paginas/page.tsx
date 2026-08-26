@@ -42,10 +42,10 @@ export default function PoliticaDevoluciónPage() {
       const data = res.data?.data ?? res.data ?? {};
       reset({
         chip: data.chip || 'DEVOLUCIONES Y CAMBIOS',
-        title: data.title || 'Politica de Devolución',
+        title: data.title || 'Política de Devolución',
         description: data.description || 'En Home Padel queremos que estes 100% satisfecho con tu compra.',
         benefits: data.benefits?.length >= 4 ? data.benefits : [
-          { icon: 'RefreshCw', title: '30 DIAS', desc: 'Tenes hasta 30 días corridos desde que recibis tu pedido.' },
+          { icon: 'RefreshCw', title: '30 DÍAS', desc: 'Tenes hasta 30 días corridos desde que recibis tu pedido.' },
           { icon: 'Package', title: 'PRODUCTO SIN USO', desc: 'El producto debe estar sin uso, con etiquetas y en su embalaje original.' },
           { icon: 'Shield', title: 'CAMBIO O REINTEGRO', desc: 'Podes elegir entre cambio por otro producto o reintegro del dinero.' },
           { icon: 'Check', title: 'COMPRA SEGURA', desc: 'Proceso simple, rapido y 100% seguro.' },
@@ -68,7 +68,7 @@ export default function PoliticaDevoluciónPage() {
     setSaving(true);
     try {
       await api.put('/site-sections/politica_devolución', { data, active: true });
-      toast('Politica de Devolución guardada', 'success');
+      toast('Política de Devolución guardada', 'success');
     } catch { toast('Error al guardar', 'error'); } finally { setSaving(false); }
   };
 
@@ -78,7 +78,7 @@ export default function PoliticaDevoluciónPage() {
     <div className="space-y-6 w-full">
       <div className="flex items-center gap-3">
         <Link href="/configuracion" className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"><ArrowLeft className="w-4 h-4" /></Link>
-        <div><h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><FileText className="w-5 h-5 text-[#C8FF00]" />Politica de Devolución</h1><p className="text-gray-500 text-sm mt-0.5">Contenido de la página de devoluciónes y cambios</p></div>
+        <div><h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><FileText className="w-5 h-5 text-[#C8FF00]" />Política de Devolución</h1><p className="text-gray-500 text-sm mt-0.5">Contenido de la página de devoluciónes y cambios</p></div>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -86,7 +86,7 @@ export default function PoliticaDevoluciónPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
           <h3 className="text-sm font-semibold text-gray-800 border-b border-gray-100 pb-3">Hero Principal</h3>
           <div><label className={labelClass}>Chip (texto verde)</label><input {...register('chip')} className={inputClass} placeholder="DEVOLUCIONES Y CAMBIOS" /></div>
-          <div><label className={labelClass}>Titulo</label><input {...register('title')} className={inputClass} placeholder="Politica de Devolución" /></div>
+          <div><label className={labelClass}>Título</label><input {...register('title')} className={inputClass} placeholder="Política de Devolución" /></div>
           <div><label className={labelClass}>Descripción</label><textarea {...register('description')} rows={3} className={inputClass} /></div>
         </div>
 
@@ -100,7 +100,7 @@ export default function PoliticaDevoluciónPage() {
           {benefitsArray.fields.length > 0 && (
             <div className="flex gap-2 mb-1 px-1">
               <span className="text-[10px] font-semibold text-gray-400 uppercase" style={{width: '25%'}}>Icono</span>
-              <span className="text-[10px] font-semibold text-gray-400 uppercase" style={{width: '35%'}}>Titulo</span>
+              <span className="text-[10px] font-semibold text-gray-400 uppercase" style={{width: '35%'}}>Título</span>
               <span className="text-[10px] font-semibold text-gray-400 uppercase" style={{width: '40%'}}>Descripción</span>
               <span style={{width: 32}}></span>
             </div>
@@ -118,7 +118,7 @@ export default function PoliticaDevoluciónPage() {
                     {createElement(IconComp, { size: 14 })}
                   </span>
                 </div>
-                <input {...register(('benefits.' + i + '.title') as any)} className={inputClass} style={{width: '35%'}} placeholder="Titulo" />
+                <input {...register(('benefits.' + i + '.title') as any)} className={inputClass} style={{width: '35%'}} placeholder="Título" />
                 <input {...register(('benefits.' + i + '.desc') as any)} className={inputClass} style={{width: '40%'}} placeholder="Descripción" />
                 <button type="button" onClick={() => benefitsArray.remove(i)} className="p-1.5 text-red-400 hover:bg-red-50 rounded-lg flex-shrink-0"><Trash2 size={14} /></button>
               </div>
@@ -152,7 +152,7 @@ export default function PoliticaDevoluciónPage() {
           {stepsArray.fields.map((field, i) => (
             <div key={field.id} className="flex gap-2">
               <span className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 flex-shrink-0">{i + 1}</span>
-              <input {...register('steps.' + i + '.title')} className={inputClass + ' flex-1'} placeholder="Titulo del paso" />
+              <input {...register('steps.' + i + '.title')} className={inputClass + ' flex-1'} placeholder="Título del paso" />
               <input {...register('steps.' + i + '.desc')} className={inputClass + ' flex-1'} placeholder="Descripción" />
               <button type="button" onClick={() => stepsArray.remove(i)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg"><Trash2 size={14} /></button>
             </div>
@@ -178,7 +178,7 @@ export default function PoliticaDevoluciónPage() {
         {/* Ayuda */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
           <h3 className="text-sm font-semibold text-gray-800 border-b border-gray-100 pb-3">Sección de Ayuda</h3>
-          <div><label className={labelClass}>Titulo</label><input {...register('helpTitle')} className={inputClass} /></div>
+          <div><label className={labelClass}>Título</label><input {...register('helpTitle')} className={inputClass} /></div>
           <div><label className={labelClass}>Descripción</label><input {...register('helpDescription')} className={inputClass} /></div>
           <div><label className={labelClass}>Horario</label><input {...register('helpSchedule')} className={inputClass} /></div>
           <div className="grid grid-cols-2 gap-3">

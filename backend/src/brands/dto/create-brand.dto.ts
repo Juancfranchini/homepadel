@@ -1,6 +1,6 @@
-﻿import { IsString, IsOptional, IsInt, Min, IsBoolean } from 'class-validator';
+﻿import { IsString, IsOptional, IsUrl, IsInt, Min, IsBoolean } from 'class-validator';
 
-export class CreateCategoryDto {
+export class CreateBrandDto {
   @IsString()
   name: string;
 
@@ -10,7 +10,11 @@ export class CreateCategoryDto {
 
   @IsOptional()
   @IsString()
-  image?: string;
+  logo?: string;
+
+  @IsOptional()
+  @IsUrl()
+  url?: string;
 
   @IsOptional()
   @IsInt()

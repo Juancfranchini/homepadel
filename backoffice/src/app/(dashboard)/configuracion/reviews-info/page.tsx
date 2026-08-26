@@ -11,7 +11,7 @@ import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { useToast } from '@/components/ui/Toast';
 
 const schema = z.object({
-  title: z.string().min(2, 'El titulo es requerido'),
+  title: z.string().min(2, 'El título es requerido'),
   content: z.string().min(10, 'El contenido es requerido'),
 });
 type FormData = z.infer<typeof schema>;

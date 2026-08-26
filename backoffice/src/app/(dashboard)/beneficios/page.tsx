@@ -36,7 +36,7 @@ ICON_OPTIONS.forEach((o) => { ICON_MAP[o.value] = o.icon; });
 
 const schema = z.object({
   icon: z.string().min(1, 'Selecciona un icono'),
-  title: z.string().min(2, 'El titulo es requerido'),
+  title: z.string().min(2, 'El título es requerido'),
   description: z.string().optional().or(z.literal('')),
   order: z.coerce.number().int().min(0).default(0),
   active: z.boolean().default(true),
@@ -129,10 +129,10 @@ export default function BeneficiosPage() {
               <tr className="border-b border-gray-100">
                 <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-12">#</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Icono</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Titulo</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Título</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Descripción</th>
                 <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciónes</th>
+                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
               </tr>
             </thead>
             <tbody>
@@ -186,7 +186,7 @@ export default function BeneficiosPage() {
               {errors.icon && <p className="text-xs text-red-600 mt-1">{errors.icon.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Titulo *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Título *</label>
               <input {...register('title')} className={inputClass} placeholder="Ej: Envío gratis" />
               {errors.title && <p className="text-xs text-red-600 mt-1">{errors.title.message}</p>}
             </div>

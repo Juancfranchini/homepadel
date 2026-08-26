@@ -61,7 +61,7 @@ export default function FaqPage() {
           Preguntas Frecuentes
         </h1>
         <p className="text-[#C7C7C0] text-base leading-relaxed max-w-xl mx-auto">
-          Encontra respuestas a las dudas mas comunes. Si no encontras lo que buscas, no dudes en contactarnos.
+          Encontra respuestas a las dudas más comunes. Si no encontras lo que buscas, no dudes en contactarnos.
         </p>
       </section>
 

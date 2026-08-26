@@ -21,7 +21,7 @@ const menuItems = [
 
 type MenuSection = 'category' | 'active';
 
-const CATEGORIES = ['COMPRAS', 'ENVIOS', 'PAGOS', 'DEVOLUCIONES', 'PRODUCTOS', 'General'];
+const CATEGORIES = ['COMPRAS', 'ENVÍOS', 'PAGOS', 'DEVOLUCIONES', 'PRODUCTOS', 'General'];
 
 export default function FaqAdvancedSearchModal({ isOpen, onClose, onApply }: Props) {
   const [activeSection, setActiveSection] = useState<MenuSection>('category');

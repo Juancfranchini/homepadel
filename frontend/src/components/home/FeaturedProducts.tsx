@@ -145,7 +145,7 @@ export default function FeaturedProducts({ products }: Props) {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-2xl md:text-3xl font-semibold uppercase text-[#F7F6F7]">
-              LOS MAS VENDIDOS
+              LOS MÁS VENDIDOS
             </h2>
             <p className="text-[#C7C7C0] text-sm mt-0.5">Elegidos por nuestra comunidad.</p>
           </div>
