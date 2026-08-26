@@ -9,9 +9,9 @@ interface Props {
 const FALLBACK: Banner[] = [
   {
     id: '1',
-    title: 'NUEVA COLECCION 2026',
+    title: 'NUEVA COLECCIÓN 2026',
     subtitle: 'Zapatillas premium',
-    ctaText: 'VER COLECCION',
+    ctaText: 'VER COLECCIÓN',
     link: '/catalogo?categoria=zapatillas',
     image: '',
     order: 0,

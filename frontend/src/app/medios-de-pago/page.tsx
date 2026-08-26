@@ -36,7 +36,7 @@ export default function MediosPagoPage() {
 
       <div className="max-w-4xl mx-auto px-6 lg:px-8 py-12">
         <h1 className="text-3xl font-bold text-[#F7F6F7] mb-2">Medios de Pago</h1>
-        <p className="text-[#8A8A85] mb-10">Trabajamos con los medios de pago mas seguros del mercado.</p>
+        <p className="text-[#8A8A85] mb-10">Trabajamos con los medios de pago más seguros del mercado.</p>
 
         <div className="space-y-4 mb-12">
           {paymentMethods.map((method) => (

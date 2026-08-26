@@ -25,7 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
       template: '%s | Home Padel',
     },
     description:
-      'Las mejores paletas, indumentaria y accesorios para padel. Nueva temporada 2026 con envios a todo el pais.',
+      'Las mejores paletas, indumentaria y accesorios para padel. Nueva temporada 2026 con envíos a todo el pais.',
     keywords: [
       'padel',
       'paletas de padel',

@@ -54,7 +54,7 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold text-sm uppercase tracking-widest text-[#F7F6F7] mb-4">Ayuda</h3>
             <ul className="space-y-2">
-              {[{ label: 'Preguntas frecuentes', href: '/faq' },{ label: 'Rastrear mi pedido', href: '/rastrear' },{ label: 'Cambios y devoluciones', href: '/politica-de-devolucion' },{ label: 'Envios', href: '/envios' },{ label: 'Medios de pago', href: '/medios-de-pago' },{ label: 'Guia de talles', href: '/talles' }].map((link) => (
+              {[{ label: 'Preguntas frecuentes', href: '/faq' },{ label: 'Rastrear mi pedido', href: '/rastrear' },{ label: 'Cambios y devoluciones', href: '/politica-de-devolucion' },{ label: 'Envíos', href: '/envios' },{ label: 'Medios de pago', href: '/medios-de-pago' },{ label: 'Guia de talles', href: '/talles' }].map((link) => (
                 <li key={link.href}><Link href={link.href} className="text-sm hover:text-[#B7D31A] transition-colors">{link.label}</Link></li>
               ))}
             </ul>

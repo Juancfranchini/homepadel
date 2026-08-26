@@ -12,9 +12,9 @@ interface Props {
 const FALLBACK_SLIDE: HeroSlide = {
   id: '0',
   title: 'EQUIPAMIENTO DE\nALTO RENDIMIENTO',
-  subtitle: 'Nueva Coleccion 2026',
-  description: 'Descubri las paletas mas avanzadas del mercado.',
-  ctaPrimary: 'VER COLECCION',
+  subtitle: 'Nueva Colección 2026',
+  description: 'Descubri las paletas más avanzadas del mercado.',
+  ctaPrimary: 'VER COLECCIÓN',
   ctaPrimaryUrl: '/catalogo',
   order: 0,
   active: true,

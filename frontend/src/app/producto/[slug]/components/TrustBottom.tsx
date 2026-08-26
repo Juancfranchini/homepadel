@@ -9,10 +9,10 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 const ICON_MAP: Record<string, any> = { Truck, RefreshCw, Shield, Check, MessageCircle, Star, Zap, Heart, Lock, Headphones, Gift, Award, Clock, ThumbsUp };
 
 const FALLBACK = [
-  { icon: 'Truck', title: 'ENVIOS A TODO EL PAIS', subtitle: 'Recibi tu pedido en cualquier punto del pais' },
-  { icon: 'RefreshCw', title: '30 DIAS PARA CAMBIOS', subtitle: 'Si no estas conforme, podes cambiar tu producto' },
-  { icon: 'Shield', title: 'GARANTIA OFICIAL', subtitle: 'Todos nuestros productos cuentan con garantia oficial' },
-  { icon: 'Check', title: 'PAGOS 100% SEGUROS', subtitle: 'Protegemos tus datos con el mas alto nivel de seguridad' },
+  { icon: 'Truck', title: 'ENVÍOS A TODO EL PAÍS', subtitle: 'Recibi tu pedido en cualquier punto del país' },
+  { icon: 'RefreshCw', title: '30 DÍAS PARA CAMBIOS', subtitle: 'Si no estas conforme, podes cambiar tu producto' },
+  { icon: 'Shield', title: 'GARANTÍA OFICIAL', subtitle: 'Todos nuestros productos cuentan con garantía oficial' },
+  { icon: 'Check', title: 'PAGOS 100% SEGUROS', subtitle: 'Protegemos tus datos con el más alto nivel de seguridad' },
   { icon: 'MessageCircle', title: 'ATENCION PERSONALIZADA', subtitle: 'Te asesoramos por WhatsApp en todo momento' },
 ];
 

@@ -126,7 +126,7 @@ export default function ProductPrice({
           className="flex items-center gap-1.5 text-[#C7C7C0] hover:text-[#F7F6F7] text-xs underline underline-offset-2 transition-colors w-fit"
         >
           <CreditCard size={12} />
-          Ver mas detalles
+          Ver más detalles
         </button>
       )}
     </div>

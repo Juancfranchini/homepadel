@@ -8,7 +8,7 @@ interface Props {
 const FALLBACK = [
   { id: '1', title: 'ENVIO GRATIS', description: 'A todo el pais', icon: 'truck' },
   { id: '2', title: 'HASTA 9 CUOTAS', description: 'Sin interes', icon: 'credit-card' },
-  { id: '3', title: 'CAMBIOS SIN CARGO', description: '30 días de garantia', icon: 'refresh-cw' },
+  { id: '3', title: 'CAMBIOS SIN CARGO', description: '30 días de garantía', icon: 'refresh-cw' },
   { id: '4', title: 'PRODUCTOS ORIGINALES', description: 'Calidad asegurada', icon: 'shield' },
 ];
 
