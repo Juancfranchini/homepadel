@@ -28,7 +28,7 @@ interface Props {
 const menuItems = [
   { id: 'product', label: 'Producto', icon: Package },
   { id: 'active', label: 'Estado', icon: Tag },
-  { id: 'rating', label: 'Puntuacion', icon: Star },
+  { id: 'rating', label: 'Puntuación', icon: Star },
 ];
 
 type MenuSection = 'product' | 'active' | 'rating';
@@ -54,7 +54,7 @@ export default function ReviewsAdvancedSearchModal({ isOpen, onClose, onApply, p
             <h2 className="text-lg font-semibold text-gray-900">Busqueda Avanzada</h2>
             <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
           </div>
-          <p className="text-sm text-gray-500 mt-1">Filtrar por producto, estado y puntuacion</p>
+          <p className="text-sm text-gray-500 mt-1">Filtrar por producto, estado y puntuación</p>
         </div>
 
         <div className="w-full h-px bg-gray-200" />

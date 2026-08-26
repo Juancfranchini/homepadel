@@ -17,7 +17,7 @@ interface Props {
 }
 
 const menuItems = [
-  { id: 'rating', label: 'Puntuacion', icon: Star },
+  { id: 'rating', label: 'Puntuación', icon: Star },
   { id: 'active', label: 'Estado', icon: Tag },
   { id: 'dates', label: 'Rango de Fechas', icon: CalendarDays },
 ];

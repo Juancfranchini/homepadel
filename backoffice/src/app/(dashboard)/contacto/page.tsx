@@ -49,7 +49,7 @@ export default function ContactoPage() {
           { icon: 'MessageCircle', bg: 'bg-green-500/10 border-green-500/20', title: 'WhatsApp', desc: 'La forma mas rapida.', detail: '11 3181-3297', href: 'https://wa.me/5491131813297' },
           { icon: 'Mail', bg: 'bg-[#B7D31A]/10 border-[#B7D31A]/20', title: 'Email', desc: 'Respondemos tu consulta.', detail: 'hola@homepadel.com.ar', href: 'mailto:hola@homepadel.com.ar' },
           { icon: 'Clock', bg: 'bg-white/5 border-[#0D0F0F]', title: 'Horarios', desc: 'Lunes a Viernes de 9 a 18 hs.', detail: 'Sabados de 9 a 13 hs.', href: '' },
-          { icon: 'MapPin', bg: 'bg-white/5 border-[#0D0F0F]', title: 'Ubicacion', desc: 'Villa Luro, CABA.', detail: 'Envíos a todo el pais', href: '' },
+          { icon: 'MapPin', bg: 'bg-white/5 border-[#0D0F0F]', title: 'Ubicacion', desc: 'Villa Luro, CABA.', detail: 'Envíos a todo el paÍs', href: '' },
         ],
       });
     } catch {} finally { setLoading(false); }
@@ -85,7 +85,7 @@ export default function ContactoPage() {
           <h3 className="text-sm font-semibold text-gray-800 border-b border-gray-100 pb-3">Hero Principal</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div><label className={labelClass}>Chip</label><input {...register('chip')} className={inputClass} /></div>
-            <div className="md:col-span-2"><label className={labelClass}>Titulo</label><input {...register('title')} className={inputClass} /></div>
+            <div className="md:col-span-2"><label className={labelClass}>Título</label><input {...register('title')} className={inputClass} /></div>
           </div>
           <div><label className={labelClass}>Descripción</label><textarea {...register('description')} rows={2} className={inputClass} /></div>
         </div>
@@ -125,7 +125,7 @@ export default function ContactoPage() {
                   <button type="button" onClick={() => cardsArray.remove(i)} className="p-1.5 text-red-400 hover:bg-red-50 rounded-lg"><Trash2 size={14} /></button>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  <input {...register(('cards.' + i + '.title') as any)} className={inputClass} placeholder="Titulo" />
+                  <input {...register(('cards.' + i + '.title') as any)} className={inputClass} placeholder="Título" />
                   <input {...register(('cards.' + i + '.desc') as any)} className={inputClass} placeholder="Descripción" />
                   <input {...register(('cards.' + i + '.detail') as any)} className={inputClass} placeholder="Detalle" />
                   <input {...register(('cards.' + i + '.href') as any)} className={inputClass} placeholder="Link (opciónal)" />
@@ -148,7 +148,7 @@ export default function ContactoPage() {
         {/* Newsletter */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
           <h3 className="text-sm font-semibold text-gray-800 border-b border-gray-100 pb-3">Sección Newsletter</h3>
-          <div><label className={labelClass}>Titulo</label><input {...register('newsletterTitle')} className={inputClass} /></div>
+          <div><label className={labelClass}>Título</label><input {...register('newsletterTitle')} className={inputClass} /></div>
           <div><label className={labelClass}>Descripción</label><input {...register('newsletterText')} className={inputClass} /></div>
         </div>
 

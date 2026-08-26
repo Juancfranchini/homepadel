@@ -51,7 +51,7 @@ export default function FaqPage() {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
-  const [categories, setCategories] = useState(['COMPRAS', 'ENVIOS', 'PAGOS', 'DEVOLUCIONES', 'PRODUCTOS', 'GENERAL']);
+  const [categories, setCategories] = useState(['COMPRAS', 'ENVÍOS', 'PAGOS', 'DEVOLUCIONES', 'PRODUCTOS', 'GENERAL']);
   const [showCategories, setShowCategories] = useState(false);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({ resolver: zodResolver(schema) });
@@ -168,7 +168,7 @@ export default function FaqPage() {
                     <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Pregunta</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Respuesta</th>
                     <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-                    <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciónes</th>
+                    <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
                   </tr>
                 </thead>
                 <tbody>

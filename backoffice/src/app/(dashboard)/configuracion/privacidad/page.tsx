@@ -21,10 +21,10 @@ export default function PrivacidadPage() {
 
   const { register, handleSubmit, reset, watch, setValue } = useForm({
     resolver: zodResolver(z.object({
-      title: z.string().min(1, 'El titulo es requerido'),
+      title: z.string().min(1, 'El título es requerido'),
       content: z.string().optional().default(''),
     })),
-    defaultValues: { title: 'Politica de Privacidad', content: '' },
+    defaultValues: { title: 'Política de Privacidad', content: '' },
   });
 
   const load = useCallback(async () => {
@@ -32,7 +32,7 @@ export default function PrivacidadPage() {
     try {
       const res = await api.get('/site-sections/privacidad');
       const data = res.data?.data ?? res.data ?? {};
-      reset({ title: data.title || 'Politica de Privacidad', content: data.content || '' });
+      reset({ title: data.title || 'Política de Privacidad', content: data.content || '' });
     } catch {} finally { setLoading(false); }
   }, [reset]);
 
@@ -42,7 +42,7 @@ export default function PrivacidadPage() {
     setSaving(true);
     try {
       await api.put('/site-sections/privacidad', { data, active: true });
-      toast('Politica de Privacidad guardada', 'success');
+      toast('Política de Privacidad guardada', 'success');
     } catch { toast('Error al guardar', 'error'); } finally { setSaving(false); }
   };
 
@@ -53,15 +53,15 @@ export default function PrivacidadPage() {
       <div className="flex items-center gap-3">
         <Link href="/configuracion" className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"><ArrowLeft className="w-4 h-4" /></Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><UserCheck className="w-5 h-5 text-[#C8FF00]" />Politica de Privacidad</h1>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><UserCheck className="w-5 h-5 text-[#C8FF00]" />Política de Privacidad</h1>
           <p className="text-gray-500 text-sm mt-0.5">Configura la página /privacidad</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
         <div>
-          <label className={labelClass}>Titulo de la página</label>
-          <input {...register('title')} className={inputClass} placeholder="Politica de Privacidad" />
+          <label className={labelClass}>Título de la página</label>
+          <input {...register('title')} className={inputClass} placeholder="Política de Privacidad" />
         </div>
         <div>
           <label className={labelClass}>Contenido</label>

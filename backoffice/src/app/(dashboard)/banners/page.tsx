@@ -25,7 +25,7 @@ interface Banner {
 }
 
 const schema = z.object({
-  title: z.string().min(2, 'El titulo es requerido'),
+  title: z.string().min(2, 'El título es requerido'),
   subtitle: z.string().optional().or(z.literal('')),
   image: z.string().optional().or(z.literal('')),
   imageMobile: z.string().optional().or(z.literal('')),
@@ -137,11 +137,11 @@ export default function BannersPage() {
               <tr className="border-b border-gray-100">
                 <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-12">#</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Imagen</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Titulo</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Subtitulo</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Título</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Subtítulo</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Link</th>
                 <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciónes</th>
+                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
               </tr>
             </thead>
             <tbody>
@@ -205,16 +205,16 @@ export default function BannersPage() {
 
             <div className="flex-1 grid grid-cols-2 gap-4 content-start">
               <div>
-                <label className={labelClass}>Titulo *</label>
+                <label className={labelClass}>Título *</label>
                 <input {...register('title')} className={inputClass + ' mt-1'} placeholder="Ej: Promo de verano" />
                 {errors.title && <p className="text-xs text-red-600 mt-0.5">{errors.title.message}</p>}
               </div>
               <div>
-                <label className={labelClass}>Subtitulo</label>
+                <label className={labelClass}>Subtítulo</label>
                 <input {...register('subtitle')} className={inputClass + ' mt-1'} placeholder="Ej: Zapatillas premium" />
               </div>
               <div>
-                <label className={labelClass}>Texto del boton</label>
+                <label className={labelClass}>Texto del botón</label>
                 <input {...register('ctaText')} className={inputClass + ' mt-1'} placeholder="VER OFERTA" />
               </div>
               <div>

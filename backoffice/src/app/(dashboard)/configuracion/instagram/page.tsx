@@ -11,9 +11,9 @@ import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { useToast } from '@/components/ui/Toast';
 
 const schema = z.object({
-  title: z.string().min(2, 'El titulo es requerido'),
+  title: z.string().min(2, 'El título es requerido'),
   username: z.string().min(2, 'El usuario es requerido'),
-  buttonText: z.string().min(2, 'El texto del boton es requerido'),
+  buttonText: z.string().min(2, 'El texto del botón es requerido'),
   buttonUrl: z.string().min(1, 'La URL del perfil es requerida'),
   appId: z.string().optional().or(z.literal('')),
   appSecret: z.string().optional().or(z.literal('')),
@@ -166,7 +166,7 @@ export default function InstagramConfigPage() {
           <h2 className="text-sm font-semibold text-gray-800 border-b border-gray-100 pb-3">Datos generales</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className={labelClass}>Titulo *</label>
+              <label className={labelClass}>Título *</label>
               <input {...register('title')} className={inputClass} placeholder="No te pierdas ninguna publicacion" />
             </div>
             <div>
@@ -174,7 +174,7 @@ export default function InstagramConfigPage() {
               <input {...register('username')} className={inputClass} placeholder="@home.padel" />
             </div>
             <div>
-              <label className={labelClass}>Texto del boton *</label>
+              <label className={labelClass}>Texto del botón *</label>
               <input {...register('buttonText')} className={inputClass} placeholder="Seguinos en Instagram" />
             </div>
             <div>

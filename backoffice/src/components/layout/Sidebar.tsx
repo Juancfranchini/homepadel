@@ -75,11 +75,11 @@ const navGroups: NavGroup[] = [
       { label: 'Confianza Productos', href: '/configuracion/confianza-productos', icon: Shield },
       { label: 'Medios de Pago', href: '/configuracion/medios-pago', icon: CreditCard },
       
-      { label: 'Politica de Devolucion', href: '/configuracion/paginas', icon: RefreshCw },
-      { label: 'Guia de Talles', href: '/configuracion/talles', icon: Ruler },
-      { label: 'Envios', href: '/configuracion/envios', icon: Truck },
-      { label: 'Politica de Privacidad', href: '/configuracion/privacidad', icon: UserCheck },
-      { label: 'Terminos y Condiciones', href: '/configuracion/terminos', icon: FileCheck },
+      { label: 'Política de Devolución', href: '/configuracion/paginas', icon: RefreshCw },
+      { label: 'Guía de Talles', href: '/configuracion/talles', icon: Ruler },
+      { label: 'EnvÍos', href: '/configuracion/envios', icon: Truck },
+      { label: 'Política de Privacidad', href: '/configuracion/privacidad', icon: UserCheck },
+      { label: 'Términos y Condiciones', href: '/configuracion/terminos', icon: FileCheck },
     ],
   },
   {

@@ -25,7 +25,7 @@ interface ContactChannel {
 }
 
 const schema = z.object({
-  title: z.string().min(2, 'El titulo es requerido'),
+  title: z.string().min(2, 'El título es requerido'),
   description: z.string().optional().default(''),
   logo: z.string().optional().default(''),
   url: z.string().min(1, 'La URL es requerida'),
@@ -135,11 +135,11 @@ export default function CanalesContactoPage() {
               <tr className="border-b border-gray-100">
                 <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Orden</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Logo</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Titulo</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Título</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Descripción</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">URL</th>
                 <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciónes</th>
+                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
               </tr>
             </thead>
             <tbody>
@@ -183,12 +183,12 @@ export default function CanalesContactoPage() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className={labelClass}>Titulo *</label>
+              <label className={labelClass}>Título *</label>
               <input {...register('title')} className={inputClass} placeholder="Ej: WhatsApp" />
               {errors.title && <p className="text-xs text-red-600 mt-1">{errors.title.message}</p>}
             </div>
             <div>
-              <label className={labelClass}>Texto del boton</label>
+              <label className={labelClass}>Texto del botón</label>
               <input {...register('buttonText')} className={inputClass} placeholder="Ir al canal" />
             </div>
           </div>

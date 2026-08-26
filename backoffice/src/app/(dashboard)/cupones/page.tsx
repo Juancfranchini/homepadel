@@ -72,8 +72,8 @@ export default function CuponesPage() {
     setSaving(true);
     try {
       const payload = { ...data, expiresAt: data.expiresAt ? new Date(data.expiresAt).toISOString() : undefined };
-      if (editItem) { await api.patch('/coupons/' + editItem.id, payload); toast('Cupon actualizado', 'success'); }
-      else { await api.post('/coupons', payload); toast('Cupon creado', 'success'); }
+      if (editItem) { await api.patch('/coupons/' + editItem.id, payload); toast('Cupón actualizado', 'success'); }
+      else { await api.post('/coupons', payload); toast('Cupón creado', 'success'); }
       setModalOpen(false); load();
     } catch { toast('Error', 'error'); } finally { setSaving(false); }
   };
@@ -100,7 +100,7 @@ export default function CuponesPage() {
           <p className="text-gray-500 text-sm mt-0.5">{coupons.length} cupones</p>
         </div>
         <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] transition-colors">
-          <Plus className="w-4 h-4" />Nuevo cupon
+          <Plus className="w-4 h-4" />Nuevo cupón
         </button>
       </div>
 
@@ -114,7 +114,7 @@ export default function CuponesPage() {
               <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Descuento</th>
               <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Usos</th>
               <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciónes</th>
+              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
             </tr></thead>
             <tbody>
               {coupons.map((c) => (
@@ -146,7 +146,7 @@ export default function CuponesPage() {
       )}
 
       {modalOpen && (
-        <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editItem ? 'Editar cupon' : 'Nuevo cupon'} size="sm">
+        <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editItem ? 'Editar cupón' : 'Nuevo cupón'} size="sm">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Código *</label>
@@ -182,7 +182,7 @@ export default function CuponesPage() {
             </div>
             <div className="flex items-center gap-3">
               <input type="checkbox" {...register('active')} className="w-4 h-4 rounded accent-[#C8FF00]" />
-              <label className="text-sm text-gray-700">Cupon activo</label>
+              <label className="text-sm text-gray-700">Cupón activo</label>
             </div>
             <div className="flex justify-end gap-3 pt-2 border-t border-gray-100">
               <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancelar</button>
@@ -192,7 +192,7 @@ export default function CuponesPage() {
         </Modal>
       )}
 
-      <ConfirmDialog isOpen={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} title="Eliminar cupon" description={'Eliminar ' + (deleteTarget?.code || '') + '?'} isLoading={deleting} />
+      <ConfirmDialog isOpen={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} title="Eliminar cupón" description={'Eliminar ' + (deleteTarget?.code || '') + '?'} isLoading={deleting} />
     </div>
   );
 }

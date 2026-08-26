@@ -151,7 +151,7 @@ export default function ProductosContenidoPage() {
             <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Video</th>
             <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Rendimiento</th>
             <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Highlights</th>
-            <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciónes</th>
+            <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
           </tr></thead>
           <tbody>
             {products.map((p) => {

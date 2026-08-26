@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, Edit2, Trash2, ArrowUpDown, ArrowRight, ImageIcon, Star } from 'lucide-react';
@@ -77,8 +77,8 @@ export default function ProductosPage() {
     try {
       const [pRes, cRes, bRes] = await Promise.all([
         api.get('/products?showAll=1&limit=200'),
-        api.get('/categories'),
-        api.get('/brands'),
+        api.get('/categories/admin/all'),
+        api.get('/brands/admin/all'),
       ]);
       setProducts(Array.isArray(pRes.data?.items) ? pRes.data.items : Array.isArray(pRes.data?.data) ? pRes.data.data : Array.isArray(pRes.data) ? pRes.data : []);
       setCategories(Array.isArray(cRes.data?.data) ? cRes.data.data : Array.isArray(cRes.data) ? cRes.data : []);
@@ -153,7 +153,7 @@ export default function ProductosPage() {
   });
 
   const totalPages = Math.ceil(sorted.length / pageSize);
-  const páginated = sorted.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const paginated = sorted.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const defaultFormValues = editItem ? {
     name: editItem.name, sku: editItem.sku, price: editItem.price, salePrice: editItem.salePrice || undefined,
@@ -196,7 +196,7 @@ export default function ProductosPage() {
         </div>
       </div>
 
-      {páginated.length === 0 ? (
+      {paginated.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 py-20 text-center"><p className="text-gray-400 text-sm">No se encontraron productos</p></div>
       ) : (
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
@@ -211,18 +211,18 @@ export default function ProductosPage() {
                 <th className="text-center px-2 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   <span className="inline-flex items-center gap-1">Precio {sortIcon('price')}</span>
                 </th>
-                <th className="text-center px-2 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Precio Promociónal</th>
+                <th className="text-center px-2 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Precio Promocional</th>
                 <th className="text-center px-2 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Transf./Dep.</th>
                 <th className="text-center px-2 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   <span className="inline-flex items-center gap-1">Stock {sortIcon('stock')}</span>
                 </th>
                 <th className="text-center px-2 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Destacado</th>
                 <th className="text-center px-2 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Activo</th>
-                <th className="text-center px-2 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciónes</th>
+                <th className="text-center px-2 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
               </tr>
             </thead>
             <tbody>
-              {páginated.map((p) => {
+              {paginated.map((p) => {
                 const imgSrc = getImageUrl(p.images?.[0]);
                 return (
                 <tr key={p.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
@@ -323,3 +323,4 @@ export default function ProductosPage() {
     </div>
   );
 }
+

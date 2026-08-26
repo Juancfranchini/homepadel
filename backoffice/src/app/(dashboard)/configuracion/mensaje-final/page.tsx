@@ -12,15 +12,15 @@ import { useToast } from '@/components/ui/Toast';
 
 const schema = z.object({
   // CTA (columna izquierda)
-  title: z.string().min(2, 'El titulo es requerido'),
+  title: z.string().min(2, 'El título es requerido'),
   text: z.string().optional().or(z.literal('')),
-  buttonText: z.string().min(2, 'El texto del boton es requerido'),
+  buttonText: z.string().min(2, 'El texto del botón es requerido'),
   buttonUrl: z.string().min(1, 'La URL es requerida'),
   footerText: z.string().optional().or(z.literal('')),
   secondaryButtonText: z.string().optional().or(z.literal('')),
   secondaryButtonUrl: z.string().optional().or(z.literal('')),
   // Newsletter (columna derecha)
-  newsletterTitle: z.string().min(2, 'El titulo es requerido'),
+  newsletterTitle: z.string().min(2, 'El título es requerido'),
   newsletterText: z.string().optional().or(z.literal('')),
   newsletterPlaceholder: z.string().optional().or(z.literal('')),
   newsletterButtonText: z.string().optional().or(z.literal('')),
@@ -43,7 +43,7 @@ export default function CtaNewsletterConfigPage() {
       text: 'Encontra todo lo que necesitas en un solo lugar. Las mejores marcas, los mejores precios.',
       buttonText: 'Ver catálogo',
       buttonUrl: '/catalogo',
-      footerText: 'Productos originales. Envíos a todo el pais.',
+      footerText: 'Productos originales. Envíos a todo el país.',
       secondaryButtonText: '',
       secondaryButtonUrl: '',
       newsletterTitle: 'Enterate de las novedades',
@@ -66,7 +66,7 @@ export default function CtaNewsletterConfigPage() {
           text: data.text ?? '',
           buttonText: data.buttonText ?? 'Ver catálogo',
           buttonUrl: data.buttonUrl ?? '/catalogo',
-          footerText: data.footerText ?? 'Productos originales. Envíos a todo el pais.',
+          footerText: data.footerText ?? 'Productos originales. Envíos a todo el país.',
           secondaryButtonText: data.secondaryButtonText ?? '',
           secondaryButtonUrl: data.secondaryButtonUrl ?? '',
           newsletterTitle: data.newsletterTitle ?? 'Enterate de las novedades',
@@ -114,7 +114,7 @@ export default function CtaNewsletterConfigPage() {
               <Megaphone size={16} className="text-[#C8FF00]" />Columna CTA
             </h2>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Titulo *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Título *</label>
               <input {...register('title')} className={inputClass} placeholder="Un mensaje para vos" />
               {errors.title && <p className="text-xs text-red-600 mt-1">{errors.title.message}</p>}
             </div>
@@ -123,26 +123,26 @@ export default function CtaNewsletterConfigPage() {
               <textarea {...register('text')} rows={2} className={inputClass} placeholder="Encontra todo lo que necesitas..." />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Texto del boton *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Texto del botón *</label>
               <input {...register('buttonText')} className={inputClass} placeholder="Ver catálogo" />
               {errors.buttonText && <p className="text-xs text-red-600 mt-1">{errors.buttonText.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">URL del boton *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">URL del botón *</label>
               <input {...register('buttonUrl')} className={inputClass} placeholder="/catalogo" />
               {errors.buttonUrl && <p className="text-xs text-red-600 mt-1">{errors.buttonUrl.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Texto pequeno debajo del boton</label>
-              <input {...register('footerText')} className={inputClass} placeholder="Productos originales. Envíos a todo el pais." />
+              <label className="block text-sm font-medium text-gray-700 mb-1">Texto pequeno debajo del botón</label>
+              <input {...register('footerText')} className={inputClass} placeholder="Productos originales. Envíos a todo el país." />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Boton secundario (texto)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">botón secundario (texto)</label>
                 <input {...register('secondaryButtonText')} className={inputClass} placeholder="Opciónal" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Boton secundario (URL)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">botón secundario (URL)</label>
                 <input {...register('secondaryButtonUrl')} className={inputClass} placeholder="Opciónal" />
               </div>
             </div>
@@ -154,7 +154,7 @@ export default function CtaNewsletterConfigPage() {
               <Mail size={16} className="text-[#C8FF00]" />Columna Newsletter
             </h2>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Titulo *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Título *</label>
               <input {...register('newsletterTitle')} className={inputClass} placeholder="Enterate de las novedades" />
               {errors.newsletterTitle && <p className="text-xs text-red-600 mt-1">{errors.newsletterTitle.message}</p>}
             </div>
@@ -167,7 +167,7 @@ export default function CtaNewsletterConfigPage() {
               <input {...register('newsletterPlaceholder')} className={inputClass} placeholder="Tu email" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Texto del boton</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Texto del botón</label>
               <input {...register('newsletterButtonText')} className={inputClass} placeholder="Suscribirme" />
             </div>
             <div>

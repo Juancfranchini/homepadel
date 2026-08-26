@@ -62,8 +62,8 @@ export default function EditorToolbar({ editor, showLinkInput, setShowLinkInput,
       <button type="button" onClick={() => isHtmlMode ? onHtmlToolbarAction('u') : editor.chain().focus().toggleUnderline().run()} className={(!isHtmlMode && editor.isActive('underline')) ? btnActive : btn} title="Subrayado"><UnderlineIcon size={16} /></button>
       <button type="button" onClick={() => isHtmlMode ? onHtmlToolbarAction('s') : editor.chain().focus().toggleStrike().run()} className={(!isHtmlMode && editor.isActive('strike')) ? btnActive : btn} title="Tachado"><Strikethrough size={16} /></button>
       {sep}
-      <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={editor.isActive('heading', { level: 1 }) ? btnActive : btn} title="Titulo 1"><Heading1 size={16} /></button>
-      <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={editor.isActive('heading', { level: 2 }) ? btnActive : btn} title="Titulo 2"><Heading2 size={16} /></button>
+      <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={editor.isActive('heading', { level: 1 }) ? btnActive : btn} title="Título 1"><Heading1 size={16} /></button>
+      <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={editor.isActive('heading', { level: 2 }) ? btnActive : btn} title="Título 2"><Heading2 size={16} /></button>
       {sep}
       <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()} className={editor.isActive('bulletList') ? btnActive : btn} title="Lista"><List size={16} /></button>
       <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={editor.isActive('orderedList') ? btnActive : btn} title="Lista numerada"><ListOrdered size={16} /></button>

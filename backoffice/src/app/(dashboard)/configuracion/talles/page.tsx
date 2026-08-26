@@ -99,10 +99,10 @@ export default function TallesPage() {
       const payload = { ...data, productIds: selectedProducts };
       if (editItem) {
         await api.patch('/size-guides/' + editItem.id, payload);
-        toast('Guia actualizada', 'success');
+        toast('Guía actualizada', 'success');
       } else {
         await api.post('/size-guides', payload);
-        toast('Guia creada', 'success');
+        toast('Guía creada', 'success');
       }
       setModalOpen(false);
       load();
@@ -113,7 +113,7 @@ export default function TallesPage() {
     if (!deleteTarget) return;
     try {
       await api.delete('/size-guides/' + deleteTarget.id);
-      toast('Guia eliminada', 'success');
+      toast('Guía eliminada', 'success');
       setDeleteTarget(null);
       load();
     } catch { toast('Error al eliminar', 'error'); }
@@ -122,7 +122,7 @@ export default function TallesPage() {
   const toggleActive = async (item: SizeGuide) => {
     try {
       await api.patch('/size-guides/' + item.id, { active: !item.active });
-      toast(item.active ? 'Guia desactivada' : 'Guia activada', 'success');
+      toast(item.active ? 'Guía  desactivada' : 'Guía  activada', 'success');
       load();
     } catch { toast('Error', 'error'); }
   };
@@ -145,19 +145,19 @@ export default function TallesPage() {
         <div className="flex items-center gap-3">
           <Link href="/configuracion" className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"><ArrowLeft className="w-4 h-4" /></Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><Ruler className="w-5 h-5 text-[#C8FF00]" />Guia de Talles</h1>
-            <p className="text-gray-500 text-sm mt-0.5">{guides.length} guias configuradas</p>
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><Ruler className="w-5 h-5 text-[#C8FF00]" />Guía  de Talles</h1>
+            <p className="text-gray-500 text-sm mt-0.5">{guides.length} Guía s configuradas</p>
           </div>
         </div>
         <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] transition-colors">
-          <Plus className="w-4 h-4" />Nueva Guia
+          <Plus className="w-4 h-4" />Nueva Guía 
         </button>
       </div>
 
       {guides.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 py-20 text-center">
           <Ruler className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-400 text-sm">No hay guias de talles configuradas</p>
+          <p className="text-gray-400 text-sm">No hay Guía s de talles configuradas</p>
         </div>
       ) : (
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
@@ -168,7 +168,7 @@ export default function TallesPage() {
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Categoría</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Productos</th>
                 <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciónes</th>
+                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
               </tr>
             </thead>
             <tbody>
@@ -197,12 +197,12 @@ export default function TallesPage() {
       )}
 
       {/* Modal Crear/Editar */}
-      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editItem ? 'Editar Guia' : 'Nueva Guia'} size="lg">
+      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editItem ? 'Editar Guía ' : 'Nueva Guía '} size="lg">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>Nombre *</label>
-              <input {...register('name')} className={inputClass} placeholder="Ej: Guia de Talles Calzado" />
+              <input {...register('name')} className={inputClass} placeholder="Ej: Guía  de Talles Calzado" />
               {errors.name && <p className="text-xs text-red-600 mt-1">{errors.name.message}</p>}
             </div>
             <div>
@@ -279,8 +279,8 @@ export default function TallesPage() {
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleDelete}
-        title="Eliminar Guia"
-        description={'Eliminar la guia ' + (deleteTarget?.name || '') + '?'}
+        title="Eliminar Guía "
+        description={'Eliminar la Guía  ' + (deleteTarget?.name || '') + '?'}
       />
     </div>
   );

@@ -212,9 +212,9 @@ export default function TestimoniosPage() {
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Nombre</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Creado{sortIcon('createdAt')}</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Modificado{sortIcon('updatedAt')}</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Puntuacion{sortIcon('rating')}</th>
+                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Puntuación{sortIcon('rating')}</th>
                 <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciónes</th>
+                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
               </tr>
             </thead>
             <tbody>
@@ -281,7 +281,7 @@ export default function TestimoniosPage() {
               {errors.comment && <p className="text-xs text-red-600 mt-1">{errors.comment.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Puntuacion</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Puntuación</label>
               <select {...register('rating')} className={inputClass + ' pr-10'}>
                 {[5, 4, 3, 2, 1].map(r => (<option key={r} value={r}>{r} estrella{r > 1 ? 's' : ''}</option>))}
               </select>

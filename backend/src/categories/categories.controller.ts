@@ -1,12 +1,8 @@
-// CRUD de categorías
-// GET    /api/categories        — listar todas (público)
-// POST   /api/categories        — crear categoría (ADMIN)
-// PATCH  /api/categories/:id    — actualizar categoría (ADMIN)
-// DELETE /api/categories/:id    — eliminar categoría (ADMIN)
-
-import { Controller, Get, Post, Patch, Put, Delete, Param, Body, UseGuards } from '@nestjs/common';
+﻿import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { CategoriesService } from './categories.service';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -17,25 +13,53 @@ import { Role } from '@prisma/client';
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
-  @Get()
-  findAll() { return this.categoriesService.findAll(); }
-
   @Post()
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  create(@Body() dto: any) { return this.categoriesService.create(dto); }
+  create(@Body() createCategoryDto: CreateCategoryDto) {
+    return this.categoriesService.create(createCategoryDto);
+  }
 
-  @Patch(':id')
-  @Put(':id')
+  @Get()
+  findAll() {
+    return this.categoriesService.findAll();
+  }
+
+  @Get('admin/all')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  update(@Param('id') id: string, @Body() dto: any) { return this.categoriesService.update(id, dto); }
+  findAllAdmin() {
+    return this.categoriesService.findAllAdmin();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.categoriesService.findOne(id);
+  }
+
+  @Patch(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
+    return this.categoriesService.update(id, updateCategoryDto);
+  }
 
   @Delete(':id')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  remove(@Param('id') id: string) { return this.categoriesService.remove(id); }
+  remove(@Param('id') id: string) {
+    return this.categoriesService.remove(id);
+  }
+
+  @Patch(':id/deactivate')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  deactivate(@Param('id') id: string) {
+    return this.categoriesService.deactivate(id);
+  }
 }

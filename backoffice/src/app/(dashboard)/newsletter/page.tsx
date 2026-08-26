@@ -57,7 +57,7 @@ export default function NewsletterPage() {
               <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
               <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
               <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Fecha</th>
-              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciónes</th>
+              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
             </tr></thead>
             <tbody>
               {subscribers.map((s) => (

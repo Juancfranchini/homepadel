@@ -90,8 +90,8 @@ export default function ReviewsPage() {
   const onSubmit = async (data: FormData) => {
     setSaving(true);
     try {
-      if (editItem) { await api.patch('/reviews/' + editItem.id, data); toast('Resena actualizada', 'success'); }
-      else { await api.post('/reviews', data); toast('Resena creada', 'success'); }
+      if (editItem) { await api.patch('/reviews/' + editItem.id, data); toast('Reseña actualizada', 'success'); }
+      else { await api.post('/reviews', data); toast('Reseña creada', 'success'); }
       setModalOpen(false); load();
     } catch { toast('Error al guardar', 'error'); } finally { setSaving(false); }
   };
@@ -140,18 +140,18 @@ export default function ReviewsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
-        <h1 className="text-2xl font-bold text-gray-900">Resenas de productos</h1>
-        <p className="text-gray-500 text-sm mt-0.5">{filtered.length} resenas</p>
+        <h1 className="text-2xl font-bold text-gray-900">Reseñas de productos</h1>
+        <p className="text-gray-500 text-sm mt-0.5">{filtered.length} reseñas</p>
         <div className="flex items-center gap-2">
           <ReviewsSearchBar value={search} onChange={setSearch} onAdvancedSearch={() => setAdvancedOpen(true)} hasAdvancedFilters={advancedFilters !== null} onClearFilters={() => { setAdvancedFilters(null); setAdvancedOpen(false); }} />
           <button onClick={() => setShowInfoModal(true)} className="flex items-center gap-2 px-4 py-2 border border-[#C8FF00]/50 text-gray-600 rounded-lg font-semibold text-sm hover:bg-[#C8FF00]/10 hover:border-[#C8FF00] hover:text-[#C8FF00] transition-colors"><HelpCircle className="w-4 h-4" />Info</button>          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] transition-colors">
-            <Plus className="w-4 h-4" />Nueva resena
+            <Plus className="w-4 h-4" />Nueva reseña
           </button>
         </div>
       </div>
 
       {páginated.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 py-20 text-center"><p className="text-gray-400 text-sm">No se encontraron resenas</p></div>
+        <div className="bg-white rounded-xl border border-gray-200 py-20 text-center"><p className="text-gray-400 text-sm">No se encontraron reseñas</p></div>
       ) : (
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
           <table className="w-full">
@@ -161,7 +161,7 @@ export default function ReviewsPage() {
               <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Punt. {sortIcon('rating')}</th>
               <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Comentario</th>
               <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciónes</th>
+              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
             </tr></thead>
             <tbody>
               {páginated.map((r) => (
@@ -188,11 +188,11 @@ export default function ReviewsPage() {
       )}
 
       {modalOpen && (
-        <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editItem ? 'Editar resena' : 'Nueva resena'} size="md">
+        <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editItem ? 'Editar reseña' : 'Nueva reseña'} size="md">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div><label className="block text-sm font-medium text-gray-700 mb-1">Producto *</label><select {...register('productId')} className={inputClass}><option value="">Seleccionar</option>{products.map(p => (<option key={p.id} value={p.id}>{p.name}</option>))}</select>{errors.productId && <p className="text-xs text-red-600 mt-1">{errors.productId.message}</p>}</div>
             <div><label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label><input {...register('name')} className={inputClass} />{errors.name && <p className="text-xs text-red-600 mt-1">{errors.name.message}</p>}</div>
-            <div><label className="block text-sm font-medium text-gray-700 mb-1">Puntuacion *</label><div className="flex items-center gap-2"><input type="number" min={1} max={5} {...register('rating')} className={inputClass + ' w-20'} /><div className="flex gap-0.5">{[1,2,3,4,5].map((s) => (<Star key={s} className={'w-5 h-5 ' + (s <= (watchRating || 5) ? 'text-[#C8FF00] fill-[#C8FF00]' : 'text-gray-200')} />))}</div></div></div>
+            <div><label className="block text-sm font-medium text-gray-700 mb-1">Puntuación *</label><div className="flex items-center gap-2"><input type="number" min={1} max={5} {...register('rating')} className={inputClass + ' w-20'} /><div className="flex gap-0.5">{[1,2,3,4,5].map((s) => (<Star key={s} className={'w-5 h-5 ' + (s <= (watchRating || 5) ? 'text-[#C8FF00] fill-[#C8FF00]' : 'text-gray-200')} />))}</div></div></div>
             <div><label className="block text-sm font-medium text-gray-700 mb-1">Comentario *</label><textarea {...register('comment')} rows={3} className={inputClass} />{errors.comment && <p className="text-xs text-red-600 mt-1">{errors.comment.message}</p>}</div>
             <div className="flex items-center gap-4"><label className="flex items-center gap-2"><input type="checkbox" {...register('active')} className="w-4 h-4 rounded accent-[#C8FF00]" /> Aprobada</label><label className="flex items-center gap-2"><input type="checkbox" {...register('verified')} className="w-4 h-4 rounded accent-[#C8FF00]" /> Verificada</label></div>
             <div className="flex justify-end gap-3 pt-2 border-t border-gray-100"><button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancelar</button><button type="submit" disabled={saving} className="px-4 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg text-sm font-semibold hover:bg-[#b8ef00] disabled:opacity-50">{saving ? 'Guardando...' : editItem ? 'Actualizar' : 'Crear'}</button></div>
@@ -202,7 +202,7 @@ export default function ReviewsPage() {
 
       <ReviewsAdvancedSearchModal isOpen={advancedOpen} onClose={() => setAdvancedOpen(false)} onApply={(filters) => { setAdvancedFilters(filters); setAdvancedOpen(false); }} products={products} />
 
-      <ConfirmDialog isOpen={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} title="Eliminar resena" description={'Eliminar la resena de ' + (deleteTarget?.name || '') + '?'} isLoading={deleting} />
+      <ConfirmDialog isOpen={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} title="Eliminar reseña" description={'Eliminar la reseña de ' + (deleteTarget?.name || '') + '?'} isLoading={deleting} />
 
       {showInfoModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">

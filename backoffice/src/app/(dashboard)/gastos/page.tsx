@@ -106,7 +106,7 @@ export default function GastosPage() {
               <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Categoría</th>
               <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Monto</th>
               <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Fecha</th>
-              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciónes</th>
+              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
             </tr></thead>
             <tbody>
               {páginated.map((e) => (

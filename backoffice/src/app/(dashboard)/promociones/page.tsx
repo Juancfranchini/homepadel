@@ -24,7 +24,7 @@ interface Promotion {
 }
 
 const schema = z.object({
-  title: z.string().min(2, 'Titulo requerido'),
+  title: z.string().min(2, 'Título requerido'),
   description: z.string().optional().or(z.literal('')),
   discount: z.coerce.number().min(1, 'Descuento requerido'),
   ctaText: z.string().optional().or(z.literal('')),
@@ -105,11 +105,11 @@ export default function PromociónesPage() {
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
           <table className="w-full">
             <thead><tr className="border-b border-gray-100">
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Titulo</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Título</th>
               <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Descuento</th>
               <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Vigencia</th>
               <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciónes</th>
+              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
             </tr></thead>
             <tbody>
               {promotions.map((p) => (
@@ -143,7 +143,7 @@ export default function PromociónesPage() {
         <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editItem ? 'Editar promoción' : 'Nueva promoción'} size="md">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Titulo *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Título *</label>
               <input {...register('title')} className={inputClass} placeholder="Ej: Black Friday" />
               {errors.title && <p className="text-xs text-red-600 mt-1">{errors.title.message}</p>}
             </div>
@@ -157,12 +157,12 @@ export default function PromociónesPage() {
                 <input type="number" {...register('discount')} className={inputClass} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Texto del boton</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Texto del botón</label>
                 <input {...register('ctaText')} className={inputClass} placeholder="VER OFERTA" />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">URL del boton</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">URL del botón</label>
               <input {...register('ctaUrl')} className={inputClass} placeholder="/catalogo?oferta=true" />
             </div>
             <div className="grid grid-cols-2 gap-3">

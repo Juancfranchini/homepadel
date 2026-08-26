@@ -54,8 +54,8 @@ export default function ConfianzaProductosPage() {
     resolver: zodResolver(schema),
     defaultValues: {
       items: [
-        { icon: 'Truck', title: 'ENVIOS A TODO EL PAIS', subtitle: 'Recibi tu pedido en cualquier punto del pais' },
-        { icon: 'RefreshCw', title: '30 DIAS PARA CAMBIOS', subtitle: 'Si no estas conforme, podes cambiar tu producto' },
+        { icon: 'Truck', title: 'ENVÍOS A TODO EL PAÍS', subtitle: 'Recibi tu pedido en cualquier punto del país' },
+        { icon: 'RefreshCw', title: '30 DÍAS PARA CAMBIOS', subtitle: 'Si no estas conforme, podes cambiar tu producto' },
         { icon: 'Shield', title: 'GARANTIA OFICIAL', subtitle: 'Todos nuestros productos cuentan con garantia oficial' },
         { icon: 'Check', title: 'PAGOS 100% SEGUROS', subtitle: 'Protegemos tus datos con el mas alto nivel de seguridad' },
         { icon: 'MessageCircle', title: 'ATENCION PERSONALIZADA', subtitle: 'Te asesoramos por WhatsApp en todo momento' },
@@ -113,8 +113,8 @@ export default function ConfianzaProductosPage() {
               <div key={i} className="flex items-center gap-3 px-3 py-2 first:pl-0 last:pr-0">
                 <span className="text-[#B7D31A] flex-shrink-0">{createElement(IconComp, { size: 20 })}</span>
                 <div>
-                  <p className="text-[#F7F6F7] font-semibold text-[9px] uppercase tracking-wide leading-snug">{item.title || 'Titulo'}</p>
-                  <p className="text-[#C7C7C0] text-[8px] leading-snug mt-0.5">{item.subtitle || 'Subtitulo'}</p>
+                  <p className="text-[#F7F6F7] font-semibold text-[9px] uppercase tracking-wide leading-snug">{item.title || 'Título'}</p>
+                  <p className="text-[#C7C7C0] text-[8px] leading-snug mt-0.5">{item.subtitle || 'Subtítulo'}</p>
                 </div>
               </div>
             );
@@ -151,12 +151,12 @@ export default function ConfianzaProductosPage() {
                     </div>
                   </div>
                   <div className="flex-1">
-                    <label className="block text-xs font-medium text-gray-500 mb-1">Titulo *</label>
-                    <input {...register(('items.' + i + '.title') as any)} className={inputClass} placeholder="ENVIOS A TODO EL PAIS" />
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Título *</label>
+                    <input {...register(('items.' + i + '.title') as any)} className={inputClass} placeholder="ENVÍOS A TODO EL PAÍS" />
                     {errors.items?.[i]?.title && <p className="text-xs text-red-600 mt-0.5">{errors.items[i]?.title?.message}</p>}
                   </div>
                   <div className="flex-1">
-                    <label className="block text-xs font-medium text-gray-500 mb-1">Subtitulo</label>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Subtítulo</label>
                     <input {...register(('items.' + i + '.subtitle') as any)} className={inputClass} placeholder="Recibi tu pedido en..." />
                   </div>
                   <button type="button" onClick={() => remove(i)} className="p-2 mt-5 text-red-400 hover:bg-red-50 rounded-lg transition-colors shrink-0">

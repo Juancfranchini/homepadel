@@ -19,7 +19,7 @@ export default function ReviewsSearchBar({ value, onChange, onAdvancedSearch, ha
         </div>
         <input
           type="text"
-          placeholder="Buscar resena..."
+          placeholder="Buscar resea..."
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className="w-56 pl-10 pr-4 py-2 bg-white border border-[#C8FF00]/50 rounded-l-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00] transition-all"

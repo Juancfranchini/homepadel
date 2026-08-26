@@ -30,7 +30,7 @@ const benefitSchema = z.object({
 });
 
 const schema = z.object({
-  title: z.string().min(2, 'El titulo es requerido'),
+  title: z.string().min(2, 'El título es requerido'),
   description: z.string().min(10, 'La descripción es requerida'),
   image: z.string().optional().or(z.literal('')),
   benefits: z.array(benefitSchema).min(1, 'Agrega al menos un item'),
@@ -52,7 +52,7 @@ export default function AboutConfigPage() {
       title: 'Somos Home Padel',
       description: 'En Home Padel vivimos este deporte con la misma pasion que vos.',
       benefits: [
-        { icon: 'Truck', title: 'Envíos a todo el pais', description: 'Llegamos a cada rincon de Argentina' },
+        { icon: 'Truck', title: 'Envíos a todo el país', description: 'Llegamos a cada rincon de Argentina' },
         { icon: 'Shield', title: 'Productos originales', description: 'Garantia oficial de fabrica' },
         { icon: 'Users', title: 'Atencion personalizada', description: 'Te asesoramos segun tu nivel y estilo' },
       ],
@@ -75,7 +75,7 @@ export default function AboutConfigPage() {
           description: data.description ?? '',
           image: data.image ?? '',
           benefits: data.benefits?.length > 0 ? data.benefits : [
-            { icon: 'Truck', title: 'Envíos a todo el pais', description: 'Llegamos a cada rincon de Argentina' },
+            { icon: 'Truck', title: 'Envíos a todo el país', description: 'Llegamos a cada rincon de Argentina' },
             { icon: 'Shield', title: 'Productos originales', description: 'Garantia oficial de fabrica' },
             { icon: 'Users', title: 'Atencion personalizada', description: 'Te asesoramos segun tu nivel y estilo' },
           ],
@@ -115,7 +115,7 @@ export default function AboutConfigPage() {
             <ImageUpload  value={imageValue}  onChange={(url) => setValue('image', url, { shouldDirty: true })} placeholder="URL de imagen" width={200} height={160}  />
             <div className="flex-1 space-y-4">
               <div>
-                <label className={labelClass + ' mb-1'}>Titulo *</label>
+                <label className={labelClass + ' mb-1'}>Título *</label>
                 <input {...register('title')} className={inputClass + ' mt-1'} placeholder="Somos Home Padel" />
                 {errors.title && <p className="text-xs text-red-600 mt-0.5">{errors.title.message}</p>}
               </div>
@@ -156,8 +156,8 @@ export default function AboutConfigPage() {
                       </div>
                     </div>
                     <div className="flex-1">
-                      <label className="block text-xs font-medium text-gray-500 mb-1">Titulo *</label>
-                      <input {...register(('benefits.' + i + '.title') as any)} className={inputClass} placeholder="Ej: Envíos a todo el pais" />
+                      <label className="block text-xs font-medium text-gray-500 mb-1">Título *</label>
+                      <input {...register(('benefits.' + i + '.title') as any)} className={inputClass} placeholder="Ej: Envíos a todo el país" />
                     </div>
                     <div className="flex-1">
                       <label className="block text-xs font-medium text-gray-500 mb-1">Descripción (opciónal)</label>
