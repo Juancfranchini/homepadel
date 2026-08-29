@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useRef, useState } from 'react';
 import Link from 'next/link';
@@ -9,6 +9,7 @@ import { formatPrice, getDiscountPercent, getImageUrl } from '@/lib/utils';
 
 interface Props {
   products: Product[];
+  mode: 'best_sellers' | 'featured';
 }
 
 function ProductCard({ product }: { product: Product }) {
@@ -39,7 +40,6 @@ function ProductCard({ product }: { product: Product }) {
       href={'/producto/' + product.slug}
       className="group bg-[#0C0C0C] rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:shadow-[#B7D31A]/10 border border-[#B7D31A]/20 hover:border-[#B7D31A]/60 flex flex-col"
     >
-      {/* Imagen */}
       <div className="relative aspect-square bg-[#050606] overflow-hidden">
         {product.images && product.images.length > 0 ? (
           <img
@@ -53,7 +53,6 @@ function ProductCard({ product }: { product: Product }) {
           </div>
         )}
 
-        {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5">
           {hasDiscount && (
             <span className="bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">-{discountPct}%</span>
@@ -66,7 +65,6 @@ function ProductCard({ product }: { product: Product }) {
           )}
         </div>
 
-        {/* Wishlist */}
         <button
           onClick={handleWish}
           className={'absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center z-10 transition-all duration-200 ' +
@@ -77,7 +75,6 @@ function ProductCard({ product }: { product: Product }) {
         </button>
       </div>
 
-      {/* Info */}
       <div className="p-5 flex flex-col gap-2 flex-1">
         {product.brand && (
           <p className="text-xs text-[#8A8A85] font-semibold uppercase tracking-wider">{product.brand.name}</p>
@@ -98,7 +95,6 @@ function ProductCard({ product }: { product: Product }) {
           )}
         </div>
 
-        {/* Cuotas */}
         {product.price >= 10000 && (
           <p className="text-xs text-[#C7C7C0] font-medium">
             Hasta 9 cuotas sin interes
@@ -123,17 +119,16 @@ function ProductCard({ product }: { product: Product }) {
   );
 }
 
-const MOCK: Product[] = [
-  { id: '1', name: 'NOX AT10 Genius WR 2024', slug: 'nox-at10-genius', price: 550000, salePrice: undefined, sku: 'N1', stock: 8, images: [], featured: true, isNew: false, isOffer: false, description: '', category: { id: '1', name: 'Paletas', slug: 'paletas' }, brand: { id: '1', name: 'NOX', slug: 'nox' } },
-  { id: '2', name: 'Bullpadel Hack 04 2024', slug: 'bullpadel-hack-04', price: 525000, salePrice: 420000, sku: 'B1', stock: 12, images: [], featured: true, isNew: true, isOffer: false, description: '', category: { id: '1', name: 'Paletas', slug: 'paletas' }, brand: { id: '2', name: 'Bullpadel', slug: 'bullpadel' } },
-  { id: '3', name: 'Adidas Metalbone 3.3 2025', slug: 'adidas-metalbone', price: 530000, salePrice: undefined, sku: 'A1', stock: 6, images: [], featured: true, isNew: false, isOffer: true, description: '', category: { id: '1', name: 'Paletas', slug: 'paletas' }, brand: { id: '3', name: 'Adidas', slug: 'adidas' } },
-  { id: '4', name: 'Paletero NOX AT10 Team', slug: 'paletero-nox', price: 210000, salePrice: undefined, sku: 'N2', stock: 4, images: [], featured: true, isNew: false, isOffer: false, description: '', category: { id: '2', name: 'Paleteros', slug: 'paleteros' }, brand: { id: '4', name: 'NOX', slug: 'nox' } },
-  { id: '5', name: 'Zapatillas Bullpadel Vertex', slug: 'zapatillas-bullpadel', price: 180000, salePrice: 135000, sku: 'B2', stock: 10, images: [], featured: true, isNew: false, isOffer: true, description: '', category: { id: '3', name: 'Zapatillas', slug: 'zapatillas' }, brand: { id: '2', name: 'Bullpadel', slug: 'bullpadel' } },
-];
-
-export default function FeaturedProducts({ products }: Props) {
+export default function FeaturedProducts({ products, mode }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const displayProducts = products && products.length >= 5 ? products.slice(0, 5) : MOCK;
+
+  if (!products || products.length === 0) return null;
+
+  const displayProducts = products.slice(0, 5);
+  const sectionTitle = mode === 'best_sellers' ? 'LOS MÁS VENDIDOS' : 'PRODUCTOS DESTACADOS';
+  const sectionSubtitle = mode === 'best_sellers'
+    ? 'Los favoritos de nuestra comunidad.'
+    : 'Seleccionados especialmente para vos.';
 
   const scroll = (dir: 'left' | 'right') => {
     scrollRef.current?.scrollBy({ left: dir === 'right' ? 320 : -320, behavior: 'smooth' });
@@ -145,9 +140,9 @@ export default function FeaturedProducts({ products }: Props) {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-2xl md:text-3xl font-semibold uppercase text-[#F7F6F7]">
-              LOS MÁS VENDIDOS
+              {sectionTitle}
             </h2>
-            <p className="text-[#C7C7C0] text-sm mt-0.5">Elegidos por nuestra comunidad.</p>
+            <p className="text-[#C7C7C0] text-sm mt-0.5">{sectionSubtitle}</p>
           </div>
           <Link href="/catalogo" className="text-sm font-semibold text-[#B7D31A] hover:text-[#CAE52E] flex items-center gap-1 uppercase transition-colors">
             VER TODOS <ChevronRight size={14} />

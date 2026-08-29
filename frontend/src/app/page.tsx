@@ -1,4 +1,5 @@
 ﻿import {
+  getBestSellers,
   getFeaturedProducts,
   getCategories,
   getBrands,
@@ -56,7 +57,8 @@ async function fetchAll() {
   const [
     slidesRes,
     benefitsRes,
-    productsRes,
+    bestSellersRes,
+    featuredProductsRes,
     categoriesRes,
     brandsRes,
     bannersRes,
@@ -69,6 +71,7 @@ async function fetchAll() {
   ] = await Promise.allSettled([
     getHeroSlides(),
     getBenefits(),
+    getBestSellers(),
     getFeaturedProducts(),
     getCategories(),
     getBrands(),
@@ -87,7 +90,8 @@ async function fetchAll() {
   return {
     heroSlides: arr<HeroSlide>(val(slidesRes)),
     benefits: arr<Benefit>(val(benefitsRes)),
-    featuredProducts: arr<Product>(val(productsRes)),
+    bestSellers: arr<Product>(val(bestSellersRes)),
+    featuredProducts: arr<Product>(val(featuredProductsRes)),
     categories: arr<Category>(val(categoriesRes)),
     brands: arr<Brand>(val(brandsRes)),
     banners: arr<Banner>(val(bannersRes)),
@@ -104,6 +108,7 @@ export default async function HomePage() {
   const {
     heroSlides,
     benefits,
+    bestSellers,
     featuredProducts,
     categories,
     brands,
@@ -126,6 +131,10 @@ export default async function HomePage() {
 
   const showCategories = categoriesSection !== null && categories.length > 0;
 
+  const hasBestSellers = bestSellers.length >= 5;
+  const productsToShow = hasBestSellers ? bestSellers : featuredProducts;
+  const productMode: 'best_sellers' | 'featured' = hasBestSellers ? 'best_sellers' : 'featured';
+
   return (
     <>
       <HeroBanner slides={heroSlides} />
@@ -142,7 +151,7 @@ export default async function HomePage() {
         />
       )}
 
-      <FeaturedProducts products={featuredProducts} />
+      <FeaturedProducts products={productsToShow} mode={productMode} />
 
       <PromoBanners banners={sortedBanners} />
 

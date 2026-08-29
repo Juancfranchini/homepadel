@@ -1,4 +1,4 @@
-// Cliente Axios configurado para el backend
+﻿// Cliente Axios configurado para el backend
 // Base URL leída de variable de entorno NEXT_PUBLIC_API_URL
 
 import axios from 'axios';
@@ -19,9 +19,12 @@ api.interceptors.request.use((config) => {
 
 export default api;
 
-// ── Productos ──────────────────────────────────────────────────────────────
+// Productos
 export const getProducts = (params?: Record<string, unknown>) =>
   api.get('/products', { params }).then((r) => r.data);
+
+export const getBestSellers = () =>
+  api.get('/products/best-sellers').then((r) => r.data);
 
 export const getFeaturedProducts = () =>
   api.get('/products/featured').then((r) => r.data);
@@ -29,14 +32,14 @@ export const getFeaturedProducts = () =>
 export const getProduct = (slug: string) =>
   api.get(`/products/${slug}`).then((r) => r.data);
 
-// ── Categorías y marcas ────────────────────────────────────────────────────
+// Categorías y marcas
 export const getCategories = () =>
   api.get('/categories').then((r) => r.data);
 
 export const getBrands = () =>
   api.get('/brands').then((r) => r.data);
 
-// ── Autenticación ──────────────────────────────────────────────────────────
+// Autenticación
 export const login = (data: { email: string; password: string }) =>
   api.post('/auth/login', data).then((r) => r.data);
 
@@ -46,18 +49,18 @@ export const register = (data: { name: string; email: string; password: string }
 export const getMe = () =>
   api.get('/auth/me').then((r) => r.data);
 
-// ── Órdenes ────────────────────────────────────────────────────────────────
+// Órdenes
 export const createOrder = (data: Record<string, unknown>) =>
   api.post('/orders', data).then((r) => r.data);
 
 export const getMyOrders = () =>
   api.get('/orders/my').then((r) => r.data);
 
-// ── Banners (banners secundarios del home) ─────────────────────────────────
+// Banners
 export const getBanners = () =>
   api.get('/banners').then((r) => r.data);
 
-// ── Nuevas secciónes homepage ──────────────────────────────────────────────
+// Secciones homepage
 export const getHeroSlides = () =>
   api.get('/hero-slides').then((r) => r.data);
 
