@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import * as fs from 'fs';
 import * as path from 'path';
 
-export type SectionKey = 'categories' | 'meta_pixel' | 'about' | 'instagram' | 'final_message' | 'branding' | 'settings' | 'trust_bottom' | 'politica_devolución' | 'envíos' | 'medios_pago' | 'terminos' | 'privacidad' | 'contacto' | 'talles' | 'reviews_info' | 'payment_methods' | 'email_settings';
+export type SectionKey = 'categories' | 'meta_pixel' | 'hero' | 'benefits' | 'promo_destacada' | 'featured_products' | 'banners' | 'about' | 'testimonials' | 'brands' | 'instagram' | 'final_message' | 'branding' | 'settings' | 'trust_bottom' | 'politica_devolución' | 'envíos' | 'medios_pago' | 'terminos' | 'privacidad' | 'contacto' | 'talles' | 'reviews_info' | 'payment_methods' | 'email_settings';
 
 @Injectable()
 export class SiteSectionsService {
@@ -96,6 +96,13 @@ export class SiteSectionsService {
 
   private getDefault(key: SectionKey): Record<string, unknown> {
     const defaults: Record<SectionKey, Record<string, unknown>> = {
+      hero: {},
+      benefits: {},
+      promo_destacada: {},
+      featured_products: {},
+      banners: {},
+      testimonials: {},
+      brands: {},
       categories: { title: 'Categorias', description: 'Encontra lo que necesitas para tu mejor version en la cancha.' },
       meta_pixel: {
         pixelId: '',
