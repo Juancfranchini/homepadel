@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+﻿import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -43,6 +43,33 @@ export class ProductsService {
       include: { category: true, brand: true },
       take: 8,
     });
+  }
+
+  async findBestSellers() {
+    const grouped = await this.prisma.orderItem.groupBy({
+      by: ['productId'],
+      _sum: { quantity: true },
+      where: {
+        order: {
+          status: { in: ['PAID', 'SHIPPED', 'DELIVERED'] },
+        },
+      },
+      orderBy: { _sum: { quantity: 'desc' } },
+      take: 8,
+    });
+
+    if (grouped.length === 0) return [];
+
+    const productIds = grouped.map((g) => g.productId);
+    const products = await this.prisma.product.findMany({
+      where: { id: { in: productIds }, active: true },
+      include: { category: true, brand: true },
+    });
+
+    const productMap = new Map(products.map((p) => [p.id, p]));
+    return grouped
+      .map((g) => productMap.get(g.productId))
+      .filter((p) => p !== undefined);
   }
 
   async findBySlug(slugOrId: string) {
