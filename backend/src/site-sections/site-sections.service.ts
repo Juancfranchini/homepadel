@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import * as fs from 'fs';
 import * as path from 'path';
 
-export type SectionKey = 'categories' | 'about' | 'instagram' | 'final_message' | 'branding' | 'settings' | 'trust_bottom' | 'politica_devolución' | 'envíos' | 'medios_pago' | 'terminos' | 'privacidad' | 'contacto' | 'talles' | 'reviews_info' | 'payment_methods' | 'email_settings';
+export type SectionKey = 'categories' | 'meta_pixel' | 'about' | 'instagram' | 'final_message' | 'branding' | 'settings' | 'trust_bottom' | 'politica_devolución' | 'envíos' | 'medios_pago' | 'terminos' | 'privacidad' | 'contacto' | 'talles' | 'reviews_info' | 'payment_methods' | 'email_settings';
 
 @Injectable()
 export class SiteSectionsService {
@@ -20,11 +20,45 @@ export class SiteSectionsService {
       await this.removeOldImages(dto.data);
     }
 
+    if (key === 'meta_pixel') {
+      await this.saveMetaPixelEnv(dto.data);
+    }
+
     return this.prisma.siteSection.upsert({
       where: { key },
       update: { data: dto.data as Prisma.InputJsonValue, active: dto.active ?? true },
       create: { key, data: dto.data as Prisma.InputJsonValue, active: dto.active ?? true },
     });
+  }
+
+  private async saveMetaPixelEnv(data: Record<string, unknown>) {
+    try {
+      const accessToken = data.accessToken as string;
+      const testEventCode = data.testEventCode as string;
+      if (!accessToken) return;
+
+      const envPath = path.join(__dirname, '..', '..', '.env');
+      let envContent = '';
+
+      if (fs.existsSync(envPath)) {
+        envContent = fs.readFileSync(envPath, 'utf-8');
+      }
+
+      const lines = envContent.split('\n');
+      const newLines = lines.filter(line => 
+        !line.startsWith('META_ACCESS_TOKEN=') && 
+        !line.startsWith('META_TEST_EVENT_CODE=')
+      );
+
+      newLines.push('META_ACCESS_TOKEN=' + accessToken);
+      if (testEventCode) {
+        newLines.push('META_TEST_EVENT_CODE=' + testEventCode);
+      }
+
+      fs.writeFileSync(envPath, newLines.join('\n'), 'utf-8');
+    } catch (err) {
+      console.error('Error guardando Meta Pixel en .env:', err);
+    }
   }
 
   private async removeOldImages(newData: Record<string, unknown>) {
@@ -63,6 +97,18 @@ export class SiteSectionsService {
   private getDefault(key: SectionKey): Record<string, unknown> {
     const defaults: Record<SectionKey, Record<string, unknown>> = {
       categories: { title: 'Categorias', description: 'Encontra lo que necesitas para tu mejor version en la cancha.' },
+      meta_pixel: {
+        pixelId: '',
+        testEventCode: '',
+        events: {
+          pageView: true,
+          viewContent: true,
+          addToCart: true,
+          initiateCheckout: true,
+          purchase: true,
+          contact: true,
+        },
+      },
       'politica_devolución': { title: 'Politica de Devolución', content: '' },
       'envíos': { title: 'Envíos', sections: [{ title: 'Tiempos y costos', content: '' }] },
       'medios_pago': { title: 'Medios de Pago', content: '' },
