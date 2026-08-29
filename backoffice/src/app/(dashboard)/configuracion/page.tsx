@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Store, Shield, Bell, Mail, Target } from 'lucide-react';
+import { Store, Shield, Bell, Mail, Target, LayoutDashboard } from 'lucide-react';
 import api from '@/lib/api';
 import { useToast } from '@/components/ui/Toast';
 import GeneralTab from './components/GeneralTab';
@@ -14,6 +14,7 @@ import EmailsTab from './components/EmailsTab';
 import PlantillasTab from './components/PlantillasTab';
 import CampanasTab from './components/CampanasTab';
 import MetaPixelTab from './components/MetaPixelTab';
+import HomeSectionsTab from './components/HomeSectionsTab';
 
 const generalSchema = z.object({
   storeName: z.string().min(2, 'El nombre de la tienda es requerido'),
@@ -29,10 +30,11 @@ const generalSchema = z.object({
 });
 type GeneralForm = z.infer<typeof generalSchema>;
 
-type Tab = 'general' | 'meta_pixel' | 'seguridad' | 'notificaciones' | 'emails';
+type Tab = 'general' | 'home_sections' | 'meta_pixel' | 'seguridad' | 'notificaciones' | 'emails';
 
 const TABS = [
   { id: 'general' as Tab, label: 'General', icon: Store },
+  { id: 'home_sections' as Tab, label: 'Secciones Home', icon: LayoutDashboard },
   { id: 'meta_pixel' as Tab, label: 'Meta Pixel', icon: Target },
   { id: 'seguridad' as Tab, label: 'Seguridad', icon: Shield },
   { id: 'notificaciones' as Tab, label: 'Notificaciones', icon: Bell },
@@ -239,6 +241,10 @@ export default function ConfiguracionPage() {
       <div className="space-y-6">
         {activeTab === 'general' && (
           <GeneralTab generalForm={generalForm} onSave={handleSaveGeneral} saving={saving} />
+        )}
+
+        {activeTab === 'home_sections' && (
+          <HomeSectionsTab />
         )}
 
         {activeTab === 'meta_pixel' && (
