@@ -1,10 +1,11 @@
-// CRUD completo de productos
-// GET    /api/products           — lista páginada con filtros (público)
-// GET    /api/products/featured  — productos destacados para el home (público)
-// GET    /api/products/:slug     — detalle por slug (público)
-// POST   /api/products           — crear producto (ADMIN)
-// PATCH  /api/products/:id       — actualizar producto (ADMIN)
-// DELETE /api/products/:id       — eliminar producto (ADMIN)
+﻿// CRUD completo de productos
+// GET    /api/products               lista páginada con filtros (público)
+// GET    /api/products/best-sellers  productos mas vendidos para el home (público)
+// GET    /api/products/featured      productos destacados para el home (público)
+// GET    /api/products/:slug         detalle por slug (público)
+// POST   /api/products               crear producto (ADMIN)
+// PATCH  /api/products/:id           actualizar producto (ADMIN)
+// DELETE /api/products/:id           eliminar producto (ADMIN)
 //
 // Filtros disponibles: page, limit, category (slug), brand (slug), search, minPrice, maxPrice
 
@@ -33,6 +34,11 @@ export class ProductsController {
   @ApiQuery({ name: 'maxPrice', required: false })
   findAll(@Query() query: any) {
     return this.productsService.findAll(query);
+  }
+
+  @Get('best-sellers')
+  findBestSellers() {
+    return this.productsService.findBestSellers();
   }
 
   @Get('featured')
