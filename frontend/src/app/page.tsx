@@ -1,4 +1,4 @@
-import {
+﻿import {
   getFeaturedProducts,
   getCategories,
   getBrands,
@@ -39,8 +39,6 @@ import {
 
 export const revalidate = 60;
 
-// ─── helpers ──────────────────────────────────────────────────────────────────
-
 function arr<T>(raw: unknown): T[] {
   if (Array.isArray(raw)) return raw as T[];
   const maybe = raw as { data?: T[] };
@@ -53,8 +51,6 @@ function sectionData<T>(raw: unknown): T | null {
   if (s.active === false) return null;
   return (s.data as T) ?? null;
 }
-
-// ─── data fetching ────────────────────────────────────────────────────────────
 
 async function fetchAll() {
   const [
@@ -69,6 +65,7 @@ async function fetchAll() {
     aboutRes,
     instagramRes,
     finalMsgRes,
+    categoriesSectionRes,
   ] = await Promise.allSettled([
     getHeroSlides(),
     getBenefits(),
@@ -81,6 +78,7 @@ async function fetchAll() {
     getSiteSection('about'),
     getSiteSection('instagram'),
     getSiteSection('final_message'),
+    getSiteSection('categories'),
   ]);
 
   const val = (r: PromiseSettledResult<unknown>) =>
@@ -98,10 +96,9 @@ async function fetchAll() {
     aboutData: sectionData<AboutData>(val(aboutRes)),
     instagramConfig: sectionData<InstagramConfig>(val(instagramRes)),
     finalMessageData: sectionData<FinalMessageData>(val(finalMsgRes)),
+    categoriesSection: sectionData<{ title?: string; description?: string }>(val(categoriesSectionRes)),
   };
 }
-
-// ─── page ─────────────────────────────────────────────────────────────────────
 
 export default async function HomePage() {
   const {
@@ -116,51 +113,47 @@ export default async function HomePage() {
     aboutData,
     instagramConfig,
     finalMessageData,
+    categoriesSection,
   } = await fetchAll();
 
-  // Banners secundarios (PromoBanners) — todos los banners ordenados
   const sortedBanners = [...banners].sort((a, b) => a.order - b.order);
 
-  // Promoción destacada — la primera activa y no expirada
   const now = new Date();
   const activePromotion =
     promotions.find(
       (p) => p.active && p.endDate && new Date(p.endDate) > now
     ) ?? null;
 
+  const showCategories = categoriesSection !== null && categories.length > 0;
+
   return (
     <>
-      {/* 1 · Carrusel hero */}
       <HeroBanner slides={heroSlides} />
 
-      {/* 2 · Barra de beneficios */}
       <BenefitsStrip benefits={benefits} />
 
-      {/* 3 · Promoción destacada con countdown */}
       <PromoDestacada promotion={activePromotion} />
 
-      {/* 4 · Categorías */}
-      <CategoryCards categories={categories} />
+      {showCategories && (
+        <CategoryCards
+          categories={categories}
+          title={categoriesSection?.title}
+          description={categoriesSection?.description}
+        />
+      )}
 
-      {/* 5 · Productos destacados */}
       <FeaturedProducts products={featuredProducts} />
 
-      {/* 6 · Banners secundarios */}
       <PromoBanners banners={sortedBanners} />
 
-      {/* 7 · Quiénes somos */}
       <AboutSection data={aboutData} />
 
-      {/* 8 · Testimonios */}
       <TestimonialsSection testimonials={testimonials} />
 
-      {/* 9 · Marcas (slider) */}
       <BrandsSection brands={brands} />
 
-      {/* 10 · Instagram */}
       <InstagramSection config={instagramConfig} />
 
-      {/* 11 · Mensaje final / CTA */}
       <FinalMessage data={finalMessageData} />
     </>
   );
