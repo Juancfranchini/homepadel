@@ -40,6 +40,19 @@ type FormData = z.infer<typeof schema>;
 const inputClass = 'w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00]';
 const labelClass = 'text-xs font-medium text-gray-400 uppercase tracking-wider';
 
+function getErrorMessage(error: unknown): string {
+  if (error && typeof error === 'object' && 'response' in error) {
+    const response = (error as any).response;
+    const data = response?.data;
+    if (data?.message) {
+      if (Array.isArray(data.message)) return data.message.join('. ');
+      return String(data.message);
+    }
+    if (typeof data === 'string') return data;
+  }
+  return 'Error inesperado';
+}
+
 export default function categoriasPage() {
   const { toast } = useToast();
   const [categories, setCategories] = useState<Category[]>([]);
@@ -50,6 +63,8 @@ export default function categoriasPage() {
   const [deleting, setDeleting] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [showCategoriesSection, setShowCategoriesSection] = useState<boolean>(true);
+  const [loadingSection, setLoadingSection] = useState(true);
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -72,7 +87,34 @@ export default function categoriasPage() {
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  const loadCategoriesSection = useCallback(async () => {
+    setLoadingSection(true);
+    try {
+      const res = await api.get('/site-sections/categories');
+      const section = res.data?.data ? res.data : res.data;
+      setShowCategoriesSection(section?.active !== false);
+    } catch {
+      setShowCategoriesSection(true);
+    } finally {
+      setLoadingSection(false);
+    }
+  }, []);
+
+  useEffect(() => { load(); loadCategoriesSection(); }, [load, loadCategoriesSection]);
+
+  const handleToggleCategoriesSection = async (checked: boolean) => {
+    setShowCategoriesSection(checked);
+    try {
+      await api.put('/site-sections/categories', {
+        active: checked,
+        data: { title: 'Categorias', description: 'Encontra lo que necesitas para tu mejor version en la cancha.' },
+      });
+      toast(checked ? 'Seccion de categorias activada en Landing Page' : 'Seccion de categorias oculta en Landing Page', 'success');
+    } catch (err) {
+      setShowCategoriesSection(!checked);
+      toast(getErrorMessage(err), 'error');
+    }
+  };
 
   const openCreate = () => {
     setEditItem(null);
@@ -125,8 +167,8 @@ export default function categoriasPage() {
       }
       setModalOpen(false);
       load();
-    } catch {
-      toast('Error al guardar la categoria', 'error');
+    } catch (err) {
+      toast(getErrorMessage(err), 'error');
     } finally {
       setSaving(false);
     }
@@ -137,8 +179,8 @@ export default function categoriasPage() {
       await api.patch('/categories/' + c.id, { active: !c.active });
       toast('Actualizado', 'success');
       load();
-    } catch {
-      toast('Error', 'error');
+    } catch (err) {
+      toast(getErrorMessage(err), 'error');
     }
   };
 
@@ -150,8 +192,8 @@ export default function categoriasPage() {
       toast('categoria eliminada', 'success');
       setDeleteTarget(null);
       load();
-    } catch {
-      toast('Error al eliminar', 'error');
+    } catch (err) {
+      toast(getErrorMessage(err), 'error');
     } finally {
       setDeleting(false);
     }
@@ -242,6 +284,21 @@ export default function categoriasPage() {
               })}
             </tbody>
           </table>
+
+          <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={showCategoriesSection}
+                onChange={(e) => handleToggleCategoriesSection(e.target.checked)}
+                disabled={loadingSection}
+                className="w-4 h-4 border border-gray-300 rounded-[1px] cursor-pointer accent-[#C8FF00]"
+              />
+              <span className="text-sm font-medium text-gray-700">
+                {showCategoriesSection ? 'No mostrar seccion en Landing Page' : 'Mostrar seccion'}
+              </span>
+            </label>
+          </div>
         </div>
       )}
 
@@ -327,4 +384,3 @@ export default function categoriasPage() {
     </div>
   );
 }
-
