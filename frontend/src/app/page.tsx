@@ -64,7 +64,14 @@ async function fetchAll() {
     bannersRes,
     testimonialsRes,
     promotionsRes,
+    heroSectionRes,
+    benefitsSectionRes,
+    promoSectionRes,
+    featuredSectionRes,
+    bannersSectionRes,
     aboutRes,
+    testimonialsSectionRes,
+    brandsSectionRes,
     instagramRes,
     finalMsgRes,
     categoriesSectionRes,
@@ -78,7 +85,14 @@ async function fetchAll() {
     getBanners(),
     getTestimonials(),
     getPromotions(),
+    getSiteSection('hero'),
+    getSiteSection('benefits'),
+    getSiteSection('promo_destacada'),
+    getSiteSection('featured_products'),
+    getSiteSection('banners'),
     getSiteSection('about'),
+    getSiteSection('testimonials'),
+    getSiteSection('brands'),
     getSiteSection('instagram'),
     getSiteSection('final_message'),
     getSiteSection('categories'),
@@ -97,7 +111,14 @@ async function fetchAll() {
     banners: arr<Banner>(val(bannersRes)),
     testimonials: arr<Testimonial>(val(testimonialsRes)),
     promotions: arr<Promotion>(val(promotionsRes)),
+    heroSection: sectionData(val(heroSectionRes)),
+    benefitsSection: sectionData(val(benefitsSectionRes)),
+    promoSection: sectionData(val(promoSectionRes)),
+    featuredSection: sectionData(val(featuredSectionRes)),
+    bannersSection: sectionData(val(bannersSectionRes)),
     aboutData: sectionData<AboutData>(val(aboutRes)),
+    testimonialsSection: sectionData(val(testimonialsSectionRes)),
+    brandsSection: sectionData(val(brandsSectionRes)),
     instagramConfig: sectionData<InstagramConfig>(val(instagramRes)),
     finalMessageData: sectionData<FinalMessageData>(val(finalMsgRes)),
     categoriesSection: sectionData<{ title?: string; description?: string }>(val(categoriesSectionRes)),
@@ -115,7 +136,14 @@ export default async function HomePage() {
     banners,
     testimonials,
     promotions,
+    heroSection,
+    benefitsSection,
+    promoSection,
+    featuredSection,
+    bannersSection,
     aboutData,
+    testimonialsSection,
+    brandsSection,
     instagramConfig,
     finalMessageData,
     categoriesSection,
@@ -137,11 +165,17 @@ export default async function HomePage() {
 
   return (
     <>
-      <HeroBanner slides={heroSlides} />
+      {heroSection !== null && heroSlides.length > 0 && (
+        <HeroBanner slides={heroSlides} />
+      )}
 
-      <BenefitsStrip benefits={benefits} />
+      {benefitsSection !== null && benefits.length > 0 && (
+        <BenefitsStrip benefits={benefits} />
+      )}
 
-      <PromoDestacada promotion={activePromotion} />
+      {promoSection !== null && activePromotion && (
+        <PromoDestacada promotion={activePromotion} />
+      )}
 
       {showCategories && (
         <CategoryCards
@@ -151,19 +185,33 @@ export default async function HomePage() {
         />
       )}
 
-      <FeaturedProducts products={productsToShow} mode={productMode} />
+      {featuredSection !== null && productsToShow.length > 0 && (
+        <FeaturedProducts products={productsToShow} mode={productMode} />
+      )}
 
-      <PromoBanners banners={sortedBanners} />
+      {bannersSection !== null && sortedBanners.length > 0 && (
+        <PromoBanners banners={sortedBanners} />
+      )}
 
-      <AboutSection data={aboutData} />
+      {aboutData !== null && (
+        <AboutSection data={aboutData} />
+      )}
 
-      <TestimonialsSection testimonials={testimonials} />
+      {testimonialsSection !== null && testimonials.length > 0 && (
+        <TestimonialsSection testimonials={testimonials} />
+      )}
 
-      <BrandsSection brands={brands} />
+      {brandsSection !== null && brands.length > 0 && (
+        <BrandsSection brands={brands} />
+      )}
 
-      <InstagramSection config={instagramConfig} />
+      {instagramConfig !== null && (
+        <InstagramSection config={instagramConfig} />
+      )}
 
-      <FinalMessage data={finalMessageData} />
+      {finalMessageData !== null && (
+        <FinalMessage data={finalMessageData} />
+      )}
     </>
   );
 }
