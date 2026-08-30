@@ -1,4 +1,4 @@
-import { useFieldArray, UseFormRegister } from 'react-hook-form';
+﻿import { useFieldArray, UseFormRegister } from 'react-hook-form';
 import Toggle from '../../testimonios/components/Toggle';
 import { createElement } from 'react';
 import { Plus, Trash2, Target, Circle, Scale, Ruler, User, Zap, Star, Shield, Award, Gauge, Wind, Package, Thermometer, Droplets, Maximize, Layers, Scissors, TrendingUp, Footprints } from 'lucide-react';
@@ -40,10 +40,10 @@ export default function RendimientoTab({ register, control, watch, showPerforman
           <div className="flex items-center gap-2"><Toggle checked={showPerformance} onChange={onToggleShowPerformance} /><span className="text-xs text-gray-400">{showPerformance ? "Activado" : "Desactivado"}</span></div>
         </div>
         {PERF_LABELS.map((label, i) => (
-          <div key={i} className="flex items-center gap-3 mb-2">
-            <span className="w-28 text-sm text-gray-600 flex-shrink-0">{label}</span>
-            <input type="range" min={0} max={100} {...register('performanceStats.' + i + '.value')} className="flex-1 accent-[#C8FF00]" />
-            <span className="w-10 text-xs text-gray-500 text-right">{watch('performanceStats.' + i + '.value') || 0}%</span>
+          <div key={i} className="flex items-center gap-2 sm:gap-3 mb-2">
+            <span className="w-20 sm:w-28 text-sm text-gray-600 flex-shrink-0">{label}</span>
+            <input type="range" min={0} max={100} {...register('performanceStats.' + i + '.value')} className="flex-1 accent-[#C8FF00] min-w-0" />
+            <span className="w-8 sm:w-10 text-xs text-gray-500 text-right flex-shrink-0">{watch('performanceStats.' + i + '.value') || 0}%</span>
           </div>
         ))}
       </div>
@@ -56,11 +56,11 @@ export default function RendimientoTab({ register, control, watch, showPerforman
         </div>
 
         {specsArray.fields.length > 0 && (
-          <div className="flex gap-2 mb-1 px-1">
-            <span className="text-[10px] font-semibold text-gray-400 uppercase w-[130px] flex-shrink-0">Icono</span>
-            <span className="text-[10px] font-semibold text-gray-400 uppercase w-[90px] flex-shrink-0">Título</span>
-            <span className="text-[10px] font-semibold text-gray-400 uppercase flex-1">Descripción</span>
-            <span className="w-8 flex-shrink-0"></span>
+          <div className="hidden sm:grid grid-cols-[130px_90px_1fr_40px] gap-2 mb-1 px-1">
+            <span className="text-[10px] font-semibold text-gray-400 uppercase">Icono</span>
+            <span className="text-[10px] font-semibold text-gray-400 uppercase">Titulo</span>
+            <span className="text-[10px] font-semibold text-gray-400 uppercase">Descripcion</span>
+            <span></span>
           </div>
         )}
 
@@ -70,23 +70,49 @@ export default function RendimientoTab({ register, control, watch, showPerforman
           const IconComp = iconObj?.icon || Target;
 
           return (
-            <div key={field.id} className="flex gap-2 mb-2 items-center">
-              <div className="relative w-[130px] flex-shrink-0">
-                <select {...register(('specs.' + i + '.icon') as any)} className={inputClass + ' text-xs pl-8 pr-2'}>
-                  {SPEC_ICONS.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
-                  ))}
-                </select>
-                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[#C8FF00] pointer-events-none">
-                  {createElement(IconComp, { size: 14 })}
-                </span>
+            <div key={field.id} className="mb-2">
+              {/* Mobile */}
+              <div className="sm:hidden grid grid-cols-2 gap-2 mb-2">
+                <div className="relative">
+                  <select {...register(('specs.' + i + '.icon') as any)} className={inputClass + ' text-xs pl-8 pr-2'}>
+                    {SPEC_ICONS.map((o) => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[#C8FF00] pointer-events-none">
+                    {createElement(IconComp, { size: 14 })}
+                  </span>
+                </div>
+                <input {...register(('specs.' + i + '.title') as any)} className={inputClass} placeholder="Ej: Carbono" />
               </div>
-              <input {...register(('specs.' + i + '.title') as any)} className={inputClass + ' w-[90px] flex-shrink-0'} placeholder="Ej: Carbono" />
-              <input {...register(('specs.' + i + '.value') as any)} className={inputClass + ' flex-1'} placeholder="Ej: 18 K" />
-              <button type="button" onClick={() => specsArray.remove(i)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg flex-shrink-0"><Trash2 size={14} /></button>
+              <div className="sm:hidden flex gap-2">
+                <input {...register(('specs.' + i + '.value') as any)} className={inputClass + ' flex-1 min-w-0'} placeholder="Descripcion del producto" />
+                <button type="button" onClick={() => specsArray.remove(i)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg flex-shrink-0"><Trash2 size={14} /></button>
+              </div>
+
+              {/* Tablet/Web */}
+              <div className="hidden sm:grid grid-cols-[130px_90px_1fr_40px] gap-2 items-center">
+                <div className="relative">
+                  <select {...register(('specs.' + i + '.icon') as any)} className={inputClass + ' text-xs pl-8 pr-2'}>
+                    {SPEC_ICONS.map((o) => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[#C8FF00] pointer-events-none">
+                    {createElement(IconComp, { size: 14 })}
+                  </span>
+                </div>
+                <input {...register(('specs.' + i + '.title') as any)} className={inputClass} placeholder="Ej: Carbono" />
+                <input {...register(('specs.' + i + '.value') as any)} className={inputClass + ' min-w-0'} placeholder="Descripcion del producto" />
+                <button type="button" onClick={() => specsArray.remove(i)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg flex-shrink-0"><Trash2 size={14} /></button>
+              </div>
             </div>
           );
         })}
+
+        {specsArray.fields.length === 0 && (
+          <p className="text-xs text-gray-400 text-center py-4">No hay especificaciones. Haz clic en Agregar.</p>
+        )}
       </div>
     </div>
   );
