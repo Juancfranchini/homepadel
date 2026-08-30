@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+﻿import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { PrismaModule } from './prisma/prisma.module';
@@ -28,6 +28,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { EmailModule } from './email/email.module';
 import { ShippingModule } from './shipping/shipping.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { TrackModule } from './track/track.module';
 
 @Module({
   imports: [
@@ -60,9 +61,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     EmailModule,
     ShippingModule,
     DashboardModule,
+    TrackModule,
   ],
 })
 export class AppModule {}
-
-
-

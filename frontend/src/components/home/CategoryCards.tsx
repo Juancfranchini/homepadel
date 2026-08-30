@@ -1,40 +1,33 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 import { Category } from '@/types';
 import { getImageUrl } from '@/lib/utils';
 
-const FALLBACK_CATEGORIES = [
-  { id: '1', name: 'Palas',        slug: 'paletas' },
-  { id: '2', name: 'Zapatillas',   slug: 'zapatillas' },
-  { id: '3', name: 'Indumentaria', slug: 'indumentaria' },
-  { id: '4', name: 'Paleteros',    slug: 'paleteros' },
-  { id: '5', name: 'Accesorios',   slug: 'accesorios' },
-];
-
 interface Props {
   categories?: Category[];
+  title?: string;
+  description?: string;
 }
 
-export default function CategoryCards({ categories }: Props) {
-  const items =
-    categories && categories.length > 0
-      ? categories.slice(0, 5)
-      : FALLBACK_CATEGORIES;
+export default function CategoryCards({ categories, title, description }: Props) {
+  if (!categories || categories.length === 0) return null;
+
+  const items = categories.slice(0, 5);
 
   return (
     <section className="section-gradient bg-[#202427] py-14">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="mb-7">
           <h2 className="text-2xl md:text-3xl font-semibold uppercase tracking-tight text-[#F7F6F7]">
-            CATEGORIAS
+            {title || 'CATEGORIAS'}
           </h2>
           <p className="text-[#C7C7C0] text-sm mt-1">
-            Encontra lo que necesitas para tu mejor versión en la cancha.
+            {description || 'Encontra lo que necesitas para tu mejor version en la cancha.'}
           </p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           {items.map((cat) => {
-            const imgUrl = (cat as Category).image ? getImageUrl((cat as Category).image!) : null;
+            const imgUrl = cat.image ? getImageUrl(cat.image) : null;
 
             return (
               <Link

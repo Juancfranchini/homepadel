@@ -1,4 +1,5 @@
-import {
+﻿import {
+  getBestSellers,
   getFeaturedProducts,
   getCategories,
   getBrands,
@@ -39,8 +40,6 @@ import {
 
 export const revalidate = 60;
 
-// ─── helpers ──────────────────────────────────────────────────────────────────
-
 function arr<T>(raw: unknown): T[] {
   if (Array.isArray(raw)) return raw as T[];
   const maybe = raw as { data?: T[] };
@@ -54,33 +53,49 @@ function sectionData<T>(raw: unknown): T | null {
   return (s.data as T) ?? null;
 }
 
-// ─── data fetching ────────────────────────────────────────────────────────────
-
 async function fetchAll() {
   const [
     slidesRes,
     benefitsRes,
-    productsRes,
+    bestSellersRes,
+    featuredProductsRes,
     categoriesRes,
     brandsRes,
     bannersRes,
     testimonialsRes,
     promotionsRes,
+    heroSectionRes,
+    benefitsSectionRes,
+    promoSectionRes,
+    featuredSectionRes,
+    bannersSectionRes,
     aboutRes,
+    testimonialsSectionRes,
+    brandsSectionRes,
     instagramRes,
     finalMsgRes,
+    categoriesSectionRes,
   ] = await Promise.allSettled([
     getHeroSlides(),
     getBenefits(),
+    getBestSellers(),
     getFeaturedProducts(),
     getCategories(),
     getBrands(),
     getBanners(),
     getTestimonials(),
     getPromotions(),
+    getSiteSection('hero'),
+    getSiteSection('benefits'),
+    getSiteSection('promo_destacada'),
+    getSiteSection('featured_products'),
+    getSiteSection('banners'),
     getSiteSection('about'),
+    getSiteSection('testimonials'),
+    getSiteSection('brands'),
     getSiteSection('instagram'),
     getSiteSection('final_message'),
+    getSiteSection('categories'),
   ]);
 
   const val = (r: PromiseSettledResult<unknown>) =>
@@ -89,79 +104,114 @@ async function fetchAll() {
   return {
     heroSlides: arr<HeroSlide>(val(slidesRes)),
     benefits: arr<Benefit>(val(benefitsRes)),
-    featuredProducts: arr<Product>(val(productsRes)),
+    bestSellers: arr<Product>(val(bestSellersRes)),
+    featuredProducts: arr<Product>(val(featuredProductsRes)),
     categories: arr<Category>(val(categoriesRes)),
     brands: arr<Brand>(val(brandsRes)),
     banners: arr<Banner>(val(bannersRes)),
     testimonials: arr<Testimonial>(val(testimonialsRes)),
     promotions: arr<Promotion>(val(promotionsRes)),
+    heroSection: sectionData(val(heroSectionRes)),
+    benefitsSection: sectionData(val(benefitsSectionRes)),
+    promoSection: sectionData(val(promoSectionRes)),
+    featuredSection: sectionData(val(featuredSectionRes)),
+    bannersSection: sectionData(val(bannersSectionRes)),
     aboutData: sectionData<AboutData>(val(aboutRes)),
+    testimonialsSection: sectionData(val(testimonialsSectionRes)),
+    brandsSection: sectionData(val(brandsSectionRes)),
     instagramConfig: sectionData<InstagramConfig>(val(instagramRes)),
     finalMessageData: sectionData<FinalMessageData>(val(finalMsgRes)),
+    categoriesSection: sectionData<{ title?: string; description?: string }>(val(categoriesSectionRes)),
   };
 }
-
-// ─── page ─────────────────────────────────────────────────────────────────────
 
 export default async function HomePage() {
   const {
     heroSlides,
     benefits,
+    bestSellers,
     featuredProducts,
     categories,
     brands,
     banners,
     testimonials,
     promotions,
+    heroSection,
+    benefitsSection,
+    promoSection,
+    featuredSection,
+    bannersSection,
     aboutData,
+    testimonialsSection,
+    brandsSection,
     instagramConfig,
     finalMessageData,
+    categoriesSection,
   } = await fetchAll();
 
-  // Banners secundarios (PromoBanners) — todos los banners ordenados
   const sortedBanners = [...banners].sort((a, b) => a.order - b.order);
 
-  // Promoción destacada — la primera activa y no expirada
   const now = new Date();
   const activePromotion =
     promotions.find(
       (p) => p.active && p.endDate && new Date(p.endDate) > now
     ) ?? null;
 
+  const showCategories = categoriesSection !== null && categories.length > 0;
+
+  const hasBestSellers = bestSellers.length >= 5;
+  const productsToShow = hasBestSellers ? bestSellers : featuredProducts;
+  const productMode: 'best_sellers' | 'featured' = hasBestSellers ? 'best_sellers' : 'featured';
+
   return (
     <>
-      {/* 1 · Carrusel hero */}
-      <HeroBanner slides={heroSlides} />
+      {heroSection !== null && heroSlides.length > 0 && (
+        <HeroBanner slides={heroSlides} />
+      )}
 
-      {/* 2 · Barra de beneficios */}
-      <BenefitsStrip benefits={benefits} />
+      {benefitsSection !== null && benefits.length > 0 && (
+        <BenefitsStrip benefits={benefits} />
+      )}
 
-      {/* 3 · Promoción destacada con countdown */}
-      <PromoDestacada promotion={activePromotion} />
+      {promoSection !== null && activePromotion && (
+        <PromoDestacada promotion={activePromotion} />
+      )}
 
-      {/* 4 · Categorías */}
-      <CategoryCards categories={categories} />
+      {showCategories && (
+        <CategoryCards
+          categories={categories}
+          title={categoriesSection?.title}
+          description={categoriesSection?.description}
+        />
+      )}
 
-      {/* 5 · Productos destacados */}
-      <FeaturedProducts products={featuredProducts} />
+      {featuredSection !== null && productsToShow.length > 0 && (
+        <FeaturedProducts products={productsToShow} mode={productMode} />
+      )}
 
-      {/* 6 · Banners secundarios */}
-      <PromoBanners banners={sortedBanners} />
+      {bannersSection !== null && sortedBanners.length > 0 && (
+        <PromoBanners banners={sortedBanners} />
+      )}
 
-      {/* 7 · Quiénes somos */}
-      <AboutSection data={aboutData} />
+      {aboutData !== null && (
+        <AboutSection data={aboutData} />
+      )}
 
-      {/* 8 · Testimonios */}
-      <TestimonialsSection testimonials={testimonials} />
+      {testimonialsSection !== null && testimonials.length > 0 && (
+        <TestimonialsSection testimonials={testimonials} />
+      )}
 
-      {/* 9 · Marcas (slider) */}
-      <BrandsSection brands={brands} />
+      {brandsSection !== null && brands.length > 0 && (
+        <BrandsSection brands={brands} />
+      )}
 
-      {/* 10 · Instagram */}
-      <InstagramSection config={instagramConfig} />
+      {instagramConfig !== null && (
+        <InstagramSection config={instagramConfig} />
+      )}
 
-      {/* 11 · Mensaje final / CTA */}
-      <FinalMessage data={finalMessageData} />
+      {finalMessageData !== null && (
+        <FinalMessage data={finalMessageData} />
+      )}
     </>
   );
 }

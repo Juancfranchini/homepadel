@@ -20,7 +20,7 @@ export class CategoriesService {
     const baseSlug = this.generateSlug(createCategoryDto.name);
     let slug = baseSlug;
     let counter = 1;
-    
+
     while (true) {
       const existing = await this.prisma.category.findUnique({ where: { slug } });
       if (!existing) break;
@@ -46,6 +46,11 @@ export class CategoriesService {
   async findAllAdmin() {
     return this.prisma.category.findMany({
       orderBy: { order: 'asc' },
+      include: {
+        _count: {
+          select: { products: true },
+        },
+      },
     });
   }
 
@@ -80,7 +85,17 @@ export class CategoriesService {
 
     if (productCount > 0) {
       throw new BadRequestException(
-        'No se puede eliminar la categoria porque tiene ' + productCount + ' productos asociados. Utilice la opcion de desactivar.'
+        'No puedes eliminar la categoria "' + category.name + '" porque tiene ' + productCount + ' productos asociados. Te recomendamos desactivarla.'
+      );
+    }
+
+    const sizeGuideCount = await this.prisma.sizeGuide.count({
+      where: { categoryId: id },
+    });
+
+    if (sizeGuideCount > 0) {
+      throw new BadRequestException(
+        'No puedes eliminar la categoria "' + category.name + '" porque tiene ' + sizeGuideCount + ' guias de talles asociadas. Te recomendamos desactivarla.'
       );
     }
 

@@ -17,12 +17,10 @@ export class BrandsService {
   }
 
   async create(createBrandDto: CreateBrandDto) {
-    // Generar slug automáticamente
     const baseSlug = this.generateSlug(createBrandDto.name);
     let slug = baseSlug;
     let counter = 1;
-    
-    // Asegurar unicidad
+
     while (true) {
       const existing = await this.prisma.brand.findUnique({ where: { slug } });
       if (!existing) break;
@@ -48,6 +46,11 @@ export class BrandsService {
   async findAllAdmin() {
     return this.prisma.brand.findMany({
       orderBy: { order: 'asc' },
+      include: {
+        _count: {
+          select: { products: true },
+        },
+      },
     });
   }
 

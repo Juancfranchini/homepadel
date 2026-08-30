@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Store, Shield, Bell, Mail } from 'lucide-react';
+import { Store, Shield, Bell, Mail, Target, LayoutDashboard } from 'lucide-react';
 import api from '@/lib/api';
 import { useToast } from '@/components/ui/Toast';
 import GeneralTab from './components/GeneralTab';
@@ -13,6 +13,8 @@ import NotificacionesTab from './components/NotificacionesTab';
 import EmailsTab from './components/EmailsTab';
 import PlantillasTab from './components/PlantillasTab';
 import CampanasTab from './components/CampanasTab';
+import MetaPixelTab from './components/MetaPixelTab';
+import HomeSectionsTab from './components/HomeSectionsTab';
 
 const generalSchema = z.object({
   storeName: z.string().min(2, 'El nombre de la tienda es requerido'),
@@ -28,10 +30,12 @@ const generalSchema = z.object({
 });
 type GeneralForm = z.infer<typeof generalSchema>;
 
-type Tab = 'general' | 'seguridad' | 'notificaciones' | 'emails';
+type Tab = 'general' | 'home_sections' | 'meta_pixel' | 'seguridad' | 'notificaciones' | 'emails';
 
 const TABS = [
   { id: 'general' as Tab, label: 'General', icon: Store },
+  { id: 'home_sections' as Tab, label: 'Secciones Home', icon: LayoutDashboard },
+  { id: 'meta_pixel' as Tab, label: 'Meta Pixel', icon: Target },
   { id: 'seguridad' as Tab, label: 'Seguridad', icon: Shield },
   { id: 'notificaciones' as Tab, label: 'Notificaciones', icon: Bell },
   { id: 'emails' as Tab, label: 'Emails', icon: Mail },
@@ -173,7 +177,7 @@ export default function ConfiguracionPage() {
   };
 
   const handleDeleteTemplate = async (id: string) => {
-    if (!confirm('ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿Eliminar esta plantilla?')) return;
+    if (!confirm('Eliminar esta plantilla?')) return;
     try {
       await api.delete('/email/templates/' + id);
       toast('Plantilla eliminada', 'success');
@@ -184,18 +188,18 @@ export default function ConfiguracionPage() {
   const handleCreateCampaign = async (data: { name: string; templateId: string; recipients: string[] }) => {
     try {
       await api.post('/email/campaigns', data);
-      toast('CampaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±a creada', 'success');
+      toast('Campana creada', 'success');
       setCampaignModal(false);
       loadEmailData();
-    } catch { toast('Error al crear campaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±a', 'error'); }
+    } catch { toast('Error al crear campana', 'error'); }
   };
 
   const handleSendCampaign = async (id: string) => {
     try {
       await api.post('/email/campaigns/' + id + '/send');
-      toast('CampaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±a enviada', 'success');
+      toast('Campana enviada', 'success');
       loadEmailData();
-    } catch { toast('Error al enviar campaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â±a', 'error'); }
+    } catch { toast('Error al enviar campana', 'error'); }
   };
 
   const handleLoadRecipients = async (source: 'all' | 'customers' | 'newsletter') => {
@@ -212,8 +216,8 @@ export default function ConfiguracionPage() {
         <p className="text-gray-500 text-sm mt-0.5">Administra las preferencias del BackOffice</p>
       </div>
 
-      <div className="flex justify-end">
-        <div className="flex gap-1 bg-gray-50 rounded-xl p-1 border border-gray-200">
+      <div className="flex justify-start">
+        <div className="flex gap-1 bg-gray-50 rounded-xl p-1 border border-gray-200 overflow-x-auto">
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -221,7 +225,7 @@ export default function ConfiguracionPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ' +
+                className={'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ' +
                   (isActive
                     ? 'bg-[#0f172a] text-white shadow-sm'
                     : 'text-gray-500 hover:bg-white hover:text-gray-700')}
@@ -237,6 +241,14 @@ export default function ConfiguracionPage() {
       <div className="space-y-6">
         {activeTab === 'general' && (
           <GeneralTab generalForm={generalForm} onSave={handleSaveGeneral} saving={saving} />
+        )}
+
+        {activeTab === 'home_sections' && (
+          <HomeSectionsTab />
+        )}
+
+        {activeTab === 'meta_pixel' && (
+          <MetaPixelTab />
         )}
 
         {activeTab === 'seguridad' && (
