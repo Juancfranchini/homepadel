@@ -21,7 +21,12 @@ const SECTIONS: SectionItem[] = [
   { key: 'testimonials', label: 'Testimonios', description: 'Opiniones de clientes' },
   { key: 'brands', label: 'Marcas', description: 'Slider de marcas' },
   { key: 'instagram', label: 'Instagram', description: 'Feed de Instagram' },
+  { key: 'newsletter', label: 'Newsletter', description: 'Formulario de suscripcion' },
   { key: 'final_message', label: 'Mensaje final / CTA', description: 'Cierre con llamado a la accion' },
+  { key: 'trust_bottom', label: 'Confianza de productos', description: 'Badges de confianza en productos' },
+  { key: 'politica_devolución', label: 'Politica de Devolucion', description: 'Pagina de politica de devolucion' },
+  { key: 'terminos', label: 'Terminos y Condiciones', description: 'Pagina de terminos y condiciones' },
+  { key: 'envíos', label: 'Envios', description: 'Pagina de informacion de envios' },
 ];
 
 export default function HomeSectionsTab() {
@@ -59,10 +64,9 @@ export default function HomeSectionsTab() {
   const handleToggle = async (key: string, active: boolean) => {
     setSections((prev) => ({ ...prev, [key]: active }));
     try {
-      const defaultData = SECTIONS.find((s) => s.key === key);
       await api.put('/site-sections/' + key, {
         active,
-        data: defaultData ? {} : {},
+        data: {},
       });
     } catch {
       setSections((prev) => ({ ...prev, [key]: !active }));
@@ -128,6 +132,9 @@ export default function HomeSectionsTab() {
                     <p className="text-sm font-medium text-gray-800">{section.label}</p>
                     <p className="text-xs text-gray-400">{section.description}</p>
                   </div>
+                  <span className={'text-xs font-medium ' + (isActive ? 'text-green-600' : 'text-gray-400')}>
+                    {isActive ? 'Seccion activa' : 'Seccion inactiva'}
+                  </span>
                 </label>
               </div>
             );
