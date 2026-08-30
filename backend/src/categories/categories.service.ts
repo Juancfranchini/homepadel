@@ -46,6 +46,11 @@ export class CategoriesService {
   async findAllAdmin() {
     return this.prisma.category.findMany({
       orderBy: { order: 'asc' },
+      include: {
+        _count: {
+          select: { products: true },
+        },
+      },
     });
   }
 
