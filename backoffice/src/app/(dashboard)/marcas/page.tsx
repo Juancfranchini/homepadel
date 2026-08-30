@@ -4,13 +4,20 @@ import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Edit2, Trash2, ImageIcon } from 'lucide-react';
+import { Plus, Edit2, Trash2, Upload, ImageIcon } from 'lucide-react';
 import api from '@/lib/api';
 import { Modal, ConfirmDialog } from '@/components/ui/Modal';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { useToast } from '@/components/ui/Toast';
 import Toggle from '../testimonios/components/Toggle';
-import ImageUpload, { getImageUrl } from '@/components/ui/ImageUpload';
+
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000').replace(/\/api\/?$/, '');
+
+function getImageUrl(path: string | undefined | null): string | null {
+  if (!path) return null;
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) return path;
+  return API_BASE + (path.startsWith('/') ? '' : '/') + path;
+}
 
 interface Brand {
   id: string;
@@ -46,12 +53,26 @@ export default function MarcasPage() {
   const [deleteTarget, setDeleteTarget] = useState<Brand | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isMobile, setIsMobile] = useState(false);
+  const pageSize = isMobile ? 3 : 10;
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => { setCurrentPage(1); }, [isMobile]);
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
 
   const logoValue = watch('logo') || '';
+  const previewUrl = getImageUrl(logoValue);
   const isActive = watch('isActive');
 
   const load = useCallback(async () => {
@@ -65,6 +86,9 @@ export default function MarcasPage() {
 
   useEffect(() => { load(); }, [load]);
 
+  const totalPages = Math.ceil(brands.length / pageSize);
+  const paginated = brands.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
   const openCreate = () => {
     setEditItem(null);
     reset({ name: '', url: '', order: 0, isActive: true, logo: '' });
@@ -77,26 +101,66 @@ export default function MarcasPage() {
     setModalOpen(true);
   };
 
+  const handleUpload = async () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      setUploading(true);
+      const formData = new FormData();
+      formData.append('file', file);
+      try {
+        const res = await api.post('/uploads/image', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        const url = res.data?.url || res.data?.imageUrl || '';
+        setValue('logo', url, { shouldDirty: true });
+      } catch {} finally { setUploading(false); }
+    };
+    input.click();
+  };
+
   const onSubmit = async (data: FormData) => {
     setSaving(true);
     try {
-      const payload = { name: data.name, url: data.url || undefined, order: data.order, active: data.isActive, ...(data.logo ? { logo: data.logo } : {}) };
-      if (editItem) { await api.patch('/brands/' + editItem.id, payload); toast('Marca actualizada', 'success'); }
-      else { await api.post('/brands', payload); toast('Marca creada', 'success'); }
-      setModalOpen(false); load();
-    } catch { toast('Error al guardar la marca', 'error'); } finally { setSaving(false); }
+      const payload = {
+        name: data.name,
+        url: data.url,
+        order: data.order,
+        active: data.isActive,
+        ...(data.logo ? { logo: data.logo } : {}),
+      };
+      if (editItem) {
+        await api.patch('/brands/' + editItem.id, payload);
+        toast('Marca actualizada', 'success');
+      } else {
+        await api.post('/brands', payload);
+        toast('Marca creada', 'success');
+      }
+      setModalOpen(false);
+      load();
+    } catch { toast('Error al guardar', 'error'); } finally { setSaving(false); }
   };
 
   const toggleActive = async (b: Brand) => {
-    try { await api.patch('/brands/' + b.id, { active: !(b.active ?? b.isActive) }); toast('Actualizado', 'success'); load(); }
-    catch { toast('Error', 'error'); }
+    try {
+      await api.patch('/brands/' + b.id, { active: !isBrandActive(b) });
+      toast('Actualizado', 'success');
+      load();
+    } catch { toast('Error', 'error'); }
   };
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
-    try { await api.delete('/brands/' + deleteTarget.id); toast('Marca eliminada', 'success'); setDeleteTarget(null); load(); }
-    catch (err: any) { toast(err?.response?.data?.message || 'Error al eliminar', 'error'); } finally { setDeleting(false); }
+    try {
+      await api.delete('/brands/' + deleteTarget.id);
+      toast('Marca eliminada', 'success');
+      setDeleteTarget(null);
+      load();
+    } catch { toast('Error al eliminar', 'error'); } finally { setDeleting(false); }
   };
 
   const isBrandActive = (b: Brand) => b.active ?? b.isActive ?? false;
@@ -105,57 +169,159 @@ export default function MarcasPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div><h1 className="text-2xl font-bold text-gray-900">Marcas</h1><p className="text-gray-500 text-sm mt-0.5">{brands.length} registros</p></div>
-        <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] transition-colors"><Plus className="w-4 h-4" />Nueva marca</button>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Marcas</h1>
+          <p className="text-gray-500 text-sm mt-0.5">{brands.length} registros</p>
+        </div>
+        <button onClick={openCreate} className="flex items-center justify-center gap-2 px-3 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] transition-colors whitespace-nowrap">
+          <Plus className="w-4 h-4" />
+          <span className="hidden sm:inline">Nueva marca</span>
+          <span className="sm:hidden">Nueva</span>
+        </button>
       </div>
 
-      {brands.length === 0 ? (
+      {paginated.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 py-20 text-center"><p className="text-gray-400 text-sm">No se encontraron marcas</p></div>
       ) : (
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-          <table className="w-full">
-            <thead><tr className="border-b border-gray-100">
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Logo</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Nombre</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Slug</th>
-              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Productos</th>
-              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
-            </tr></thead>
-            <tbody>
-              {brands.map((b) => {
-                const imgSrc = getImageUrl(b.logo || b.logoUrl);
-                return (
-                  <tr key={b.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3">
-                      {imgSrc ? <img src={imgSrc} alt={b.name} className="w-10 h-10 rounded-lg object-contain border border-gray-200 bg-white" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                        : <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center"><ImageIcon className="w-4 h-4 text-gray-400" /></div>}
-                    </td>
-                    <td className="px-4 py-3"><p className="text-gray-900 font-medium text-sm">{b.name}</p></td>
-                    <td className="px-4 py-3 hidden md:table-cell"><code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">{b.slug}</code></td>
-                    <td className="px-4 py-3 text-center text-sm text-gray-500 hidden md:table-cell">{b._count?.products ?? '-'}</td>
-                    <td className="px-4 py-3 text-center"><div className="flex items-center justify-center gap-2"><Toggle checked={isBrandActive(b)} onChange={() => toggleActive(b)} /><span className={'text-xs font-medium ' + (isBrandActive(b) ? 'text-green-600' : 'text-gray-400')}>{isBrandActive(b) ? 'Activo' : 'Inactivo'}</span></div></td>
-                    <td className="px-4 py-3"><div className="flex items-center justify-center gap-1"><button onClick={() => openEdit(b)} className="p-1.5 rounded-lg text-[#C8FF00] hover:bg-[#C8FF00]/10 transition-colors" title="Editar"><Edit2 className="w-4 h-4" /></button><button onClick={() => setDeleteTarget(b)} className="p-1.5 rounded-lg text-red-400 hover:bg-red-400/10 transition-colors" title="Eliminar"><Trash2 className="w-4 h-4" /></button></div></td>
+        <div>
+          <div className="hidden md:block bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[600px]">
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Logo</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Nombre</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Slug</th>
+                    <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Productos</th>
+                    <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
+                    <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                </thead>
+                <tbody>
+                  {paginated.map((b) => {
+                    const imgSrc = getImageUrl(b.logo || b.logoUrl);
+                    return (
+                      <tr key={b.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                        <td className="px-4 py-3">
+                          {imgSrc ? <img src={imgSrc} alt={b.name} className="w-10 h-10 rounded-lg object-contain border border-gray-200 bg-white" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /> : <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center"><ImageIcon className="w-4 h-4 text-gray-400" /></div>}
+                        </td>
+                        <td className="px-4 py-3"><p className="text-gray-900 font-medium text-sm">{b.name}</p></td>
+                        <td className="px-4 py-3"><code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">{b.slug}</code></td>
+                        <td className="px-4 py-3 text-center text-sm text-gray-500">{b._count?.products ?? '-'}</td>
+                        <td className="px-4 py-3 text-center">
+                          <Toggle checked={isBrandActive(b)} onChange={() => toggleActive(b)} />
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center justify-center gap-1">
+                            <button onClick={() => openEdit(b)} className="p-1.5 rounded-lg text-[#C8FF00] hover:bg-[#C8FF00]/10" title="Editar"><Edit2 className="w-4 h-4" /></button>
+                            <button onClick={() => setDeleteTarget(b)} className="p-1.5 rounded-lg text-red-400 hover:bg-red-400/10" title="Eliminar"><Trash2 className="w-4 h-4" /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="md:hidden space-y-3">
+            {paginated.map((b) => {
+              const imgSrc = getImageUrl(b.logo || b.logoUrl);
+              return (
+                <div key={b.id} className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
+                  <div className="flex gap-3">
+                    <div className="w-14 h-14 rounded-lg bg-gray-100 flex items-center justify-center shrink-0 overflow-hidden border border-gray-200 bg-white">
+                      {imgSrc ? <img src={imgSrc} alt={b.name} className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /> : <ImageIcon className="w-5 h-5 text-gray-400" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-900 truncate">{b.name}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{b._count?.products ?? 0} productos</p>
+                    </div>
+                    <div className="shrink-0">
+                      <Toggle checked={isBrandActive(b)} onChange={() => toggleActive(b)} />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
+                    <button onClick={() => openEdit(b)} className="p-2 rounded-lg text-[#C8FF00] hover:bg-[#C8FF00]/10" title="Editar"><Edit2 className="w-4 h-4" /></button>
+                    <button onClick={() => setDeleteTarget(b)} className="p-2 rounded-lg text-red-400 hover:bg-red-400/10" title="Eliminar"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          {Array.from({ length: totalPages }).map((_, i) => (
+            <button key={i} onClick={() => setCurrentPage(i + 1)} className={'w-8 h-8 rounded-lg text-sm font-medium ' + (i + 1 === currentPage ? 'bg-[#C8FF00] text-[#0f172a]' : 'text-gray-500 hover:bg-gray-50')}>{i + 1}</button>
+          ))}
         </div>
       )}
 
       {modalOpen && (
         <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editItem ? 'Editar marca' : 'Nueva marca'} size="xl">
-          <form onSubmit={handleSubmit(onSubmit)} className="flex gap-0">
-            <ImageUpload value={logoValue} onChange={(url) => setValue('logo', url, { shouldDirty: true })} placeholder="URL del logo" suggestion="Medida recomendada: 300x150px. Logo horizontal, fondo transparente." />
-            <div className="mx-6 w-px bg-gray-200 self-stretch my-2" />
-            <div className="flex-1 grid grid-cols-2 gap-4 content-start">
-              <div><label className={labelClass}>Nombre *</label><input {...register('name')} className={inputClass + ' mt-1'} placeholder="Ej: Bullpadel" />{errors.name && <p className="text-xs text-red-600 mt-0.5">{errors.name.message}</p>}</div>
-              <div><label className={labelClass}>Sitio Web</label><input {...register('url')} className={inputClass + ' mt-1'} placeholder="https://bullpadel.com" /></div>
-              <div><label className={labelClass}>Orden</label><input type="number" min={0} {...register('order')} className={inputClass + ' mt-1'} /></div>
-              <div><label className={labelClass}>Estado</label><div className="flex items-center gap-2 mt-1"><Toggle checked={isActive} onChange={() => setValue('isActive', !isActive, { shouldDirty: true })} /><span className={'text-xs font-medium ' + (isActive ? 'text-green-600' : 'text-gray-400')}>{isActive ? 'Activo' : 'Inactivo'}</span></div></div>
-              <div className="col-span-2 flex justify-end gap-3 pt-2 border-t border-gray-100"><button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">Cancelar</button><button type="submit" disabled={saving} className="px-4 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg text-sm font-semibold hover:bg-[#b8ef00] disabled:opacity-50 transition-colors">{saving ? 'Guardando...' : editItem ? 'Actualizar' : 'Crear'}</button></div>
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full">
+            <div className="flex flex-col md:flex-row gap-4 md:gap-6 flex-1 min-h-0 overflow-y-auto p-4 md:p-6">
+              <div className="w-full md:w-[200px] flex-shrink-0 flex flex-col gap-3">
+                <div className="w-full h-[180px] md:h-[200px] rounded-xl bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200">
+                  {previewUrl ? (
+                    <img src={previewUrl} alt="Preview" className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                  ) : (
+                    <ImageIcon className="w-12 h-12 text-gray-300" />
+                  )}
+                </div>
+                <div className="flex gap-2 w-full">
+                  <input
+                    {...register('logo')}
+                    className="flex-1 min-w-0 px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00]"
+                    placeholder="URL del logo"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleUpload}
+                    disabled={uploading}
+                    className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all border border-[#C8FF00]/50 text-gray-600 hover:bg-gray-50 disabled:opacity-50 shrink-0"
+                  >
+                    <Upload className="w-3 h-3" />{uploading ? '...' : 'Subir'}
+                  </button>
+                </div>
+                <p className="text-[10px] text-gray-400 leading-tight mt-1">Medida recomendada: 300x150px. Logo horizontal, fondo transparente.</p>
+              </div>
+
+              <div className="hidden md:block w-px bg-gray-200 self-stretch" />
+
+              <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 content-start">
+                <div>
+                  <label className={labelClass}>Nombre *</label>
+                  <input {...register('name')} className={inputClass + ' mt-1'} placeholder="Ej: Bullpadel" />
+                  {errors.name && <p className="text-xs text-red-600 mt-0.5">{errors.name.message}</p>}
+                </div>
+                <div>
+                  <label className={labelClass}>Sitio Web</label>
+                  <input {...register('url')} className={inputClass + ' mt-1'} placeholder="https://bullpadel.com" />
+                </div>
+                <div>
+                  <label className={labelClass}>Orden</label>
+                  <input type="number" min={0} {...register('order')} className={inputClass + ' mt-1'} />
+                </div>
+                <div>
+                  <label className={labelClass}>Estado</label>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Toggle checked={isActive} onChange={() => setValue('isActive', !isActive, { shouldDirty: true })} />
+                    <span className={'text-xs font-medium ' + (isActive ? 'text-green-600' : 'text-gray-400')}>{isActive ? 'Activo' : 'Inactivo'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 px-4 md:px-6 py-3 md:py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl flex-shrink-0">
+              <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">Cancelar</button>
+              <button type="submit" disabled={saving} className="px-4 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg text-sm font-semibold hover:bg-[#b8ef00] disabled:opacity-50 transition-colors">{saving ? 'Guardando...' : editItem ? 'Actualizar' : 'Crear'}</button>
             </div>
           </form>
         </Modal>
@@ -165,4 +331,3 @@ export default function MarcasPage() {
     </div>
   );
 }
-

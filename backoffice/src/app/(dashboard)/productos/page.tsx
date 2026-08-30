@@ -196,82 +196,84 @@ export default function ProductosPage() {
       {paginated.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 py-20 text-center"><p className="text-gray-400 text-sm">No se encontraron productos</p></div>
       ) : (
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full min-w-[900px]">
-              <thead>
-                <tr className="border-b border-gray-100">
-                  <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase">Imagen</th>
-                  <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase">
-                    <span className="inline-flex items-center gap-1 cursor-pointer" onClick={() => { setSortField('name'); setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); }}>Nombre {sortIcon('name')}</span>
-                  </th>
-                  <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase">Categoria</th>
-                  <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase">
-                    <span className="inline-flex items-center gap-1 cursor-pointer" onClick={() => { setSortField('price'); setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); }}>Precio {sortIcon('price')}</span>
-                  </th>
-                  <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase">Promo</th>
-                  <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase">Transf.</th>
-                  <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase">
-                    <span className="inline-flex items-center gap-1 cursor-pointer" onClick={() => { setSortField('stock'); setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); }}>Stock {sortIcon('stock')}</span>
-                  </th>
-                  <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase">Destacado</th>
-                  <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase">Activo</th>
-                  <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase">Opciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginated.map((p) => {
-                  const imgSrc = getImageUrl(p.images?.[0]);
-                  return (
-                    <tr key={p.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
-                      <td className="px-3 py-3">
-                        {imgSrc ? (
-                          <img src={imgSrc} alt={p.name} className="w-10 h-10 rounded-lg object-cover border border-gray-200" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                        ) : (
-                          <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center"><ImageIcon className="w-4 h-4 text-gray-400" /></div>
-                        )}
-                      </td>
-                      <td className="px-3 py-3"><p className="text-gray-900 font-medium text-sm">{p.name}</p></td>
-                      <td className="px-3 py-3 text-sm text-gray-500">{p.category?.name || '-'}</td>
-                      <td className="px-3 py-3 text-center font-semibold text-sm">{formatPrice(p.price)}</td>
-                      <td className="px-3 py-3 text-center">
-                        {p.salePrice && p.salePrice < p.price ? (
-                          <p className="text-green-600 font-semibold text-sm">{formatPrice(p.salePrice)}</p>
-                        ) : <span className="text-gray-400">-</span>}
-                      </td>
-                      <td className="px-3 py-3 text-center">
-                        {p.transferPrice && p.transferPrice > 0 ? (
-                          <p className="text-blue-600 font-semibold text-sm">{formatPrice(p.transferPrice)}</p>
-                        ) : <span className="text-gray-400">-</span>}
-                      </td>
-                      <td className="px-3 py-3 text-center"><span className={'text-sm font-medium ' + (p.stock <= 5 ? 'text-red-500' : 'text-gray-700')}>{p.stock}</span></td>
-                      <td className="px-3 py-3 text-center">
-                        <button onClick={() => toggleFeatured(p)} className="focus:outline-none" title={p.featured ? 'Quitar destacado' : 'Destacar'}>
-                          <Star className={'w-5 h-5 ' + (p.featured ? 'text-[#C8FF00] fill-[#C8FF00]' : 'text-gray-300')} />
-                        </button>
-                      </td>
-                      <td className="px-3 py-3 text-center">
-                        <Toggle checked={p.active} onChange={() => toggleActive(p)} />
-                      </td>
-                      <td className="px-3 py-3">
-                        <div className="flex items-center justify-center gap-1">
-                          <button onClick={() => openEdit(p)} className="p-1.5 rounded-lg text-[#C8FF00] hover:bg-[#C8FF00]/10" title="Editar"><Edit2 className="w-4 h-4" /></button>
-                          <button onClick={() => setDeleteTarget(p)} className="p-1.5 rounded-lg text-red-400 hover:bg-red-400/10" title="Eliminar"><Trash2 className="w-4 h-4" /></button>
-                          <button onClick={() => setDetailItem(p)} className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50" title="Ver detalle"><ArrowRight className="w-4 h-4" /></button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+        <div>
+          <div className="hidden md:block bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[900px]">
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase">Imagen</th>
+                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase">
+                      <span className="inline-flex items-center gap-1 cursor-pointer" onClick={() => { setSortField('name'); setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); }}>Nombre {sortIcon('name')}</span>
+                    </th>
+                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase">Categoria</th>
+                    <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase">
+                      <span className="inline-flex items-center gap-1 cursor-pointer" onClick={() => { setSortField('price'); setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); }}>Precio {sortIcon('price')}</span>
+                    </th>
+                    <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase">Promo</th>
+                    <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase">Transf.</th>
+                    <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase">
+                      <span className="inline-flex items-center gap-1 cursor-pointer" onClick={() => { setSortField('stock'); setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); }}>Stock {sortIcon('stock')}</span>
+                    </th>
+                    <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase">Destacado</th>
+                    <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase">Activo</th>
+                    <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase">Opciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginated.map((p) => {
+                    const imgSrc = getImageUrl(p.images?.[0]);
+                    return (
+                      <tr key={p.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                        <td className="px-3 py-3">
+                          {imgSrc ? (
+                            <img src={imgSrc} alt={p.name} className="w-10 h-10 rounded-lg object-cover border border-gray-200" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                          ) : (
+                            <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center"><ImageIcon className="w-4 h-4 text-gray-400" /></div>
+                          )}
+                        </td>
+                        <td className="px-3 py-3"><p className="text-gray-900 font-medium text-sm">{p.name}</p></td>
+                        <td className="px-3 py-3 text-sm text-gray-500">{p.category?.name || '-'}</td>
+                        <td className="px-3 py-3 text-center font-semibold text-sm">{formatPrice(p.price)}</td>
+                        <td className="px-3 py-3 text-center">
+                          {p.salePrice && p.salePrice < p.price ? (
+                            <p className="text-green-600 font-semibold text-sm">{formatPrice(p.salePrice)}</p>
+                          ) : <span className="text-gray-400">-</span>}
+                        </td>
+                        <td className="px-3 py-3 text-center">
+                          {p.transferPrice && p.transferPrice > 0 ? (
+                            <p className="text-blue-600 font-semibold text-sm">{formatPrice(p.transferPrice)}</p>
+                          ) : <span className="text-gray-400">-</span>}
+                        </td>
+                        <td className="px-3 py-3 text-center"><span className={'text-sm font-medium ' + (p.stock <= 5 ? 'text-red-500' : 'text-gray-700')}>{p.stock}</span></td>
+                        <td className="px-3 py-3 text-center">
+                          <button onClick={() => toggleFeatured(p)} className="focus:outline-none" title={p.featured ? 'Quitar destacado' : 'Destacar'}>
+                            <Star className={'w-5 h-5 ' + (p.featured ? 'text-[#C8FF00] fill-[#C8FF00]' : 'text-gray-300')} />
+                          </button>
+                        </td>
+                        <td className="px-3 py-3 text-center">
+                          <Toggle checked={p.active} onChange={() => toggleActive(p)} />
+                        </td>
+                        <td className="px-3 py-3">
+                          <div className="flex items-center justify-center gap-1">
+                            <button onClick={() => openEdit(p)} className="p-1.5 rounded-lg text-[#C8FF00] hover:bg-[#C8FF00]/10" title="Editar"><Edit2 className="w-4 h-4" /></button>
+                            <button onClick={() => setDeleteTarget(p)} className="p-1.5 rounded-lg text-red-400 hover:bg-red-400/10" title="Eliminar"><Trash2 className="w-4 h-4" /></button>
+                            <button onClick={() => setDetailItem(p)} className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50" title="Ver detalle"><ArrowRight className="w-4 h-4" /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
 
-          <div className="md:hidden divide-y divide-gray-100">
+          <div className="md:hidden space-y-3">
             {paginated.map((p) => {
               const imgSrc = getImageUrl(p.images?.[0]);
               return (
-                <div key={p.id} className="p-4 space-y-3">
+                <div key={p.id} className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
                   <div className="flex gap-3">
                     <div className="w-14 h-14 rounded-lg bg-gray-100 flex items-center justify-center shrink-0 overflow-hidden">
                       {imgSrc ? (
