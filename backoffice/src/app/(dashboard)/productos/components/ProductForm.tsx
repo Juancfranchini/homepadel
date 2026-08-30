@@ -28,7 +28,7 @@ const schema = z.object({
   featured: z.boolean().default(false),
   isNew: z.boolean().default(false),
   isOffer: z.boolean().default(false),
-  categoryId: z.string().min(1, 'Categoría requerida'),
+  categoryId: z.string().min(1, 'Categoria requerida'),
   brandId: z.string().min(1, 'Marca requerida'),
   images: z.array(z.string()).optional(),
   discountPercentage: z.coerce.number().min(0).max(100).optional(),
@@ -61,15 +61,15 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
   const [uploading, setUploading] = useState(false);
   const [galleryImages, setGalleryImages] = useState<string[]>(Array.isArray(defaultValues?.images) ? (defaultValues.images as string[]).slice(1) : []);
   const [mainImage, setMainImage] = useState<string>(Array.isArray(defaultValues?.images) ? (defaultValues.images as string[])[0] || '' : '');
-  
+
   const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<ProductFormData>({
     resolver: zodResolver(schema),
-    defaultValues: defaultValues || { 
-      active: true, 
-      featured: false, 
-      isNew: false, 
-      isOffer: false, 
-      stock: 0, 
+    defaultValues: defaultValues || {
+      active: true,
+      featured: false,
+      isNew: false,
+      isOffer: false,
+      stock: 0,
       price: 0,
       categoryId: '',
       brandId: ''
@@ -120,9 +120,9 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="flex gap-0">
-      <div className="flex-shrink-0 w-[220px] flex flex-col gap-3">
-        <div className="w-full h-[220px] rounded-xl bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col lg:flex-row gap-4 lg:gap-0">
+      <div className="w-full lg:w-[220px] flex-shrink-0 flex flex-col gap-3">
+        <div className="w-full h-[180px] sm:h-[220px] rounded-xl bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200">
           {previewUrl ? (
             <img src={previewUrl} alt="Preview" className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
           ) : (
@@ -130,12 +130,12 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
           )}
         </div>
         <div className="flex gap-2">
-          <input 
+          <input
             type="text"
             value={mainImage}
             onChange={(e) => setMainImage(e.target.value)}
-            className="flex-1 px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00]" 
-            placeholder="URL de imagen" 
+            className="flex-1 px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00]"
+            placeholder="URL de imagen"
           />
           <button type="button" onClick={handleUpload} disabled={uploading} className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all border border-[#C8FF00]/50 text-gray-600 hover:bg-gray-50 disabled:opacity-50">
             <Upload className="w-3 h-3" />{uploading ? '...' : 'Subir'}
@@ -148,9 +148,9 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
         </div>
       </div>
 
-      <div className="ml-7 mr-5 w-px bg-gray-200 self-stretch my-2" />
+      <div className="hidden lg:block ml-7 mr-5 w-px bg-gray-200 self-stretch my-2" />
 
-      <div className="flex-1 grid grid-cols-2 gap-x-4 gap-y-5 content-start">
+      <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4 sm:gap-y-5 content-start">
         <div>
           <label className={labelClass}>Nombre *</label>
           <input {...register('name')} className={inputClass + ' mt-1'} />
@@ -182,7 +182,7 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
               <label className={labelClass}>% Descuento</label>
               <input type="number" step="0.1" min="0" max="100" {...register('discountPercentage')} className={inputClass + ' mt-1'} placeholder="Ej: 15" />
             </div>
-            <div className="col-span-2">
+            <div className="sm:col-span-2">
               <label className={labelClass}>Cuotas (Mercado Pago)</label>
               <select {...register('installments')} className={inputClass + ' mt-1'}>
                 <option value="">Sin cuotas</option>
@@ -193,7 +193,7 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
               </select>
             </div>
 
-            <div className="col-span-2">
+            <div className="sm:col-span-2">
               <div className="flex items-center justify-between">
                 <label className={labelClass}>Interes en cuotas</label>
                 <div className="flex items-center gap-2">
@@ -218,12 +218,12 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
           </div>
         ) : (
           <div>
-            <label className={labelClass}>Días estimados de fabricacion</label>
+            <label className={labelClass}>Dias estimados de fabricacion</label>
             <input type="number" {...register('estimatedDays')} className={inputClass + ' mt-1'} placeholder="Ej: 20" />
           </div>
         )}
         <div>
-          <label className={labelClass}>Categoría *</label>
+          <label className={labelClass}>Categoria *</label>
           <select {...register('categoryId')} className={inputClass + ' mt-1'}>
             <option value="">Seleccionar</option>
             {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -231,7 +231,7 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
           {errors.categoryId && <p className="text-xs text-red-600 mt-0.5">{errors.categoryId.message}</p>}
         </div>
 
-        <div className="col-span-2">
+        <div className="sm:col-span-2">
           <div className="flex items-center justify-between">
             <label className={labelClass}>Producto por encargo</label>
             <div className="flex items-center gap-2">
@@ -247,7 +247,7 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
           )}
         </div>
 
-        <div className="col-span-2">
+        <div className="sm:col-span-2">
           <label className={labelClass}>Marca *</label>
           <select {...register('brandId')} className={inputClass + ' mt-1'}>
             <option value="">Seleccionar</option>
@@ -256,7 +256,7 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
           {errors.brandId && <p className="text-xs text-red-600 mt-0.5">{errors.brandId.message}</p>}
         </div>
 
-        <div className="col-span-2 flex items-center gap-8 pt-1">
+        <div className="sm:col-span-2 grid grid-cols-2 sm:flex sm:items-center gap-4 sm:gap-8 pt-1">
           <div>
             <label className={labelClass}>Activo</label>
             <div className="flex items-center gap-2 mt-1">
@@ -287,7 +287,7 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
           </div>
         </div>
 
-        <div className="col-span-2 flex justify-end gap-3 pt-6 border-t border-gray-100">
+        <div className="sm:col-span-2 flex justify-end gap-3 pt-4 sm:pt-6 border-t border-gray-100">
           <button type="button" onClick={onCancel} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">Cancelar</button>
           <button type="submit" disabled={saving} className="px-4 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg text-sm font-semibold hover:bg-[#b8ef00] disabled:opacity-50 transition-colors">
             {saving ? 'Guardando...' : 'Guardar'}

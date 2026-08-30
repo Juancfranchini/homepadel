@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { Upload } from 'lucide-react';
 import api from '@/lib/api';
@@ -42,12 +42,12 @@ export default function ImageGalleryInput({ images, onChange }: Props) {
   };
 
   return (
-    <div className="space-y-1.5 mt-2">
+    <div className="space-y-1.5 mt-2 w-full">
       <p className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">Imagenes adicionales (hasta 5)</p>
       {slots.map((url, i) => {
         const preview = getImageUrl(url);
         return (
-          <div key={i} className="flex gap-1.5 items-center">
+          <div key={i} className="flex gap-1.5 items-center w-full">
             <div className="w-6 h-6 rounded bg-gray-100 border border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
               {preview ? (
                 <img src={preview} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
@@ -60,12 +60,12 @@ export default function ImageGalleryInput({ images, onChange }: Props) {
               value={url}
               onChange={(e) => { const newImages = [...slots]; newImages[i] = e.target.value; onChange(newImages.filter(Boolean)); }}
               placeholder={'URL ' + (i + 1)}
-              className="w-[122px] px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00]"
+              className="flex-1 min-w-0 px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00]"
             />
             <button
               type="button"
               onClick={() => handleUpload(i)}
-              className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap border border-[#C8FF00]/50 text-gray-600 hover:bg-gray-50"
+              className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap border border-[#C8FF00]/50 text-gray-600 hover:bg-gray-50 shrink-0"
             >
               <Upload className="w-3 h-3" />Subir
             </button>
