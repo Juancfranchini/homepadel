@@ -36,6 +36,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 const inputClass = 'w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00]';
+const labelClass = 'text-xs font-medium text-gray-400 uppercase tracking-wider';
 
 export default function ReviewsPage() {
   const { toast } = useToast();
@@ -55,7 +56,17 @@ export default function ReviewsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [infoData, setInfoData] = useState({ title: 'Como se calculan las opiniones?', content: '' });
-  const pageSize = 10;
+  const [isMobile, setIsMobile] = useState(false);
+  const pageSize = isMobile ? 3 : 10;
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => { setCurrentPage(1); }, [isMobile]);
 
   const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<FormData>({ resolver: zodResolver(schema) });
   const watchRating = watch('rating');
@@ -139,23 +150,22 @@ export default function ReviewsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-3">
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Resenas de productos</h1>
-            <p className="text-gray-500 text-sm mt-0.5">{filtered.length} resenas</p>
-          </div>
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+        <div className="flex items-center justify-between lg:justify-start gap-3 lg:shrink-0">
+          <h1 className="text-2xl font-bold text-gray-900">Resenas de productos</h1>
+          <p className="text-gray-500 text-sm">{filtered.length} resenas</p>
         </div>
-        <div className="flex flex-wrap items-center gap-2 w-full">
-          <div className="flex-1 min-w-[180px] max-w-md">
+
+        <div className="flex items-center gap-2 w-full lg:w-auto lg:flex-1 lg:max-w-2xl lg:justify-end">
+          <div className="flex-1 min-w-0">
             <ReviewsSearchBar value={search} onChange={setSearch} onAdvancedSearch={() => setAdvancedOpen(true)} hasAdvancedFilters={advancedFilters !== null} onClearFilters={() => { setAdvancedFilters(null); setAdvancedOpen(false); }} />
           </div>
-          <button onClick={() => setShowInfoModal(true)} className="flex items-center gap-2 px-3 py-2 border border-[#C8FF00]/50 text-gray-600 rounded-lg font-semibold text-sm hover:bg-[#C8FF00]/10 hover:border-[#C8FF00] hover:text-[#C8FF00] transition-colors whitespace-nowrap shrink-0">
+          <button onClick={() => setShowInfoModal(true)} className="flex items-center gap-1.5 px-3 py-2 border border-[#C8FF00]/50 text-gray-600 rounded-lg font-semibold text-sm hover:bg-[#C8FF00]/10 hover:border-[#C8FF00] hover:text-[#C8FF00] transition-colors whitespace-nowrap shrink-0">
             <HelpCircle className="w-4 h-4" />
             <span className="hidden sm:inline">Info</span>
             <span className="sm:hidden">i</span>
           </button>
-          <button onClick={openCreate} className="flex items-center gap-2 px-3 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] transition-colors whitespace-nowrap shrink-0">
+          <button onClick={openCreate} className="flex items-center gap-1.5 px-3 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] transition-colors whitespace-nowrap shrink-0">
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">Nueva resena</span>
             <span className="sm:hidden">Nueva</span>
@@ -166,34 +176,37 @@ export default function ReviewsPage() {
       {paginated.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 py-20 text-center"><p className="text-gray-400 text-sm">No se encontraron resenas</p></div>
       ) : (
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full min-w-[700px]">
-              <thead><tr className="border-b border-gray-100">
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Producto</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Cliente</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Punt. {sortIcon('rating')}</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Comentario</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
-              </tr></thead>
-              <tbody>
-                {paginated.map((r) => (
-                  <tr key={r.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 text-sm text-gray-900">{r.product?.name || r.productId}</td>
-                    <td className="px-4 py-3"><div className="flex items-center gap-2"><div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center"><User className="w-3.5 h-3.5 text-gray-400" /></div><span className="text-sm font-medium text-gray-900">{r.name}</span></div></td>
-                    <td className="px-4 py-3 text-center"><div className="flex gap-0.5 justify-center">{[1,2,3,4,5].map((s) => (<Star key={s} className={'w-3 h-3 ' + (s <= r.rating ? 'text-[#C8FF00] fill-[#C8FF00]' : 'text-gray-200')} />))}</div></td>
-                    <td className="px-4 py-3"><p className="text-sm text-gray-500 truncate max-w-xs">{r.comment}</p></td>
-                    <td className="px-4 py-3 text-center"><div className="flex items-center justify-center gap-2"><Toggle checked={r.active} onChange={() => toggleActive(r)} /><span className={'text-xs font-medium ' + (r.active ? 'text-green-600' : 'text-gray-400')}>{r.active ? 'Activo' : 'Inactivo'}</span></div></td>
-                    <td className="px-4 py-3"><div className="flex items-center justify-center gap-1"><button onClick={() => openEdit(r)} className="p-1.5 rounded-lg text-[#C8FF00] hover:bg-[#C8FF00]/10 transition-colors" title="Editar"><Edit2 className="w-4 h-4" /></button><button onClick={() => setDeleteTarget(r)} className="p-1.5 rounded-lg text-red-400 hover:bg-red-400/10 transition-colors" title="Eliminar"><Trash2 className="w-4 h-4" /></button></div></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <div>
+          <div className="hidden md:block bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[700px]">
+                <thead><tr className="border-b border-gray-100">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Producto</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Cliente</th>
+                  <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Punt. {sortIcon('rating')}</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Comentario</th>
+                  <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
+                  <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
+                </tr></thead>
+                <tbody>
+                  {paginated.map((r) => (
+                    <tr key={r.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 text-sm text-gray-900">{r.product?.name || r.productId}</td>
+                      <td className="px-4 py-3"><div className="flex items-center gap-2"><div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center"><User className="w-3.5 h-3.5 text-gray-400" /></div><span className="text-sm font-medium text-gray-900">{r.name}</span></div></td>
+                      <td className="px-4 py-3 text-center"><div className="flex gap-0.5 justify-center">{[1,2,3,4,5].map((s) => (<Star key={s} className={'w-3 h-3 ' + (s <= r.rating ? 'text-[#C8FF00] fill-[#C8FF00]' : 'text-gray-200')} />))}</div></td>
+                      <td className="px-4 py-3"><p className="text-sm text-gray-500 truncate max-w-xs">{r.comment}</p></td>
+                      <td className="px-4 py-3 text-center"><div className="flex items-center justify-center gap-2"><Toggle checked={r.active} onChange={() => toggleActive(r)} /><span className={'text-xs font-medium ' + (r.active ? 'text-green-600' : 'text-gray-400')}>{r.active ? 'Activo' : 'Inactivo'}</span></div></td>
+                      <td className="px-4 py-3"><div className="flex items-center justify-center gap-1"><button onClick={() => openEdit(r)} className="p-1.5 rounded-lg text-[#C8FF00] hover:bg-[#C8FF00]/10 transition-colors" title="Editar"><Edit2 className="w-4 h-4" /></button><button onClick={() => setDeleteTarget(r)} className="p-1.5 rounded-lg text-red-400 hover:bg-red-400/10 transition-colors" title="Eliminar"><Trash2 className="w-4 h-4" /></button></div></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-          <div className="md:hidden divide-y divide-gray-100">
+
+          <div className="md:hidden space-y-3">
             {paginated.map((r) => (
-              <div key={r.id} className="p-4 space-y-2">
+              <div key={r.id} className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate">{r.product?.name || r.productId}</p>
@@ -201,15 +214,17 @@ export default function ReviewsPage() {
                   </div>
                   <div className="flex gap-0.5 shrink-0">{[1,2,3,4,5].map((s) => (<Star key={s} className={'w-3 h-3 ' + (s <= r.rating ? 'text-[#C8FF00] fill-[#C8FF00]' : 'text-gray-200')} />))}</div>
                 </div>
+
                 <p className="text-xs text-gray-500 line-clamp-2">{r.comment}</p>
+
                 <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                   <div className="flex items-center gap-2">
                     <Toggle checked={r.active} onChange={() => toggleActive(r)} />
                     <span className={'text-xs ' + (r.active ? 'text-green-600' : 'text-gray-400')}>{r.active ? 'Activo' : 'Inactivo'}</span>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => openEdit(r)} className="p-1.5 rounded-lg text-[#C8FF00] hover:bg-[#C8FF00]/10"><Edit2 className="w-4 h-4" /></button>
-                    <button onClick={() => setDeleteTarget(r)} className="p-1.5 rounded-lg text-red-400 hover:bg-red-400/10"><Trash2 className="w-4 h-4" /></button>
+                    <button onClick={() => openEdit(r)} className="p-2 rounded-lg text-[#C8FF00] hover:bg-[#C8FF00]/10" title="Editar"><Edit2 className="w-4 h-4" /></button>
+                    <button onClick={() => setDeleteTarget(r)} className="p-2 rounded-lg text-red-400 hover:bg-red-400/10" title="Eliminar"><Trash2 className="w-4 h-4" /></button>
                   </div>
                 </div>
               </div>
@@ -228,20 +243,22 @@ export default function ReviewsPage() {
 
       {modalOpen && (
         <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editItem ? 'Editar resena' : 'Nueva resena'} size="md">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div><label className="block text-sm font-medium text-gray-700 mb-1">Producto *</label><select {...register('productId')} className={inputClass}><option value="">Seleccionar</option>{products.map(p => (<option key={p.id} value={p.id}>{p.name}</option>))}</select>{errors.productId && <p className="text-xs text-red-600 mt-1">{errors.productId.message}</p>}</div>
-            <div><label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label><input {...register('name')} className={inputClass} />{errors.name && <p className="text-xs text-red-600 mt-1">{errors.name.message}</p>}</div>
-            <div><label className="block text-sm font-medium text-gray-700 mb-1">Puntuacion *</label><div className="flex items-center gap-2"><input type="number" min={1} max={5} {...register('rating')} className={inputClass + ' w-20'} /><div className="flex gap-0.5">{[1,2,3,4,5].map((s) => (<Star key={s} className={'w-5 h-5 ' + (s <= (watchRating || 5) ? 'text-[#C8FF00] fill-[#C8FF00]' : 'text-gray-200')} />))}</div></div></div>
-            <div><label className="block text-sm font-medium text-gray-700 mb-1">Comentario *</label><textarea {...register('comment')} rows={3} className={inputClass} />{errors.comment && <p className="text-xs text-red-600 mt-1">{errors.comment.message}</p>}</div>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4 sm:p-6">
+            <div><label className={labelClass}>Producto *</label><select {...register('productId')} className={inputClass + ' mt-1'}><option value="">Seleccionar</option>{products.map(p => (<option key={p.id} value={p.id}>{p.name}</option>))}</select>{errors.productId && <p className="text-xs text-red-600 mt-1">{errors.productId.message}</p>}</div>
+            <div><label className={labelClass}>Nombre *</label><input {...register('name')} className={inputClass + ' mt-1'} />{errors.name && <p className="text-xs text-red-600 mt-1">{errors.name.message}</p>}</div>
+            <div><label className={labelClass}>Puntuacion *</label><div className="flex items-center gap-2 mt-1"><input type="number" min={1} max={5} {...register('rating')} className={inputClass + ' w-20'} /><div className="flex gap-0.5">{[1,2,3,4,5].map((s) => (<Star key={s} className={'w-5 h-5 ' + (s <= (watchRating || 5) ? 'text-[#C8FF00] fill-[#C8FF00]' : 'text-gray-200')} />))}</div></div></div>
+            <div><label className={labelClass}>Comentario *</label><textarea {...register('comment')} rows={3} className={inputClass + ' mt-1'} />{errors.comment && <p className="text-xs text-red-600 mt-1">{errors.comment.message}</p>}</div>
             <div className="flex items-center gap-4"><label className="flex items-center gap-2"><input type="checkbox" {...register('active')} className="w-4 h-4 rounded accent-[#C8FF00]" /> Aprobada</label><label className="flex items-center gap-2"><input type="checkbox" {...register('verified')} className="w-4 h-4 rounded accent-[#C8FF00]" /> Verificada</label></div>
-            <div className="flex justify-end gap-3 pt-2 border-t border-gray-100"><button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancelar</button><button type="submit" disabled={saving} className="px-4 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg text-sm font-semibold hover:bg-[#b8ef00] disabled:opacity-50">{saving ? 'Guardando...' : editItem ? 'Actualizar' : 'Crear'}</button></div>
+            <div className="flex justify-end gap-3 pt-4 border-t border-gray-100"><button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancelar</button><button type="submit" disabled={saving} className="px-4 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg text-sm font-semibold hover:bg-[#b8ef00] disabled:opacity-50">{saving ? 'Guardando...' : editItem ? 'Actualizar' : 'Crear'}</button></div>
           </form>
         </Modal>
       )}
 
       {showInfoModal && (
         <Modal isOpen={showInfoModal} onClose={() => setShowInfoModal(false)} title={infoData.title} size="md">
-          <div className="prose prose-sm max-w-none">{infoData.content || 'No hay informacion disponible.'}</div>
+          <div className="p-4 sm:p-6">
+            <p className="text-gray-600 text-sm leading-relaxed">{infoData.content || 'No hay informacion disponible.'}</p>
+          </div>
         </Modal>
       )}
 

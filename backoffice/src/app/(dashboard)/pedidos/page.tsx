@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { ArrowRight, Eye } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { ArrowRight, ChevronDown } from 'lucide-react';
 import api from '@/lib/api';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { Modal } from '@/components/ui/Modal';
@@ -60,7 +60,29 @@ export default function PedidosPage() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
+  const [isMobile, setIsMobile] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const pageSize = isMobile ? 3 : 10;
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => { setCurrentPage(1); }, [isMobile, statusFilter]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -75,7 +97,7 @@ export default function PedidosPage() {
 
   const filtered = statusFilter === 'ALL' ? orders : orders.filter((o) => o.status === statusFilter);
   const totalPages = Math.ceil(filtered.length / pageSize);
-  const páginated = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const paginated = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleStatusChange = async (orderId: string, newStatus: string, trackingNumber?: string, trackingUrl?: string) => {
     setUpdatingStatus(true);
@@ -96,7 +118,8 @@ export default function PedidosPage() {
         <p className="text-gray-500 text-sm mt-0.5">{filtered.length} pedidos</p>
       </div>
 
-      <div className="grid grid-cols-6 gap-2 w-full">
+      {/* Grid: <345px dropdown informativo, 345-640px 2 cols x 3 rows, 640-1024px 3 cols x 2 rows, 1024px+ 6 cols x 1 row */}
+      <div className="hidden min-[345px]:grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 w-full">
         {STATUS_TABS.map((tab) => {
           const count = tab.value === 'ALL' ? orders.length : orders.filter((o) => o.status === tab.value).length;
           const isActive = statusFilter === tab.value;
@@ -121,51 +144,138 @@ export default function PedidosPage() {
         })}
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-gray-100">
-              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Número</th>
-              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Cliente</th>
-              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Teléfono</th>
-              <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Items</th>
-              <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
-              <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-              <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden xl:table-cell">Fecha</th>
-              <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {páginated.map((o) => {
+      {/* Dropdown informativo solo < 345px */}
+      <div className="min-[345px]:hidden relative" ref={dropdownRef}>
+        <div className="w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
+          <button
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <span className="flex items-center gap-2">
+              <span>Todos</span>
+              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
+                {orders.length}
+              </span>
+            </span>
+            <span className="p-1 rounded-md bg-gray-100 text-gray-500 hover:bg-gray-200 hover:bg-opacity-10 transition-colors">
+              <ChevronDown className={'w-4 h-4 transition-transform ' + (dropdownOpen ? 'rotate-180' : '')} />
+            </span>
+          </button>
+
+          {dropdownOpen && (
+            <div className="border-t border-gray-100">
+              {STATUS_TABS.filter((t) => t.value !== 'ALL').map((tab) => {
+                const count = orders.filter((o) => o.status === tab.value).length;
+                return (
+                  <div
+                    key={tab.value}
+                    className="flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-600 bg-gray-50/50"
+                  >
+                    <span>{tab.label}</span>
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
+                      {count}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {paginated.length === 0 ? (
+        <div className="bg-white rounded-xl border border-gray-200 py-20 text-center"><p className="text-gray-400 text-sm">No se encontraron pedidos</p></div>
+      ) : (
+        <div>
+          <div className="hidden md:block bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[800px]">
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Numero</th>
+                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Cliente</th>
+                    <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Telefono</th>
+                    <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Items</th>
+                    <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
+                    <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
+                    <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Fecha</th>
+                    <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginated.map((o) => {
+                    const statusInfo = STATUS_TABS.find((t) => t.value === o.status);
+                    return (
+                      <tr key={o.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                        <td className="px-3 py-3"><code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-900 font-semibold">{o.number}</code></td>
+                        <td className="px-3 py-3">
+                          <p className="text-gray-900 font-medium text-sm">{o.buyerName || o.user?.name || 'Invitado'}</p>
+                          <p className="text-xs text-gray-400">{o.buyerEmail || o.user?.email || '-'}</p>
+                        </td>
+                        <td className="px-3 py-3 text-sm text-gray-500">{o.buyerPhone || '-'}</td>
+                        <td className="px-3 py-3 text-center text-sm text-gray-500">{(o.items || []).length} items</td>
+                        <td className="px-3 py-3 text-center font-semibold text-sm">{formatPrice(o.total)}</td>
+                        <td className="px-3 py-3 text-center">
+                          <span className={'text-xs font-medium px-2 py-1 rounded-full ' + (statusInfo?.color || 'bg-gray-100')}>
+                            {STATUS_LABELS[o.status] || o.status}
+                          </span>
+                        </td>
+                        <td className="px-3 py-3 text-center text-xs text-gray-500">{formatDate(o.createdAt)}</td>
+                        <td className="px-3 py-3 text-center">
+                          <button onClick={() => { setSelectedOrder(o); setDetailOpen(true); }}
+                            className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors" title="Ver detalle">
+                            <ArrowRight className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="md:hidden space-y-3">
+            {paginated.map((o) => {
               const statusInfo = STATUS_TABS.find((t) => t.value === o.status);
               return (
-                <tr key={o.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
-                  <td className="px-3 py-3"><code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-900 font-semibold">{o.number}</code></td>
-                  <td className="px-3 py-3">
-                    <p className="text-gray-900 font-medium text-sm">{o.buyerName || o.user?.name || 'Invitado'}</p>
-                    <p className="text-xs text-gray-400">{o.buyerEmail || o.user?.email || '-'}</p>
-                  </td>
-                  <td className="px-3 py-3 text-sm text-gray-500 hidden lg:table-cell">{o.buyerPhone || '-'}</td>
-                  <td className="px-3 py-3 text-center text-sm text-gray-500">{(o.items || []).length} items</td>
-                  <td className="px-3 py-3 text-center font-semibold text-sm">{formatPrice(o.total)}</td>
-                  <td className="px-3 py-3 text-center">
-                    <span className={'text-xs font-medium px-2 py-1 rounded-full ' + (statusInfo?.color || 'bg-gray-100')}>
+                <div key={o.id} className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-900 font-semibold">{o.number}</code>
+                      <p className="text-sm font-semibold text-gray-900 mt-1 truncate">{o.buyerName || o.user?.name || 'Invitado'}</p>
+                      <p className="text-xs text-gray-400">{o.buyerPhone || '-'}</p>
+                    </div>
+                    <span className={'text-xs font-medium px-2 py-1 rounded-full shrink-0 ' + (statusInfo?.color || 'bg-gray-100')}>
                       {STATUS_LABELS[o.status] || o.status}
                     </span>
-                  </td>
-                  <td className="px-3 py-3 text-center text-xs text-gray-500 hidden xl:table-cell">{formatDate(o.createdAt)}</td>
-                  <td className="px-3 py-3 text-center">
+                  </div>
+
+                  <div className="bg-[#0f172a] rounded-lg p-3 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-[#C8FF00] font-medium">Items</p>
+                      <p className="text-sm font-semibold text-white">{(o.items || []).length} items</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-[#C8FF00] font-medium">Total</p>
+                      <p className="text-sm font-bold text-[#C8FF00]">{formatPrice(o.total)}</p>
+                    </div>
+                  </div>
+
+                  <div className="text-xs text-gray-400">{formatDate(o.createdAt)}</div>
+
+                  <div className="flex justify-end pt-2 border-t border-gray-100">
                     <button onClick={() => { setSelectedOrder(o); setDetailOpen(true); }}
-                      className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors" title="Ver detalle">
-                      <ArrowRight className="w-4 h-4" />
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-blue-600 bg-blue-50/50 hover:bg-blue-50 transition-opacity hover:opacity-80">
+                      Ver mas <ArrowRight className="w-4 h-4" />
                     </button>
-                  </td>
-                </tr>
+                  </div>
+                </div>
               );
             })}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        </div>
+      )}
 
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2">
@@ -177,8 +287,8 @@ export default function PedidosPage() {
 
       {detailOpen && selectedOrder && (
         <Modal isOpen={detailOpen} onClose={() => setDetailOpen(false)} title={'Pedido ' + selectedOrder.number} size="lg">
-          <div className="space-y-5">
-            <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-5 p-4 sm:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div className="bg-gray-50 rounded-lg p-4">
                 <p className="text-xs font-semibold text-gray-400 uppercase mb-1">Cliente</p>
                 <p className="font-semibold text-gray-900">{selectedOrder.buyerName || selectedOrder.user?.name || 'Invitado'}</p>
@@ -186,11 +296,11 @@ export default function PedidosPage() {
                 <p className="text-sm text-gray-500">{selectedOrder.buyerPhone || '-'}</p>
               </div>
               <div className="bg-gray-50 rounded-lg p-4">
-                <p className="text-xs font-semibold text-gray-400 uppercase mb-1">Dirección</p>
+                <p className="text-xs font-semibold text-gray-400 uppercase mb-1">Direccion</p>
                 <p className="text-sm text-gray-700">{selectedOrder.address}</p>
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
               <div className="bg-gray-50 rounded-lg p-4">
                 <p className="text-xs font-semibold text-gray-400 uppercase mb-1">Medio de pago</p>
                 <p className="text-sm text-gray-700">{selectedOrder.paymentMethod || 'No especificado'}</p>
@@ -213,31 +323,18 @@ export default function PedidosPage() {
               <p className="text-sm font-semibold text-gray-700 mb-3">Productos</p>
               <div className="space-y-2">
                 {(selectedOrder.items || []).map((item) => (
-                  <div key={item.id} className="flex items-center justify-between p-3 border border-gray-100 rounded-lg">
+                  <div key={item.id} className="flex items-center justify-between p-3 bg-[#0f172a] rounded-lg">
                     <div>
-                      <p className="text-sm font-medium text-gray-900">{item.product.name}</p>
-                      <p className="text-xs text-gray-400">{item.product.sku} x {item.quantity}</p>
+                      <p className="text-sm font-medium text-white">{item.product.name}</p>
+                      <p className="text-xs text-[#C8FF00]">{item.product.sku} x {item.quantity}</p>
                     </div>
-                    <p className="text-sm font-semibold text-gray-900">{formatPrice(item.price * item.quantity)}</p>
+                    <p className="text-sm font-bold text-[#C8FF00]">{formatPrice(item.price)}</p>
                   </div>
                 ))}
               </div>
             </div>
-
-            <div className="bg-[#0f172a] rounded-xl p-4 text-white space-y-2">
-              <div className="flex justify-between text-sm"><span className="text-slate-400">Subtotal</span><span>{formatPrice(selectedOrder.subtotal)}</span></div>
-              {selectedOrder.discount > 0 && <div className="flex justify-between text-sm text-green-400"><span>Descuento</span><span>-{formatPrice(selectedOrder.discount)}</span></div>}
-              <div className="flex justify-between text-sm"><span className="text-slate-400">Envío</span><span>{selectedOrder.shipping > 0 ? formatPrice(selectedOrder.shipping) : 'GRATIS'}</span></div>
-              <div className="flex justify-between font-bold text-base pt-2 border-t border-white/10"><span>Total</span><span className="text-[#C8FF00]">{formatPrice(selectedOrder.total)}</span></div>
-            </div>
           </div>
         </Modal>
-      )}
-
-      {páginated.length === 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 py-20 text-center">
-          <p className="text-gray-400 text-sm">No se encontraron pedidos</p>
-        </div>
       )}
     </div>
   );
