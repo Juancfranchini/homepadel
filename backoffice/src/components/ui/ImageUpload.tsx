@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useRef, useCallback } from 'react';
 import { Upload, ImageIcon, X, Loader2 } from 'lucide-react';
@@ -16,7 +16,7 @@ interface Props {
   value: string;
   onChange: (url: string) => void;
   placeholder?: string;
-  width?: number;
+  width?: number | string;
   height?: number;
   suggestion?: string;
 }
@@ -85,7 +85,7 @@ export default function ImageUpload({ value, onChange, placeholder = 'URL de ima
             : previewUrl
               ? 'border-gray-200 bg-gray-100'
               : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-gray-100')}
-        style={{ width, height }}
+        style={{ width: '100%', height }}
       >
         {uploading ? (
           <div className="flex flex-col items-center gap-2 text-gray-500">
@@ -122,7 +122,7 @@ export default function ImageUpload({ value, onChange, placeholder = 'URL de ima
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="flex-1 px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00]"
+          className="flex-1 min-w-0 px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00]"
         />
         <button
           type="button"
