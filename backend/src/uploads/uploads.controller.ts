@@ -1,8 +1,7 @@
 // Upload de imágenes para productos, banners, categorías, etc.
-// POST /api/uploads/image  — sube una imagen y retorna { url: "/uploads/filename.jpg" }
+// POST /api/uploads/image — sube una imagen y retorna { url: "data:image/png;base64,..." }
 // Requiere autenticación ADMIN
 // El campo del form-data debe llamarse 'file'
-// Ejemplo de uso en frontend: const formData = new FormData(); formData.append('file', file);
 
 import { Controller, Post, UploadedFile, UseInterceptors, UseGuards } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -22,6 +21,9 @@ export class UploadsController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
   uploadImage(@UploadedFile() file: Express.Multer.File) {
-    return { url: `/uploads/${file.filename}` };
+    const base64 = file.buffer.toString('base64');
+    const mimeType = file.mimetype;
+    const dataUrl = `data:${mimeType};base64,${base64}`;
+    return { url: dataUrl };
   }
 }

@@ -1,9 +1,9 @@
-interface BrandLogoProps {
+﻿interface BrandLogoProps {
   /** URL de imagen personalizada (desde backoffice) */
   imageUrl?: string;
   /** 'dark' para fondos oscuros, 'light' para fondos claros */
   variant?: 'dark' | 'light';
-  size?: 'xs' | 'sm' | 'md' | 'lg';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   /** Mostrar el texto "HOME PÁDEL */
   showText?: boolean;
   className?: string;
@@ -15,6 +15,7 @@ const SIZE_MAP: Record<string, [number, number, string, number]> = {
   sm: [32, 20, '9px', 3],
   md: [64, 47, '12px', 6],
   lg: [84, 54, '16px', 8],
+  xl: [120, 77, '18px', 10],
 };
 
 export default function BrandLogo({
