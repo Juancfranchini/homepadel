@@ -11,7 +11,7 @@ async function getFaviconUrl(): Promise<string> {
     const res = await fetch(apiUrl + '/site-sections/branding', { next: { revalidate: 3600 } });
     const data = await res.json();
     const isotipo = data?.data?.isotipo || data?.isotipo;
-    if (isotipo) return baseUrl + isotipo;
+    if (isotipo) { if (isotipo.startsWith('data:') || isotipo.startsWith('http')) return isotipo; return baseUrl + isotipo; }
   } catch { }
   return '/logo-icon.svg';
 }
@@ -91,3 +91,4 @@ export default function RootLayout({
     </html>
   );
 }
+

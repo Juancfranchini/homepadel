@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -15,6 +15,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http:/
 
 function getFullUrl(path: string): string {
   if (!path) return '';
+  if (path.startsWith('data:')) return path;
   if (path.startsWith('http')) return path;
   return API_BASE + path;
 }
