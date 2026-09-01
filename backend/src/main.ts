@@ -1,4 +1,4 @@
-// Punto de entrada de la app NestJS
+﻿// Punto de entrada de la app NestJS
 // Configura Swagger, CORS, validación global, Helmet
 // Para correr en dev: npm run start:dev
 // Docs disponibles en: http://localhost:4000/api/docs
@@ -9,12 +9,13 @@ import { join } from 'path';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
+import { json, urlencoded } from 'express';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Prefijo global de rutas → /api/...
+  // Prefijo global de rutas  /api/...
   app.setGlobalPrefix('api');
 
   // Servir archivos estaticos de la carpeta uploads
@@ -25,13 +26,17 @@ async function bootstrap() {
   // Seguridad HTTP headers
   app.use(helmet());
 
-  // CORS — acepta localhost en dev y dominios de Vercel + URLs configuradas en producción
+  // Aumentar límite de body para imágenes base64 (50MB)
+  app.use(json({ limit: '50mb' }));
+  app.use(urlencoded({ extended: true, limit: '50mb' }));
+
+  // CORS  acepta localhost en dev y dominios de Vercel + URLs configuradas en producción
   const isDev = process.env.NODE_ENV !== 'production';
   app.enableCors({
     origin: isDev
       ? true
       : (origin, callback) => {
-          // Sin origen (curl, Postman, server-side) → permitir
+          // Sin origen (curl, Postman, server-side)  permitir
           if (!origin) return callback(null, true);
 
           const allowed = [
@@ -46,7 +51,7 @@ async function bootstrap() {
             return callback(null, true);
           }
 
-          callback(new Error(`CORS: origen no permitido → ${origin}`));
+          callback(new Error(`CORS: origen no permitido  ${origin}`));
         },
     credentials: true,
   });
@@ -60,7 +65,7 @@ async function bootstrap() {
     }),
   );
 
-  // Swagger docs → /api/docs
+  // Swagger docs  /api/docs
   const config = new DocumentBuilder()
     .setTitle('HomePadel API')
     .setDescription('API REST para la plataforma ecommerce de pádel')
