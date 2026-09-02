@@ -1,4 +1,4 @@
-import { FinalMessageData } from '@/types';
+﻿import { FinalMessageData } from '@/types';
 import Link from 'next/link';
 import { ArrowRight, Package } from 'lucide-react';
 import NewsletterForm from './NewsletterForm';
@@ -30,14 +30,14 @@ export default function FinalMessage({ data }: Props) {
             </div>
             <div className="flex flex-col gap-4 mt-6">
               <div className="w-10 h-0.5 bg-[#B7D31A] rounded-full" />
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3">
                 {buttonText && buttonUrl && (
-                  <Link href={buttonUrl} className="btn-primary-glow bg-[#B7D31A] text-[#050606] px-6 py-3 rounded-lg font-semibold text-sm uppercase tracking-wider inline-flex items-center gap-2 hover:bg-[#CAE52E] transition-colors">
+                  <Link href={buttonUrl} className="btn-primary-glow bg-[#B7D31A] text-[#050606] px-6 py-3 rounded-lg font-semibold text-sm uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#CAE52E] transition-colors w-full sm:w-auto">
                     {buttonText}<ArrowRight size={14} />
                   </Link>
                 )}
                 {data?.secondaryButtonText && data?.secondaryButtonUrl && (
-                  <Link href={data.secondaryButtonUrl} className="bg-[#0A2D3D] text-[#F7F6F7] px-6 py-3 rounded-lg font-semibold text-sm uppercase tracking-wider inline-flex items-center gap-2 hover:bg-[#0D3D52] transition-colors">
+                  <Link href={data.secondaryButtonUrl} className="bg-[#0A2D3D] text-[#F7F6F7] px-6 py-3 rounded-lg font-semibold text-sm uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#0D3D52] transition-colors w-full sm:w-auto">
                     {data.secondaryButtonText}
                   </Link>
                 )}

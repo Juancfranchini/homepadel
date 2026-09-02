@@ -1,4 +1,4 @@
-// Servicio global de Prisma — se inyecta en cualquier módulo
+﻿// Servicio global de Prisma — se inyecta en cualquier módulo
 // Extiende PrismaClient para exponer todos los métodos de acceso a la BD
 // Se conecta automáticamente al iniciar el módulo
 

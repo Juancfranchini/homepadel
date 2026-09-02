@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { Mail, CheckCircle, Loader2 } from 'lucide-react';
@@ -81,7 +81,7 @@ export default function NewsletterForm({ data }: Props) {
             <button
               type="submit"
               disabled={status === 'loading'}
-              className="bg-[#B7D31A] text-[#050606] px-6 py-3 rounded-lg font-semibold text-sm uppercase tracking-wider hover:bg-[#CAE52E] transition-colors btn-primary-glow whitespace-nowrap disabled:opacity-70 flex items-center justify-center gap-2"
+              className="bg-[#B7D31A] text-[#050606] px-6 py-3 rounded-lg font-semibold text-sm uppercase tracking-wider hover:bg-[#CAE52E] transition-colors btn-primary-glow whitespace-nowrap disabled:opacity-70 flex items-center justify-center gap-2 w-full sm:w-auto"
             >
               {status === 'loading' ? (
                 <><Loader2 size={14} className="animate-spin" /> ENVIANDO...</>
