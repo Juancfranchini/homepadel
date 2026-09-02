@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -139,32 +139,34 @@ export default function InstagramConfigPage() {
 
   return (
     <div className="space-y-6 w-full">
-      <div className="flex items-center gap-3">
-        <Link href="/configuracion" className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
-          <ArrowLeft className="w-4 h-4" />
-        </Link>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Instagram</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Configuración de la sección Instagram del inicio</p>
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <Link href="/configuracion" className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
+            <ArrowLeft className="w-4 h-4" />
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Instagram</h1>
+            <p className="text-gray-500 text-sm mt-0.5">Configuración de la sección Instagram del inicio</p>
+          </div>
         </div>
       </div>
 
-      <div className="bg-[#0f172a] rounded-xl p-5 flex items-center justify-between">
+      <div className="bg-[#0f172a] rounded-xl p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <p className="text-[#C8FF00] text-xs font-bold uppercase tracking-widest mb-1">Vista previa</p>
           <p className="text-white font-black text-lg">{watchTitle || 'No te pierdas ninguna publicacion'}</p>
         </div>
         <a href={watch('buttonUrl')} target="_blank" rel="noopener noreferrer"
-          className="flex items-center gap-2 bg-[#C8FF00] text-[#0f172a] px-4 py-2 rounded-full font-bold text-sm">
+          className="flex items-center gap-2 bg-[#C8FF00] text-[#0f172a] px-4 py-2 rounded-full font-bold text-sm self-start sm:self-auto">
           {watchUsername || '@home.padel'}
           <ExternalLink className="w-3.5 h-3.5" />
         </a>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+        <div className="bg-white rounded-xl border border-gray-200 px-4 sm:px-6 py-4 sm:py-6 space-y-4">
           <h2 className="text-sm font-semibold text-gray-800 border-b border-gray-100 pb-3">Datos generales</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>Título *</label>
               <input {...register('title')} className={inputClass} placeholder="No te pierdas ninguna publicacion" />
@@ -184,17 +186,17 @@ export default function InstagramConfigPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+        <div className="bg-white rounded-xl border border-gray-200 px-4 sm:px-6 py-4 sm:py-6 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-gray-100 pb-3">
             <h2 className="text-sm font-semibold text-gray-800">Conexion API de Meta</h2>
             <button type="button" onClick={handleTestConnection} disabled={testing}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-[#C8FF00]/50 text-gray-600 hover:bg-gray-50 disabled:opacity-50">
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-[#C8FF00]/50 text-gray-600 hover:bg-gray-50 disabled:opacity-50 self-start sm:self-auto">
               {testing ? <Loader2 className="w-4 h-4 animate-spin" /> : testResult === true ? <CheckCircle className="w-4 h-4 text-green-500" /> : testResult === false ? <XCircle className="w-4 h-4 text-red-500" /> : null}
               {testing ? 'Probando...' : 'Probar conexion'}
             </button>
           </div>
           <p className="text-xs text-gray-400">Necesitas crear una App en Meta for Developers y activar oEmbed Read. Si la API no funciona, las imagenes subidas manualmente se usaran en el frontend.</p>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>Meta App ID</label>
               <input {...register('appId')} className={inputClass} placeholder="123456789" />
@@ -211,11 +213,11 @@ export default function InstagramConfigPage() {
           )}
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+        <div className="bg-white rounded-xl border border-gray-200 px-4 sm:px-6 py-4 sm:py-6 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-gray-100 pb-3">
             <h2 className="text-sm font-semibold text-gray-800">URLs de posts ({fields.length})</h2>
             <button type="button" onClick={() => append({ url: '', thumbnail: '' })}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#C8FF00] text-[#0f172a] hover:bg-[#b8ef00] transition-colors">
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#C8FF00] text-[#0f172a] hover:bg-[#b8ef00] transition-colors self-start sm:self-auto">
               <Plus className="w-3 h-3" />Agregar
             </button>
           </div>
@@ -223,39 +225,42 @@ export default function InstagramConfigPage() {
           <input type="file" ref={fileRef} className="hidden" accept="image/*" onChange={() => { if (uploadingIndex !== null) handleUploadThumbnail(uploadingIndex); }} />
           <div className="space-y-3">
             {fields.map((field, index) => (
-              <div key={field.id} className="flex gap-2 items-start">
+              <div key={field.id} className="flex flex-col sm:flex-row gap-2 sm:items-start">
                 <div className="flex-1 space-y-2">
                   <input
                     {...register(('manualUrls.' + index + '.url') as any)}
                     className={inputClass}
                     placeholder={'Post #' + (index + 1) + ' - https://www.instagram.com/p/...'}
                   />
-                  
                 </div>
-                <button type="button" onClick={() => { setUploadingIndex(index); fileRef.current?.click(); }} disabled={uploadingIndex !== null}
-                  className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium border border-[#C8FF00]/50 text-gray-600 hover:bg-gray-50 disabled:opacity-50 whitespace-nowrap">
-                  <Upload className="w-3 h-3" />{uploadingIndex === index ? 'Subiendo...' : 'Subir imagen'}
-                </button>
-                {fields.length > 1 && (
-                  <button type="button" onClick={() => remove(index)}
-                    className="p-2 rounded-lg text-red-400 hover:bg-red-50 transition-colors">
-                    <Trash2 className="w-4 h-4" />
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => { setUploadingIndex(index); fileRef.current?.click(); }} disabled={uploadingIndex !== null}
+                    className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium border border-[#C8FF00]/50 text-gray-600 hover:bg-gray-50 disabled:opacity-50 whitespace-nowrap">
+                    <Upload className="w-3 h-3" />{uploadingIndex === index ? 'Subiendo...' : 'Subir imagen'}
                   </button>
-                )}
+                  {fields.length > 1 && (
+                    <button type="button" onClick={() => remove(index)}
+                      className="p-2 rounded-lg text-red-400 hover:bg-red-50 transition-colors">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-6 flex items-center justify-between">
+        <div className="bg-white rounded-xl border border-gray-200 px-4 sm:px-6 py-4 sm:py-6 flex flex-col gap-4">
           <div className="flex items-center gap-3">
             <input type="checkbox" id="igActive" {...register('active')} className="w-4 h-4 rounded accent-[#C8FF00]" />
             <label htmlFor="igActive" className="text-sm text-gray-700 font-medium">Sección activa (visible en el inicio)</label>
           </div>
-          <button type="submit" disabled={saving}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#C8FF00] text-[#0f172a] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] disabled:opacity-50 transition-colors">
-            <Save className="w-4 h-4" />{saving ? 'Guardando...' : 'Guardar cambios'}
-          </button>
+          <div className="flex justify-end">
+            <button type="submit" disabled={saving}
+              className="flex items-center gap-2 px-5 py-2.5 bg-[#C8FF00] text-[#0f172a] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] disabled:opacity-50 transition-colors">
+              <Save className="w-4 h-4" />{saving ? 'Guardando...' : 'Guardar cambios'}
+            </button>
+          </div>
         </div>
       </form>
     </div>
