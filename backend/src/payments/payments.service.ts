@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+﻿import { Injectable } from '@nestjs/common';
+import * as crypto from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -92,6 +93,64 @@ export class PaymentsService {
 
       console.log('Orden creada:', orderNumber, 'Usuario:', email);
       await this.prisma.siteSection.delete({ where: { key: 'pending_order_' + ref } }).catch(() => {});
+
+      await this.sendPurchaseToMeta(payment, orderNumber, items, email);
     } catch (err) { console.error('Error en webhook:', err); }
+  }
+
+  private async sendPurchaseToMeta(payment: any, orderNumber: string, items: any[], email: string) {
+    try {
+      const metaConfig = await this.prisma.siteSection.findUnique({ where: { key: 'meta_pixel' } });
+      const config: any = metaConfig?.data || {};
+      if (!config.pixelId || !config.accessToken) return;
+
+      const hashEmail = (email: string) => {
+        const normalized = email.trim().toLowerCase();
+        return crypto.createHash('sha256').update(normalized).digest('hex');
+      };
+
+      const apiUrl = 'https://graph.facebook.com/v21.0/' + config.pixelId + '/events';
+      const eventId = 'purchase_' + orderNumber;
+      const value = payment.transaction_amount || items.reduce((acc: number, item: any) => acc + (Number(item.price) * item.quantity), 0);
+
+      const payload = {
+        data: [{
+          event_name: 'Purchase',
+          event_time: Math.floor(Date.now() / 1000),
+          event_id: eventId,
+          event_source_url: this.FRONTEND_URL + '/checkout/success?order=' + orderNumber,
+          action_source: 'website',
+          user_data: {
+            em: email ? [hashEmail(email)] : undefined,
+            client_ip_address: payment.payer?.ip_address || undefined,
+            client_user_agent: payment.payer?.user_agent || undefined,
+          },
+          custom_data: {
+            currency: 'ARS',
+            value: value,
+            content_ids: items.map((item: any) => item.productId),
+            content_type: 'product',
+            contents: items.map((item: any) => ({
+              id: item.productId,
+              quantity: item.quantity,
+              item_price: Number(item.price),
+            })),
+          },
+        }],
+      };
+
+      const params: any = { access_token: config.accessToken };
+      if (config.testEventCode) {
+        params.test_event_code = config.testEventCode;
+      }
+
+      await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+    } catch (err) {
+      console.error('Error enviando Purchase a Meta:', err);
+    }
   }
 }

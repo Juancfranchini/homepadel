@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -7,6 +7,7 @@ import { Ruler } from 'lucide-react';
 import { getProduct, getProducts } from '@/lib/api';
 import { Product } from '@/types';
 import { formatPrice, getDiscountPercent } from '@/lib/utils';
+import { trackMetaEvent } from '@/lib/metaPixel';
 import { useCartStore } from '@/store/cartStore';
 import ProductGallery from './components/ProductGallery';
 import ProductInfo from './components/ProductInfo';
@@ -67,6 +68,18 @@ export default function ProductoPage() {
       })
       .finally(() => setLoading(false));
   }, [params.slug]);
+
+  useEffect(() => {
+    if (product) {
+      trackMetaEvent('ViewContent', {
+        content_ids: [product.id],
+        content_type: 'product',
+        content_name: product.name,
+        value: product.salePrice ?? product.price,
+        currency: 'ARS',
+      });
+    }
+  }, [product]);
 
   const handleAddToCart = () => { if (!product) return; addItem(product, quantity); setAdded(true); setTimeout(() => setAdded(false), 1500); };
   const handleBuyNow = () => { if (!product) return; addItem(product, quantity); router.push('/carrito'); };

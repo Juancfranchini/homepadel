@@ -1,4 +1,5 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
+import { trackMetaEvent } from '@/lib/metaPixel';
 import { RefreshCw, Package, Shield, Check, X, MessageCircle, Mail, ArrowRight } from 'lucide-react';
 import { getSiteSection } from '@/lib/api';
 
@@ -187,7 +188,7 @@ export default async function PoliticaDevoluciónPage() {
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-              <a href={'https://wa.me/' + help.whatsapp} target="_blank" rel="noopener noreferrer" className="btn-primary-glow bg-[#B7D31A] text-[#050606] px-6 py-3 rounded-xl font-semibold text-sm uppercase tracking-wider inline-flex items-center gap-2 hover:bg-[#CAE52E] transition-colors whitespace-nowrap"><MessageCircle size={16} />WHATSAPP</a>
+              <a href={'https://wa.me/' + help.whatsapp} onClick={() => trackMetaEvent('Contact', { content_type: 'whatsapp' })} target="_blank" rel="noopener noreferrer" className="btn-primary-glow bg-[#B7D31A] text-[#050606] px-6 py-3 rounded-xl font-semibold text-sm uppercase tracking-wider inline-flex items-center gap-2 hover:bg-[#CAE52E] transition-colors whitespace-nowrap"><MessageCircle size={16} />WHATSAPP</a>
               <a href={'mailto:' + help.email} className="bg-[#0A2D3D] text-[#F7F6F7] px-6 py-3 rounded-xl font-semibold text-sm uppercase tracking-wider inline-flex items-center gap-2 hover:bg-[#0D3D52] transition-colors whitespace-nowrap"><Mail size={16} />ENVIAR EMAIL</a>
             </div>
           </div>

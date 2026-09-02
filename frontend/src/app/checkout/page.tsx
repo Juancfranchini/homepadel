@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { CheckCircle, CreditCard, Truck, User, ChevronRight, Lock } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
+import { trackMetaEvent } from '@/lib/metaPixel';
 import { useAuthStore } from '@/store/authStore';
 import { usePaymentMethods } from '@/hooks/usePaymentMethods';
 import { getImageUrl } from '@/lib/utils';

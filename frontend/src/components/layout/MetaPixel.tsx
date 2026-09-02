@@ -20,14 +20,8 @@ declare global {
   interface Window {
     fbq: any;
     _fbq: any;
+    __metaPixelId?: string;
   }
-}
-
-function newEventId(): string {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
-  return 'evt_' + Date.now() + '_' + Math.random().toString(36).slice(2);
 }
 
 export default function MetaPixel() {
@@ -43,6 +37,8 @@ export default function MetaPixel() {
         const config: MetaPixelConfig = section?.data || section || {};
 
         if (!config.pixelId) return;
+
+        window.__metaPixelId = config.pixelId;
 
         if (!initialized.current) {
           const f: any = function (...args: any[]) {
@@ -78,7 +74,10 @@ export default function MetaPixel() {
 
           if (config.events?.pageView !== false && lastTrackedPath.current !== pathname) {
             lastTrackedPath.current = pathname;
-            const eventId = newEventId();
+            const eventId = typeof crypto !== 'undefined' && crypto.randomUUID
+              ? crypto.randomUUID()
+              : 'evt_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+
             window.fbq('track', 'PageView', {}, { eventID: eventId });
 
             api.post('/track', {

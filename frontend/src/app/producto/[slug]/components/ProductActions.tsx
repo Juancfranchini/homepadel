@@ -1,5 +1,6 @@
-'use client';
+﻿'use client';
 
+import { trackMetaEvent } from '@/lib/metaPixel';
 import { ShoppingCart, Heart, Zap, Minus, Plus, MessageCircle } from 'lucide-react';
 
 interface Props {
@@ -54,7 +55,7 @@ export default function ProductActions({ stock, quantity, onQuantityChange, onBu
           </button>
         </div>
 
-        <a href="https://wa.me/5491172345678?text=Hola! Me interesa este producto" target="_blank" rel="noopener noreferrer"
+        <a href="https://wa.me/5491172345678?text=Hola! Me interesa este producto" target="_blank" rel="noopener noreferrer" onClick={() => trackMetaEvent("Contact", { content_type: "whatsapp" })}
           className="w-full py-3 rounded-xl border border-[#0A2D3D] bg-[#0A2D3D]/50 text-[#F7F6F7] font-medium text-sm flex items-center justify-center gap-2 hover:bg-[#0A2D3D] transition-colors">
           <MessageCircle size={16} />Consultar por WhatsApp
         </a>
