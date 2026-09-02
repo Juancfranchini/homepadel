@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -30,8 +30,8 @@ const benefitSchema = z.object({
 });
 
 const schema = z.object({
-  title: z.string().min(2, 'El titulo es requerido'),
-  description: z.string().min(10, 'La descripcion es requerida'),
+  title: z.string().min(2, 'El título es requerido'),
+  description: z.string().min(10, 'La descripción es requerida'),
   image: z.string().optional().or(z.literal('')),
   benefits: z.array(benefitSchema).min(1, 'Agrega al menos un item'),
   active: z.boolean().default(true),
@@ -45,7 +45,6 @@ export default function AboutConfigPage() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
 
   const { register, handleSubmit, reset, control, setValue, watch, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -53,7 +52,7 @@ export default function AboutConfigPage() {
       title: 'Somos Home Padel',
       description: 'En Home Padel vivimos este deporte con la misma pasion que vos.',
       benefits: [
-        { icon: 'Truck', title: 'Envios a todo el pais', description: 'Llegamos a cada rincon de Argentina' },
+        { icon: 'Truck', title: 'Envíos a todo el país', description: 'Llegamos a cada rincon de Argentina' },
         { icon: 'Shield', title: 'Productos originales', description: 'Garantia oficial de fabrica' },
         { icon: 'Users', title: 'Atencion personalizada', description: 'Te asesoramos segun tu nivel y estilo' },
       ],
@@ -64,13 +63,6 @@ export default function AboutConfigPage() {
   const { fields, append, remove } = useFieldArray({ control, name: 'benefits' });
   const imageValue = watch('image') || '';
   const benefitsWatch = watch('benefits');
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 640);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -83,7 +75,7 @@ export default function AboutConfigPage() {
           description: data.description ?? '',
           image: data.image ?? '',
           benefits: data.benefits?.length > 0 ? data.benefits : [
-            { icon: 'Truck', title: 'Envios a todo el pais', description: 'Llegamos a cada rincon de Argentina' },
+            { icon: 'Truck', title: 'Envíos a todo el país', description: 'Llegamos a cada rincon de Argentina' },
             { icon: 'Shield', title: 'Productos originales', description: 'Garantia oficial de fabrica' },
             { icon: 'Users', title: 'Atencion personalizada', description: 'Te asesoramos segun tu nivel y estilo' },
           ],
@@ -99,7 +91,7 @@ export default function AboutConfigPage() {
     setSaving(true);
     try {
       await api.put('/site-sections/about', { data, active: data.active });
-      toast('Seccion guardada', 'success');
+      toast('Sección guardada', 'success');
     } catch { toast('Error al guardar', 'error'); } finally { setSaving(false); }
   };
 
@@ -107,49 +99,36 @@ export default function AboutConfigPage() {
 
   return (
     <div className="space-y-6 w-full">
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <Link href="/configuracion" className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors shrink-0">
-            <ArrowLeft className="w-4 h-4" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><Info className="w-5 h-5 text-[#C8FF00]" />Sobre Nosotros</h1>
-            <p className="text-gray-500 text-sm mt-0.5">Seccion del inicio</p>
-          </div>
+      <div className="flex items-center gap-3">
+        <Link href="/configuracion" className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
+          <ArrowLeft className="w-4 h-4" />
+        </Link>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><Info className="w-5 h-5 text-[#C8FF00]" />Sobre Nosotros</h1>
+          <p className="text-gray-500 text-sm mt-0.5">Sección del inicio</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 space-y-6">
-          {/* Layout: columna imagen (25%) + divider + columna campos (75%) en desktop/tablet */}
-          <div className="flex flex-col sm:flex-row gap-0">
-            {/* Columna 1: Imagen + URL (25%) */}
-            <div className="w-full sm:w-1/4 sm:pr-6 space-y-4">
-              <div className={isMobile ? 'flex justify-center' : ''}>
-                <ImageUpload value={imageValue} onChange={(url) => setValue('image', url, { shouldDirty: true })} placeholder="URL de imagen" width={isMobile ? undefined : '100%'} height={160} />
-              </div>
-            </div>
-
-            {/* Divider vertical solo en desktop/tablet */}
-            <div className="hidden sm:block w-px bg-gray-200 self-stretch mx-6 shrink-0" />
-
-            {/* Columna 2: Titulo + Descripcion (75%) */}
-            <div className="flex-1 flex flex-col space-y-4 mt-6 sm:mt-0">
+        <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-6">
+          <div className="flex gap-6">
+            <ImageUpload  value={imageValue}  onChange={(url) => setValue('image', url, { shouldDirty: true })} placeholder="URL de imagen" width={200} height={160}  />
+            <div className="flex-1 space-y-4">
               <div>
-                <label className={labelClass + ' mb-1'}>Titulo *</label>
+                <label className={labelClass + ' mb-1'}>Título *</label>
                 <input {...register('title')} className={inputClass + ' mt-1'} placeholder="Somos Home Padel" />
                 {errors.title && <p className="text-xs text-red-600 mt-0.5">{errors.title.message}</p>}
               </div>
-              <div className="flex-1 flex flex-col">
-                <label className={labelClass + ' mb-1'}>Descripcion *</label>
-                <textarea {...register('description')} rows={4} className={inputClass + ' mt-1 flex-1 min-h-[100px]'} />
+              <div>
+                <label className={labelClass + ' mb-1'}>Descripción *</label>
+                <textarea {...register('description')} rows={3} className={inputClass + ' mt-1'} />
                 {errors.description && <p className="text-xs text-red-600 mt-0.5">{errors.description.message}</p>}
               </div>
             </div>
           </div>
 
           <div className="border-t border-gray-100 pt-4">
-            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-gray-800">Beneficios ({fields.length})</h3>
               <button type="button" onClick={() => append({ icon: 'Star', title: '', description: '' })}
                 className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-[#C8FF00] text-[#0f172a] rounded-lg hover:bg-[#b8ef00] transition-colors">
@@ -162,8 +141,8 @@ export default function AboutConfigPage() {
                 const iconObj = ICON_OPTIONS.find((o) => o.value === currentIcon);
                 const IconPreview = iconObj?.icon || Star;
                 return (
-                  <div key={field.id} className="flex flex-col sm:flex-row gap-3 sm:items-start p-3 bg-gray-50 rounded-lg">
-                    <div className="w-full sm:w-24 shrink-0">
+                  <div key={field.id} className="flex gap-3 items-start p-3 bg-gray-50 rounded-lg">
+                    <div className="w-24">
                       <label className="block text-xs font-medium text-gray-500 mb-1">Icono</label>
                       <div className="relative">
                         <select {...register(('benefits.' + i + '.icon') as any)} className={inputClass + ' text-xs pl-8'}>
@@ -176,15 +155,15 @@ export default function AboutConfigPage() {
                         </span>
                       </div>
                     </div>
-                    <div className="flex-1 w-full">
-                      <label className="block text-xs font-medium text-gray-500 mb-1">Titulo *</label>
-                      <input {...register(('benefits.' + i + '.title') as any)} className={inputClass} placeholder="Ej: Envios a todo el pais" />
+                    <div className="flex-1">
+                      <label className="block text-xs font-medium text-gray-500 mb-1">Título *</label>
+                      <input {...register(('benefits.' + i + '.title') as any)} className={inputClass} placeholder="Ej: Envíos a todo el país" />
                     </div>
-                    <div className="flex-1 w-full">
-                      <label className="block text-xs font-medium text-gray-500 mb-1">Descripcion (opcional)</label>
+                    <div className="flex-1">
+                      <label className="block text-xs font-medium text-gray-500 mb-1">Descripción (opciónal)</label>
                       <input {...register(('benefits.' + i + '.description') as any)} className={inputClass} placeholder="Ej: Llegamos a cada rincon" />
                     </div>
-                    <button type="button" onClick={() => remove(i)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors shrink-0 self-end sm:self-start sm:mt-5">
+                    <button type="button" onClick={() => remove(i)} className="p-2 mt-5 text-red-400 hover:bg-red-50 rounded-lg transition-colors shrink-0">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
@@ -194,13 +173,13 @@ export default function AboutConfigPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="bg-white rounded-xl border border-gray-200 p-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <input type="checkbox" id="aboutActive" {...register('active')} className="w-4 h-4 rounded accent-[#C8FF00]" />
-            <label htmlFor="aboutActive" className="text-sm text-gray-700 font-medium">Seccion activa</label>
+            <label htmlFor="aboutActive" className="text-sm text-gray-700 font-medium">Sección activa</label>
           </div>
           <button type="submit" disabled={saving}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#C8FF00] text-[#0f172a] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] disabled:opacity-50 transition-colors w-full sm:w-auto">
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#C8FF00] text-[#0f172a] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] disabled:opacity-50 transition-colors">
             <Save className="w-4 h-4" />{saving ? 'Guardando...' : 'Guardar cambios'}
           </button>
         </div>
