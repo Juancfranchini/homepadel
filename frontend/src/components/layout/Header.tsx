@@ -84,7 +84,7 @@ export default function Header() {
     <>
       <header className="w-full sticky top-0 z-50 bg-[#050606] border-b border-[#0D0F0F]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-2 sm:gap-4">
-          <div className="flex items-center gap-2 lg:gap-0">
+          <div className="flex items-center gap-3 lg:gap-0">
             <button className="lg:hidden text-[#C7C7C0] hover:text-[#F7F6F7]" onClick={() => setOpen(!open)} aria-label="Menu">
               {open ? <X size={20} /> : <Menu size={20} />}
             </button>

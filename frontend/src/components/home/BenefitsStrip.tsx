@@ -1,4 +1,4 @@
-import { Truck, CreditCard, RefreshCw, Shield, Lock, Package, Sparkles, Heart, Star, Check } from 'lucide-react';
+﻿import { Truck, CreditCard, RefreshCw, Shield, Lock, Package, Sparkles, Heart, Star, Check } from 'lucide-react';
 import { Benefit } from '@/types';
 
 interface Props {
@@ -45,8 +45,8 @@ export default function BenefitsStrip({ benefits }: Props) {
   const items = benefits && benefits.length > 0 ? benefits : FALLBACK;
 
   return (
-    <section className="bg-[#050606] border-t border-b border-[#0D0F0F] py-8">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+    <section className="bg-[#050606] border-t border-b border-[#0D0F0F] py-3 sm:py-6 md:py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Desktop: 4 columnas */}
         <div className="hidden md:grid md:grid-cols-4 gap-0">
           {items.map((b) => (
@@ -64,30 +64,23 @@ export default function BenefitsStrip({ benefits }: Props) {
           ))}
         </div>
 
-        {/* Mobile: 2 filas x 2 columnas */}
-        <div className="md:hidden grid grid-cols-2 gap-6">
-          {items.slice(0, 2).map((b) => (
-            <div key={b.id} className="flex flex-col items-center text-center gap-2">
-              <span className="text-[#B7D31A]">
-                {getIcon(b.icon)}
-              </span>
-              <div>
-                <h4 className="text-[#F7F6F7] font-semibold text-xs uppercase leading-tight">{b.title}</h4>
-                <p className="text-[#C7C7C0] text-xs font-medium mt-0.5">{b.description}</p>
+        {/* Mobile: scroll horizontal */}
+        <div className="md:hidden overflow-x-auto -mx-4 px-4 sm:-mx-6 sm:px-6">
+          <div className="flex gap-4 min-w-max">
+            {items.map((b) => (
+              <div key={b.id} className="flex items-center gap-3 bg-[#0A0F12] border border-[#0D0F0F] rounded-xl px-4 py-3 min-w-[180px] max-w-[200px]">
+                <div className="flex-shrink-0">
+                  <span className="text-[#B7D31A]">
+                    {getIcon(b.icon)}
+                  </span>
+                </div>
+                <div className="min-w-0">
+                  <h4 className="text-[#F7F6F7] font-semibold text-[11px] uppercase leading-tight">{b.title}</h4>
+                  <p className="text-[#C7C7C0] text-[11px] font-medium mt-0.5 line-clamp-2">{b.description}</p>
+                </div>
               </div>
-            </div>
-          ))}
-          {items.slice(2, 4).map((b) => (
-            <div key={b.id} className="flex flex-col items-center text-center gap-2">
-              <span className="text-[#B7D31A]">
-                {getIcon(b.icon)}
-              </span>
-              <div>
-                <h4 className="text-[#F7F6F7] font-semibold text-xs uppercase leading-tight">{b.title}</h4>
-                <p className="text-[#C7C7C0] text-xs font-medium mt-0.5">{b.description}</p>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </section>

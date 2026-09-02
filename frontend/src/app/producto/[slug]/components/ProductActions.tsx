@@ -17,16 +17,16 @@ interface Props {
 export default function ProductActions({ stock, quantity, onQuantityChange, onBuyNow, onAddToCart, added, wished, onWish }: Props) {
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4">
-        <span className="text-sm font-medium text-[#C7C7C0]">Cantidad:</span>
-        <div className="flex items-center bg-[#1A1F21] border border-[#0D0F0F] rounded-xl overflow-hidden">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-base sm:text-sm font-semibold text-[#F7F6F7]">Cantidad:</span>
+        <div className="flex items-center bg-[#1A1F21] border border-[#0D0F0F] rounded-xl overflow-hidden flex-1 max-w-[180px]">
           <button onClick={() => onQuantityChange(Math.max(1, quantity - 1))} disabled={quantity <= 1}
-            className="w-10 h-10 flex items-center justify-center hover:bg-white/[0.04] transition-colors disabled:opacity-30">
+            className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center hover:bg-white/[0.04] transition-colors disabled:opacity-30">
             <Minus size={15} />
           </button>
-          <span className="w-10 text-center font-semibold text-sm text-[#F7F6F7]">{quantity}</span>
+          <span className="flex-1 text-center font-bold text-lg sm:text-base text-[#F7F6F7]">{quantity}</span>
           <button onClick={() => onQuantityChange(Math.min(stock || 99, quantity + 1))} disabled={quantity >= (stock || 99)}
-            className="w-10 h-10 flex items-center justify-center hover:bg-white/[0.04] transition-colors disabled:opacity-30">
+            className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center hover:bg-white/[0.04] transition-colors disabled:opacity-30">
             <Plus size={15} />
           </button>
         </div>
@@ -34,7 +34,7 @@ export default function ProductActions({ stock, quantity, onQuantityChange, onBu
 
       <div className="flex flex-col gap-3">
         <button onClick={onBuyNow} disabled={stock === 0}
-          className="w-full py-4 rounded-xl bg-[#B7D31A] text-[#050606] font-semibold text-sm uppercase tracking-wider btn-primary-glow disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+          className="w-full py-3.5 sm:py-4 rounded-xl bg-[#B7D31A] text-[#050606] font-semibold text-sm sm:text-base uppercase tracking-wider btn-primary-glow disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
           <Zap size={16} />COMPRAR AHORA
         </button>
 
@@ -56,7 +56,7 @@ export default function ProductActions({ stock, quantity, onQuantityChange, onBu
         </div>
 
         <a href="https://wa.me/5491172345678?text=Hola! Me interesa este producto" target="_blank" rel="noopener noreferrer" onClick={() => trackMetaEvent("Contact", { content_type: "whatsapp" })}
-          className="w-full py-3 rounded-xl border border-[#0A2D3D] bg-[#0A2D3D]/50 text-[#F7F6F7] font-medium text-sm flex items-center justify-center gap-2 hover:bg-[#0A2D3D] transition-colors">
+          className="w-full py-2.5 sm:py-3 rounded-xl border border-[#0A2D3D] bg-[#0A2D3D]/50 text-[#F7F6F7] font-medium text-xs sm:text-sm flex items-center justify-center gap-2 hover:bg-[#0A2D3D] transition-colors">
           <MessageCircle size={16} />Consultar por WhatsApp
         </a>
       </div>

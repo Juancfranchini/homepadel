@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { Star, MessageSquare, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -20,7 +20,7 @@ function TestimonialCard({ t }: { t: Testimonial }) {
   const photoUrl = t.photo ? getImageUrl(t.photo) : null;
   const initials = t.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   return (
-    <div className="bg-[#141A1D] rounded-2xl p-6 flex flex-col gap-4 border border-[#0D0F0F] h-full">
+    <div className="bg-[#141A1D] rounded-xl sm:rounded-2xl p-4 sm:p-6 flex flex-col gap-3 sm:gap-4 border border-[#0D0F0F] h-full">
       <div className="flex items-center gap-3">
         {photoUrl ? (
           <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border-2 border-[#B7D31A]/30">
@@ -58,13 +58,13 @@ export default function TestimonialsSection({ testimonials }: Props) {
   const prevGroup = () => setCurrentGroup((prev) => (prev - 1 + totalGroups) % totalGroups);
 
   return (
-    <section className="bg-[#242A05] border-t border-[#0D0F0F] py-16">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="text-center mb-10">
-          <h2 className="text-2xl md:text-3xl font-semibold uppercase text-[#F7F6F7] mb-2">
+    <section className="bg-[#242A05] border-t border-[#0D0F0F] py-8 sm:py-12 md:py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-6 sm:mb-10">
+          <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold uppercase text-[#F7F6F7] mb-2">
             LO QUE DICEN NUESTROS CLIENTES
           </h2>
-          <p className="text-[#C7C7C0] text-sm">La experiencia de nuestra comunidad nos respalda.</p>
+          <p className="text-[#C7C7C0] text-xs sm:text-sm">La experiencia de nuestra comunidad nos respalda.</p>
         </div>
 
         {activeItems.length === 0 ? (
@@ -77,14 +77,14 @@ export default function TestimonialsSection({ testimonials }: Props) {
               <>
                 <button
                   onClick={prevGroup}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 z-10 w-10 h-10 rounded-full bg-[#B7D31A]/10 backdrop-blur-sm border border-[#B7D31A]/30 flex items-center justify-center text-[#B7D31A] hover:bg-[#B7D31A]/20 transition-all"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 sm:-translate-x-2 z-10 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#B7D31A]/10 backdrop-blur-sm border border-[#B7D31A]/30 flex items-center justify-center text-[#B7D31A] hover:bg-[#B7D31A]/20 transition-all"
                   aria-label="Anterior"
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
                 <button
                   onClick={nextGroup}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 z-10 w-10 h-10 rounded-full bg-[#B7D31A]/10 backdrop-blur-sm border border-[#B7D31A]/30 flex items-center justify-center text-[#B7D31A] hover:bg-[#B7D31A]/20 transition-all"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1 sm:translate-x-2 z-10 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#B7D31A]/10 backdrop-blur-sm border border-[#B7D31A]/30 flex items-center justify-center text-[#B7D31A] hover:bg-[#B7D31A]/20 transition-all"
                   aria-label="Siguiente"
                 >
                   <ChevronRight className="w-5 h-5" />
@@ -92,9 +92,9 @@ export default function TestimonialsSection({ testimonials }: Props) {
               </>
             )}
 
-            <div className="flex justify-center gap-6 flex-wrap">
+            <div className="flex gap-4 sm:gap-6 overflow-x-auto md:overflow-visible md:flex-wrap md:justify-center -mx-4 px-4 sm:-mx-6 sm:px-6 md:mx-0 md:px-0 pb-2">
               {currentItems.map((t) => (
-                <div key={t.id} className="w-full md:w-[340px] flex-shrink-0">
+                <div key={t.id} className="w-[280px] sm:w-[340px] md:w-[340px] flex-shrink-0">
                   <TestimonialCard t={t} />
                 </div>
               ))}
@@ -119,7 +119,7 @@ export default function TestimonialsSection({ testimonials }: Props) {
           <div className="mt-10 text-center">
             <button
               onClick={() => setShowForm(true)}
-              className="inline-flex items-center gap-2 px-12 py-4 bg-[#B7D31A] text-[#050606] rounded-xl font-semibold text-sm uppercase tracking-wider btn-primary-glow transition-all"
+              className="inline-flex items-center gap-2 px-6 sm:px-12 py-3 sm:py-4 bg-[#B7D31A] text-[#050606] rounded-xl font-semibold text-xs sm:text-sm uppercase tracking-wider btn-primary-glow transition-all"
             >
               <MessageSquare className="w-5 h-5" />
               Deja tu reseña

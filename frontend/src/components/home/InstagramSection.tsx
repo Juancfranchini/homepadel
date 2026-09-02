@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { InstagramConfig } from '@/types';
@@ -59,25 +59,25 @@ export default function InstagramSection({ config }: Props) {
   const hasRealPosts = posts.length > 0;
 
   return (
-    <section className="section-gradient bg-[#030F14] border-t border-[#0D0F0F] py-16">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+    <section className="section-gradient bg-[#030F14] border-t border-[#0D0F0F] py-8 sm:py-12 md:py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-5 sm:mb-8">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#B7D31A] to-[#1699D3] flex items-center justify-center">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-[#B7D31A] to-[#1699D3] flex items-center justify-center">
               <InstagramIcon size={22} />
             </div>
             <div>
-              <h2 className="text-2xl md:text-3xl font-semibold uppercase text-[#F7F6F7]">{ig.title}</h2>
-              <p className="text-[#C7C7C0] text-sm">{ig.username}</p>
+              <h2 className="text-base sm:text-2xl md:text-3xl font-semibold uppercase text-[#F7F6F7]">{ig.title}</h2>
+              <p className="text-[#C7C7C0] text-xs sm:text-sm">{ig.username}</p>
             </div>
           </div>
           <a href={ig.buttonUrl} target="_blank" rel="noopener noreferrer"
-            className="text-sm font-semibold text-[#F7F6F7] bg-[#0A2D3D] hover:bg-[#0D3D52] px-5 py-2 rounded-lg transition-colors flex items-center gap-2">
+            className="text-xs sm:text-sm font-semibold text-[#F7F6F7] bg-[#0A2D3D] hover:bg-[#0D3D52] px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg transition-colors flex items-center gap-1.5 sm:gap-2 self-start sm:self-auto">
             <InstagramIcon size={14} />{ig.buttonText}
           </a>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-1.5 sm:gap-3">
           {[...posts, ...PLACEHOLDER_POSTS].slice(0, 6).map((item, idx) => {
             if (idx < posts.length) {
               const post = item as InstagramPost;

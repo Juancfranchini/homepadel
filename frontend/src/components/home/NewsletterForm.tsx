@@ -48,16 +48,18 @@ export default function NewsletterForm({ data }: Props) {
   const footerText = data?.newsletterFooterText || 'Sin spam. Solo contenido relevante sobre padel.';
 
   return (
-    <div className="bg-[#0C0C0C] border border-[#0D0F0F] rounded-2xl p-8 md:p-10 flex flex-col justify-between h-full">
-      <div className="flex flex-col gap-5">
-        <div className="w-12 h-12 rounded-full bg-[#B7D31A]/10 border border-[#B7D31A]/20 flex items-center justify-center">
-          {status === 'success' ? <CheckCircle size={20} className="text-green-400" /> : <Mail size={20} className="text-[#B7D31A]" />}
+    <div className="bg-[#0C0C0C] border border-[#0D0F0F] rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-10 flex flex-col justify-between h-full">
+      <div className="flex flex-col gap-3 sm:gap-5">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#B7D31A]/10 border border-[#B7D31A]/20 flex items-center justify-center flex-shrink-0">
+            {status === 'success' ? <CheckCircle size={20} className="text-green-400" /> : <Mail size={20} className="text-[#B7D31A]" />}
+          </div>
+          <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold uppercase tracking-tight text-[#F7F6F7] leading-tight">{title}</h2>
         </div>
-        <h2 className="text-2xl md:text-3xl font-semibold uppercase tracking-tight text-[#F7F6F7] leading-tight">{title}</h2>
-        {text && <p className="text-[#C7C7C0] text-sm leading-relaxed">{text}</p>}
+        {text && <p className="text-[#C7C7C0] text-xs sm:text-sm leading-relaxed">{text}</p>}
       </div>
-      <div className="flex flex-col gap-4 mt-6">
-        <div className="w-10 h-0.5 bg-[#B7D31A] rounded-full" />
+      <div className="flex flex-col gap-3 sm:gap-4 mt-3 sm:mt-6">
+        <div className="w-8 sm:w-10 h-0.5 bg-[#B7D31A] rounded-full" />
 
         {status === 'success' ? (
           <div className="bg-green-500/10 border border-green-500/20 rounded-lg px-4 py-3 flex items-center gap-3">
@@ -76,12 +78,12 @@ export default function NewsletterForm({ data }: Props) {
               placeholder={placeholder}
               required
               disabled={status === 'loading'}
-              className="flex-1 bg-[#0A0F12] border border-[#0D0F0F] rounded-lg px-4 py-3 text-sm text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A] focus:ring-1 focus:ring-[#B7D31A]/20 transition-all disabled:opacity-50"
+              className="flex-1 bg-[#0A0F12] border border-[#B7D31A]/40 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm focus:border-[#B7D31A] focus:ring-1 focus:ring-[#B7D31A]/30 text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A] focus:ring-1 focus:ring-[#B7D31A]/20 transition-all disabled:opacity-50"
             />
             <button
               type="submit"
               disabled={status === 'loading'}
-              className="bg-[#B7D31A] text-[#050606] px-6 py-3 rounded-lg font-semibold text-sm uppercase tracking-wider hover:bg-[#CAE52E] transition-colors btn-primary-glow whitespace-nowrap disabled:opacity-70 flex items-center justify-center gap-2 w-full sm:w-auto"
+              className="bg-[#B7D31A] text-[#050606] px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold text-xs sm:text-sm uppercase tracking-wider hover:bg-[#CAE52E] transition-colors btn-primary-glow whitespace-nowrap disabled:opacity-70 flex items-center justify-center gap-2 w-full sm:w-auto"
             >
               {status === 'loading' ? (
                 <><Loader2 size={14} className="animate-spin" /> ENVIANDO...</>
