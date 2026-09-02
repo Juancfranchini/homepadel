@@ -1,4 +1,4 @@
-// Servicio de gastos operativos
+﻿// Servicio de gastos operativos
 // Los gastos se ordenan por fecha descendente (más recientes primero)
 
 import { Injectable, NotFoundException } from '@nestjs/common';
@@ -10,12 +10,18 @@ export class ExpensesService {
 
   findAll() { return this.prisma.expense.findMany({ orderBy: { date: 'desc' } }); }
 
-  create(dto: any) { return this.prisma.expense.create({ data: dto }); }
+  create(dto: any) {
+    const data = { ...dto };
+    if (data.date) data.date = new Date(data.date);
+    return this.prisma.expense.create({ data });
+  }
 
   async update(id: string, dto: any) {
     const e = await this.prisma.expense.findUnique({ where: { id } });
     if (!e) throw new NotFoundException('Gasto no encontrado');
-    return this.prisma.expense.update({ where: { id }, data: dto });
+    const data = { ...dto };
+    if (data.date) data.date = new Date(data.date);
+    return this.prisma.expense.update({ where: { id }, data });
   }
 
   async remove(id: string) {

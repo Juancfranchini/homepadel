@@ -216,8 +216,8 @@ export default function ConfiguracionPage() {
         <p className="text-gray-500 text-sm mt-0.5">Administra las preferencias del BackOffice</p>
       </div>
 
-      <div className="flex justify-start">
-        <div className="flex gap-1 bg-gray-50 rounded-xl p-1 border border-gray-200 overflow-x-auto">
+      <div className="w-full bg-gray-50 rounded-xl p-1.5 border border-gray-200">
+        <div className="flex items-center gap-1 overflow-x-auto lg:overflow-visible lg:justify-between">
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -225,13 +225,13 @@ export default function ConfiguracionPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ' +
+                className={'flex-shrink-0 lg:flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ' +
                   (isActive
                     ? 'bg-[#0f172a] text-white shadow-sm'
                     : 'text-gray-500 hover:bg-white hover:text-gray-700')}
               >
-                <Icon className={'w-4 h-4 ' + (isActive ? 'text-[#C8FF00]' : 'text-gray-400')} />
-                {tab.label}
+                <Icon className={'w-4 h-4 shrink-0 ' + (isActive ? 'text-[#C8FF00]' : 'text-gray-400')} />
+                <span className="truncate">{tab.label}</span>
               </button>
             );
           })}

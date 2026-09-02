@@ -1,15 +1,16 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { OrderStatusBadge } from '@/components/ui/Badge';
-import { TrendingUp, ShoppingBag, BarChart2, DollarSign, Package, Users, Star, Megaphone, AlertTriangle, Truck } from 'lucide-react';
+import { TrendingUp, ShoppingBag, BarChart2, DollarSign, Package, Users, Star, Megaphone, AlertTriangle, Truck, TrendingDown, Wallet } from 'lucide-react';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import api from '@/lib/api';
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
-  const [kpis, setKpis] = useState({ ventas30: 0, totalPedidos: 0, ticketPromedio: 0, ganancia: 0 });
+  const [kpis, setKpis] = useState({ ventas30: 0, totalPedidos: 0, ticketPromedio: 0, ganancia: 0, gastos30: 0 });
+  const [expensesStats, setExpensesStats] = useState({ total30: 0, totalAllTime: 0, byCategory: [] as any[] });
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [topProducts, setTopProducts] = useState<any[]>([]);
   const [productsStats, setProductsStats] = useState({ total: 0, active: 0, outOfStock: 0, lowStock: 0, madeToOrder: 0 });
@@ -23,6 +24,7 @@ export default function DashboardPage() {
       const res = await api.get('/dashboard/stats');
       const data = res.data;
       setKpis(data.kpis || {});
+      setExpensesStats(data.expensesStats || { total30: 0, totalAllTime: 0, byCategory: [] });
       setRecentOrders(data.recentOrders || []);
       setTopProducts(data.topProducts || []);
       setProductsStats(data.productsStats || {});
@@ -41,10 +43,11 @@ export default function DashboardPage() {
   if (loading) return <PageLoader />;
 
   const kpiCards = [
-    { label: 'Ventas (30 días)', value: formatPrice(kpis.ventas30), icon: TrendingUp, color: 'bg-green-50 text-green-600', border: 'border-green-200' },
-    { label: 'Total Pedidos', value: String(kpis.totalPedidos), icon: ShoppingBag, color: 'bg-blue-50 text-blue-600', border: 'border-blue-200' },
-    { label: 'Ticket Promedio', value: formatPrice(kpis.ticketPromedio), icon: BarChart2, color: 'bg-purple-50 text-purple-600', border: 'border-purple-200' },
-    { label: 'Ganancia estimada', value: formatPrice(kpis.ganancia), icon: DollarSign, color: 'bg-yellow-50 text-yellow-600', border: 'border-yellow-200' },
+    { label: 'Ventas (30 dias)', value: formatPrice(kpis.ventas30), icon: TrendingUp, color: 'bg-green-50 text-green-600', border: 'border-green-200' },
+    { label: 'Gastos (30 dias)', value: formatPrice(kpis.gastos30), icon: TrendingDown, color: 'bg-red-50 text-red-600', border: 'border-red-200' },
+    { label: 'Balance neto', value: formatPrice(kpis.ganancia), icon: Wallet, color: 'bg-blue-50 text-blue-600', border: 'border-blue-200' },
+    { label: 'Total Pedidos', value: String(kpis.totalPedidos), icon: ShoppingBag, color: 'bg-purple-50 text-purple-600', border: 'border-purple-200' },
+    { label: 'Ticket Promedio', value: formatPrice(kpis.ticketPromedio), icon: BarChart2, color: 'bg-orange-50 text-orange-600', border: 'border-orange-200' },
   ];
 
   const statusLabels: Record<string, string> = {
@@ -59,7 +62,7 @@ export default function DashboardPage() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
         {kpiCards.map((stat) => {
           const Icon = stat.icon;
           return (
@@ -74,6 +77,31 @@ export default function DashboardPage() {
             </div>
           );
         })}
+      </div>
+
+      {/* Gastos por categoria */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2"><TrendingDown className="w-4 h-4 text-red-500" />Gastos por categoria (30 dias)</h2>
+        {expensesStats.byCategory.length > 0 ? (
+          <div className="space-y-3">
+            {expensesStats.byCategory.map((cat) => (
+              <div key={cat.category} className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">{cat.category}</span>
+                <span className="text-sm font-semibold text-red-500">{formatPrice(cat.amount)}</span>
+              </div>
+            ))}
+            <div className="border-t border-gray-100 pt-3 flex items-center justify-between">
+              <span className="text-sm font-semibold text-gray-900">Total 30 dias</span>
+              <span className="text-sm font-bold text-red-600">{formatPrice(expensesStats.total30)}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-400">Total historico</span>
+              <span className="text-xs text-gray-400">{formatPrice(expensesStats.totalAllTime)}</span>
+            </div>
+          </div>
+        ) : (
+          <p className="text-gray-400 text-sm text-center py-10">No hay gastos registrados en los ultimos 30 dias</p>
+        )}
       </div>
 
       {/* Pedidos por estado */}
@@ -163,7 +191,7 @@ export default function DashboardPage() {
           <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2"><Megaphone className="w-4 h-4 text-gray-500" />Marketing</h2>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between"><span className="text-gray-500">Newsletter</span><span className="font-semibold">{marketingStats.newsletterSubscribers}</span></div>
-            <div className="flex justify-between"><span className="text-gray-500">Promociónes activas</span><span className="font-semibold">{marketingStats.activePromotions}</span></div>
+            <div className="flex justify-between"><span className="text-gray-500">Promociones activas</span><span className="font-semibold">{marketingStats.activePromotions}</span></div>
             <div className="flex justify-between"><span className="text-gray-500">Cupones activos</span><span className="font-semibold">{marketingStats.activeCoupons}</span></div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+﻿import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -19,10 +19,23 @@ export class DashboardService {
       include: { items: { include: { product: true } } },
     });
 
+    const recentExpenses = await this.prisma.expense.findMany({
+      where: { date: { gte: thirtyDaysAgo } },
+    });
+
+    const allExpenses = await this.prisma.expense.findMany();
+
     const ventas30 = recentOrders.reduce((acc, o) => acc + o.total, 0);
     const totalPedidos = allOrders.length;
     const ticketPromedio = recentOrders.length > 0 ? ventas30 / recentOrders.length : 0;
-    const ganancia = ventas30 * 0.3;
+    const gastos30 = recentExpenses.reduce((acc, e) => acc + e.amount, 0);
+    const ganancia = ventas30 - gastos30;
+
+    const expensesByCategory: Record<string, number> = {};
+    recentExpenses.forEach((e) => {
+      if (!expensesByCategory[e.category]) expensesByCategory[e.category] = 0;
+      expensesByCategory[e.category] += e.amount;
+    });
 
     const productSales: Record<string, { name: string; units: number; revenue: number }> = {};
     allOrders.forEach((order) => {
@@ -48,7 +61,20 @@ export class DashboardService {
     });
 
     return {
-      kpis: { ventas30, totalPedidos, ticketPromedio, ganancia },
+      kpis: {
+        ventas30,
+        totalPedidos,
+        ticketPromedio,
+        ganancia,
+        gastos30,
+      },
+      expensesStats: {
+        total30: gastos30,
+        totalAllTime: allExpenses.reduce((acc, e) => acc + e.amount, 0),
+        byCategory: Object.entries(expensesByCategory)
+          .map(([category, amount]) => ({ category, amount }))
+          .sort((a, b) => b.amount - a.amount),
+      },
       recentOrders: recentOrdersList.map((o) => ({
         id: o.id,
         number: o.number,
