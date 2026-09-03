@@ -1,6 +1,7 @@
 ﻿import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailService } from '../email/email.service';
+import { PricingService } from '../pricing/pricing.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderStatus } from '@prisma/client';
 
@@ -9,6 +10,7 @@ export class OrdersService {
   constructor(
     private prisma: PrismaService,
     private emailService: EmailService,
+    private pricing: PricingService,
   ) {}
 
   async findAll() {
@@ -86,41 +88,21 @@ export class OrdersService {
   async create(dto: CreateOrderDto, userId?: string) {
     const number = 'HP-' + Date.now();
     
-    // S3 - Buscar precios reales desde la BD
-    const itemsWithRealPrices = await Promise.all(
-      dto.items.map(async (item) => {
-        const product = await this.prisma.product.findUnique({
-          where: { id: item.productId },
-          select: { price: true, salePrice: true, stock: true },
-        });
-        if (!product) throw new NotFoundException(`Producto ${item.productId} no encontrado`);
-        
-        // F6 - Verificar stock
-        if (product.stock < item.quantity) {
-          throw new NotFoundException(`Stock insuficiente para producto ${item.productId}`);
-        }
-        
-        const realPrice = product.salePrice !== undefined && product.salePrice > 0 && product.salePrice < product.price
-          ? product.salePrice
-          : product.price;
-        
-        return {
-          productId: item.productId,
-          quantity: item.quantity,
-          price: realPrice,
-        };
-      })
+    // S3 / F6 - Precios desde la base y verificación de stock. La misma lógica
+    // que usa el checkout de Mercado Pago, para que ambos caminos coincidan.
+    const resolvedItems = await this.pricing.resolveItems(
+      dto.items.map((item) => ({ productId: item.productId, quantity: item.quantity })),
     );
 
-    // F6 - Descontar stock
-    await Promise.all(
-      itemsWithRealPrices.map(async (item) => {
-        await this.prisma.product.update({
-          where: { id: item.productId },
-          data: { stock: { decrement: item.quantity } },
-        });
-      })
-    );
+    // El descuento es atómico: dos compras simultáneas de la última unidad no
+    // pueden prosperar las dos.
+    await this.pricing.decrementStock(resolvedItems);
+
+    const itemsWithRealPrices = resolvedItems.map((item) => ({
+      productId: item.productId,
+      quantity: item.quantity,
+      price: item.price,
+    }));
 
     const subtotal = itemsWithRealPrices.reduce((acc, item) => acc + item.price * item.quantity, 0);
     const total = subtotal + (dto.shipping || 0) - (dto.discount || 0);
