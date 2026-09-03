@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
@@ -50,7 +50,8 @@ export default function FaqPage() {
   const [sortField, setSortField] = useState<string>('order');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
+  const [isMobile, setIsMobile] = useState(false);
+  const pageSize = isMobile ? 3 : 10;
   const [categories, setCategories] = useState(['COMPRAS', 'ENVÍOS', 'PAGOS', 'DEVOLUCIONES', 'PRODUCTOS', 'GENERAL']);
   const [showCategories, setShowCategories] = useState(false);
 
@@ -66,6 +67,15 @@ export default function FaqPage() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => { setCurrentPage(1); }, [isMobile]);
 
   const openCreate = () => { setEditItem(null); reset({ active: true, order: faqs.length + 1, category: 'GENERAL' }); setModalOpen(true); };
   const openEdit = (t: FaqItem) => { setEditItem(t); reset({ category: t.category || 'GENERAL', question: t.question, answer: t.answer, order: t.order, active: t.active }); setModalOpen(true); };
@@ -121,7 +131,7 @@ export default function FaqPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Preguntas Frecuentes</h1>
           <p className="text-gray-500 text-sm mt-0.5">{faqs.length} registros</p>
@@ -159,8 +169,11 @@ export default function FaqPage() {
           {páginated.length === 0 ? (
             <div className="bg-white rounded-xl border border-gray-200 py-20 text-center"><p className="text-gray-400 text-sm">No se encontraron FAQs</p></div>
           ) : (
-            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-              <table className="w-full">
+            <>
+              {/* Tabla desktop */}
+              <div className="hidden md:block bg-white border border-gray-200 rounded-xl overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[700px]">
                 <thead>
                   <tr className="border-b border-gray-100">
                     <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Orden {sortIcon('order')}</th>
@@ -193,9 +206,38 @@ export default function FaqPage() {
                       </td>
                     </tr>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                  </tbody>
+                </table>
+                </div>
+              </div>
+
+              {/* Cards mobile */}
+              <div className="md:hidden space-y-3">
+                {páginated.map((t) => (
+                  <div key={t.id} className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{t.category || 'GENERAL'}</span>
+                      <div className="flex items-center gap-2">
+                        <Toggle checked={t.active} onChange={() => toggleActive(t)} />
+                        <span className={'text-xs font-medium ' + (t.active ? 'text-green-600' : 'text-gray-400')}>{t.active ? 'Activo' : 'Inactivo'}</span>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-gray-900 font-medium text-sm line-clamp-2">{t.question}</p>
+                      <p className="text-gray-500 text-sm line-clamp-2 mt-1">{t.answer}</p>
+                    </div>
+                    <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                      <span className="text-xs text-gray-400">Orden: {t.order}</span>
+                      <div className="flex items-center gap-1">
+                        <button onClick={() => openEdit(t)} className="p-1.5 rounded-lg text-[#C8FF00] hover:bg-[#C8FF00]/10 transition-colors" title="Editar"><Edit2 className="w-4 h-4" /></button>
+                        <button onClick={() => setDeleteTarget(t)} className="p-1.5 rounded-lg text-red-400 hover:bg-red-400/10 transition-colors" title="Eliminar"><Trash2 className="w-4 h-4" /></button>
+                        <button onClick={() => setDetailItem(t)} className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors" title="Ver detalle"><ArrowRight className="w-4 h-4" /></button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
 
           {totalPages > 1 && (
@@ -246,7 +288,7 @@ export default function FaqPage() {
       {detailItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/60" onClick={() => setDetailItem(null)} />
-          <div className="relative z-10 bg-white border border-gray-200 rounded-2xl p-6 w-full max-w-md mx-4 flex flex-col gap-4">
+          <div className="relative z-10 bg-white border border-gray-200 rounded-2xl px-4 sm:px-6 py-4 sm:py-6 w-full max-w-md mx-4 flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">Detalle de FAQ</h3>
               <button onClick={() => setDetailItem(null)} className="text-gray-400 hover:text-gray-900"><X className="w-5 h-5" /></button>

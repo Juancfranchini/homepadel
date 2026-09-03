@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Store, Shield, Bell, Mail, Target, LayoutDashboard } from 'lucide-react';
+import { Store, Shield, Bell, Mail, Target, LayoutDashboard, Cloud } from 'lucide-react';
 import api from '@/lib/api';
 import { useToast } from '@/components/ui/Toast';
 import GeneralTab from './components/GeneralTab';
@@ -15,6 +15,7 @@ import PlantillasTab from './components/PlantillasTab';
 import CampanasTab from './components/CampanasTab';
 import MetaPixelTab from './components/MetaPixelTab';
 import HomeSectionsTab from './components/HomeSectionsTab';
+import CloudinaryTab from './components/CloudinaryTab';
 
 const generalSchema = z.object({
   storeName: z.string().min(2, 'El nombre de la tienda es requerido'),
@@ -30,7 +31,7 @@ const generalSchema = z.object({
 });
 type GeneralForm = z.infer<typeof generalSchema>;
 
-type Tab = 'general' | 'home_sections' | 'meta_pixel' | 'seguridad' | 'notificaciones' | 'emails';
+type Tab = 'general' | 'home_sections' | 'meta_pixel' | 'seguridad' | 'notificaciones' | 'emails' | 'cloudinary';
 
 const TABS = [
   { id: 'general' as Tab, label: 'General', icon: Store },
@@ -39,6 +40,7 @@ const TABS = [
   { id: 'seguridad' as Tab, label: 'Seguridad', icon: Shield },
   { id: 'notificaciones' as Tab, label: 'Notificaciones', icon: Bell },
   { id: 'emails' as Tab, label: 'Emails', icon: Mail },
+  { id: 'cloudinary' as Tab, label: 'Cloudinary', icon: Cloud },
 ];
 
 export default function ConfiguracionPage() {
@@ -216,8 +218,8 @@ export default function ConfiguracionPage() {
         <p className="text-gray-500 text-sm mt-0.5">Administra las preferencias del BackOffice</p>
       </div>
 
-      <div className="flex justify-start">
-        <div className="flex gap-1 bg-gray-50 rounded-xl p-1 border border-gray-200 overflow-x-auto">
+      <div className="w-full bg-gray-50 rounded-xl p-1.5 border border-gray-200">
+        <div className="flex items-center gap-1 overflow-x-auto lg:overflow-visible lg:justify-between">
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -225,13 +227,13 @@ export default function ConfiguracionPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ' +
+                className={'flex-shrink-0 lg:flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ' +
                   (isActive
                     ? 'bg-[#0f172a] text-white shadow-sm'
                     : 'text-gray-500 hover:bg-white hover:text-gray-700')}
               >
-                <Icon className={'w-4 h-4 ' + (isActive ? 'text-[#C8FF00]' : 'text-gray-400')} />
-                {tab.label}
+                <Icon className={'w-4 h-4 shrink-0 ' + (isActive ? 'text-[#C8FF00]' : 'text-gray-400')} />
+                <span className="truncate">{tab.label}</span>
               </button>
             );
           })}
@@ -257,6 +259,10 @@ export default function ConfiguracionPage() {
 
         {activeTab === 'notificaciones' && (
           <NotificacionesTab notifs={notifs} setNotifs={setNotifs} onSave={handleSaveNotifs} />
+        )}
+
+        {activeTab === 'cloudinary' && (
+          <CloudinaryTab />
         )}
 
         {activeTab === 'emails' && (

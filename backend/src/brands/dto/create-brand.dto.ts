@@ -1,4 +1,4 @@
-﻿import { IsString, IsOptional, IsUrl, IsInt, Min, IsBoolean } from 'class-validator';
+﻿import { IsString, IsOptional, IsUrl, IsInt, Min, IsBoolean, ValidateIf } from 'class-validator';
 
 export class CreateBrandDto {
   @IsString()
@@ -12,8 +12,8 @@ export class CreateBrandDto {
   @IsString()
   logo?: string;
 
-  @IsOptional()
-  @IsUrl()
+  @ValidateIf((o) => o.url !== '' && o.url !== null && o.url !== undefined)
+  @IsUrl({}, { message: 'url debe ser una URL valida' })
   url?: string;
 
   @IsOptional()

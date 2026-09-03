@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Edit2, Trash2, Truck, CreditCard, RefreshCw, Lock, Package, Star, Zap } from 'lucide-react';
+import { Plus, Edit2, Trash2, Truck, CreditCard, RefreshCw, Lock, Package, Star, Zap, Search } from 'lucide-react';
 import api from '@/lib/api';
 import { Modal, ConfirmDialog } from '@/components/ui/Modal';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
@@ -22,7 +22,7 @@ interface Benefit {
 }
 
 const ICON_OPTIONS = [
-  { value: 'Truck', label: 'Envío', icon: Truck },
+  { value: 'Truck', label: 'Envio', icon: Truck },
   { value: 'CreditCard', label: 'Pago', icon: CreditCard },
   { value: 'RefreshCw', label: 'Cambios', icon: RefreshCw },
   { value: 'Lock', label: 'Seguridad', icon: Lock },
@@ -36,7 +36,7 @@ ICON_OPTIONS.forEach((o) => { ICON_MAP[o.value] = o.icon; });
 
 const schema = z.object({
   icon: z.string().min(1, 'Selecciona un icono'),
-  title: z.string().min(2, 'El título es requerido'),
+  title: z.string().min(2, 'El titulo es requerido'),
   description: z.string().optional().or(z.literal('')),
   order: z.coerce.number().int().min(0).default(0),
   active: z.boolean().default(true),
@@ -44,12 +44,15 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 const inputClass = 'w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00]';
-const labelClass = 'text-xs font-medium text-gray-400 uppercase tracking-wider';
 
 export default function BeneficiosPage() {
   const { toast } = useToast();
   const [benefits, setBenefits] = useState<Benefit[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [isMobile, setIsMobile] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editItem, setEditItem] = useState<Benefit | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Benefit | null>(null);
@@ -62,6 +65,17 @@ export default function BeneficiosPage() {
 
   const watchIcon = watch('icon');
 
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      setPageSize(mobile ? 3 : 10);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -72,6 +86,15 @@ export default function BeneficiosPage() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  const filtered = benefits.filter((b) => {
+    const q = search.toLowerCase();
+    return b.title.toLowerCase().includes(q) || (b.description || '').toLowerCase().includes(q);
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const paginated = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const openCreate = () => {
     setEditItem(null);
@@ -110,67 +133,127 @@ export default function BeneficiosPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Beneficios</h1>
-          <p className="text-gray-500 text-sm mt-0.5">{benefits.length} registros</p>
+          <p className="text-gray-500 text-sm mt-0.5">{filtered.length} registros</p>
         </div>
-        <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] transition-colors">
-          <Plus className="w-4 h-4" />Nuevo beneficio
-        </button>
+        <div className="flex items-center gap-3 flex-1 min-w-0 lg:max-w-md">
+          <div className="relative flex-1 min-w-0">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              placeholder="Buscar beneficios..."
+              className="w-full pl-10 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00]"
+            />
+          </div>
+          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] transition-colors shrink-0">
+            <Plus className="w-4 h-4" />Nuevo
+          </button>
+        </div>
       </div>
 
-      {benefits.length === 0 ? (
+      {filtered.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 py-20 text-center"><p className="text-gray-400 text-sm">No se encontraron beneficios</p></div>
       ) : (
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-100">
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-12">#</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Icono</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Título</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Descripción</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {benefits.map((b) => {
-                const IconComp = ICON_MAP[b.icon] || Star;
-                return (
-                  <tr key={b.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 text-center text-sm text-gray-400">{b.order}</td>
-                    <td className="px-4 py-3">
-                      <div className="w-9 h-9 rounded-lg bg-[#0f172a] flex items-center justify-center">
-                        {createElement(IconComp, { size: 16, className: 'text-[#C8FF00]' })}
+        <>
+          {/* Tabla desktop */}
+          <div className="hidden md:block bg-white border border-gray-200 rounded-xl overflow-hidden overflow-x-auto">
+            <table className="w-full min-w-[700px]">
+              <thead>
+                <tr className="border-b border-gray-100">
+                  <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-12">#</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Icono</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Titulo</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Descripcion</th>
+                  <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
+                  <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginated.map((b) => {
+                  const IconComp = ICON_MAP[b.icon] || Star;
+                  return (
+                    <tr key={b.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 text-center text-sm text-gray-400">{b.order}</td>
+                      <td className="px-4 py-3">
+                        <div className="w-9 h-9 rounded-lg bg-[#0f172a] flex items-center justify-center">
+                          {createElement(IconComp, { size: 16, className: 'text-[#C8FF00]' })}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3"><p className="text-gray-900 font-medium text-sm">{b.title}</p></td>
+                      <td className="px-4 py-3"><p className="text-gray-500 text-sm">{b.description || '-'}</p></td>
+                      <td className="px-4 py-3 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <Toggle checked={b.active} onChange={() => toggleActive(b)} />
+                          <span className={'text-xs font-medium ' + (b.active ? 'text-green-600' : 'text-gray-400')}>{b.active ? 'Activo' : 'Inactivo'}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-center gap-1">
+                          <button onClick={() => openEdit(b)} className="p-1.5 rounded-lg text-[#C8FF00] hover:bg-[#C8FF00]/10 transition-colors" title="Editar"><Edit2 className="w-4 h-4" /></button>
+                          <button onClick={() => setDeleteTarget(b)} className="p-1.5 rounded-lg text-red-400 hover:bg-red-400/10 transition-colors" title="Eliminar"><Trash2 className="w-4 h-4" /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Cards mobile */}
+          <div className="md:hidden space-y-3">
+            {paginated.map((b) => {
+              const IconComp = ICON_MAP[b.icon] || Star;
+              return (
+                <div key={b.id} className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-[#0f172a] flex items-center justify-center">
+                        {createElement(IconComp, { size: 18, className: 'text-[#C8FF00]' })}
                       </div>
-                    </td>
-                    <td className="px-4 py-3"><p className="text-gray-900 font-medium text-sm">{b.title}</p></td>
-                    <td className="px-4 py-3 hidden md:table-cell"><p className="text-gray-500 text-sm">{b.description || '-'}</p></td>
-                    <td className="px-4 py-3 text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <Toggle checked={b.active} onChange={() => toggleActive(b)} />
-                        <span className={'text-xs font-medium ' + (b.active ? 'text-green-600' : 'text-gray-400')}>{b.active ? 'Activo' : 'Inactivo'}</span>
+                      <div>
+                        <p className="text-gray-900 font-medium text-sm">{b.title}</p>
+                        <p className="text-xs text-gray-400">#{b.order}</p>
                       </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center justify-center gap-1">
-                        <button onClick={() => openEdit(b)} className="p-1.5 rounded-lg text-[#C8FF00] hover:bg-[#C8FF00]/10 transition-colors" title="Editar"><Edit2 className="w-4 h-4" /></button>
-                        <button onClick={() => setDeleteTarget(b)} className="p-1.5 rounded-lg text-red-400 hover:bg-red-400/10 transition-colors" title="Eliminar"><Trash2 className="w-4 h-4" /></button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                    </div>
+                    <Toggle checked={b.active} onChange={() => toggleActive(b)} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                    <div>
+                      <p className="text-xs text-gray-400">Descripcion</p>
+                      <p className="text-sm text-gray-900">{b.description || '-'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-400">Estado</p>
+                      <p className={'text-sm font-medium ' + (b.active ? 'text-green-600' : 'text-gray-400')}>{b.active ? 'Activo' : 'Inactivo'}</p>
+                    </div>
+                  </div>
+                  <div className="border-t pt-2 flex justify-end gap-2">
+                    <button onClick={() => openEdit(b)} className="p-1.5 rounded-lg text-[#C8FF00] hover:bg-[#C8FF00]/10 transition-colors" title="Editar"><Edit2 className="w-4 h-4" /></button>
+                    <button onClick={() => setDeleteTarget(b)} className="p-1.5 rounded-lg text-red-400 hover:bg-red-400/10 transition-colors" title="Eliminar"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Paginacion */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2">
+              <button onClick={() => setPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1} className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40">Anterior</button>
+              <span className="text-sm text-gray-500">Pagina {currentPage} de {totalPages}</span>
+              <button onClick={() => setPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages} className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40">Siguiente</button>
+            </div>
+          )}
+        </>
       )}
 
       {modalOpen && (
         <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editItem ? 'Editar beneficio' : 'Nuevo beneficio'} size="sm">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 px-4 sm:px-6 py-4 sm:py-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Icono *</label>
               <div className="relative">
@@ -186,13 +269,13 @@ export default function BeneficiosPage() {
               {errors.icon && <p className="text-xs text-red-600 mt-1">{errors.icon.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Título *</label>
-              <input {...register('title')} className={inputClass} placeholder="Ej: Envío gratis" />
+              <label className="block text-sm font-medium text-gray-700 mb-1">Titulo *</label>
+              <input {...register('title')} className={inputClass} placeholder="Ej: Envio gratis" />
               {errors.title && <p className="text-xs text-red-600 mt-1">{errors.title.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-              <input {...register('description')} className={inputClass} placeholder="En compras mayores a .000" />
+              <label className="block text-sm font-medium text-gray-700 mb-1">Descripcion</label>
+              <input {...register('description')} className={inputClass} placeholder="En compras mayores a $50.000" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Orden</label>

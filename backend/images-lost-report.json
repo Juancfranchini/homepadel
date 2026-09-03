@@ -1,0 +1,272 @@
+[
+  {
+    "entity": "Banner",
+    "name": "Cyber Monday TEST",
+    "url": "/uploads/1787151698569-265439188.jpg"
+  },
+  {
+    "entity": "SiteSection",
+    "name": "branding.isotipo",
+    "url": "/uploads/1788013458253-728453484.png"
+  },
+  {
+    "entity": "SiteSection",
+    "name": "branding.logoMobile",
+    "url": "/uploads/1788013022262-225544568.png"
+  },
+  {
+    "entity": "SiteSection",
+    "name": "about.image",
+    "url": "/uploads/1788021230471-324591202.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "Metalbone 3.4",
+    "url": "/uploads/1788182665823-255808353.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "Metalbone 3.4",
+    "url": "/uploads/1788182670612-135728166.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "Metalbone 3.4",
+    "url": "/uploads/1788182675824-363364607.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "Vertex 04 Comfort (2024)",
+    "url": "/uploads/1788186192885-387628780.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "Vertex 04 Comfort (2024)",
+    "url": "/uploads/1788186196869-593551847.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "Metalbone Carbon (2026)",
+    "url": "/uploads/1788184326109-450233134.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "Metalbone Carbon (2026)",
+    "url": "/uploads/1788184330282-772839373.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "EA10 Ventus Hybrid 12k Xtreme",
+    "url": "/uploads/1788188023687-312411925.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "EA10 Ventus Hybrid 12k Xtreme",
+    "url": "/uploads/1788188030068-414517479.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "EA10 Ventus Hybrid 12k Xtreme",
+    "url": "/uploads/1788188038350-332712107.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "Technical Veron 2.5",
+    "url": "/uploads/1788184963404-996541534.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "Technical Veron 2.5",
+    "url": "/uploads/1788184966860-803947325.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "X-Zero Blue",
+    "url": "/uploads/1788186445416-523571545.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "X-Zero Blue",
+    "url": "/uploads/1788186449331-591261330.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "VK10 Ventus Control 12k",
+    "url": "/uploads/1788187439531-315181046.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "VK10 Ventus Control 12k",
+    "url": "/uploads/1788187558722-608120631.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "VK10 Ventus Control 12k",
+    "url": "/uploads/1788187445987-346634550.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "Metalbone Carbon Ctrl 3.5 (2026)",
+    "url": "/uploads/1787839534552-332461954.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "Metalbone Carbon Ctrl 3.5 (2026)",
+    "url": "/uploads/1787839538277-238584103.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "Metalbone Ctrl (2026)",
+    "url": "/uploads/1788183887789-177193328.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "Metalbone Ctrl (2026)",
+    "url": "/uploads/1788183892324-415635916.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "Metalbone Ctrl (2026)",
+    "url": "/uploads/1788183897789-45278823.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "Metalbone Ctrl (2026)",
+    "url": "/uploads/1788183903602-241711421.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "Indiga W",
+    "url": "/uploads/1788185736367-702630699.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "Indiga W",
+    "url": "/uploads/1788185739032-191647209.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "Metalbone Ctrl 3.3 ",
+    "url": "/uploads/1788183215004-393628610.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "Metalbone Ctrl 3.3 ",
+    "url": "/uploads/1788183219009-273257552.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "Metalbone Ctrl 3.3 ",
+    "url": "/uploads/1788183222983-228483690.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "Metalbone (2026)",
+    "url": "/uploads/1788183556132-940098591.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "Metalbone (2026)",
+    "url": "/uploads/1788183562472-951792505.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "Metalbone (2026)",
+    "url": "/uploads/1788183566711-513134182.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "Ventus Hybrid 12k Lit",
+    "url": "/uploads/1788186985504-105176216.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "Ventus Hybrid 12k Lit",
+    "url": "/uploads/1788186991207-371021846.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "Ventus Hybrid 12k Lit",
+    "url": "/uploads/1788186995010-192496474.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "EA10 Ventus Attack 12k Xtreme",
+    "url": "/uploads/1788187785287-837679635.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "EA10 Ventus Attack 12k Xtreme",
+    "url": "/uploads/1788187799620-889635378.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "EA10 Ventus Attack 12k Xtreme",
+    "url": "/uploads/1788187805981-504404613.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "AT10 Luxury Genius 18k Alum ",
+    "url": "/uploads/1788189190722-511648967.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "AT10 Luxury Genius 18k Alum ",
+    "url": "/uploads/1788189195873-610975123.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "AT10 Luxury Genius 18k Alum ",
+    "url": "/uploads/1788189199771-108113768.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "AT10 Luxury Genius 18k Alum ",
+    "url": "/uploads/1788189203788-918947628.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "AT10 Luxury Genius 18k Alum ",
+    "url": "/uploads/1788189210288-508531743.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "AT10 Luxury Genius 12k Alum Xtreme Lite",
+    "url": "/uploads/1788188357211-331272652.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "AT10 Luxury Genius 12k Alum Xtreme Lite",
+    "url": "/uploads/1788188360265-341115277.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "AT10 Luxury Genius 12k Alum Xtreme Lite",
+    "url": "/uploads/1788188364989-905849802.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "AT10 Luxury Genius 12k Alum Xtreme",
+    "url": "/uploads/1788188793748-521063472.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "AT10 Luxury Genius 12k Alum Xtreme",
+    "url": "/uploads/1788188797695-499104990.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "AT10 Luxury Genius 12k Alum Xtreme",
+    "url": "/uploads/1788188802401-949310665.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "AT10 Luxury Genius 12k Alum Xtreme",
+    "url": "/uploads/1788188812369-809855759.png"
+  },
+  {
+    "entity": "Producto",
+    "name": "AT10 Luxury Genius 12k Alum Xtreme",
+    "url": "/uploads/1788188819730-813047962.png"
+  }
+]

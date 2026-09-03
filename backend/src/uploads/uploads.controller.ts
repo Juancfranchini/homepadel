@@ -1,8 +1,7 @@
-// Upload de imágenes para productos, banners, categorías, etc.
-// POST /api/uploads/image  — sube una imagen y retorna { url: "/uploads/filename.jpg" }
+﻿// Upload de imágenes para productos, banners, categorías, etc.
+// POST /api/uploads/image  sube una imagen a Cloudinary y retorna { url: "https://res.cloudinary.com/..." }
 // Requiere autenticación ADMIN
 // El campo del form-data debe llamarse 'file'
-// Ejemplo de uso en frontend: const formData = new FormData(); formData.append('file', file);
 
 import { Controller, Post, UploadedFile, UseInterceptors, UseGuards } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -11,6 +10,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '@prisma/client';
+import { UploadsService } from './uploads.service';
 
 @ApiTags('Uploads')
 @ApiBearerAuth()
@@ -18,10 +18,18 @@ import { Role } from '@prisma/client';
 @Roles(Role.ADMIN)
 @Controller('uploads')
 export class UploadsController {
+  constructor(private readonly uploadsService: UploadsService) {}
+
+  @Post('migrate-to-cloudinary')
+  async migrateToCloudinary() {
+    return this.uploadsService.migrateToCloudinary();
+  }
+
   @Post('image')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
-  uploadImage(@UploadedFile() file: Express.Multer.File) {
-    return { url: `/uploads/${file.filename}` };
+  async uploadImage(@UploadedFile() file: Express.Multer.File) {
+    const url = await this.uploadsService.uploadImage(file);
+    return { url };
   }
 }

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { Mail, Save, Send } from 'lucide-react';
@@ -40,13 +40,13 @@ export default function EmailsTab({ emailConfig, setEmailConfig, onSave, onTest,
           <input value={testEmail} onChange={(e) => setTestEmail(e.target.value)} className={inputClass} placeholder="tu@email.com" />
         </div>
         <div className="flex items-end">
-          <button onClick={() => onTest(testEmail)} disabled={testing || !testEmail} className="flex items-center gap-2 px-4 py-2.5 bg-[#0f172a] text-white hover:bg-[#1e293b] rounded-lg font-semibold text-sm hover:bg-[#1e293b] disabled:opacity-50">
+          <button onClick={() => onTest(testEmail)} disabled={testing || !testEmail} className="flex items-center gap-2 px-4 py-2.5 bg-[#0f172a] text-white hover:bg-[#1e293b] rounded-lg font-semibold text-sm hover:bg-[#1e293b] disabled:opacity-50 whitespace-nowrap shrink-0">
             <Send className="w-4 h-4" />{testing ? 'Enviando...' : 'Probar'}
           </button>
         </div>
       </div>
       <div className="flex justify-end">
-        <button onClick={onSave} disabled={saving} className="flex items-center gap-2 px-5 py-2.5 bg-[#C8FF00] text-[#0f172a] hover:bg-[#b8ef00] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] disabled:opacity-50">
+        <button onClick={onSave} disabled={saving} className="flex items-center gap-2 px-5 py-2.5 bg-[#C8FF00] text-[#0f172a] hover:bg-[#b8ef00] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] disabled:opacity-50 whitespace-nowrap shrink-0">
           <Save className="w-4 h-4" />{saving ? 'Guardando...' : 'Guardar configuración'}
         </button>
       </div>

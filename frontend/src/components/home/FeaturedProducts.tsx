@@ -75,7 +75,7 @@ function ProductCard({ product }: { product: Product }) {
         </button>
       </div>
 
-      <div className="p-5 flex flex-col gap-2 flex-1">
+      <div className="p-3 sm:p-4 md:p-5 flex flex-col gap-1.5 sm:gap-2 flex-1">
         {product.brand && (
           <p className="text-xs text-[#8A8A85] font-semibold uppercase tracking-wider">{product.brand.name}</p>
         )}
@@ -135,16 +135,16 @@ export default function FeaturedProducts({ products, mode }: Props) {
   };
 
   return (
-    <section className="bg-[#050606] py-20 md:py-24">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="flex items-center justify-between mb-8">
+    <section className="bg-[#050606] py-8 sm:py-12 md:py-20 lg:py-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-5 sm:mb-8">
           <div>
-            <h2 className="text-2xl md:text-3xl font-semibold uppercase text-[#F7F6F7]">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold uppercase text-[#F7F6F7]">
               {sectionTitle}
             </h2>
-            <p className="text-[#C7C7C0] text-sm mt-0.5">{sectionSubtitle}</p>
+            <p className="text-[#C7C7C0] text-xs sm:text-sm mt-0.5">{sectionSubtitle}</p>
           </div>
-          <Link href="/catalogo" className="text-sm font-semibold text-[#B7D31A] hover:text-[#CAE52E] flex items-center gap-1 uppercase transition-colors">
+          <Link href="/catalogo" className="text-xs sm:text-sm font-semibold text-[#B7D31A] hover:text-[#CAE52E] flex items-center gap-1 uppercase transition-colors self-start sm:self-auto">
             VER TODOS <ChevronRight size={14} />
           </Link>
         </div>
@@ -156,7 +156,7 @@ export default function FeaturedProducts({ products, mode }: Props) {
 
           <div ref={scrollRef} className="flex gap-5 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollSnapType: 'x mandatory' }}>
             {displayProducts.map(p => (
-              <div key={p.id} className="flex-none w-[260px] md:w-[280px]" style={{ scrollSnapAlign: 'start' }}>
+              <div key={p.id} className="flex-none w-[200px] sm:w-[240px] md:w-[280px]" style={{ scrollSnapAlign: 'start' }}>
                 <ProductCard product={p} />
               </div>
             ))}

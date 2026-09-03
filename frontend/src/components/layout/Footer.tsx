@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Instagram, Facebook, Youtube, Mail, Phone, MapPin, Clock } from 'lucide-react';
@@ -27,14 +27,14 @@ export default function Footer() {
 
   return (
     <footer className="bg-[#141A1D] text-[#C7C7C0] border-t border-[#0D0F0F]">
-      <div className="max-w-7xl mx-auto px-4 lg:px-6 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <div className="lg:col-span-1">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 md:gap-6 lg:gap-4 text-center md:text-left">
+          <div className="col-span-1 md:col-span-2 lg:col-span-1 flex flex-col items-center md:items-start">
             <Link href="/" className="flex items-center gap-2 mb-4">
               <BrandLogo variant="light" size="md" showText={!branding.logoFooter} imageUrl={branding.logoFooter || undefined} />
             </Link>
-            <p className="text-sm leading-relaxed mb-6">Equipamiento profesional para jugadores apasionados. Las mejores marcas, los mejores precios.</p>
-            <div className="flex gap-3">
+            <p className="text-sm leading-relaxed mb-4 sm:mb-6">Equipamiento profesional para jugadores apasionados. Las mejores marcas, los mejores precios.</p>
+            <div className="flex gap-3 justify-center md:justify-start">
               {[{ icon: Instagram, href: 'https://instagram.com/homepadel', label: 'Instagram' },{ icon: Facebook, href: 'https://facebook.com/homepadel', label: 'Facebook' }].map(({ icon: Icon, href, label }) => (
                 <a key={label} href={href} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-white/10 hover:bg-[#B7D31A] hover:text-[#050606] flex items-center justify-center transition-colors" aria-label={label}><Icon size={14} /></a>
               ))}
@@ -42,45 +42,45 @@ export default function Footer() {
             </div>
           </div>
 
-          <div>
-            <h3 className="font-semibold text-sm uppercase tracking-widest text-[#F7F6F7] mb-4">Categorias</h3>
-            <ul className="space-y-2">
+          <div className="flex flex-col items-center md:items-start">
+            <h3 className="font-semibold text-xs sm:text-sm uppercase tracking-widest text-[#F7F6F7] mb-3 sm:mb-4">Categorias</h3>
+            <ul className="space-y-1.5 sm:space-y-2">
               {[{ label: 'Paletas', href: '/catalogo?categoria=paletas' },{ label: 'Zapatillas', href: '/catalogo?categoria=zapatillas' },{ label: 'Indumentaria', href: '/catalogo?categoria=indumentaria' },{ label: 'Accesorios', href: '/catalogo?categoria=accesorios' },{ label: 'Ofertas', href: '/catalogo?oferta=true' }].map((link) => (
                 <li key={link.href}><Link href={link.href} className="text-sm hover:text-[#B7D31A] transition-colors">{link.label}</Link></li>
               ))}
             </ul>
           </div>
 
-          <div>
-            <h3 className="font-semibold text-sm uppercase tracking-widest text-[#F7F6F7] mb-4">Ayuda</h3>
-            <ul className="space-y-2">
+          <div className="flex flex-col items-center md:items-start">
+            <h3 className="font-semibold text-xs sm:text-sm uppercase tracking-widest text-[#F7F6F7] mb-3 sm:mb-4">Ayuda</h3>
+            <ul className="space-y-1.5 sm:space-y-2">
               {[{ label: 'Preguntas frecuentes', href: '/faq' },{ label: 'Rastrear mi pedido', href: '/rastrear' },{ label: 'Cambios y devoluciones', href: '/politica-de-devolucion' },{ label: 'Envíos', href: '/envios' },{ label: 'Medios de pago', href: '/medios-de-pago' },{ label: 'Guia de talles', href: '/talles' }].map((link) => (
                 <li key={link.href}><Link href={link.href} className="text-sm hover:text-[#B7D31A] transition-colors">{link.label}</Link></li>
               ))}
             </ul>
           </div>
 
-          <div>
-            <h3 className="font-semibold text-sm uppercase tracking-widest text-[#F7F6F7] mb-4">Contacto</h3>
+          <div className="col-span-1 md:col-span-1 lg:col-span-1 flex flex-col items-center md:items-start">
+            <h3 className="font-semibold text-xs sm:text-sm uppercase tracking-widest text-[#F7F6F7] mb-3 sm:mb-4">Contacto</h3>
             <ul className="space-y-4">
-              <li><a href={'mailto:' + email} className="flex items-center gap-3 group"><div className="w-8 h-8 rounded-lg bg-[#242A05] flex items-center justify-center flex-shrink-0 transition-colors group-hover:bg-[#B7D31A]"><Mail size={14} className="text-[#B7D31A] transition-colors group-hover:text-[#141A1D]" /></div><span className="text-sm group-hover:text-[#B7D31A] transition-colors whitespace-nowrap">{email}</span></a></li>
-              <li><a href={'tel:' + phone} className="flex items-center gap-3 group"><div className="w-8 h-8 rounded-lg bg-[#242A05] flex items-center justify-center flex-shrink-0 transition-colors group-hover:bg-[#B7D31A]"><Phone size={14} className="text-[#B7D31A] transition-colors group-hover:text-[#141A1D]" /></div><span className="text-sm group-hover:text-[#B7D31A] transition-colors">{phone}</span></a></li>
-              <li className="flex items-center gap-3 group"><div className="w-8 h-8 rounded-lg bg-[#242A05] flex items-center justify-center flex-shrink-0 transition-colors group-hover:bg-[#B7D31A]"><MapPin size={14} className="text-[#B7D31A] transition-colors group-hover:text-[#141A1D]" /></div><span className="text-sm">{address}</span></li>
-              <li className="flex items-center gap-3 group"><div className="w-8 h-8 rounded-lg bg-[#242A05] flex items-center justify-center flex-shrink-0 transition-colors group-hover:bg-[#B7D31A]"><Clock size={14} className="text-[#B7D31A] transition-colors group-hover:text-[#141A1D]" /></div><span className="text-sm">Lunes a Viernes<br />9 a 18 hs</span></li>
+              <li className="w-full flex justify-center md:justify-start"><a href={'mailto:' + email} className="flex items-center gap-3 group"><div className="w-8 h-8 rounded-lg bg-[#242A05] flex items-center justify-center flex-shrink-0 transition-colors group-hover:bg-[#B7D31A]"><Mail size={14} className="text-[#B7D31A] transition-colors group-hover:text-[#141A1D]" /></div><span className="text-sm group-hover:text-[#B7D31A] transition-colors break-all">{email}</span></a></li>
+              <li className="w-full flex justify-center md:justify-start"><a href={'tel:' + phone} className="flex items-center gap-3 group"><div className="w-8 h-8 rounded-lg bg-[#242A05] flex items-center justify-center flex-shrink-0 transition-colors group-hover:bg-[#B7D31A]"><Phone size={14} className="text-[#B7D31A] transition-colors group-hover:text-[#141A1D]" /></div><span className="text-sm group-hover:text-[#B7D31A] transition-colors">{phone}</span></a></li>
+              <li className="flex items-center justify-center md:justify-start gap-3 group"><div className="w-8 h-8 rounded-lg bg-[#242A05] flex items-center justify-center flex-shrink-0 transition-colors group-hover:bg-[#B7D31A]"><MapPin size={14} className="text-[#B7D31A] transition-colors group-hover:text-[#141A1D]" /></div><span className="text-sm">{address}</span></li>
+              <li className="flex items-center justify-center md:justify-start gap-3 group"><div className="w-8 h-8 rounded-lg bg-[#242A05] flex items-center justify-center flex-shrink-0 transition-colors group-hover:bg-[#B7D31A]"><Clock size={14} className="text-[#B7D31A] transition-colors group-hover:text-[#141A1D]" /></div><span className="text-sm">Lunes a Viernes<br />9 a 18 hs</span></li>
             </ul>
           </div>
 
-          <div>
-            <h3 className="font-semibold text-sm uppercase tracking-widest text-[#F7F6F7] mb-4">Medios de Pago</h3>
-            <div className="flex flex-wrap gap-2 mb-6">
+          <div className="col-span-1 md:col-span-2 lg:col-span-1 flex flex-col items-center md:items-start">
+            <h3 className="font-semibold text-xs sm:text-sm uppercase tracking-widest text-[#F7F6F7] mb-3 sm:mb-4">Medios de Pago</h3>
+            <div className="flex flex-wrap gap-2 mb-6 justify-center md:justify-start">
               {visa?.active !== false && (visa?.logo ? <div className="w-10 h-7 rounded flex items-center justify-center"><img src={getImageUrl(visa.logo)} alt="VISA" className="w-10 h-7 object-cover rounded" /></div> : <div className="w-10 h-7 bg-white rounded flex items-center justify-center"><span className="text-[#1A1F71] text-[7px] font-bold">VISA</span></div>)}
               {mastercard?.active !== false && (mastercard?.logo ? <div className="w-10 h-7 rounded flex items-center justify-center"><img src={getImageUrl(mastercard.logo)} alt="MC" className="w-10 h-7 object-cover rounded" /></div> : <div className="w-10 h-7 bg-black rounded flex items-center justify-center"><svg width="24" height="16" viewBox="0 0 24 16"><rect width="24" height="16" rx="2" fill="#000" /><circle cx="9" cy="8" r="4" fill="#FF0000" opacity="0.8" /><circle cx="15" cy="8" r="4" fill="#FF9900" opacity="0.8" /></svg></div>)}
               {amex?.active !== false && (amex?.logo ? <div className="w-10 h-7 rounded flex items-center justify-center"><img src={getImageUrl(amex.logo)} alt="AMEX" className="w-10 h-7 object-cover rounded" /></div> : <div className="w-10 h-7 bg-[#2E77BC] rounded flex items-center justify-center"><span className="text-white text-[7px] font-bold">AMEX</span></div>)}
               {mercadopago?.active !== false && (mercadopago?.logo ? <div className="w-10 h-7 rounded flex items-center justify-center"><img src={getImageUrl(mercadopago.logo)} alt="MP" className="w-10 h-7 object-cover rounded" /></div> : <div className="w-10 h-7 bg-[#00A650] rounded flex items-center justify-center"><span className="text-white text-[6px] font-bold">MP</span></div>)}
             </div>
 
-            <h3 className="font-semibold text-sm uppercase tracking-widest text-[#F7F6F7] mb-4">Medios de Envio</h3>
-            <div className="flex flex-wrap gap-2">
+            <h3 className="font-semibold text-xs sm:text-sm uppercase tracking-widest text-[#F7F6F7] mb-3 sm:mb-4">Medios de Envio</h3>
+            <div className="flex flex-wrap gap-2 justify-center md:justify-start">
               {ca?.active !== false && (ca?.logo ? <div className="w-10 h-7 rounded flex items-center justify-center"><img src={getImageUrl(ca.logo)} alt="CA" className="w-10 h-7 object-cover rounded" /></div> : <div className="w-10 h-7 bg-[#00509E] rounded flex items-center justify-center"><span className="text-white text-[6px] font-bold">CA</span></div>)}
               {oca?.active !== false && (oca?.logo ? <div className="w-10 h-7 rounded flex items-center justify-center"><img src={getImageUrl(oca.logo)} alt="OCA" className="w-10 h-7 object-cover rounded" /></div> : <div className="w-10 h-7 bg-[#E30613] rounded flex items-center justify-center"><span className="text-white text-[7px] font-bold">OCA</span></div>)}
               {andreani?.active !== false && (andreani?.logo ? <div className="w-10 h-7 rounded flex items-center justify-center"><img src={getImageUrl(andreani.logo)} alt="ANDREANI" className="w-10 h-7 object-cover rounded" /></div> : <div className="w-10 h-7 bg-[#003DA5] rounded flex items-center justify-center"><span className="text-white text-[5px] font-bold">ANDREANI</span></div>)}
@@ -91,9 +91,9 @@ export default function Footer() {
 
       <div className="max-w-7xl mx-auto px-4 lg:px-6"><div className="h-[0.5px] bg-white/20" /></div>
       <div className="border-t border-transparent">
-        <div className="max-w-7xl mx-auto px-4 lg:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p className="text-[#8A8A85] text-xs">&copy; 2026 Home Padel - Todos los derechos reservados.</p>
-          <div className="flex gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-[#8A8A85] text-xs text-center sm:text-left">&copy; 2026 Home Padel - Todos los derechos reservados.</p>
+          <div className="flex gap-4 justify-center sm:justify-start">
             <Link href="/terminos" className="text-[#8A8A85] text-xs hover:text-[#C7C7C0] transition-colors">Terminos y condiciones</Link>
             <Link href="/privacidad" className="text-[#8A8A85] text-xs hover:text-[#C7C7C0] transition-colors">Politica de privacidad</Link>
           </div>

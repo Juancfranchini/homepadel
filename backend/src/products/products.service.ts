@@ -97,15 +97,34 @@ export class ProductsService {
     };
   }
 
-  create(dto: CreateProductDto) {
+  async create(dto: CreateProductDto) {
     const { categoryId, brandId, ...rest } = dto as any;
     if (!categoryId) throw new NotFoundException('categoryId es requerido');
     if (!brandId) throw new NotFoundException('brandId es requerido');
-    const slug = slugify(rest.name, { lower: true, strict: true });
-    return this.prisma.product.create({
-      data: { ...rest, slug, categoryId, brandId },
-      include: { category: true, brand: true },
-    });
+
+    // F4 - Verificar si el slug ya existe y agregar sufijo
+    let slug = slugify(rest.name, { lower: true, strict: true });
+    let slugExists = await this.prisma.product.findUnique({ where: { slug } });
+    let counter = 1;
+
+    while (slugExists) {
+      slug = slugify(rest.name, { lower: true, strict: true }) + '-' + counter;
+      slugExists = await this.prisma.product.findUnique({ where: { slug } });
+      counter++;
+    }
+
+    try {
+      return await this.prisma.product.create({
+        data: { ...rest, slug, categoryId, brandId },
+        include: { category: true, brand: true },
+      });
+    } catch (err: any) {
+      // Traducir error de Prisma
+      if (err?.code === 'P2002') {
+        throw new NotFoundException('Ya existe un producto con ese nombre o SKU.');
+      }
+      throw err;
+    }
   }
 
   async update(id: string, dto: UpdateProductDto) {

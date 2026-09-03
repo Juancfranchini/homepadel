@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+﻿import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailService } from '../email/email.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -85,7 +85,44 @@ export class OrdersService {
 
   async create(dto: CreateOrderDto, userId?: string) {
     const number = 'HP-' + Date.now();
-    const subtotal = dto.items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    
+    // S3 - Buscar precios reales desde la BD
+    const itemsWithRealPrices = await Promise.all(
+      dto.items.map(async (item) => {
+        const product = await this.prisma.product.findUnique({
+          where: { id: item.productId },
+          select: { price: true, salePrice: true, stock: true },
+        });
+        if (!product) throw new NotFoundException(`Producto ${item.productId} no encontrado`);
+        
+        // F6 - Verificar stock
+        if (product.stock < item.quantity) {
+          throw new NotFoundException(`Stock insuficiente para producto ${item.productId}`);
+        }
+        
+        const realPrice = product.salePrice !== undefined && product.salePrice > 0 && product.salePrice < product.price
+          ? product.salePrice
+          : product.price;
+        
+        return {
+          productId: item.productId,
+          quantity: item.quantity,
+          price: realPrice,
+        };
+      })
+    );
+
+    // F6 - Descontar stock
+    await Promise.all(
+      itemsWithRealPrices.map(async (item) => {
+        await this.prisma.product.update({
+          where: { id: item.productId },
+          data: { stock: { decrement: item.quantity } },
+        });
+      })
+    );
+
+    const subtotal = itemsWithRealPrices.reduce((acc, item) => acc + item.price * item.quantity, 0);
     const total = subtotal + (dto.shipping || 0) - (dto.discount || 0);
 
     const buyerInfo = {
@@ -105,7 +142,7 @@ export class OrdersService {
         discount: dto.discount || 0,
         couponCode: dto.couponCode,
         notes: JSON.stringify(buyerInfo),
-        items: { create: dto.items },
+        items: { create: itemsWithRealPrices },
       },
       include: { items: { include: { product: true } }, user: { select: { id: true, name: true, email: true } } },
     });

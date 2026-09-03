@@ -1,10 +1,11 @@
-// Store de carrito con Zustand
+﻿// Store de carrito con Zustand
 // Persiste en localStorage bajo la clave 'homepadel-cart'
 // Permite agregar, eliminar y actualizar items, y calcular totales
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { CartItem, Product } from '@/types';
+import { trackMetaEvent } from '@/lib/metaPixel';
 
 interface CartStore {
   items: CartItem[];
@@ -24,6 +25,15 @@ export const useCartStore = create<CartStore>()(
       // Agrega un producto al carrito; si ya existe, incrementa la cantidad
       addItem: (product, quantity = 1) => {
         const existing = get().items.find((i) => i.product.id === product.id);
+
+        trackMetaEvent('AddToCart', {
+          content_ids: [product.id],
+          content_type: 'product',
+          value: (product.salePrice ?? product.price) * quantity,
+          currency: 'ARS',
+          contents: [{ id: product.id, quantity, item_price: product.salePrice ?? product.price }],
+        });
+
         if (existing) {
           set((state) => ({
             items: state.items.map((i) =>

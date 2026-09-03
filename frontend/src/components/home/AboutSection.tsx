@@ -1,4 +1,4 @@
-import { AboutSection as AboutData } from '@/types';
+﻿import { AboutSection as AboutData } from '@/types';
 import { getImageUrl } from '@/lib/utils';
 import { Heart, Users, Shield, Star, Award, Zap, CheckCircle, Truck } from 'lucide-react';
 import { createElement } from 'react';
@@ -27,7 +27,7 @@ export default function AboutSection({ data }: Props) {
   const hasAnyDescription = benefits.some((b) => b.description && b.description.trim().length > 0);
 
   return (
-    <section className="section-gradient relative bg-[#061E29] overflow-hidden py-16 md:py-20">
+    <section className="section-gradient relative bg-[#061E29] overflow-hidden py-8 sm:py-12 md:py-20">
       {bgImage ? (
         <>
           <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: 'url(' + bgImage + ')' }} />
@@ -36,12 +36,12 @@ export default function AboutSection({ data }: Props) {
       ) : (
         <div className="absolute inset-0 bg-[#061E29]" />
       )}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="max-w-2xl">
-          <h2 className="text-2xl md:text-3xl font-semibold uppercase tracking-tight text-[#F7F6F7] mb-4">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-2xl mx-auto md:mx-0">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold uppercase tracking-tight text-[#F7F6F7] mb-4 text-center md:text-left">
             {d.title}
           </h2>
-          <p className="text-[#C7C7C0] text-sm md:text-base leading-relaxed mb-8">{d.description}</p>
+          <p className="text-[#C7C7C0] text-sm md:text-base leading-relaxed mb-6 sm:mb-8 text-justify">{d.description}</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {benefits.map((b, i) => {
               const IconComp = ICON_MAP[b.icon] || Truck;

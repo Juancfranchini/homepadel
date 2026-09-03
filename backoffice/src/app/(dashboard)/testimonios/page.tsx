@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
@@ -12,7 +12,6 @@ import { useToast } from '@/components/ui/Toast';
 import SearchBar from './components/SearchBar';
 import Toggle from './components/Toggle';
 import AdvancedSearchModal, { AdvancedFilters } from './components/AdvancedSearchModal';
-import Pagination from '@/components/ui/Pagination';
 
 interface Testimonial {
   id: string;
@@ -69,11 +68,23 @@ export default function TestimoniosPage() {
   const [sortField, setSortField] = useState<string>('createdAt');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
+  const [pageSize, setPageSize] = useState(10);
+  const [isMobile, setIsMobile] = useState(false);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      setPageSize(mobile ? 3 : 10);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -179,93 +190,168 @@ export default function TestimoniosPage() {
     return sortDir === 'asc' ? String(aVal).localeCompare(String(bVal)) : String(bVal).localeCompare(String(aVal));
   });
 
-  const totalPages = Math.ceil(sorted.length / pageSize);
-  const páginated = sorted.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const paginated = sorted.slice((safeCurrentPage - 1) * pageSize, safeCurrentPage * pageSize);
 
   if (loading) return <PageLoader />;
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Testimonios</h1>
-          <p className="text-gray-500 text-sm mt-0.5">{testimonials.length} registros</p>
+          <p className="text-gray-500 text-sm mt-0.5">{filtered.length} registros</p>
         </div>
-        <div className="flex items-center gap-2">
-          <SearchBar value={search} onChange={setSearch} onAdvancedSearch={() => setAdvancedOpen(true)} hasAdvancedFilters={advancedFilters !== null} onClearFilters={() => { setAdvancedFilters(null); setAdvancedOpen(false); }} />
-          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] transition-colors">
-            <Plus className="w-4 h-4" />Nuevo testimonio
+        <div className="flex items-center gap-2 w-full lg:w-auto lg:flex-1 lg:max-w-2xl lg:justify-end">
+          <div className="flex-1 min-w-0">
+            <SearchBar value={search} onChange={setSearch} onAdvancedSearch={() => setAdvancedOpen(true)} hasAdvancedFilters={advancedFilters !== null} onClearFilters={() => { setAdvancedFilters(null); setAdvancedOpen(false); setCurrentPage(1); }} />
+          </div>
+          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] transition-colors shrink-0">
+            <Plus className="w-4 h-4" />Nuevo
           </button>
         </div>
       </div>
 
-      {páginated.length === 0 ? (
+      {paginated.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 py-20 text-center">
           <p className="text-gray-400 text-sm">No se encontraron testimonios</p>
         </div>
       ) : (
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-100">
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Foto</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Nombre</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Creado{sortIcon('createdAt')}</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Modificado{sortIcon('updatedAt')}</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Puntuación{sortIcon('rating')}</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {páginated.map((t) => (
-                <tr key={t.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3">
+        <>
+          {/* Tabla desktop */}
+          <div className="hidden md:block bg-white border border-gray-200 rounded-xl overflow-hidden overflow-x-auto">
+            <table className="w-full min-w-[700px]">
+              <thead>
+                <tr className="border-b border-gray-100">
+                  <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-16">#</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Foto</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Nombre</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Comentario</th>
+                  <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Puntuacion{sortIcon('rating')}</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Creado{sortIcon('createdAt')}</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Modificado{sortIcon('updatedAt')}</th>
+                  <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
+                  <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginated.map((t) => (
+                  <tr key={t.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                    <td className="px-4 py-3 text-center text-sm text-gray-400">{t.order}</td>
+                    <td className="px-4 py-3">
+                      {t.photo ? (
+                        <img src={t.photo} alt={t.name} className="w-9 h-9 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-9 h-9 rounded-full bg-[#C8FF00]/10 border border-[#C8FF00]/20 flex items-center justify-center">
+                          <span className="text-[#C8FF00] font-bold text-xs">{t.name.slice(0, 2).toUpperCase()}</span>
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <p className="text-gray-900 font-medium text-sm">{t.name}</p>
+                    </td>
+                    <td className="px-4 py-3">
+                      <p className="text-gray-500 text-sm max-w-xs truncate">{t.comment}</p>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex justify-center"><StarRating rating={t.rating} /></div>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{formatDate(t.createdAt)}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{formatDate(t.updatedAt)}</td>
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <Toggle checked={t.active} onChange={() => toggleActive(t)} />
+                        <span className={'text-xs font-medium ' + (t.active ? 'text-green-600' : 'text-gray-400')}>
+                          {t.active ? 'Activo' : 'Inactivo'}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-center gap-1">
+                        <button onClick={() => openEdit(t)} className="p-1.5 rounded-lg text-[#C8FF00] hover:bg-[#C8FF00]/10 transition-colors" title="Editar">
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => setDeleteTarget(t)} className="p-1.5 rounded-lg text-red-400 hover:bg-red-400/10 transition-colors" title="Eliminar">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => setDetailItem(t)} className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors" title="Ver detalle">
+                          <ArrowRight className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Cards mobile */}
+          <div className="md:hidden space-y-3">
+            {paginated.map((t) => (
+              <div key={t.id} className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
                     {t.photo ? (
-                      <img src={t.photo} alt={t.name} className="w-9 h-9 rounded-full object-cover" />
+                      <img src={t.photo} alt={t.name} className="w-10 h-10 rounded-full object-cover" />
                     ) : (
-                      <div className="w-9 h-9 rounded-full bg-[#C8FF00]/10 border border-[#C8FF00]/20 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-full bg-[#C8FF00]/10 border border-[#C8FF00]/20 flex items-center justify-center">
                         <span className="text-[#C8FF00] font-bold text-xs">{t.name.slice(0, 2).toUpperCase()}</span>
                       </div>
                     )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <p className="text-gray-900 font-medium text-sm">{t.name}</p>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-500 hidden md:table-cell">{formatDate(t.createdAt)}</td>
-                  <td className="px-4 py-3 text-sm text-gray-500 hidden md:table-cell">{formatDate(t.updatedAt)}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex justify-center"><StarRating rating={t.rating} /></div>
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      <Toggle checked={t.active} onChange={() => toggleActive(t)} />
-                      <span className={'text-xs font-medium ' + (t.active ? 'text-green-600' : 'text-gray-400')}>
-                        {t.active ? 'Activo' : 'Inactivo'}
-                      </span>
+                    <div>
+                      <p className="text-gray-900 font-medium text-sm">{t.name}</p>
+                      <p className="text-xs text-gray-400">#{t.order}</p>
                     </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-center gap-1">
-                      <button onClick={() => openEdit(t)} className="p-1.5 rounded-lg text-[#C8FF00] hover:bg-[#C8FF00]/10 transition-colors" title="Editar">
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => setDeleteTarget(t)} className="p-1.5 rounded-lg text-red-400 hover:bg-red-400/10 transition-colors" title="Eliminar">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => setDetailItem(t)} className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors" title="Ver detalle">
-                        <ArrowRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+                  </div>
+                  <Toggle checked={t.active} onChange={() => toggleActive(t)} />
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-gray-600 text-sm italic">{'"' + t.comment + '"'}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                  <div>
+                    <p className="text-xs text-gray-400">Puntuacion</p>
+                    <div className="mt-0.5"><StarRating rating={t.rating} /></div>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Estado</p>
+                    <p className={'text-sm font-medium ' + (t.active ? 'text-green-600' : 'text-gray-400')}>{t.active ? 'Activo' : 'Inactivo'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Creado</p>
+                    <p className="text-sm text-gray-900">{formatDate(t.createdAt)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Modificado</p>
+                    <p className="text-sm text-gray-900">{formatDate(t.updatedAt)}</p>
+                  </div>
+                </div>
+                <div className="border-t pt-2 flex justify-end gap-2">
+                  <button onClick={() => openEdit(t)} className="p-1.5 rounded-lg text-[#C8FF00] hover:bg-[#C8FF00]/10 transition-colors" title="Editar">
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => setDeleteTarget(t)} className="p-1.5 rounded-lg text-red-400 hover:bg-red-400/10 transition-colors" title="Eliminar">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => setDetailItem(t)} className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors" title="Ver detalle">
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
 
-      <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+          {/* Paginacion */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2">
+              <button onClick={() => setCurrentPage(Math.max(1, safeCurrentPage - 1))} disabled={safeCurrentPage === 1} className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40">Anterior</button>
+              <span className="text-sm text-gray-500">Pagina {safeCurrentPage} de {totalPages}</span>
+              <button onClick={() => setCurrentPage(Math.min(totalPages, safeCurrentPage + 1))} disabled={safeCurrentPage === totalPages} className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40">Siguiente</button>
+            </div>
+          )}
+        </>
+      )}
 
       {modalOpen && (
         <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editItem ? 'Editar testimonio' : 'Nuevo testimonio'} size="sm">
@@ -281,7 +367,7 @@ export default function TestimoniosPage() {
               {errors.comment && <p className="text-xs text-red-600 mt-1">{errors.comment.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Puntuación</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Puntuacion</label>
               <select {...register('rating')} className={inputClass + ' pr-10'}>
                 {[5, 4, 3, 2, 1].map(r => (<option key={r} value={r}>{r} estrella{r > 1 ? 's' : ''}</option>))}
               </select>
@@ -309,13 +395,8 @@ export default function TestimoniosPage() {
       )}
 
       {detailItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setDetailItem(null)} />
-          <div className="relative z-10 bg-white border border-gray-200 rounded-2xl p-6 w-full max-w-md mx-4 flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Detalle del testimonio</h3>
-              <button onClick={() => setDetailItem(null)} className="text-gray-400 hover:text-gray-900"><X className="w-5 h-5" /></button>
-            </div>
+        <Modal isOpen={!!detailItem} onClose={() => setDetailItem(null)} title="Detalle del testimonio" size="sm">
+          <div className="space-y-4">
             <div className="flex items-center gap-3">
               {detailItem.photo ? (
                 <img src={detailItem.photo} alt={detailItem.name} className="w-12 h-12 rounded-full object-cover border-2 border-[#C8FF00]/30" />
@@ -326,19 +407,41 @@ export default function TestimoniosPage() {
               )}
               <div>
                 <p className="text-gray-900 font-semibold text-sm">{detailItem.name}</p>
-                <StarRating rating={detailItem.rating} />
+                <div className="mt-0.5"><StarRating rating={detailItem.rating} /></div>
               </div>
             </div>
-            <p className="text-gray-600 text-sm leading-relaxed italic">{'"' + detailItem.comment + '"'}</p>
-            <div className="flex justify-between text-xs text-gray-400 border-t border-gray-100 pt-3">
-              <span>Creado: {formatDate(detailItem.createdAt)}</span>
-              <span>Modificado: {formatDate(detailItem.updatedAt)}</span>
+            <div className="bg-gray-50 rounded-lg p-4">
+              <p className="text-gray-600 text-sm leading-relaxed italic">{'"' + detailItem.comment + '"'}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-4 text-xs">
+              <div>
+                <p className="text-gray-400">Orden</p>
+                <p className="text-gray-900 text-sm">{detailItem.order}</p>
+              </div>
+              <div>
+                <p className="text-gray-400">Estado</p>
+                <p className={'text-sm font-medium ' + (detailItem.active ? 'text-green-600' : 'text-gray-400')}>{detailItem.active ? 'Activo' : 'Inactivo'}</p>
+              </div>
+              <div>
+                <p className="text-gray-400">Creado</p>
+                <p className="text-gray-900 text-sm">{formatDate(detailItem.createdAt)}</p>
+              </div>
+              <div>
+                <p className="text-gray-400">Modificado</p>
+                <p className="text-gray-900 text-sm">{formatDate(detailItem.updatedAt)}</p>
+              </div>
             </div>
           </div>
-        </div>
+        </Modal>
       )}
 
-      <AdvancedSearchModal isOpen={advancedOpen} onClose={() => setAdvancedOpen(false)} onApply={(filters) => { setAdvancedFilters(filters); setAdvancedOpen(false); }} />
+      {advancedOpen && (
+        <AdvancedSearchModal
+          isOpen={advancedOpen}
+          onClose={() => setAdvancedOpen(false)}
+          onApply={(filters) => { setAdvancedFilters(filters); setAdvancedOpen(false); setCurrentPage(1); }}
+        />
+      )}
 
       <ConfirmDialog
         isOpen={!!deleteTarget}

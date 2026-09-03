@@ -1,6 +1,7 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
+import { trackMetaEvent } from '@/lib/metaPixel';
 import { useState, useEffect } from 'react';
 import { Plus, X, MessageCircle } from 'lucide-react';
 
@@ -119,7 +120,7 @@ export default function FaqPage() {
           <p className="text-[#C7C7C0] text-sm mb-6">Nuestro equipo esta disponible de Lunes a Viernes de 9 a 18 hs.</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <a
-              href="https://wa.me/5491131813297"
+              href="https://wa.me/5491131813297" onClick={() => trackMetaEvent("Contact", { content_type: "whatsapp" })}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-6 py-3 bg-[#B7D31A] text-[#050606] font-semibold text-sm rounded-xl hover:bg-[#CAE52E] transition-colors"

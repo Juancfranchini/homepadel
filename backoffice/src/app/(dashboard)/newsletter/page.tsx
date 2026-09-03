@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { Mail, Trash2 } from 'lucide-react';
@@ -16,6 +16,9 @@ interface Subscriber {
 export default function NewsletterPage() {
   const { toast } = useToast();
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isMobile, setIsMobile] = useState(false);
+  const pageSize = isMobile ? 3 : 10;
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
@@ -28,6 +31,15 @@ export default function NewsletterPage() {
 
   useEffect(() => { load(); }, [load]);
 
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => { setCurrentPage(1); }, [isMobile]);
+
   const handleUnsubscribe = async (email: string) => {
     try {
       await api.post('/newsletter/unsubscribe', { email });
@@ -35,6 +47,9 @@ export default function NewsletterPage() {
       load();
     } catch { toast('Error', 'error'); }
   };
+
+  const totalPages = Math.ceil(subscribers.length / pageSize);
+  const paginated = subscribers.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   if (loading) return <PageLoader />;
 
@@ -51,8 +66,11 @@ export default function NewsletterPage() {
           <p className="text-gray-400 text-sm">No hay suscriptores todavia</p>
         </div>
       ) : (
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-          <table className="w-full">
+        <>
+          {/* Tabla desktop */}
+          <div className="hidden md:block bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[600px]">
             <thead><tr className="border-b border-gray-100">
               <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
               <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
@@ -60,7 +78,7 @@ export default function NewsletterPage() {
               <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
             </tr></thead>
             <tbody>
-              {subscribers.map((s) => (
+              {paginated.map((s) => (
                 <tr key={s.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3 flex items-center gap-2">
                     <Mail className="w-4 h-4 text-gray-400" />
@@ -81,10 +99,46 @@ export default function NewsletterPage() {
                   </td>
                 </tr>
               ))}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+            </div>
+          </div>
+
+          {/* Cards mobile */}
+          <div className="md:hidden space-y-3">
+            {paginated.map((s) => (
+              <div key={s.id} className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-gray-400" />
+                  <span className="text-sm text-gray-900 truncate">{s.email}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className={'text-xs font-medium px-2 py-1 rounded-full ' + (s.active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700')}>
+                    {s.active ? 'Activo' : 'Inactivo'}
+                  </span>
+                  <span className="text-xs text-gray-500">{new Date(s.createdAt).toLocaleDateString('es-AR')}</span>
+                </div>
+                {s.active && (
+                  <div className="flex justify-end pt-2 border-t border-gray-100">
+                    <button onClick={() => handleUnsubscribe(s.email)} className="p-1.5 rounded-lg text-red-400 hover:bg-red-50 transition-colors" title="Desuscribir">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          {Array.from({ length: totalPages }).map((_, i) => (
+            <button key={i} onClick={() => setCurrentPage(i + 1)} className={'w-8 h-8 rounded-lg text-sm font-medium ' + (i + 1 === currentPage ? 'bg-[#C8FF00] text-[#0f172a]' : 'text-gray-500 hover:bg-gray-50')}>{i + 1}</button>
+          ))}
         </div>
       )}
     </div>
   );
 }
+

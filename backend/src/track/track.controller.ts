@@ -8,7 +8,7 @@ export class TrackController {
   @Post()
   async track(@Body() body: any, @Req() req: any) {
     try {
-      const { eventName, eventId, eventSourceUrl, pixelId } = body;
+      const { eventName, eventId, eventSourceUrl, pixelId, eventData, customData } = body;
 
       if (!pixelId) return { success: false, message: 'pixelId requerido' };
 
@@ -36,6 +36,8 @@ export class TrackController {
             client_ip_address: clientIp || undefined,
             client_user_agent: clientUserAgent || undefined,
           },
+          ...(eventData || {}),
+          ...(customData ? { custom_data: customData } : {}),
         }],
       };
 

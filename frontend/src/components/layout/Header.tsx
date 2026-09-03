@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
@@ -83,10 +83,15 @@ export default function Header() {
   return (
     <>
       <header className="w-full sticky top-0 z-50 bg-[#050606] border-b border-[#0D0F0F]">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-2.5 flex items-center justify-between gap-4">
-          <Link href="/" className="flex-shrink-0">
-            <BrandLogo variant="light" size="lg" showText={!branding.logoHeader} imageUrl={(isMobile ? (branding.logoMobile || branding.logoHeader) : branding.logoHeader) || undefined}  />
-          </Link>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-2 sm:gap-4">
+          <div className="flex items-center gap-3 lg:gap-0">
+            <button className="lg:hidden text-[#C7C7C0] hover:text-[#F7F6F7]" onClick={() => setOpen(!open)} aria-label="Menu">
+              {open ? <X size={20} /> : <Menu size={20} />}
+            </button>
+            <Link href="/" className="flex-shrink-0">
+              <BrandLogo variant="light" size="xl" showText={!branding.logoHeader} imageUrl={(isMobile ? (branding.logoMobile || branding.logoHeader) : branding.logoHeader) || undefined}  />
+            </Link>
+          </div>
 
           <nav className="hidden lg:flex items-center gap-1">
             {NAV_LINKS.map((link) => {
@@ -102,14 +107,14 @@ export default function Header() {
             })}
           </nav>
 
-          <div className="flex items-center gap-4 flex-shrink-0">
+          <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
             {user ? (
               <Link href="/cuenta" className="hidden sm:flex items-center gap-2 text-[#C7C7C0] hover:text-[#F7F6F7] border border-[#B7D31A]/30 rounded-full px-3 py-1.5 transition-colors" aria-label="Mi cuenta">
                 <User size={18} />
                 <span className="text-xs font-semibold truncate max-w-[120px]">{user.name}</span>
               </Link>
             ) : (
-              <Link href="/cuenta" className="hidden sm:flex items-center gap-2 bg-[#B7D31A] text-[#050606] rounded-full px-4 py-1.5 font-bold text-xs uppercase tracking-wide transition-colors hover:bg-[#CAE52E]">
+              <Link href="/cuenta" className="flex items-center gap-2 bg-[#B7D31A] text-[#050606] rounded-full px-3 sm:px-4 py-1.5 font-bold text-xs uppercase tracking-wide transition-colors hover:bg-[#CAE52E]">
                 Login
               </Link>
             )}
@@ -120,9 +125,6 @@ export default function Header() {
                   {totalItems() > 9 ? '9+' : totalItems()}
                 </span>
               )}
-            </button>
-            <button className="lg:hidden text-[#C7C7C0] hover:text-[#F7F6F7]" onClick={() => setOpen(!open)} aria-label="Menu">
-              {open ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>

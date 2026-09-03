@@ -1,11 +1,11 @@
-import { IsString, IsNumber, IsOptional, IsBoolean, IsArray, Min, Max, IsUrl } from 'class-validator';
+﻿import { IsString, IsNumber, IsOptional, IsBoolean, IsArray, Min, Max, IsUrl } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateProductDto {
   @ApiProperty()             @IsString()                          name: string;
   @ApiPropertyOptional()    @IsString()  @IsOptional()           description?: string;
   @ApiProperty()             @IsNumber() @Min(0)                  price: number;
-  @ApiPropertyOptional()    @IsNumber()  @IsOptional()            salePrice?: number;
+  @ApiPropertyOptional()    @IsOptional()            salePrice?: number | null;
   @ApiProperty()             @IsString()                          sku: string;
   @ApiProperty()             @IsNumber() @Min(0)                  stock: number;
   @ApiPropertyOptional({ type: [String] }) @IsArray() @IsOptional() images?: string[];

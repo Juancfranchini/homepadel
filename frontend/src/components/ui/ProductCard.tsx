@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -16,7 +16,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
   const [adding, setAdding] = useState(false);
 
   const isMadeToOrder = product.isMadeToOrder === true;
-  const hasDiscount = !isMadeToOrder && product.salePrice !== undefined && product.salePrice < product.price;
+  const hasDiscount = !isMadeToOrder && product.salePrice !== undefined && product.salePrice > 0 && product.salePrice < product.price;
   const discountPct = hasDiscount ? getDiscountPercent(product.price, product.salePrice!) : 0;
 
   const initials = product.name
@@ -115,7 +115,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
         {/* Cuotas - solo para regulares */}
         {!isMadeToOrder && (
           <p className="text-[10px] font-semibold text-[#B7D31A]">
-            6 x {formatPrice(Math.ceil((product.salePrice ?? product.price) / 6))} sin interes
+            {product.installments || 6} x {formatPrice(Math.ceil((product.salePrice && product.salePrice > 0 ? product.salePrice : product.price) / (product.installments || 6)))} sin interes
           </p>
         )}
 

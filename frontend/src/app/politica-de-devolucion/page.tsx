@@ -1,16 +1,23 @@
+﻿'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { trackMetaEvent } from '@/lib/metaPixel';
 import { RefreshCw, Package, Shield, Check, X, MessageCircle, Mail, ArrowRight } from 'lucide-react';
 import { getSiteSection } from '@/lib/api';
 
-export const dynamic = 'force-dynamic';
+export default function PoliticaDevoluciónPage() {
+  const [data, setData] = useState<any>({});
 
-export default async function PoliticaDevoluciónPage() {
-  let data: any = {};
-
-  try {
-    const res = await getSiteSection('politica_devolución');
-    data = res?.data || {};
-  } catch {}
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await getSiteSection('politica_devolución');
+        setData(res?.data || {});
+      } catch {}
+    };
+    load();
+  }, []);
 
   const hero = {
     chip: data.chip || 'DEVOLUCIONES Y CAMBIOS',
@@ -187,7 +194,7 @@ export default async function PoliticaDevoluciónPage() {
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-              <a href={'https://wa.me/' + help.whatsapp} target="_blank" rel="noopener noreferrer" className="btn-primary-glow bg-[#B7D31A] text-[#050606] px-6 py-3 rounded-xl font-semibold text-sm uppercase tracking-wider inline-flex items-center gap-2 hover:bg-[#CAE52E] transition-colors whitespace-nowrap"><MessageCircle size={16} />WHATSAPP</a>
+              <a href={'https://wa.me/' + help.whatsapp} onClick={() => trackMetaEvent('Contact', { content_type: 'whatsapp' })} target="_blank" rel="noopener noreferrer" className="btn-primary-glow bg-[#B7D31A] text-[#050606] px-6 py-3 rounded-xl font-semibold text-sm uppercase tracking-wider inline-flex items-center gap-2 hover:bg-[#CAE52E] transition-colors whitespace-nowrap"><MessageCircle size={16} />WHATSAPP</a>
               <a href={'mailto:' + help.email} className="bg-[#0A2D3D] text-[#F7F6F7] px-6 py-3 rounded-xl font-semibold text-sm uppercase tracking-wider inline-flex items-center gap-2 hover:bg-[#0D3D52] transition-colors whitespace-nowrap"><Mail size={16} />ENVIAR EMAIL</a>
             </div>
           </div>

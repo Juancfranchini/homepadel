@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -7,6 +7,7 @@ import { Ruler } from 'lucide-react';
 import { getProduct, getProducts } from '@/lib/api';
 import { Product } from '@/types';
 import { formatPrice, getDiscountPercent } from '@/lib/utils';
+import { trackMetaEvent } from '@/lib/metaPixel';
 import { useCartStore } from '@/store/cartStore';
 import ProductGallery from './components/ProductGallery';
 import ProductInfo from './components/ProductInfo';
@@ -67,6 +68,18 @@ export default function ProductoPage() {
       })
       .finally(() => setLoading(false));
   }, [params.slug]);
+
+  useEffect(() => {
+    if (product) {
+      trackMetaEvent('ViewContent', {
+        content_ids: [product.id],
+        content_type: 'product',
+        content_name: product.name,
+        value: product.salePrice ?? product.price,
+        currency: 'ARS',
+      });
+    }
+  }, [product]);
 
   const handleAddToCart = () => { if (!product) return; addItem(product, quantity); setAdded(true); setTimeout(() => setAdded(false), 1500); };
   const handleBuyNow = () => { if (!product) return; addItem(product, quantity); router.push('/carrito'); };
@@ -130,7 +143,7 @@ export default function ProductoPage() {
       )}
 
       <div className="border-b border-[#0D0F0F]">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-2.5 flex items-center gap-1.5 text-[11px] text-[#8A8A85]">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-2.5 flex items-center gap-1.5 text-[10px] sm:text-[11px] text-[#8A8A85]">
           <Link href="/" className="hover:text-[#F7F6F7] transition-colors">Inicio</Link><span>/</span>
           <Link href="/catalogo" className="hover:text-[#F7F6F7] transition-colors">Catálogo</Link><span>/</span>
           <Link href={'/catalogo?marca=' + product.brand.slug} className="hover:text-[#F7F6F7] transition-colors">{product.brand.name}</Link><span>/</span>
@@ -138,11 +151,11 @@ export default function ProductoPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8 lg:py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 xl:gap-16">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 lg:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 xl:gap-16">
           <ProductGallery images={images} productName={product.name} hasDiscount={hasDiscount} discountPct={discountPct} isNew={product.isNew || false} />
 
-          <div className="flex flex-col gap-5 bg-[#0C0C0C] rounded-2xl p-6 border border-[#0D0F0F]">
+          <div className="flex flex-col gap-4 sm:gap-5 bg-[#0C0C0C] rounded-xl sm:rounded-2xl p-3 sm:p-6 border border-[#0D0F0F]">
             <ProductInfo brandName={product.brand.name} brandSlug={product.brand.slug} productName={product.name} />
             <ProductStars rating={product.rating || 0} count={product.reviewCount || 0} />
             <ProductPrice displayPrice={displayPrice} transferPrice={transferPrice} hasDiscount={hasDiscount} originalPrice={product.price} cuota={cuota} installments={installments} hasInstallmentsInterest={hasInstallmentsInterest} installmentsInterest={installmentsInterest} paymentMethods={paymentMethods} onShowPaymentModal={() => setShowPaymentModal(true)} isMadeToOrder={product.isMadeToOrder} estimatedDays={product.estimatedDays} requiredDeposit={product.requiredDeposit} />
@@ -162,8 +175,8 @@ export default function ProductoPage() {
       
 
       {showVideo && showHighlights && (embedUrl || relatedVideos.length > 0) && highlights.length > 0 ? (
-        <section className="border-t border-[#0D0F0F] py-6">
-          <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <section className="border-t border-[#0D0F0F] py-4 sm:py-6">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
               <VideoSection embedUrl={embedUrl} />
               <div className="flex flex-col h-full">
@@ -179,8 +192,8 @@ export default function ProductoPage() {
           </div>
         </section>
       ) : showVideo && (embedUrl || relatedVideos.length > 0) ? (
-        <section className="border-t border-[#0D0F0F] py-6">
-          <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <section className="border-t border-[#0D0F0F] py-4 sm:py-6">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
             {embedUrl && relatedVideos.length > 0 ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                 <VideoSection embedUrl={embedUrl} />
@@ -202,8 +215,8 @@ export default function ProductoPage() {
           </div>
         </section>
       ) : !showVideo && showHighlights && highlights.length > 0 ? (
-        <section className="border-t border-[#0D0F0F] py-6">
-          <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <section className="border-t border-[#0D0F0F] py-4 sm:py-6">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
             <HighlightsSection highlights={highlights} highlightsTitle={highlightsTitle} highlightsDescription={highlightsDescription} />
           </div>
         </section>
@@ -213,8 +226,8 @@ export default function ProductoPage() {
       {showCompare && <CompareModels data={compareData} />}
 
       {(product.reviewCount || 0) > 0 && (
-        <section className="border-t border-[#0D0F0F] py-6">
-          <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <section className="border-t border-[#0D0F0F] py-4 sm:py-6">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
             <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-tight text-[#F7F6F7] mb-6">
               LO QUE DICEN NUESTROS CLIENTES
             </h2>

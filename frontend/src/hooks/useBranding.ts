@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 
@@ -9,6 +9,13 @@ interface Branding {
   logoMobile: string | null;
   logoLogin: string | null;
   loaded: boolean;
+}
+
+function getImageUrl(baseUrl: string, path: string | null | undefined): string | null {
+  if (!path) return null;
+  if (path.startsWith('data:')) return path;
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  return baseUrl + path;
 }
 
 export function useBranding() {
@@ -29,11 +36,11 @@ export function useBranding() {
       .then(data => {
         const b = data?.data || data || {};
         setBranding({
-          logoHeader: b.logoHeader ? baseUrl + b.logoHeader : null,
-          logoFooter: b.logoFooter ? baseUrl + b.logoFooter : null,
-          isotipo: b.isotipo ? baseUrl + b.isotipo : null,
-          logoMobile: b.logoMobile ? baseUrl + b.logoMobile : null,
-          logoLogin: b.logoLogin ? baseUrl + b.logoLogin : null,
+          logoHeader: getImageUrl(baseUrl, b.logoHeader),
+          logoFooter: getImageUrl(baseUrl, b.logoFooter),
+          isotipo: getImageUrl(baseUrl, b.isotipo),
+          logoMobile: getImageUrl(baseUrl, b.logoMobile),
+          logoLogin: getImageUrl(baseUrl, b.logoLogin),
           loaded: true,
         });
       })
