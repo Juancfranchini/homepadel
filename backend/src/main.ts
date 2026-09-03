@@ -23,8 +23,10 @@ async function bootstrap() {
     prefix: '/uploads/',
   });
 
-  // Seguridad HTTP headers
-  app.use(helmet());
+  // Seguridad HTTP headers - F5: cross-origin para permitir imágenes desde Vercel
+  app.use(helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  }));
 
   // Aumentar límite de body para imágenes base64 (50MB)
   app.use(json({ limit: '50mb' }));
