@@ -107,7 +107,7 @@ export default function Header() {
             })}
           </nav>
 
-          <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+          <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
             {user ? (
               <Link href="/cuenta" className="hidden sm:flex items-center gap-2 text-[#C7C7C0] hover:text-[#F7F6F7] border border-[#B7D31A]/30 rounded-full px-3 py-1.5 transition-colors" aria-label="Mi cuenta">
                 <User size={18} />
