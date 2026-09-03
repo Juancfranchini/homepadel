@@ -54,6 +54,16 @@ function sectionData<T>(raw: unknown): T | null {
 }
 
 async function fetchAll() {
+  // Helper para hacer llamadas en lotes y evitar saturar el pool de conexiones
+  const batch = async <T,>(items: (() => Promise<T>)[], size = 5): Promise<PromiseSettledResult<T>[]> => {
+    const results: PromiseSettledResult<T>[] = [];
+    for (let i = 0; i < items.length; i += size) {
+      const batchItems = items.slice(i, i + size);
+      const batchResults = await Promise.allSettled(batchItems.map(fn => fn()));
+      results.push(...batchResults);
+    }
+    return results;
+  };
   const [
     slidesRes,
     benefitsRes,
@@ -75,27 +85,27 @@ async function fetchAll() {
     instagramRes,
     finalMsgRes,
     categoriesSectionRes,
-  ] = await Promise.allSettled([
-    getHeroSlides(),
-    getBenefits(),
-    getBestSellers(),
-    getFeaturedProducts(),
-    getCategories(),
-    getBrands(),
-    getBanners(),
-    getTestimonials(),
-    getPromotions(),
-    getSiteSection('hero'),
-    getSiteSection('benefits'),
-    getSiteSection('promo_destacada'),
-    getSiteSection('featured_products'),
-    getSiteSection('banners'),
-    getSiteSection('about'),
-    getSiteSection('testimonials'),
-    getSiteSection('brands'),
-    getSiteSection('instagram'),
-    getSiteSection('final_message'),
-    getSiteSection('categories'),
+  ] = await batch([
+    () => getHeroSlides(),
+    () => getBenefits(),
+    () => getBestSellers(),
+    () => getFeaturedProducts(),
+    () => getCategories(),
+    () => getBrands(),
+    () => getBanners(),
+    () => getTestimonials(),
+    () => getPromotions(),
+    () => getSiteSection('hero'),
+    () => getSiteSection('benefits'),
+    () => getSiteSection('promo_destacada'),
+    () => getSiteSection('featured_products'),
+    () => getSiteSection('banners'),
+    () => getSiteSection('about'),
+    () => getSiteSection('testimonials'),
+    () => getSiteSection('brands'),
+    () => getSiteSection('instagram'),
+    () => getSiteSection('final_message'),
+    () => getSiteSection('categories'),
   ]);
 
   const val = (r: PromiseSettledResult<unknown>) =>
