@@ -7,6 +7,7 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { ValidationPipe } from '@nestjs/common';
+import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { json, urlencoded } from 'express';
@@ -57,6 +58,9 @@ async function bootstrap() {
         },
     credentials: true,
   });
+
+  // Filtro global de errores de Prisma (R4)
+  app.useGlobalFilters(new PrismaExceptionFilter());
 
   // Validación global de DTOs
   app.useGlobalPipes(

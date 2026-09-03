@@ -1,17 +1,23 @@
-﻿import Link from 'next/link';
+﻿'use client';
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { trackMetaEvent } from '@/lib/metaPixel';
 import { RefreshCw, Package, Shield, Check, X, MessageCircle, Mail, ArrowRight } from 'lucide-react';
 import { getSiteSection } from '@/lib/api';
 
-export const dynamic = 'force-dynamic';
+export default function PoliticaDevoluciónPage() {
+  const [data, setData] = useState<any>({});
 
-export default async function PoliticaDevoluciónPage() {
-  let data: any = {};
-
-  try {
-    const res = await getSiteSection('politica_devolución');
-    data = res?.data || {};
-  } catch {}
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await getSiteSection('politica_devolución');
+        setData(res?.data || {});
+      } catch {}
+    };
+    load();
+  }, []);
 
   const hero = {
     chip: data.chip || 'DEVOLUCIONES Y CAMBIOS',
