@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req } from '@nestjs/common';
+﻿import { Controller, Post, Body, Req, Headers } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { PaymentsService } from './payments.service';
 
@@ -18,9 +18,14 @@ export class PaymentsController {
   }
 
   @Post('webhook')
-  async webhook(@Req() req: any, @Body() body: any) {
+  async webhook(
+    @Req() req: any,
+    @Body() body: any,
+    @Headers('x-signature') signature?: string,
+    @Headers('x-request-id') xRequestId?: string,
+  ) {
     console.log('Webhook MP:', JSON.stringify(body));
-    await this.paymentsService.handleWebhook(body);
+    await this.paymentsService.handleWebhook(body, signature || '', xRequestId || '');
     return { status: 'ok' };
   }
 }
