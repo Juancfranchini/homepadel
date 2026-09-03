@@ -15,6 +15,7 @@ import PlantillasTab from './components/PlantillasTab';
 import CampanasTab from './components/CampanasTab';
 import MetaPixelTab from './components/MetaPixelTab';
 import HomeSectionsTab from './components/HomeSectionsTab';
+import CloudinaryTab from './components/CloudinaryTab';
 
 const generalSchema = z.object({
   storeName: z.string().min(2, 'El nombre de la tienda es requerido'),
@@ -30,7 +31,7 @@ const generalSchema = z.object({
 });
 type GeneralForm = z.infer<typeof generalSchema>;
 
-type Tab = 'general' | 'home_sections' | 'meta_pixel' | 'seguridad' | 'notificaciones' | 'emails';
+type Tab = 'general' | 'home_sections' | 'meta_pixel' | 'seguridad' | 'notificaciones' | 'emails' | 'cloudinary';
 
 const TABS = [
   { id: 'general' as Tab, label: 'General', icon: Store },
@@ -257,6 +258,14 @@ export default function ConfiguracionPage() {
 
         {activeTab === 'notificaciones' && (
           <NotificacionesTab notifs={notifs} setNotifs={setNotifs} onSave={handleSaveNotifs} />
+        )}
+
+        {activeTab === 'cloudinary' && (
+          <CloudinaryTab />
+        )}
+
+        {activeTab === 'cloudinary' && (
+          <CloudinaryTab />
         )}
 
         {activeTab === 'emails' && (
