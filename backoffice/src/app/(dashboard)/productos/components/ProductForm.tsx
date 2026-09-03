@@ -26,7 +26,11 @@ const schema = z.object({
     const num = Number(val);
     return isNaN(num) ? undefined : num;
   }),
-  transferPrice: z.coerce.number().optional(),
+  transferPrice: z.string().optional().transform((val) => {
+    if (val === "" || val === undefined || val === null) return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }),
   stock: z.coerce.number().int().min(0).default(0),
   active: z.boolean().default(true),
   featured: z.boolean().default(false),
@@ -35,13 +39,33 @@ const schema = z.object({
   categoryId: z.string().min(1, 'Categoria requerida'),
   brandId: z.string().min(1, 'Marca requerida'),
   images: z.array(z.string()).optional(),
-  discountPercentage: z.coerce.number().min(0).max(100).optional(),
-  installments: z.coerce.number().int().min(0).max(12).optional(),
-  installmentsInterest: z.coerce.number().min(0).optional(),
+  discountPercentage: z.string().optional().transform((val) => {
+    if (val === "" || val === undefined || val === null) return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }),
+  installments: z.string().optional().transform((val) => {
+    if (val === "" || val === undefined || val === null) return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }),
+  installmentsInterest: z.string().optional().transform((val) => {
+    if (val === "" || val === undefined || val === null) return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }),
   hasInstallmentsInterest: z.boolean().default(false),
   isMadeToOrder: z.boolean().default(false),
-  estimatedDays: z.coerce.number().int().optional(),
-  requiredDeposit: z.coerce.number().min(0).max(100).optional(),
+  estimatedDays: z.string().optional().transform((val) => {
+    if (val === "" || val === undefined || val === null) return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }),
+  requiredDeposit: z.string().optional().transform((val) => {
+    if (val === "" || val === undefined || val === null) return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }),
 });
 
 export type ProductFormData = z.infer<typeof schema> & { images?: string[]; salePrice?: number };
