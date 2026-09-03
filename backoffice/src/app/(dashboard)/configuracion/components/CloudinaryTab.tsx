@@ -22,6 +22,7 @@ export default function CloudinaryTab() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [migrating, setMigrating] = useState(false);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -86,7 +87,29 @@ export default function CloudinaryTab() {
           <Cloud className="w-5 h-5 text-[#C8FF00]" />
           <p className="text-sm text-gray-700 font-medium">Las imágenes se subirán a Cloudinary y se almacenará la URL en la base de datos.</p>
         </div>
-        <div className="flex justify-end">
+        <div className="flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center">
+          <button
+            type="button"
+            onClick={async () => {
+              setMigrating(true);
+              try {
+                const res = await api.post('/uploads/migrate-to-cloudinary');
+                if (res.data?.error) {
+                  toast(res.data.error, 'error');
+                } else {
+                  toast(`Migración completa: ${res.data?.migrated || 0} migradas, ${res.data?.failed || 0} fallidas`, 'success');
+                }
+              } catch {
+                toast('Error al migrar imágenes', 'error');
+              } finally {
+                setMigrating(false);
+              }
+            }}
+            disabled={migrating}
+            className="flex items-center gap-2 px-4 py-2 border border-[#C8FF00]/50 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+          >
+            <Cloud className="w-4 h-4" />{migrating ? 'Migrando...' : 'Migrar imágenes a Cloudinary'}
+          </button>
           <button type="submit" disabled={saving}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#C8FF00] text-[#0f172a] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] disabled:opacity-50 transition-colors">
             <Save className="w-4 h-4" />{saving ? 'Guardando...' : 'Guardar cambios'}

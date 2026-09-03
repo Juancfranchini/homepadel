@@ -20,6 +20,11 @@ import { UploadsService } from './uploads.service';
 export class UploadsController {
   constructor(private readonly uploadsService: UploadsService) {}
 
+  @Post('migrate-to-cloudinary')
+  async migrateToCloudinary() {
+    return this.uploadsService.migrateToCloudinary();
+  }
+
   @Post('image')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))

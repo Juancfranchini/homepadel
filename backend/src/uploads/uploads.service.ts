@@ -28,6 +28,59 @@ export class UploadsService {
     return false;
   }
 
+  async migrateToCloudinary() {
+    const configured = await this.getCloudinaryConfig();
+    if (!configured) {
+      return { error: 'No hay credenciales Cloudinary configuradas', migrated: 0, failed: 0 };
+    }
+
+    let migrated = 0;
+    let failed = 0;
+
+    const products = await this.prisma.product.findMany({
+      select: { id: true, name: true, images: true },
+    });
+
+    for (const product of products) {
+      if (!product.images || product.images.length === 0) continue;
+      const newImages = [];
+      let changed = false;
+
+      for (const img of product.images) {
+        if (typeof img === 'string' && img.startsWith('data:image/')) {
+          try {
+            const newUrl = await new Promise<string>((resolve, reject) => {
+              cloudinary.uploader.upload(img, {
+                resource_type: 'image',
+                folder: 'homepadel',
+              }, (error, result) => {
+                if (error) reject(error);
+                else resolve(result.secure_url);
+              });
+            });
+            newImages.push(newUrl);
+            changed = true;
+            migrated++;
+          } catch {
+            newImages.push(img);
+            failed++;
+          }
+        } else {
+          newImages.push(img);
+        }
+      }
+
+      if (changed) {
+        await this.prisma.product.update({
+          where: { id: product.id },
+          data: { images: newImages },
+        });
+      }
+    }
+
+    return { migrated, failed };
+  }
+
   async uploadImage(file: Express.Multer.File): Promise<string> {
     const configured = await this.getCloudinaryConfig();
     if (!configured) {
