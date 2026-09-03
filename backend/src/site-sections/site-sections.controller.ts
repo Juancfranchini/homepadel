@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Param, Body, UseGuards } from '@nestjs/common';
+﻿import { Controller, Get, Put, Param, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { SiteSectionsService, SectionKey } from './site-sections.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -11,13 +11,31 @@ import { Role } from '@prisma/client';
 export class SiteSectionsController {
   constructor(private readonly siteSectionsService: SiteSectionsService) {}
 
-  // Público — cualquiera puede leer una sección por clave
+  // Público  cualquiera puede leer una sección por clave
   @Get(':key')
-  findOne(@Param('key') key: SectionKey) {
-    return this.siteSectionsService.findOne(key);
+  async findOne(@Param('key') key: SectionKey) {
+    const section = await this.siteSectionsService.findOne(key);
+
+    // S1 - Filtrar credenciales sensibles de payment_methods
+    if (key === 'payment_methods' && section?.data) {
+      const data = section.data as any;
+      const { mercadopago, ...safeData } = data;
+      if (mercadopago?.accessToken) {
+        const { accessToken, ...safeMercadopago } = mercadopago;
+        return {
+          ...section,
+          data: {
+            ...safeData,
+            mercadopago: safeMercadopago,
+          },
+        };
+      }
+    }
+
+    return section;
   }
 
-  // Admin — upsert de una sección
+  // Admin  upsert de una sección
   @Put(':key')
   @ApiBearerAuth() @UseGuards(JwtAuthGuard, RolesGuard) @Roles(Role.ADMIN)
   upsert(

@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, UseGuards, BadRequestException } from '@nestjs/common';
+﻿import { Controller, Post, Get, Body, UseGuards, BadRequestException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -24,9 +24,9 @@ export class AuthController {
   }
 
   @Post('google')
-  @ApiOperation({ summary: 'Iniciar sesión con Google' })
-  googleLogin(@Body() body: { credential: string }) {
-    return this.authService.googleLogin(body.credential);
+  @ApiOperation({ summary: 'Iniciar sesión con Google - DESACTIVADO temporalmente' })
+  googleLogin() {
+    throw new BadRequestException('Login con Google temporalmente desactivado');
   }
 
   @Post('forgot-password')
