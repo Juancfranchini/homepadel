@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Store, Shield, Bell, Mail, Target, LayoutDashboard } from 'lucide-react';
+import { Store, Shield, Bell, Mail, Target, LayoutDashboard, Cloud } from 'lucide-react';
 import api from '@/lib/api';
 import { useToast } from '@/components/ui/Toast';
 import GeneralTab from './components/GeneralTab';
@@ -40,6 +40,7 @@ const TABS = [
   { id: 'seguridad' as Tab, label: 'Seguridad', icon: Shield },
   { id: 'notificaciones' as Tab, label: 'Notificaciones', icon: Bell },
   { id: 'emails' as Tab, label: 'Emails', icon: Mail },
+  { id: 'cloudinary' as Tab, label: 'Cloudinary', icon: Cloud },
 ];
 
 export default function ConfiguracionPage() {
@@ -258,10 +259,6 @@ export default function ConfiguracionPage() {
 
         {activeTab === 'notificaciones' && (
           <NotificacionesTab notifs={notifs} setNotifs={setNotifs} onSave={handleSaveNotifs} />
-        )}
-
-        {activeTab === 'cloudinary' && (
-          <CloudinaryTab />
         )}
 
         {activeTab === 'cloudinary' && (
