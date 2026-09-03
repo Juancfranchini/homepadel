@@ -25,6 +25,7 @@ export interface ProductVariant {
   size: string;
   color?: string | null;
   imageUrl?: string | null;
+  images?: string[];
   stock: number;
   active: boolean;
 }

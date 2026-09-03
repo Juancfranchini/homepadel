@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -88,7 +88,7 @@ const labelClass = 'text-xs font-medium text-gray-400 uppercase tracking-wider';
 export default function ProductForm({
   defaultValues, onSave, onCancel, saving, categories, brands, ...rest }: Props) {
   const [uploading, setUploading] = useState(false);
-  const [variants, setVariants] = useState<{ sku: string; size: string; color?: string; imageUrl?: string; stock: number }[]>(() => {
+  const [variants, setVariants] = useState<{ sku: string; size: string; color?: string; imageUrl?: string; images?: string[]; stock: number }[]>(() => {
     return defaultValues?.variants || [];
   });
   const [hasSalePrice, setHasSalePrice] = useState<boolean>(() => {
@@ -170,6 +170,19 @@ export default function ProductForm({
       if (rawValue === undefined || rawValue === null || rawValue === '' || isNaN(numVal) || numVal <= 0) {
         setError('salePrice', { type: 'manual', message: 'El precio promocional es obligatorio' });
         return;
+      }
+    }
+
+    // Validar SKU duplicado en variantes
+    const skuSet = new Set<string>();
+    for (const v of variants) {
+      if (v.sku && v.sku.trim()) {
+        const skuLower = v.sku.trim().toLowerCase();
+        if (skuSet.has(skuLower)) {
+          alert('SKU duplicado en variantes: ' + v.sku);
+          return;
+        }
+        skuSet.add(skuLower);
       }
     }
 
@@ -407,7 +420,7 @@ export default function ProductForm({
             <label className={labelClass}>Variantes (talles/colores)</label>
             <button
               type="button"
-              onClick={() => setVariants([...variants, { sku: '', size: '', color: '', imageUrl: '', stock: 0 }])}
+              onClick={() => setVariants([...variants, { sku: '', size: '', color: '', imageUrl: '', images: [], stock: 0 }])}
               className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#C8FF00] text-[#0f172a] hover:bg-[#b8ef00] transition-colors"
             >
               <Plus className="w-3 h-3" />Agregar variante
