@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Upload, ImageIcon, Star } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import api from '@/lib/api';
 import Toggle from '../../testimonios/components/Toggle';
 import ImageGalleryInput from './ImageGalleryInput';
@@ -21,7 +21,11 @@ const schema = z.object({
   name: z.string().min(2, 'Nombre requerido'),
   sku: z.string().min(2, 'SKU requerido'),
   price: z.coerce.number().min(1, 'Precio requerido'),
-  salePrice: z.coerce.number().optional(),
+  salePrice: z.string().optional().transform((val) => {
+    if (val === "" || val === undefined || val === null) return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }),
   transferPrice: z.coerce.number().optional(),
   stock: z.coerce.number().int().min(0).default(0),
   active: z.boolean().default(true),
@@ -40,7 +44,7 @@ const schema = z.object({
   requiredDeposit: z.coerce.number().min(0).max(100).optional(),
 });
 
-export type ProductFormData = z.infer<typeof schema> & { images?: string[] };
+export type ProductFormData = z.infer<typeof schema> & { images?: string[]; salePrice?: number };
 
 interface Category { id: string; name: string }
 interface Brand { id: string; name: string }
@@ -57,12 +61,17 @@ interface Props {
 const inputClass = 'w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00]';
 const labelClass = 'text-xs font-medium text-gray-400 uppercase tracking-wider';
 
-export default function ProductForm({ defaultValues, onSave, onCancel, saving, categories, brands }: Props) {
+export default function ProductForm({
+  defaultValues, onSave, onCancel, saving, categories, brands, ...rest }: Props) {
   const [uploading, setUploading] = useState(false);
+  const [hasSalePrice, setHasSalePrice] = useState<boolean>(() => {
+    return defaultValues?.salePrice !== undefined && defaultValues.salePrice !== null && defaultValues.salePrice > 0;
+  });
+  const salePriceTempRef = useRef<number | undefined>(defaultValues?.salePrice);
   const [galleryImages, setGalleryImages] = useState<string[]>(Array.isArray(defaultValues?.images) ? (defaultValues.images as string[]).slice(1) : []);
   const [mainImage, setMainImage] = useState<string>(Array.isArray(defaultValues?.images) ? (defaultValues.images as string[])[0] || '' : '');
 
-  const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<ProductFormData>({
+  const { register, handleSubmit, setValue, watch, reset, setError, clearErrors, formState: { errors } } = useForm<ProductFormData>({
     resolver: zodResolver(schema),
     defaultValues: defaultValues || {
       active: true,
@@ -78,11 +87,20 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
 
   useEffect(() => {
     if (defaultValues) {
-      reset(defaultValues);
+      const { salePrice: _sp, ...restDefaults } = defaultValues;
+      reset(restDefaults);
       setGalleryImages(Array.isArray(defaultValues.images) ? (defaultValues.images as string[]).slice(1) : []);
       setMainImage(Array.isArray(defaultValues.images) ? (defaultValues.images as string[])[0] || '' : '');
+      // Inicializar salePriceTempRef con el valor por defecto
+      salePriceTempRef.current = defaultValues?.salePrice;
+      // Si NO hay promo activa, NO resetear salePrice
+      if (hasSalePrice) {
+        reset({ ...restDefaults, salePrice: defaultValues.salePrice });
+      } else {
+        reset({ ...restDefaults, salePrice: undefined });
+      }
     }
-  }, [defaultValues, reset]);
+  }, [defaultValues, reset, hasSalePrice]);
 
   const featured = watch('featured');
   const active = watch('active');
@@ -115,8 +133,28 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
   };
 
   const handleFormSubmit = (data: ProductFormData) => {
+    console.log('[Submit] hasSalePrice:', hasSalePrice);
+    console.log('[Submit] data.salePrice:', (data as any).salePrice);
+    console.log('[Submit] data completo:', JSON.stringify(data));
+    // Validacion antes de guardar
+    if (hasSalePrice) {
+      const rawValue = (data as any).salePrice;
+      const numVal = Number(rawValue);
+      if (rawValue === undefined || rawValue === null || rawValue === '' || isNaN(numVal) || numVal <= 0) {
+        setError('salePrice', { type: 'manual', message: 'El precio promocional es obligatorio' });
+        return;
+      }
+    }
+
     const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[];
-    onSave({ ...data, images: allImages });
+    // Si checkbox desactivado, NO enviar salePrice
+    if (!hasSalePrice) {
+      const cleanData: any = { ...data };
+      cleanData.salePrice = null; // Enviar null para que backend lo guarde como null
+      onSave({ ...cleanData, images: allImages });
+    } else {
+      onSave({ ...data, images: allImages });
+    }
   };
 
   return (
@@ -168,8 +206,58 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
           {errors.price && <p className="text-xs text-red-600 mt-0.5">{errors.price.message}</p>}
         </div>
         <div>
-          <label className={labelClass}>Precio Promocional</label>
-          <input type="number" step="0.01" {...register('salePrice')} className={inputClass + ' mt-1'} />
+          <div className="flex items-center gap-2 mb-1.5">
+            <input
+              type="checkbox"
+              checked={hasSalePrice}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                console.log('[Checkbox] Nuevo estado:', checked);
+                console.log('[Checkbox] Valor actual salePrice:', watch('salePrice'));
+                console.log('[Checkbox] salePriceTempRef:', salePriceTempRef.current);
+                setHasSalePrice(checked);
+                if (!checked) {
+                  clearErrors('salePrice');
+                  const currentVal = watch('salePrice');
+                  console.log('[Checkbox] Desactivando - guardando temp:', currentVal);
+                  salePriceTempRef.current = typeof currentVal === 'number' ? currentVal : Number(currentVal);
+                  setValue('salePrice', undefined as any, { shouldDirty: true, shouldValidate: false });
+                  console.log('[Checkbox] Despues de setValue undefined - watch:', watch('salePrice'));
+                } else {
+                  console.log('[Checkbox] Activando - restaurando temp:', salePriceTempRef.current);
+                  if (salePriceTempRef.current) {
+                    setValue('salePrice', salePriceTempRef.current, { shouldDirty: true });
+                    console.log('[Checkbox] Despues de restaurar - watch:', watch('salePrice'));
+                  }
+                }
+              }}
+              className="w-4 h-4 rounded accent-[#C8FF00] cursor-pointer"
+              id="hasSalePrice"
+            />
+            <label htmlFor="hasSalePrice" className="text-xs font-medium text-gray-500 cursor-pointer select-none">
+              Activar precio promocional
+            </label>
+          </div>
+          <input
+            type="number"
+            step="0.01"
+            {...register('salePrice', {
+              validate: (val) => {
+                if (hasSalePrice) {
+                  const numVal = Number(val);
+                  if (!val || isNaN(numVal) || numVal <= 0) {
+                    return 'El precio promocional es obligatorio';
+                  }
+                }
+                return true;
+              }
+            })}
+            className={inputClass + ' mt-1 ' + (hasSalePrice ? '' : 'bg-gray-50 text-gray-400 cursor-not-allowed') + (errors.salePrice ? ' border-red-400 focus:ring-red-400/40 focus:border-red-400' : '')}
+            placeholder={hasSalePrice ? 'Ej: 150000' : 'Desactivado'}
+            readOnly={!hasSalePrice}
+          />
+          {errors.salePrice && <p className="text-xs text-red-600 mt-0.5">{errors.salePrice.message}</p>}
+          {!hasSalePrice && <p className="text-[10px] text-gray-400 mt-1">Marca el checkbox para activar precio promocional.</p>}
         </div>
         <div>
           <label className={labelClass}>Precio Transferencia/Deposito</label>
