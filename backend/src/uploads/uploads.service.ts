@@ -107,6 +107,123 @@ export class UploadsService {
       }
     }
 
+    // Migrar categorías
+    const categories = await this.prisma.category.findMany({
+      select: { id: true, name: true, image: true },
+    });
+
+    for (const cat of categories) {
+      if (!cat.image) continue;
+      try {
+        let sourceToUpload: string | Buffer = '';
+        if (cat.image.startsWith('data:image/')) {
+          sourceToUpload = cat.image;
+        } else if (cat.image.startsWith('/uploads/')) {
+          const filePath = path.join(process.cwd(), 'uploads', cat.image.replace('/uploads/', ''));
+          if (fs.existsSync(filePath)) {
+            sourceToUpload = fs.readFileSync(filePath);
+          } else {
+            continue;
+          }
+        } else {
+          continue;
+        }
+
+        const newUrl = await new Promise<string>((resolve, reject) => {
+          cloudinary.uploader.upload_stream(
+            { resource_type: 'image', folder: 'homepadel/categories' },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result.secure_url);
+            }
+          ).end(sourceToUpload);
+        });
+
+        await this.prisma.category.update({ where: { id: cat.id }, data: { image: newUrl } });
+        migrated++;
+      } catch {
+        failed++;
+      }
+    }
+
+    // Migrar marcas
+    const brands = await this.prisma.brand.findMany({
+      select: { id: true, name: true, logo: true },
+    });
+
+    for (const brand of brands) {
+      if (!brand.logo) continue;
+      try {
+        let sourceToUpload: string | Buffer = '';
+        if (brand.logo.startsWith('data:image/')) {
+          sourceToUpload = brand.logo;
+        } else if (brand.logo.startsWith('/uploads/')) {
+          const filePath = path.join(process.cwd(), 'uploads', brand.logo.replace('/uploads/', ''));
+          if (fs.existsSync(filePath)) {
+            sourceToUpload = fs.readFileSync(filePath);
+          } else {
+            continue;
+          }
+        } else {
+          continue;
+        }
+
+        const newUrl = await new Promise<string>((resolve, reject) => {
+          cloudinary.uploader.upload_stream(
+            { resource_type: 'image', folder: 'homepadel/brands' },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result.secure_url);
+            }
+          ).end(sourceToUpload);
+        });
+
+        await this.prisma.brand.update({ where: { id: brand.id }, data: { logo: newUrl } });
+        migrated++;
+      } catch {
+        failed++;
+      }
+    }
+
+    // Migrar banners
+    const banners = await this.prisma.banner.findMany({
+      select: { id: true, title: true, image: true },
+    });
+
+    for (const banner of banners) {
+      if (!banner.image) continue;
+      try {
+        let sourceToUpload: string | Buffer = '';
+        if (banner.image.startsWith('data:image/')) {
+          sourceToUpload = banner.image;
+        } else if (banner.image.startsWith('/uploads/')) {
+          const filePath = path.join(process.cwd(), 'uploads', banner.image.replace('/uploads/', ''));
+          if (fs.existsSync(filePath)) {
+            sourceToUpload = fs.readFileSync(filePath);
+          } else {
+            continue;
+          }
+        } else {
+          continue;
+        }
+
+        const newUrl = await new Promise<string>((resolve, reject) => {
+          cloudinary.uploader.upload_stream(
+            { resource_type: 'image', folder: 'homepadel/banners' },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result.secure_url);
+            }
+          ).end(sourceToUpload);
+        });
+
+        await this.prisma.banner.update({ where: { id: banner.id }, data: { image: newUrl } });
+        migrated++;
+      } catch {
+        failed++;
+      }
+    }
+
     return { migrated, failed };
   }
 
