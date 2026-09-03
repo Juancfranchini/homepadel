@@ -3,7 +3,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Upload, ImageIcon, Star } from 'lucide-react';
+import { Upload, ImageIcon, Star, Plus, Trash2 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import api from '@/lib/api';
 import Toggle from '../../testimonios/components/Toggle';
@@ -68,7 +68,7 @@ const schema = z.object({
   }),
 });
 
-export type ProductFormData = z.infer<typeof schema> & { images?: string[]; salePrice?: number };
+export type ProductFormData = z.infer<typeof schema> & { images?: string[]; salePrice?: number; variants?: { sku: string; size: string; color?: string; stock: number }[] };
 
 interface Category { id: string; name: string }
 interface Brand { id: string; name: string }
@@ -88,6 +88,9 @@ const labelClass = 'text-xs font-medium text-gray-400 uppercase tracking-wider';
 export default function ProductForm({
   defaultValues, onSave, onCancel, saving, categories, brands, ...rest }: Props) {
   const [uploading, setUploading] = useState(false);
+  const [variants, setVariants] = useState<{ sku: string; size: string; color?: string; imageUrl?: string; stock: number }[]>(() => {
+    return defaultValues?.variants || [];
+  });
   const [hasSalePrice, setHasSalePrice] = useState<boolean>(() => {
     return defaultValues?.salePrice !== undefined && defaultValues.salePrice !== null && defaultValues.salePrice > 0;
   });
@@ -177,7 +180,7 @@ export default function ProductForm({
       cleanData.salePrice = null; // Enviar null para que backend lo guarde como null
       onSave({ ...cleanData, images: allImages });
     } else {
-      onSave({ ...data, images: allImages });
+      onSave({ ...data, images: allImages, variants });
     }
   };
 
@@ -399,6 +402,94 @@ export default function ProductForm({
           </div>
         </div>
 
+        <div className="sm:col-span-2 border-t border-gray-100 pt-4">
+          <div className="flex items-center justify-between mb-3">
+            <label className={labelClass}>Variantes (talles/colores)</label>
+            <button
+              type="button"
+              onClick={() => setVariants([...variants, { sku: '', size: '', color: '', imageUrl: '', stock: 0 }])}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#C8FF00] text-[#0f172a] hover:bg-[#b8ef00] transition-colors"
+            >
+              <Plus className="w-3 h-3" />Agregar variante
+            </button>
+          </div>
+          
+          {variants.length === 0 ? (
+            <p className="text-xs text-gray-400">Sin variantes. Agrega talles o colores si este producto los necesita.</p>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {variants.map((v, i) => (
+                <div key={i} className="grid grid-cols-2 sm:grid-cols-4 gap-2 items-start bg-gray-50 rounded-lg p-3 border border-gray-100">
+                  <div>
+                    <label className="text-[10px] text-gray-400 uppercase">Talle *</label>
+                    <input
+                      type="text"
+                      value={v.size}
+                      onChange={(e) => {
+                        const newVariants = [...variants];
+                        newVariants[i].size = e.target.value;
+                        setVariants(newVariants);
+                      }}
+                      className={inputClass + ' mt-0.5'}
+                      placeholder="S, M, L, XL"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-gray-400 uppercase">Color</label>
+                    <input
+                      type="text"
+                      value={v.color || ''}
+                      onChange={(e) => {
+                        const newVariants = [...variants];
+                        newVariants[i].color = e.target.value;
+                        setVariants(newVariants);
+                      }}
+                      className={inputClass + ' mt-0.5'}
+                      placeholder="Negro, Blanco"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-gray-400 uppercase">Stock</label>
+                    <input
+                      type="number"
+                      value={v.stock}
+                      onChange={(e) => {
+                        const newVariants = [...variants];
+                        newVariants[i].stock = Number(e.target.value);
+                        setVariants(newVariants);
+                      }}
+                      className={inputClass + ' mt-0.5'}
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-gray-400 uppercase">SKU</label>
+                    <div className="flex gap-1">
+                      <input
+                        type="text"
+                        value={v.sku}
+                        onChange={(e) => {
+                          const newVariants = [...variants];
+                          newVariants[i].sku = e.target.value;
+                          setVariants(newVariants);
+                        }}
+                        className={inputClass + ' mt-0.5'}
+                        placeholder="SKU-001"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setVariants(variants.filter((_, idx) => idx !== i))}
+                        className="mt-0.5 p-1.5 rounded-lg text-red-400 hover:bg-red-50 transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
         <div className="sm:col-span-2 flex justify-end gap-3 pt-4 sm:pt-6 border-t border-gray-100">
           <button type="button" onClick={onCancel} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">Cancelar</button>
           <button type="submit" disabled={saving} className="px-4 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg text-sm font-semibold hover:bg-[#b8ef00] disabled:opacity-50 transition-colors">

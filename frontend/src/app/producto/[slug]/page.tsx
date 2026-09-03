@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -13,6 +13,7 @@ import ProductGallery from './components/ProductGallery';
 import ProductInfo from './components/ProductInfo';
 import ProductPrice from './components/ProductPrice';
 import ProductActions from './components/ProductActions';
+import VariantSelector from './components/VariantSelector';
 import ShippingCalc from './components/ShippingCalc';
 import TrustBadges from './components/TrustBadges';
 import StockAlert from './components/StockAlert';
@@ -42,6 +43,8 @@ export default function ProductoPage() {
   const [wished, setWished] = useState(false);
   const [added, setAdded] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
 
   useEffect(() => {
     if (!params.slug) return;
@@ -162,6 +165,13 @@ export default function ProductoPage() {
             <StockAlert stock={product.stock} isMadeToOrder={product.isMadeToOrder} estimatedDays={product.estimatedDays} />
             <div className="h-px bg-[#0D0F0F]" />
             <TrustBadges />
+            <VariantSelector
+              variants={product.variants || []}
+              selectedColor={selectedColor}
+              selectedSize={selectedSize}
+              onColorChange={setSelectedColor}
+              onSizeChange={setSelectedSize}
+            />
             <ProductActions stock={product.stock} quantity={quantity} onQuantityChange={setQuantity} onBuyNow={handleBuyNow} onAddToCart={handleAddToCart} added={added} wished={wished} onWish={() => setWished(!wished)} />
             {hasSizeGuide && (<Link href="/talles" className="inline-flex items-center gap-2 px-4 py-2 bg-[#1A1F21] border border-[#0D0F0F] rounded-lg text-[#B7D31A] text-xs font-semibold hover:border-[#B7D31A]/50 transition-all w-fit"><Ruler size={14} />Guia de talles</Link>)}
             <ShippingCalc />
