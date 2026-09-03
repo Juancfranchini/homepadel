@@ -36,6 +36,8 @@ export class UploadsService {
 
     let migrated = 0;
     let failed = 0;
+    const fs = require('fs');
+    const path = require('path');
 
     const products = await this.prisma.product.findMany({
       select: { id: true, name: true, images: true },
@@ -47,17 +49,44 @@ export class UploadsService {
       let changed = false;
 
       for (const img of product.images) {
-        if (typeof img === 'string' && img.startsWith('data:image/')) {
+        if (typeof img === 'string') {
           try {
+            let sourceToUpload: string | Buffer = '';
+            
+            if (img.startsWith('data:image/')) {
+              // Base64 directo
+              sourceToUpload = img;
+            } else if (img.startsWith('/uploads/')) {
+              // Archivo local
+              const filePath = path.join(__dirname, '..', '..', 'uploads', img.replace('/uploads/', ''));
+              if (fs.existsSync(filePath)) {
+                sourceToUpload = fs.readFileSync(filePath);
+              } else {
+                // Probar ruta alternativa
+                const altPath = path.join(process.cwd(), 'uploads', img.replace('/uploads/', ''));
+                if (fs.existsSync(altPath)) {
+                  sourceToUpload = fs.readFileSync(altPath);
+                } else {
+                  newImages.push(img);
+                  continue;
+                }
+              }
+            } else {
+              // Ya es URL de Cloudinary u otra
+              newImages.push(img);
+              continue;
+            }
+
             const newUrl = await new Promise<string>((resolve, reject) => {
-              cloudinary.uploader.upload(img, {
-                resource_type: 'image',
-                folder: 'homepadel',
-              }, (error, result) => {
-                if (error) reject(error);
-                else resolve(result.secure_url);
-              });
+              cloudinary.uploader.upload_stream(
+                { resource_type: 'image', folder: 'homepadel' },
+                (error, result) => {
+                  if (error) reject(error);
+                  else resolve(result.secure_url);
+                }
+              ).end(sourceToUpload);
             });
+            
             newImages.push(newUrl);
             changed = true;
             migrated++;
