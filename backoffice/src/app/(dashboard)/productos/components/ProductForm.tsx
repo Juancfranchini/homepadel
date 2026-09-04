@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,6 +8,7 @@ import { useState, useEffect, useRef } from 'react';
 import api from '@/lib/api';
 import Toggle from '../../testimonios/components/Toggle';
 import ImageGalleryInput from './ImageGalleryInput';
+import VariantEditor from './VariantEditor';
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000').replace(/\/api\/?$/, '');
 
@@ -26,7 +27,11 @@ const schema = z.object({
     const num = Number(val);
     return isNaN(num) ? undefined : num;
   }),
-  transferPrice: z.coerce.number().optional(),
+  transferPrice: z.string().optional().transform((val) => {
+    if (val === "" || val === undefined || val === null) return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }),
   stock: z.coerce.number().int().min(0).default(0),
   active: z.boolean().default(true),
   featured: z.boolean().default(false),
@@ -35,16 +40,40 @@ const schema = z.object({
   categoryId: z.string().min(1, 'Categoria requerida'),
   brandId: z.string().min(1, 'Marca requerida'),
   images: z.array(z.string()).optional(),
-  discountPercentage: z.coerce.number().min(0).max(100).optional(),
-  installments: z.coerce.number().int().min(0).max(12).optional(),
-  installmentsInterest: z.coerce.number().min(0).optional(),
+  discountPercentage: z.string().optional().transform((val) => {
+    if (val === "" || val === undefined || val === null) return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }),
+  installments: z.string().optional().transform((val) => {
+    if (val === "" || val === undefined || val === null) return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }),
+  installmentsInterest: z.string().optional().transform((val) => {
+    if (val === "" || val === undefined || val === null) return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }),
   hasInstallmentsInterest: z.boolean().default(false),
   isMadeToOrder: z.boolean().default(false),
-  estimatedDays: z.coerce.number().int().optional(),
-  requiredDeposit: z.coerce.number().min(0).max(100).optional(),
+  estimatedDays: z.string().optional().transform((val) => {
+    if (val === "" || val === undefined || val === null) return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }),
+  requiredDeposit: z.string().optional().transform((val) => {
+    if (val === "" || val === undefined || val === null) return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  }),
 });
 
-export type ProductFormData = z.infer<typeof schema> & { images?: string[]; salePrice?: number };
+export type ProductFormData = z.infer<typeof schema> & {
+  images?: string[];
+  salePrice?: number;
+  variants?: { sku: string; size: string; color?: string; imageUrl?: string; images?: string[]; stock: number }[];
+};
 
 interface Category { id: string; name: string }
 interface Brand { id: string; name: string }
@@ -64,6 +93,9 @@ const labelClass = 'text-xs font-medium text-gray-400 uppercase tracking-wider';
 export default function ProductForm({
   defaultValues, onSave, onCancel, saving, categories, brands, ...rest }: Props) {
   const [uploading, setUploading] = useState(false);
+  const [variants, setVariants] = useState<{ sku: string; size: string; color?: string; imageUrl?: string; images?: string[]; stock: number }[]>(() => {
+    return defaultValues?.variants || [];
+  });
   const [hasSalePrice, setHasSalePrice] = useState<boolean>(() => {
     return defaultValues?.salePrice !== undefined && defaultValues.salePrice !== null && defaultValues.salePrice > 0;
   });
@@ -87,20 +119,13 @@ export default function ProductForm({
 
   useEffect(() => {
     if (defaultValues) {
-      const { salePrice: _sp, ...restDefaults } = defaultValues;
-      reset(restDefaults);
+      reset(defaultValues);
       setGalleryImages(Array.isArray(defaultValues.images) ? (defaultValues.images as string[]).slice(1) : []);
       setMainImage(Array.isArray(defaultValues.images) ? (defaultValues.images as string[])[0] || '' : '');
-      // Inicializar salePriceTempRef con el valor por defecto
       salePriceTempRef.current = defaultValues?.salePrice;
-      // Si NO hay promo activa, NO resetear salePrice
-      if (hasSalePrice) {
-        reset({ ...restDefaults, salePrice: defaultValues.salePrice });
-      } else {
-        reset({ ...restDefaults, salePrice: undefined });
-      }
+      setVariants(defaultValues?.variants || []);
     }
-  }, [defaultValues, reset, hasSalePrice]);
+  }, [defaultValues, reset]);
 
   const featured = watch('featured');
   const active = watch('active');
@@ -133,10 +158,6 @@ export default function ProductForm({
   };
 
   const handleFormSubmit = (data: ProductFormData) => {
-    console.log('[Submit] hasSalePrice:', hasSalePrice);
-    console.log('[Submit] data.salePrice:', (data as any).salePrice);
-    console.log('[Submit] data completo:', JSON.stringify(data));
-    // Validacion antes de guardar
     if (hasSalePrice) {
       const rawValue = (data as any).salePrice;
       const numVal = Number(rawValue);
@@ -146,14 +167,25 @@ export default function ProductForm({
       }
     }
 
+    const skuSet = new Set<string>();
+    for (const v of variants) {
+      if (v.sku && v.sku.trim()) {
+        const skuLower = v.sku.trim().toLowerCase();
+        if (skuSet.has(skuLower)) {
+          alert('SKU duplicado en variantes: ' + v.sku);
+          return;
+        }
+        skuSet.add(skuLower);
+      }
+    }
+
     const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[];
-    // Si checkbox desactivado, NO enviar salePrice
     if (!hasSalePrice) {
       const cleanData: any = { ...data };
-      cleanData.salePrice = null; // Enviar null para que backend lo guarde como null
-      onSave({ ...cleanData, images: allImages });
+      cleanData.salePrice = undefined;
+      onSave({ ...cleanData, images: allImages, variants });
     } else {
-      onSave({ ...data, images: allImages });
+      onSave({ ...data, images: allImages, variants });
     }
   };
 
@@ -212,22 +244,15 @@ export default function ProductForm({
               checked={hasSalePrice}
               onChange={(e) => {
                 const checked = e.target.checked;
-                console.log('[Checkbox] Nuevo estado:', checked);
-                console.log('[Checkbox] Valor actual salePrice:', watch('salePrice'));
-                console.log('[Checkbox] salePriceTempRef:', salePriceTempRef.current);
                 setHasSalePrice(checked);
                 if (!checked) {
                   clearErrors('salePrice');
                   const currentVal = watch('salePrice');
-                  console.log('[Checkbox] Desactivando - guardando temp:', currentVal);
                   salePriceTempRef.current = typeof currentVal === 'number' ? currentVal : Number(currentVal);
                   setValue('salePrice', undefined as any, { shouldDirty: true, shouldValidate: false });
-                  console.log('[Checkbox] Despues de setValue undefined - watch:', watch('salePrice'));
                 } else {
-                  console.log('[Checkbox] Activando - restaurando temp:', salePriceTempRef.current);
                   if (salePriceTempRef.current) {
                     setValue('salePrice', salePriceTempRef.current, { shouldDirty: true });
-                    console.log('[Checkbox] Despues de restaurar - watch:', watch('salePrice'));
                   }
                 }
               }}
@@ -374,6 +399,8 @@ export default function ProductForm({
             </div>
           </div>
         </div>
+
+        <VariantEditor variants={variants} onChange={setVariants} inputClass={inputClass} />
 
         <div className="sm:col-span-2 flex justify-end gap-3 pt-4 sm:pt-6 border-t border-gray-100">
           <button type="button" onClick={onCancel} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">Cancelar</button>

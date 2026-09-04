@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, Edit2, Trash2, ArrowUpDown, ArrowRight, ImageIcon, Star } from 'lucide-react';
@@ -47,6 +47,7 @@ interface Product {
   categoryId?: string;
   brandId?: string;
   description?: string;
+  variants?: { sku: string; size: string; color?: string; imageUrl?: string; images?: string[]; stock: number }[];
 }
 
 interface Category { id: string; name: string }
@@ -164,6 +165,7 @@ export default function ProductosPage() {
     isMadeToOrder: editItem.isMadeToOrder || false,
     estimatedDays: editItem.estimatedDays || undefined,
     requiredDeposit: editItem.requiredDeposit || undefined,
+    variants: editItem.variants || [],
   } : undefined;
 
   if (loading) return <PageLoader />;

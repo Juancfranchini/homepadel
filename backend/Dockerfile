@@ -1,4 +1,4 @@
-# ─── Stage 1: Builder ─────────────────────────────
+﻿# ─── Stage 1: Builder ─────────────────────────────
 FROM node:20-alpine AS builder
 
 RUN apk add --no-cache openssl
@@ -39,4 +39,4 @@ COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
 
 EXPOSE 4000
 
-CMD ["sh", "-c", "node_modules/.bin/prisma db push --accept-data-loss && node prisma/seed.js; node dist/main"]
+CMD ["sh", "-c", "node_modules/.bin/prisma migrate deploy && node dist/main"]

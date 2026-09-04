@@ -44,7 +44,7 @@ export default function NewsletterSection({ title, text }: Props) {
   return (
     <section className="border-t border-[#0D0F0F] bg-[#080D11]">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-14">
-        <div className="bg-gradient-to-br from-[#0C0C0C] via-[#0F1417] to-[#0A0F12] border border-[#B7D31A]/20 rounded-2xl p-8 md:p-10">
+        <div className="bg-gradient-to-br from-[#0C0C0C] via-[#0F1417] to-[#0A0F12] border border-[#B7D31A]/20 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-10">
           <div className="flex flex-col md:flex-row items-center gap-8 md:gap-6">
             <div className="flex-shrink-0">
               <div className="w-14 h-14 rounded-full bg-[#B7D31A]/10 border border-[#B7D31A]/20 flex items-center justify-center">
@@ -62,7 +62,7 @@ export default function NewsletterSection({ title, text }: Props) {
                   <span className="text-sm font-semibold">{message}</span>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="flex gap-2">
+                <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 sm:gap-2">
                   <input
                     type="email"
                     value={email}
@@ -70,9 +70,9 @@ export default function NewsletterSection({ title, text }: Props) {
                     placeholder="Tu email"
                     required
                     disabled={status === 'loading'}
-                    className="flex-1 bg-[#11181D] border border-[#B7D31A]/30 rounded-xl px-4 py-3 text-sm text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A] focus:ring-1 focus:ring-[#B7D31A]/20 transition-all disabled:opacity-50"
+                    className="flex-1 min-w-0 bg-[#11181D] border border-[#B7D31A]/30 rounded-xl px-3 sm:px-4 py-3 text-sm text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A] focus:ring-1 focus:ring-[#B7D31A]/20 transition-all disabled:opacity-50"
                   />
-                  <button type="submit" disabled={status === 'loading'} className="px-5 py-3 bg-[#B7D31A] text-[#050606] font-semibold text-sm uppercase tracking-wider rounded-xl hover:bg-[#CAE52E] transition-colors disabled:opacity-50 whitespace-nowrap">
+                  <button type="submit" disabled={status === 'loading'} className="px-5 py-3 bg-[#B7D31A] text-[#050606] font-semibold text-sm uppercase tracking-wider rounded-xl hover:bg-[#CAE52E] transition-colors disabled:opacity-50 whitespace-nowrap w-full sm:w-auto justify-center">
                     {status === 'loading' ? 'ENVIANDO...' : 'SUSCRIBIRME'}
                   </button>
                 </form>

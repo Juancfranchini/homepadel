@@ -1,18 +1,48 @@
-﻿import { Injectable, BadRequestException } from '@nestjs/common';
+﻿import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
 import * as crypto from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
+import { PricingService, ResolvedItem } from '../pricing/pricing.service';
 import * as bcrypt from 'bcrypt';
+
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
 @Injectable()
 export class PaymentsService {
-  constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(PaymentsService.name);
+
+  constructor(
+    private prisma: PrismaService,
+    private pricing: PricingService,
+  ) {}
+
+  /**
+   * N3 / N4 — Sin valores por defecto adivinados.
+   *
+   * Antes, si faltaba la variable de entorno se usaba un dominio inventado:
+   * el aviso de pago se enviaba a una dirección inexistente y la venta se
+   * perdía en silencio. Ahora falta la variable y el checkout falla de forma
+   * visible, sin afectar al resto del sitio.
+   */
+  private requiredUrl(name: 'FRONTEND_URL' | 'BACKEND_URL'): string {
+    const value = process.env[name];
+    if (value) return value.replace(/\/+$/, '');
+
+    if (IS_PRODUCTION) {
+      this.logger.error(`Falta la variable de entorno ${name}: no se puede cobrar sin ella.`);
+      throw new InternalServerErrorException(
+        'El medio de pago no está configurado. Avisá a la tienda o probá con otro método.',
+      );
+    }
+
+    return name === 'FRONTEND_URL' ? 'http://localhost:3000' : 'http://localhost:4000';
+  }
 
   private get FRONTEND_URL(): string {
-    return process.env.FRONTEND_URL || 'https://www.homepadel.com.ar';
+    return this.requiredUrl('FRONTEND_URL');
   }
 
   private get BACKEND_URL(): string {
-    return process.env.BACKEND_URL || 'https://api.homepadel.com.ar';
+    return this.requiredUrl('BACKEND_URL');
   }
 
   private async getMPAccessToken(): Promise<string> {
@@ -22,11 +52,23 @@ export class PaymentsService {
   }
 
   async createPreference(orderNumber: string, items: any[], payer: { name: string; email: string }, externalReference: string) {
+    // Se leen las URLs antes de tocar la base: si la configuración falta,
+    // conviene fallar acá y no después de haber creado una orden huérfana.
+    const frontendUrl = this.FRONTEND_URL;
+    const backendUrl = this.BACKEND_URL;
     const accessToken = await this.getMPAccessToken();
 
-    // P3 - Crear orden pendiente en la tabla de órdenes, no en SiteSection
-    const subtotal = items.reduce((acc: number, item: any) => acc + (Number(item.price) * item.quantity), 0);
+    // S3 / F6 — El precio sale de la base y se verifica el stock. Lo que haya
+    // mandado el navegador en `price` se descarta por completo.
+    const resolvedItems = await this.pricing.resolveItems(
+      (items || []).map((item: any) => ({ productId: item.productId, quantity: item.quantity })),
+    );
 
+    const subtotal = resolvedItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+    // P3 - Orden pendiente en la tabla de órdenes, no en la de configuración.
+    // El stock se descuenta recién cuando el pago se aprueba (ver handleWebhook),
+    // para no reservar unidades por carritos que quedan abandonados.
     try {
       await this.prisma.order.create({
         data: {
@@ -39,33 +81,32 @@ export class PaymentsService {
           discount: 0,
           address: 'Pendiente de pago',
           notes: JSON.stringify({ externalReference, pendingPayment: true }),
-          items: { create: items.map((item: any) => ({
+          items: { create: resolvedItems.map((item) => ({
             productId: item.productId,
             quantity: item.quantity,
-            price: Number(item.price),
+            price: item.price,
           })) },
         },
       });
     } catch (err) {
-      // Si la orden ya existe, continuar
-      console.log('Orden pendiente ya existe o error:', err);
+      this.logger.warn(`No se pudo crear la orden pendiente ${orderNumber}: ${err}`);
     }
 
     const body = {
       external_reference: externalReference,
-      notification_url: this.BACKEND_URL + '/api/payments/webhook',
+      notification_url: backendUrl + '/api/payments/webhook',
       payer: { name: payer.name, email: payer.email },
-      items: items.map((item) => ({
+      items: resolvedItems.map((item) => ({
         id: item.productId,
         title: item.name,
         quantity: item.quantity,
-        unit_price: Number(item.price),
+        unit_price: item.price,
         currency_id: 'ARS',
       })),
       back_urls: {
-        success: this.FRONTEND_URL + '/checkout/success?order=' + orderNumber,
-        failure: this.FRONTEND_URL + '/checkout/error?order=' + orderNumber,
-        pending: this.FRONTEND_URL + '/checkout/pending?order=' + orderNumber,
+        success: frontendUrl + '/checkout/success?order=' + orderNumber,
+        failure: frontendUrl + '/checkout/error?order=' + orderNumber,
+        pending: frontendUrl + '/checkout/pending?order=' + orderNumber,
       },
     };
 
@@ -82,25 +123,17 @@ export class PaymentsService {
     const paymentId = body.data?.id;
     if (!paymentId) return { received: true };
 
-    // P2 - Validar firma del webhook
-    const webhookSecret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
-    if (webhookSecret && signature) {
-      const expectedSignature = crypto
-        .createHmac('sha256', webhookSecret)
-        .update(xRequestId + '.' + JSON.stringify(body))
-        .digest('hex');
-      if (expectedSignature !== signature) {
-        console.error('Firma de webhook inválida');
-        return { received: true, signatureInvalid: true };
-      }
+    // N2 - Validación de firma según la especificación de Mercado Pago
+    if (!this.isSignatureValid(String(paymentId), signature, xRequestId)) {
+      return { received: true, signatureInvalid: true };
     }
 
     // P2 - Idempotencia: verificar si el pago ya fue procesado
     const existingOrder = await this.prisma.order.findFirst({
-      where: { notes: { contains: paymentId } },
+      where: { notes: { contains: String(paymentId) } },
     });
     if (existingOrder) {
-      console.log('Pago ya procesado:', paymentId);
+      this.logger.log(`Pago ya procesado, se ignora: ${paymentId}`);
       return { received: true, alreadyProcessed: true };
     }
 
@@ -111,7 +144,10 @@ export class PaymentsService {
       });
       const payment = await response.json();
 
-      if (payment.status !== 'approved') { console.log('Pago no aprobado:', payment.status); return { received: true }; }
+      if (payment.status !== 'approved') {
+        this.logger.log(`Pago ${paymentId} en estado "${payment.status}": no se registra la venta.`);
+        return { received: true };
+      }
 
       const ref = payment.external_reference;
       const email = payment.payer?.email || '';
@@ -127,23 +163,44 @@ export class PaymentsService {
         });
       }
 
-      // Buscar la orden pendiente creada en createPreference
+      // Buscar la orden pendiente creada en createPreference, con sus ítems:
+      // hacen falta para descontar el stock ahora que el pago se confirmó.
       const pendingOrder = await this.prisma.order.findFirst({
         where: { notes: { contains: ref } },
+        include: { items: { include: { product: { select: { name: true } } } } },
       });
 
       if (pendingOrder) {
-        // Actualizar la orden pendiente a PAID
+        // F6 - Recién acá se descuenta el stock: la reserva no se hace al abrir
+        // el checkout para no retener unidades por carritos abandonados.
+        try {
+          await this.pricing.decrementStock(
+            pendingOrder.items.map((item) => ({
+              productId: item.productId,
+              name: item.product.name,
+              quantity: item.quantity,
+              price: item.price,
+            })),
+          );
+        } catch (stockErr) {
+          // El pago ya se cobró: la venta se registra igual y queda el aviso
+          // para que la tienda resuelva el faltante con el comprador.
+          this.logger.error(
+            `Pago ${paymentId} aprobado pero sin stock para la orden ${pendingOrder.number}: ${stockErr}`,
+          );
+        }
+
         await this.prisma.order.update({
           where: { id: pendingOrder.id },
           data: {
             status: 'PAID',
+            userId: user?.id ?? pendingOrder.userId,
             total: payment.transaction_amount || pendingOrder.total,
             notes: JSON.stringify({ paymentId: payment.id, paymentMethod: 'mercadopago', paymentStatus: payment.status, buyerEmail: email, buyerName: name }),
           },
         });
 
-        console.log('Orden actualizada a PAID:', pendingOrder.number);
+        this.logger.log(`Orden ${pendingOrder.number} marcada como pagada.`);
       } else {
         // Fallback: crear orden si no existe
         const orderNumber = 'HP-' + Date.now();
@@ -158,12 +215,85 @@ export class PaymentsService {
         });
       }
 
-      await this.sendPurchaseToMeta(payment, pendingOrder?.number || 'HP-' + Date.now(), [], email);
+      await this.sendPurchaseToMeta(
+        payment,
+        pendingOrder?.number || 'HP-' + Date.now(),
+        pendingOrder?.items.map((item) => ({ productId: item.productId, quantity: item.quantity, price: item.price })) ?? [],
+        email,
+      );
     } catch (err) {
-      console.error('Error en webhook:', err);
+      this.logger.error(`Error procesando el aviso del pago ${paymentId}: ${err}`);
     }
 
     return { received: true };
+  }
+
+  /**
+   * N2 — Verificación de la firma del aviso de pago.
+   *
+   * Mercado Pago envía la cabecera `x-signature` con esta forma:
+   *     ts=1704908010,v1=618c85345248dd820d5fd456117c2ab2ef8eda45a0282ff693eac24131a5e839
+   *
+   * y firma esta cadena exacta (el "manifest"), no el cuerpo de la petición:
+   *     id:<data.id>;request-id:<x-request-id>;ts:<ts>;
+   *
+   * El identificador va en minúsculas cuando es alfanumérico, y los tramos cuyo
+   * valor no llega se omiten enteros. La implementación anterior firmaba el
+   * cuerpo serializado y comparaba contra la cabecera completa, así que ninguna
+   * firma legítima podía coincidir.
+   */
+  private isSignatureValid(paymentId: string, signature: string, xRequestId: string): boolean {
+    const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
+
+    if (!secret) {
+      // Sin secreto no hay forma de distinguir un aviso real de uno falso.
+      // En producción se rechaza: aceptar avisos sin verificar permitiría a
+      // cualquiera marcar órdenes como pagadas.
+      if (IS_PRODUCTION) {
+        this.logger.error(
+          'Falta MERCADOPAGO_WEBHOOK_SECRET: se rechazan los avisos de pago hasta configurarlo.',
+        );
+        return false;
+      }
+      this.logger.warn('Sin MERCADOPAGO_WEBHOOK_SECRET — validación de firma omitida (solo desarrollo).');
+      return true;
+    }
+
+    if (!signature) {
+      this.logger.error('Aviso de pago sin cabecera x-signature.');
+      return false;
+    }
+
+    // La cabecera trae pares separados por coma: ts=... , v1=...
+    const parts = new Map(
+      signature.split(',').map((chunk) => {
+        const [name, ...rest] = chunk.split('=');
+        return [name.trim(), rest.join('=').trim()] as const;
+      }),
+    );
+
+    const ts = parts.get('ts');
+    const received = parts.get('v1');
+    if (!ts || !received) {
+      this.logger.error('Cabecera x-signature con formato inesperado.');
+      return false;
+    }
+
+    const id = /^[a-z0-9]+$/i.test(paymentId) ? paymentId.toLowerCase() : paymentId;
+    let manifest = `id:${id};`;
+    if (xRequestId) manifest += `request-id:${xRequestId};`;
+    manifest += `ts:${ts};`;
+
+    const expected = crypto.createHmac('sha256', secret).update(manifest).digest('hex');
+
+    // Comparación de tiempo constante: evita filtrar información por la
+    // duración de la comparación. timingSafeEqual exige longitudes iguales.
+    const a = Buffer.from(expected, 'utf8');
+    const b = Buffer.from(received, 'utf8');
+    const valid = a.length === b.length && crypto.timingSafeEqual(a, b);
+
+    if (!valid) this.logger.error(`Firma inválida en el aviso del pago ${paymentId}.`);
+    return valid;
   }
 
   private async sendPurchaseToMeta(payment: any, orderNumber: string, items: any[], email: string) {

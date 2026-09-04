@@ -56,7 +56,7 @@ export default function FaqPage() {
         </div>
       </div>
 
-      <section className="max-w-7xl mx-auto px-6 lg:px-8 py-12 lg:py-16 text-center">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-12 lg:py-16 text-center">
         <p className="text-[#B7D31A] text-xs font-semibold uppercase tracking-[0.2em] mb-3">SOPORTE</p>
         <h1 className="text-4xl md:text-5xl font-semibold text-[#F7F6F7] leading-tight mb-4">
           Preguntas Frecuentes
@@ -66,7 +66,7 @@ export default function FaqPage() {
         </p>
       </section>
 
-      <section className="max-w-4xl mx-auto px-6 lg:px-8 pb-20">
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-5 sm:pb-20">
         {loading ? (
           <div className="text-center py-12">
             <p className="text-[#8A8A85] text-sm">Cargando...</p>
@@ -114,7 +114,7 @@ export default function FaqPage() {
         )}
       </section>
 
-      <section className="border-t border-[#0D0F0F] py-12 bg-[#050606]">
+      <section className="border-t border-[#0D0F0F] py-5 sm:py-12 bg-[#050606]">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
           <h3 className="text-[#F7F6F7] font-semibold text-xl mb-2">No encontraste lo que buscabas?</h3>
           <p className="text-[#C7C7C0] text-sm mb-6">Nuestro equipo esta disponible de Lunes a Viernes de 9 a 18 hs.</p>

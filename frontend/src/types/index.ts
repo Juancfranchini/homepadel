@@ -19,7 +19,19 @@ export interface Brand {
   active?: boolean;
 }
 
+export interface ProductVariant {
+  id: string;
+  sku: string;
+  size: string;
+  color?: string | null;
+  imageUrl?: string | null;
+  images?: string[];
+  stock: number;
+  active: boolean;
+}
+
 export interface Product {
+  variants?: ProductVariant[];
   id: string;
   name: string;
   slug: string;

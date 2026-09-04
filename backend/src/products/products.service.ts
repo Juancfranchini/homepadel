@@ -28,7 +28,7 @@ export class ProductsService {
         where,
         skip,
         take: Number(limit),
-        include: { category: true, brand: true },
+        include: { category: true, brand: true, variants: true },
         orderBy: { createdAt: 'desc' },
       }),
       this.prisma.product.count({ where }),
@@ -78,6 +78,7 @@ export class ProductsService {
       include: {
         category: true,
         brand: true,
+        variants: true,
         reviews: { where: { active: true } },
       },
     });
@@ -98,7 +99,7 @@ export class ProductsService {
   }
 
   async create(dto: CreateProductDto) {
-    const { categoryId, brandId, ...rest } = dto as any;
+    const { categoryId, brandId, variants, ...rest } = dto as any;
     if (!categoryId) throw new NotFoundException('categoryId es requerido');
     if (!brandId) throw new NotFoundException('brandId es requerido');
 
@@ -115,8 +116,11 @@ export class ProductsService {
 
     try {
       return await this.prisma.product.create({
-        data: { ...rest, slug, categoryId, brandId },
-        include: { category: true, brand: true },
+        data: {
+          ...rest, slug, categoryId, brandId,
+          ...(variants && variants.length > 0 ? { variants: { create: variants } } : {}),
+        },
+        include: { category: true, brand: true, variants: true },
       });
     } catch (err: any) {
       // Traducir error de Prisma
@@ -129,9 +133,19 @@ export class ProductsService {
 
   async update(id: string, dto: UpdateProductDto) {
     await this.findById(id);
-    const data: any = { ...dto };
+    const { variants, ...rest } = dto as any;
+    const data: any = { ...rest };
     if (dto.name) data.slug = slugify(dto.name, { lower: true, strict: true });
-    return this.prisma.product.update({ where: { id }, data, include: { category: true, brand: true } });
+
+    // Manejar variants: eliminar existentes y crear nuevas
+    if (variants !== undefined) {
+      await this.prisma.productVariant.deleteMany({ where: { productId: id } });
+      if (variants.length > 0) {
+        data.variants = { create: variants };
+      }
+    }
+
+    return this.prisma.product.update({ where: { id }, data, include: { category: true, brand: true, variants: true } });
   }
 
   async remove(id: string) {
