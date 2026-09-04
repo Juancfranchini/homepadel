@@ -117,6 +117,9 @@ export default function ProductoPage() {
   const images = selectedVariant?.imageUrl
     ? [selectedVariant.imageUrl, ...(selectedVariant.images || [])]
     : (product.images?.length > 0 ? product.images : []);
+
+  // Stock efectivo: variante seleccionada o stock del producto
+  const effectiveStock = selectedVariant ? selectedVariant.stock : product.stock;
   const installments = product.installments || 0;
   const hasInstallmentsInterest = product.hasInstallmentsInterest || false;
   const installmentsInterest = product.installmentsInterest || 0;
@@ -169,7 +172,7 @@ export default function ProductoPage() {
             <ProductInfo brandName={product.brand.name} brandSlug={product.brand.slug} productName={product.name} />
             <ProductStars rating={product.rating || 0} count={product.reviewCount || 0} />
             <ProductPrice displayPrice={displayPrice} transferPrice={transferPrice} hasDiscount={hasDiscount} originalPrice={product.price} cuota={cuota} installments={installments} hasInstallmentsInterest={hasInstallmentsInterest} installmentsInterest={installmentsInterest} paymentMethods={paymentMethods} onShowPaymentModal={() => setShowPaymentModal(true)} isMadeToOrder={product.isMadeToOrder} estimatedDays={product.estimatedDays} requiredDeposit={product.requiredDeposit} />
-            <StockAlert stock={product.stock} isMadeToOrder={product.isMadeToOrder} estimatedDays={product.estimatedDays} />
+            <StockAlert stock={effectiveStock} isMadeToOrder={product.isMadeToOrder} estimatedDays={product.estimatedDays} />
             <div className="h-px bg-[#0D0F0F]" />
             <TrustBadges />
             <VariantSelector
@@ -179,7 +182,7 @@ export default function ProductoPage() {
               onColorChange={setSelectedColor}
               onSizeChange={setSelectedSize}
             />
-            <ProductActions stock={product.stock} quantity={quantity} onQuantityChange={setQuantity} onBuyNow={handleBuyNow} onAddToCart={handleAddToCart} added={added} wished={wished} onWish={() => setWished(!wished)} />
+            <ProductActions stock={effectiveStock} quantity={quantity} onQuantityChange={setQuantity} onBuyNow={handleBuyNow} onAddToCart={handleAddToCart} added={added} wished={wished} onWish={() => setWished(!wished)} />
             {hasSizeGuide && (<Link href="/talles" className="inline-flex items-center gap-2 px-4 py-2 bg-[#1A1F21] border border-[#0D0F0F] rounded-lg text-[#B7D31A] text-xs font-semibold hover:border-[#B7D31A]/50 transition-all w-fit"><Ruler size={14} />Guia de talles</Link>)}
             <ShippingCalc />
             <p className="text-[10px] text-[#8A8A85]">SKU: {product.sku}</p>

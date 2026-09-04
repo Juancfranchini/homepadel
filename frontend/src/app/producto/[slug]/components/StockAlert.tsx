@@ -24,5 +24,9 @@ export default function StockAlert({ stock, isMadeToOrder, estimatedDays }: Prop
       </div>
     );
   }
-  return null;
+  return (
+    <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-semibold px-3 py-2 rounded-lg w-fit">
+      STOCK DISPONIBLE: {stock} UNIDADES
+    </div>
+  );
 }
