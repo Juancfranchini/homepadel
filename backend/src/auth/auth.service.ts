@@ -83,11 +83,20 @@ export class AuthService {
       const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
       if (!user) throw new NotFoundException('Usuario no encontrado');
 
+      // M2 - Verificar si el token fue emitido antes del último cambio de contraseña
+      if (user.updatedAt && payload.iat) {
+        const tokenIssuedAt = new Date(payload.iat * 1000);
+        if (user.updatedAt > tokenIssuedAt) {
+          throw new UnauthorizedException('Token ya utilizado');
+        }
+      }
+
       const hashed = await bcrypt.hash(newPassword, 10);
       await this.prisma.user.update({ where: { id: user.id }, data: { password: hashed } });
 
       return { success: true, message: 'Contraseña actualizada correctamente' };
     } catch (e) {
+      if (e instanceof UnauthorizedException) throw e;
       throw new UnauthorizedException('Token invalido o expirado');
     }
   }

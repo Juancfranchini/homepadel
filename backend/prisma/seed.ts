@@ -1,4 +1,4 @@
-import { PrismaClient, Role, OrderStatus } from '@prisma/client';
+﻿import { PrismaClient, Role, OrderStatus } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
@@ -120,7 +120,6 @@ async function main() {
   console.log(' Productos:', products.length);
 
   //  Banners 
-  await prisma.banner.deleteMany();
   await prisma.banner.createMany({
     data: [
       { title: 'Nuevas Paletas 2026', subtitle: 'Tecnologia de punta', image: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=1200', ctaText: 'VER COLECCION', link: '/catalogo?categoria=paletas', order: 1 },
@@ -131,7 +130,6 @@ async function main() {
   console.log(' Banners: 3');
 
   //  FAQ 
-  await prisma.fAQ.deleteMany();
   const faqs = [
     { category: 'COMPRAS', question: 'Como realizo una compra?', answer: 'Navega por nuestro catalogo, agrega productos al carrito y finaliza la compra completando tus datos. Recibiras un email de confirmacion.', order: 1 },
     { category: 'COMPRAS', question: 'Puedo modificar o cancelar mi pedido?', answer: 'Podes cancelar sin costo dentro de las 2 horas posteriores a la compra. Luego contactanos por WhatsApp.', order: 2 },
@@ -151,7 +149,6 @@ async function main() {
   console.log(' FAQs:', faqs.length);
 
   //  Testimonios 
-  await prisma.testimonial.deleteMany();
   await prisma.testimonial.createMany({
     data: [
       { name: 'Martin Lopez', comment: 'Excelente atencion y productos de primera calidad. La paleta llego en 48hs.', rating: 5, order: 1 },
@@ -164,7 +161,6 @@ async function main() {
   console.log(' Testimonios: 5');
 
   //  Beneficios 
-  await prisma.benefit.deleteMany();
   await prisma.benefit.createMany({
     data: [
       { icon: 'Truck', title: 'Envios a todo el pais', description: 'Recibi tu pedido donde estes', order: 1 },
@@ -176,7 +172,6 @@ async function main() {
   console.log(' Beneficios: 4');
 
   //  Hero Slides 
-  await prisma.heroSlide.deleteMany();
   await prisma.heroSlide.createMany({
     data: [
       { title: 'Nueva Coleccion 2026', subtitle: 'Paletas de alto rendimiento', description: 'Descubri las ultimas novedades en paletas profesionales', ctaPrimary: 'VER COLECCION', ctaPrimaryUrl: '/catalogo?categoria=paletas', order: 1 },
