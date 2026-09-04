@@ -3,11 +3,12 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Upload, ImageIcon, Star, Plus, Trash2 } from 'lucide-react';
+import { Upload, ImageIcon, Star } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import api from '@/lib/api';
 import Toggle from '../../testimonios/components/Toggle';
 import ImageGalleryInput from './ImageGalleryInput';
+import VariantEditor from './VariantEditor';
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000').replace(/\/api\/?$/, '');
 
@@ -68,7 +69,11 @@ const schema = z.object({
   }),
 });
 
-export type ProductFormData = z.infer<typeof schema> & { images?: string[]; salePrice?: number; variants?: { sku: string; size: string; color?: string; stock: number }[] };
+export type ProductFormData = z.infer<typeof schema> & {
+  images?: string[];
+  salePrice?: number;
+  variants?: { sku: string; size: string; color?: string; imageUrl?: string; images?: string[]; stock: number }[];
+};
 
 interface Category { id: string; name: string }
 interface Brand { id: string; name: string }
@@ -114,20 +119,13 @@ export default function ProductForm({
 
   useEffect(() => {
     if (defaultValues) {
-      const { salePrice: _sp, ...restDefaults } = defaultValues;
-      reset(restDefaults);
+      reset(defaultValues);
       setGalleryImages(Array.isArray(defaultValues.images) ? (defaultValues.images as string[]).slice(1) : []);
       setMainImage(Array.isArray(defaultValues.images) ? (defaultValues.images as string[])[0] || '' : '');
-      // Inicializar salePriceTempRef con el valor por defecto
       salePriceTempRef.current = defaultValues?.salePrice;
-      // Si NO hay promo activa, NO resetear salePrice
-      if (hasSalePrice) {
-        reset({ ...restDefaults, salePrice: defaultValues.salePrice });
-      } else {
-        reset({ ...restDefaults, salePrice: undefined });
-      }
+      setVariants(defaultValues?.variants || []);
     }
-  }, [defaultValues, reset, hasSalePrice]);
+  }, [defaultValues, reset]);
 
   const featured = watch('featured');
   const active = watch('active');
@@ -160,10 +158,6 @@ export default function ProductForm({
   };
 
   const handleFormSubmit = (data: ProductFormData) => {
-    console.log('[Submit] hasSalePrice:', hasSalePrice);
-    console.log('[Submit] data.salePrice:', (data as any).salePrice);
-    console.log('[Submit] data completo:', JSON.stringify(data));
-    // Validacion antes de guardar
     if (hasSalePrice) {
       const rawValue = (data as any).salePrice;
       const numVal = Number(rawValue);
@@ -173,7 +167,6 @@ export default function ProductForm({
       }
     }
 
-    // Validar SKU duplicado en variantes
     const skuSet = new Set<string>();
     for (const v of variants) {
       if (v.sku && v.sku.trim()) {
@@ -187,11 +180,10 @@ export default function ProductForm({
     }
 
     const allImages = [mainImage, ...galleryImages].filter(Boolean) as string[];
-    // Si checkbox desactivado, NO enviar salePrice
     if (!hasSalePrice) {
       const cleanData: any = { ...data };
-      cleanData.salePrice = null; // Enviar null para que backend lo guarde como null
-      onSave({ ...cleanData, images: allImages });
+      cleanData.salePrice = undefined;
+      onSave({ ...cleanData, images: allImages, variants });
     } else {
       onSave({ ...data, images: allImages, variants });
     }
@@ -252,22 +244,15 @@ export default function ProductForm({
               checked={hasSalePrice}
               onChange={(e) => {
                 const checked = e.target.checked;
-                console.log('[Checkbox] Nuevo estado:', checked);
-                console.log('[Checkbox] Valor actual salePrice:', watch('salePrice'));
-                console.log('[Checkbox] salePriceTempRef:', salePriceTempRef.current);
                 setHasSalePrice(checked);
                 if (!checked) {
                   clearErrors('salePrice');
                   const currentVal = watch('salePrice');
-                  console.log('[Checkbox] Desactivando - guardando temp:', currentVal);
                   salePriceTempRef.current = typeof currentVal === 'number' ? currentVal : Number(currentVal);
                   setValue('salePrice', undefined as any, { shouldDirty: true, shouldValidate: false });
-                  console.log('[Checkbox] Despues de setValue undefined - watch:', watch('salePrice'));
                 } else {
-                  console.log('[Checkbox] Activando - restaurando temp:', salePriceTempRef.current);
                   if (salePriceTempRef.current) {
                     setValue('salePrice', salePriceTempRef.current, { shouldDirty: true });
-                    console.log('[Checkbox] Despues de restaurar - watch:', watch('salePrice'));
                   }
                 }
               }}
@@ -415,94 +400,8 @@ export default function ProductForm({
           </div>
         </div>
 
-        <div className="sm:col-span-2 border-t border-gray-100 pt-4">
-          <div className="flex items-center justify-between mb-3">
-            <label className={labelClass}>Variantes (talles/colores)</label>
-            <button
-              type="button"
-              onClick={() => setVariants([...variants, { sku: '', size: '', color: '', imageUrl: '', images: [], stock: 0 }])}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#C8FF00] text-[#0f172a] hover:bg-[#b8ef00] transition-colors"
-            >
-              <Plus className="w-3 h-3" />Agregar variante
-            </button>
-          </div>
-          
-          {variants.length === 0 ? (
-            <p className="text-xs text-gray-400">Sin variantes. Agrega talles o colores si este producto los necesita.</p>
-          ) : (
-            <div className="flex flex-col gap-3">
-              {variants.map((v, i) => (
-                <div key={i} className="grid grid-cols-2 sm:grid-cols-4 gap-2 items-start bg-gray-50 rounded-lg p-3 border border-gray-100">
-                  <div>
-                    <label className="text-[10px] text-gray-400 uppercase">Talle *</label>
-                    <input
-                      type="text"
-                      value={v.size}
-                      onChange={(e) => {
-                        const newVariants = [...variants];
-                        newVariants[i].size = e.target.value;
-                        setVariants(newVariants);
-                      }}
-                      className={inputClass + ' mt-0.5'}
-                      placeholder="S, M, L, XL"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-gray-400 uppercase">Color</label>
-                    <input
-                      type="text"
-                      value={v.color || ''}
-                      onChange={(e) => {
-                        const newVariants = [...variants];
-                        newVariants[i].color = e.target.value;
-                        setVariants(newVariants);
-                      }}
-                      className={inputClass + ' mt-0.5'}
-                      placeholder="Negro, Blanco"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-gray-400 uppercase">Stock</label>
-                    <input
-                      type="number"
-                      value={v.stock}
-                      onChange={(e) => {
-                        const newVariants = [...variants];
-                        newVariants[i].stock = Number(e.target.value);
-                        setVariants(newVariants);
-                      }}
-                      className={inputClass + ' mt-0.5'}
-                      placeholder="0"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-gray-400 uppercase">SKU</label>
-                    <div className="flex gap-1">
-                      <input
-                        type="text"
-                        value={v.sku}
-                        onChange={(e) => {
-                          const newVariants = [...variants];
-                          newVariants[i].sku = e.target.value;
-                          setVariants(newVariants);
-                        }}
-                        className={inputClass + ' mt-0.5'}
-                        placeholder="SKU-001"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setVariants(variants.filter((_, idx) => idx !== i))}
-                        className="mt-0.5 p-1.5 rounded-lg text-red-400 hover:bg-red-50 transition-colors"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <VariantEditor variants={variants} onChange={setVariants} inputClass={inputClass} />
+
         <div className="sm:col-span-2 flex justify-end gap-3 pt-4 sm:pt-6 border-t border-gray-100">
           <button type="button" onClick={onCancel} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">Cancelar</button>
           <button type="submit" disabled={saving} className="px-4 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg text-sm font-semibold hover:bg-[#b8ef00] disabled:opacity-50 transition-colors">

@@ -257,6 +257,8 @@ model ProductVariant {
   sku       String   @unique
   size      String
   color     String?
+  imageUrl  String?
+  images    String[] @default([])
   stock     Int      @default(0)
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
