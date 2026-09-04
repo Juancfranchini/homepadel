@@ -109,7 +109,14 @@ export default function ProductoPage() {
   const hasDiscount = !product.isMadeToOrder && product.salePrice !== undefined && product.salePrice > 0 && product.salePrice < product.price;
   const discountPct = hasDiscount ? getDiscountPercent(product.price, product.salePrice!) : 0;
   const displayPrice = hasDiscount ? product.salePrice! : product.price;
-  const images = product.images?.length > 0 ? product.images : [];
+  // Imágenes a mostrar: si hay variante seleccionada con color+size, usar sus imágenes
+  const selectedVariant = selectedColor && selectedSize
+    ? product.variants?.find(v => v.color === selectedColor && v.size === selectedSize)
+    : null;
+
+  const images = selectedVariant?.imageUrl
+    ? [selectedVariant.imageUrl, ...(selectedVariant.images || [])]
+    : (product.images?.length > 0 ? product.images : []);
   const installments = product.installments || 0;
   const hasInstallmentsInterest = product.hasInstallmentsInterest || false;
   const installmentsInterest = product.installmentsInterest || 0;
