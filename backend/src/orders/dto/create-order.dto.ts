@@ -4,8 +4,8 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 class OrderItemDto {
   @IsString() productId: string;
+  @IsString() @IsOptional() variantId?: string;
   @IsNumber() @Min(1) quantity: number;
-  @IsNumber() price: number;
 }
 
 export class CreateOrderDto {

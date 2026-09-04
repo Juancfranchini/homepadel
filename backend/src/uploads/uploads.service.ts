@@ -224,13 +224,109 @@ export class UploadsService {
       }
     }
 
+    const heroSlides = await this.prisma.heroSlide.findMany({
+      select: { id: true, image: true, imageMobile: true },
+    });
+    for (const slide of heroSlides) {
+      const data: { image?: string | null; imageMobile?: string | null } = {};
+      let changed = false;
+      for (const field of ['image', 'imageMobile'] as const) {
+        const value = slide[field];
+        if (!value || !value.startsWith('data:image/')) continue;
+        try {
+          data[field] = await this.uploadBase64(value, 'homepadel/hero-slides');
+          changed = true;
+          migrated++;
+        } catch {
+          failed++;
+        }
+      }
+      if (changed) {
+        await this.prisma.heroSlide.update({ where: { id: slide.id }, data });
+      }
+    }
+
+    const contactChannels = await this.prisma.contactChannel.findMany({
+      select: { id: true, logo: true },
+    });
+    for (const channel of contactChannels) {
+      if (!channel.logo || !channel.logo.startsWith('data:image/')) continue;
+      try {
+        const logo = await this.uploadBase64(channel.logo, 'homepadel/contact-channels');
+        await this.prisma.contactChannel.update({ where: { id: channel.id }, data: { logo } });
+        migrated++;
+      } catch {
+        failed++;
+      }
+    }
+
+    const sections = await this.prisma.siteSection.findMany({
+      select: { id: true, data: true },
+    });
+    for (const section of sections) {
+      const result = await this.migrateJsonImages(section.data, 'homepadel/site-sections');
+      if (result.migrated > 0) {
+        await this.prisma.siteSection.update({
+          where: { id: section.id },
+          data: { data: result.value as any },
+        });
+      }
+      migrated += result.migrated;
+      failed += result.failed;
+    }
+
     return { migrated, failed };
+  }
+
+  private uploadBase64(base64: string, folder: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      cloudinary.uploader.upload_stream(
+        { resource_type: 'image', folder },
+        (error, result) => {
+          if (error) reject(error);
+          else if (!result?.secure_url) reject(new Error('Cloudinary no devolvió una URL'));
+          else resolve(result.secure_url);
+        },
+      ).end(base64);
+    });
+  }
+
+  private async migrateJsonImages(value: unknown, folder: string): Promise<{ value: unknown; migrated: number; failed: number }> {
+    if (typeof value === 'string') {
+      if (!value.startsWith('data:image/')) return { value, migrated: 0, failed: 0 };
+      try {
+        return { value: await this.uploadBase64(value, folder), migrated: 1, failed: 0 };
+      } catch {
+        return { value, migrated: 0, failed: 1 };
+      }
+    }
+    if (Array.isArray(value)) {
+      const results = await Promise.all(value.map((item) => this.migrateJsonImages(item, folder)));
+      return {
+        value: results.map((result) => result.value),
+        migrated: results.reduce((sum, result) => sum + result.migrated, 0),
+        failed: results.reduce((sum, result) => sum + result.failed, 0),
+      };
+    }
+    if (value && typeof value === 'object') {
+      const entries = await Promise.all(
+        Object.entries(value as Record<string, unknown>).map(async ([key, item]) => [key, await this.migrateJsonImages(item, folder)] as const),
+      );
+      return {
+        value: Object.fromEntries(entries.map(([key, result]) => [key, result.value])),
+        migrated: entries.reduce((sum, [, result]) => sum + result.migrated, 0),
+        failed: entries.reduce((sum, [, result]) => sum + result.failed, 0),
+      };
+    }
+    return { value, migrated: 0, failed: 0 };
   }
 
   async uploadImage(file: Express.Multer.File): Promise<string> {
     const configured = await this.getCloudinaryConfig();
     if (!configured) {
-      // Fallback: si no hay Cloudinary, guardar como base64 (temporal)
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('Cloudinary no está configurado en producción');
+      }
       const base64 = file.buffer.toString('base64');
       return `data:${file.mimetype};base64,${base64}`;
     }

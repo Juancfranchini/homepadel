@@ -15,7 +15,7 @@ export class OrdersService {
 
   async findAll() {
     const orders = await this.prisma.order.findMany({
-      include: { items: { include: { product: true } }, user: { select: { id: true, name: true, email: true } } },
+      include: { items: { include: { product: true, variant: true } }, user: { select: { id: true, name: true, email: true } } },
       orderBy: { createdAt: 'desc' },
     });
 
@@ -35,7 +35,7 @@ export class OrdersService {
   findByUser(userId: string) {
     return this.prisma.order.findMany({
       where: { userId },
-      include: { items: { include: { product: true } } },
+      include: { items: { include: { product: true, variant: true } } },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -43,7 +43,7 @@ export class OrdersService {
   async findOne(id: string) {
     const order = await this.prisma.order.findUnique({
       where: { id },
-      include: { items: { include: { product: true } }, user: { select: { id: true, name: true, email: true } } },
+      include: { items: { include: { product: true, variant: true } }, user: { select: { id: true, name: true, email: true } } },
     });
     if (!order) throw new NotFoundException('Pedido no encontrado');
     return order;
@@ -52,7 +52,7 @@ export class OrdersService {
   async trackByNumber(number: string, email?: string, phone?: string) {
     const order = await this.prisma.order.findUnique({
       where: { number },
-      include: { items: { include: { product: true } }, user: { select: { id: true, name: true, email: true } } },
+      include: { items: { include: { product: true, variant: true } }, user: { select: { id: true, name: true, email: true } } },
     });
     if (!order) throw new NotFoundException('Pedido no encontrado. Verifica el número de orden.');
 
@@ -91,7 +91,7 @@ export class OrdersService {
     // S3 / F6 - Precios desde la base y verificación de stock. La misma lógica
     // que usa el checkout de Mercado Pago, para que ambos caminos coincidan.
     const resolvedItems = await this.pricing.resolveItems(
-      dto.items.map((item) => ({ productId: item.productId, quantity: item.quantity })),
+      dto.items.map((item) => ({ productId: item.productId, variantId: item.variantId, quantity: item.quantity })),
     );
 
     // El descuento es atómico: dos compras simultáneas de la última unidad no
@@ -100,6 +100,7 @@ export class OrdersService {
 
     const itemsWithRealPrices = resolvedItems.map((item) => ({
       productId: item.productId,
+      variantId: item.variantId,
       quantity: item.quantity,
       price: item.price,
     }));
@@ -126,7 +127,7 @@ export class OrdersService {
         notes: JSON.stringify(buyerInfo),
         items: { create: itemsWithRealPrices },
       },
-      include: { items: { include: { product: true } }, user: { select: { id: true, name: true, email: true } } },
+      include: { items: { include: { product: true, variant: true } }, user: { select: { id: true, name: true, email: true } } },
     });
 
     const customerEmail = dto.buyerEmail || order.user?.email;

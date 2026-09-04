@@ -67,6 +67,11 @@ export interface Product {
 export interface CartItem {
   product: Product;
   quantity: number;
+  variantId?: string;
+  variantSku?: string;
+  variantSize?: string;
+  variantColor?: string | null;
+  variantImageUrl?: string | null;
 }
 
 export interface Order {
@@ -89,6 +94,7 @@ export interface Order {
     quantity: number;
     price: number;
     product: { name: string; sku: string; images?: string[] };
+    variant?: { sku: string; size: string; color?: string | null } | null;
   }[];
 }
 

@@ -27,23 +27,6 @@ export class AuthService {
     return { user, token: this.jwtService.sign({ sub: user.id, role: user.role }) };
   }
 
-  async googleLogin(credential: string) {
-    const payload = JSON.parse(Buffer.from(credential.split('.')[1], 'base64').toString());
-    const { email, name, sub } = payload;
-
-    let user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user) {
-      const randomPassword = 'google_' + Math.random().toString(36).slice(2) + Date.now();
-      const hashed = await bcrypt.hash(randomPassword, 10);
-      user = await this.prisma.user.create({
-        data: { email, name, password: hashed, role: 'CUSTOMER' },
-      });
-    }
-
-    const { password: _, ...userData } = user;
-    return { user: userData, token: this.jwtService.sign({ sub: user.id, role: user.role }) };
-  }
-
   async login(dto: LoginDto) {
     const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (!user) throw new UnauthorizedException('Credenciales invalidas');

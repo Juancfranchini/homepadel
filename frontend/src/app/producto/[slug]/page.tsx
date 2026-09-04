@@ -45,6 +45,11 @@ export default function ProductoPage() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const activeProductVariants = product?.variants?.filter(v => v.active) ?? [];
+  const selectedVariant = activeProductVariants.find(v =>
+    v.size === selectedSize &&
+    (!activeProductVariants.some(candidate => candidate.color) || v.color === selectedColor)
+  ) ?? null;
 
   useEffect(() => {
     if (!params.slug) return;
@@ -84,8 +89,25 @@ export default function ProductoPage() {
     }
   }, [product]);
 
-  const handleAddToCart = () => { if (!product) return; addItem(product, quantity); setAdded(true); setTimeout(() => setAdded(false), 1500); };
-  const handleBuyNow = () => { if (!product) return; addItem(product, quantity); router.push('/carrito'); };
+  const handleAddToCart = () => {
+    if (!product) return;
+    if (activeProductVariants.length && !selectedVariant) {
+      alert('Seleccioná las opciones de la variante antes de continuar');
+      return;
+    }
+    addItem(product, quantity, selectedVariant ?? undefined);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1500);
+  };
+  const handleBuyNow = () => {
+    if (!product) return;
+    if (activeProductVariants.length && !selectedVariant) {
+      alert('Seleccioná las opciones de la variante antes de continuar');
+      return;
+    }
+    addItem(product, quantity, selectedVariant ?? undefined);
+    router.push('/carrito');
+  };
 
   if (loading) {
     return (
@@ -110,16 +132,18 @@ export default function ProductoPage() {
   const discountPct = hasDiscount ? getDiscountPercent(product.price, product.salePrice!) : 0;
   const displayPrice = hasDiscount ? product.salePrice! : product.price;
   // Imágenes a mostrar: si hay variante seleccionada con color+size, usar sus imágenes
-  const selectedVariant = selectedColor && selectedSize
-    ? product.variants?.find(v => v.color === selectedColor && v.size === selectedSize)
-    : null;
+  const activeVariants = activeProductVariants;
 
   const images = selectedVariant?.imageUrl
     ? [selectedVariant.imageUrl, ...(selectedVariant.images || [])]
     : (product.images?.length > 0 ? product.images : []);
 
   // Stock efectivo: variante seleccionada o stock del producto
-  const effectiveStock = selectedVariant ? selectedVariant.stock : product.stock;
+  const effectiveStock = selectedVariant
+    ? selectedVariant.stock
+    : activeProductVariants.length > 0
+      ? 1
+      : product.stock;
   const installments = product.installments || 0;
   const hasInstallmentsInterest = product.hasInstallmentsInterest || false;
   const installmentsInterest = product.installmentsInterest || 0;
@@ -176,7 +200,7 @@ export default function ProductoPage() {
             <div className="h-px bg-[#0D0F0F]" />
             <TrustBadges />
             <VariantSelector
-              variants={product.variants || []}
+              variants={activeVariants}
               selectedColor={selectedColor}
               selectedSize={selectedSize}
               onColorChange={setSelectedColor}
@@ -269,4 +293,3 @@ export default function ProductoPage() {
     </div>
   );
 }
-

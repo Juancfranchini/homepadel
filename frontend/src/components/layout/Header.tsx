@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react';
 import { User, ShoppingCart, Menu, X } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
-import api from '@/lib/api';
 import { usePathname } from 'next/navigation';
 import BrandLogo from '@/components/ui/BrandLogo';
 import { useBranding } from '@/hooks/useBranding';
@@ -22,7 +21,7 @@ const NAV_LINKS = [
 
 export default function Header() {
   const branding = useBranding();
-  const { user, setAuth, isAuthenticated } = useAuthStore();
+  const { user } = useAuthStore();
   const [isMobile, setIsMobile] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
 
@@ -38,47 +37,6 @@ export default function Header() {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && !user) {
-      const script = document.createElement('script');
-      script.src = 'https://accounts.google.com/gsi/client';
-      script.async = true;
-      script.defer = true;
-      script.onload = () => {
-        if ((window as any).google) {
-          (window as any).google.accounts.id.initialize({
-            client_id: '295795847498-dfja9kjp9klivohbrgacnl6iueo1jm4h.apps.googleusercontent.com',
-            callback: handleGoogleResponse,
-          });
-          const btnRef = document.getElementById('google-login-btn');
-          if (btnRef) {
-            (window as any).google.accounts.id.renderButton(btnRef, {
-              theme: 'outline',
-              size: 'medium',
-              text: 'signin_with',
-              shape: 'rectangular',
-              width: 200,
-            });
-          }
-        }
-      };
-      document.body.appendChild(script);
-    }
-  }, [user]);
-
-  const handleGoogleResponse = async (response: any) => {
-    try {
-      const payload = JSON.parse(atob(response.credential.split('.')[1]));
-      const { email, name, sub } = payload;
-      const res = await api.post('/auth/google', { email, name, googleId: sub });
-      if (res.data?.user && res.data?.token) {
-        setAuth(res.data.user, res.data.token);
-      }
-    } catch (error) {
-      console.error('Error login Google:', error);
-    }
-  };
 
   return (
     <>

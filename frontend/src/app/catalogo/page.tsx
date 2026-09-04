@@ -33,6 +33,13 @@ function CatálogoContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const addItem = useCartStore((s) => s.addItem);
+  const addCatalogItem = useCallback((product: Product) => {
+    if (product.variants?.some((variant) => variant.active)) {
+      router.push('/producto/' + product.slug);
+      return;
+    }
+    addItem(product);
+  }, [addItem, router]);
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -150,9 +157,9 @@ function CatálogoContent() {
             {loading ? <CatalogSkeleton /> :
               products.length === 0 ? <CatalogEmpty hasFilters={hasFilters} onClear={clearFilters} /> :
                 (viewMode === 'grid' ?
-                  <CatalogGrid products={products} onAddToCart={(p) => addItem(p)} />
+                  <CatalogGrid products={products} onAddToCart={addCatalogItem} />
                 :
-                  <CatalogList products={products} onAddToCart={(p) => addItem(p)} />
+                  <CatalogList products={products} onAddToCart={addCatalogItem} />
                 )
             }
 

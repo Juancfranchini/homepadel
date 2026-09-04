@@ -1,4 +1,4 @@
-﻿// Store de carrito con Zustand
+// Store de carrito con Zustand
 // Persiste en localStorage bajo la clave 'homepadel-cart'
 // Permite agregar, eliminar y actualizar items, y calcular totales
 
@@ -9,9 +9,9 @@ import { trackMetaEvent } from '@/lib/metaPixel';
 
 interface CartStore {
   items: CartItem[];
-  addItem: (product: Product, quantity?: number) => void;
-  removeItem: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  addItem: (product: Product, quantity?: number, variant?: { id: string; sku: string; size: string; color?: string | null; imageUrl?: string | null }) => void;
+  removeItem: (itemKey: string) => void;
+  updateQuantity: (itemKey: string, quantity: number) => void;
   clearCart: () => void;
   totalItems: () => number;
   totalPrice: () => number;
@@ -23,8 +23,10 @@ export const useCartStore = create<CartStore>()(
       items: [],
 
       // Agrega un producto al carrito; si ya existe, incrementa la cantidad
-      addItem: (product, quantity = 1) => {
-        const existing = get().items.find((i) => i.product.id === product.id);
+      addItem: (product, quantity = 1, variant) => {
+        const existing = get().items.find((i) => 
+          i.product.id === product.id && i.variantId === variant?.id
+        );
 
         trackMetaEvent('AddToCart', {
           content_ids: [product.id],
@@ -37,32 +39,42 @@ export const useCartStore = create<CartStore>()(
         if (existing) {
           set((state) => ({
             items: state.items.map((i) =>
-              i.product.id === product.id
+              i.product.id === product.id && i.variantId === variant?.id
                 ? { ...i, quantity: i.quantity + quantity }
                 : i
             ),
           }));
         } else {
-          set((state) => ({ items: [...state.items, { product, quantity }] }));
+          set((state) => ({ 
+            items: [...state.items, { 
+              product, 
+              quantity,
+              variantId: variant?.id,
+              variantSku: variant?.sku,
+              variantSize: variant?.size,
+              variantColor: variant?.color,
+              variantImageUrl: variant?.imageUrl,
+            }] 
+          }));
         }
       },
 
       // Elimina un producto del carrito por su ID
-      removeItem: (productId) => {
+      removeItem: (itemKey) => {
         set((state) => ({
-          items: state.items.filter((i) => i.product.id !== productId),
+          items: state.items.filter((i) => getItemKey(i) !== itemKey),
         }));
       },
 
       // Actualiza la cantidad de un producto; si es 0 o menos, lo elimina
-      updateQuantity: (productId, quantity) => {
+      updateQuantity: (itemKey, quantity) => {
         if (quantity <= 0) {
-          get().removeItem(productId);
+          get().removeItem(itemKey);
           return;
         }
         set((state) => ({
           items: state.items.map((i) =>
-            i.product.id === productId ? { ...i, quantity } : i
+            getItemKey(i) === itemKey ? { ...i, quantity } : i
           ),
         }));
       },
@@ -82,3 +94,7 @@ export const useCartStore = create<CartStore>()(
     { name: 'homepadel-cart' }
   )
 );
+
+export function getItemKey(item: Pick<CartItem, 'product' | 'variantId'>): string {
+  return item.product.id + '-' + (item.variantId ?? 'base');
+}
