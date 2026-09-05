@@ -118,8 +118,11 @@ export default function ProductosPage() {
   const handleSave = async (data: ProductFormData) => {
     setSaving(true);
     try {
-      if (editItem) { await api.patch('/products/' + editItem.id, data); toast('Producto actualizado', 'success'); }
-      else { await api.post('/products', data); toast('Producto creado', 'success'); }
+      const payload = editItem
+        ? { ...data, variants: data.variants?.filter((variant) => variant.id !== `${editItem.id}-base`) }
+        : data;
+      if (editItem) { await api.patch('/products/' + editItem.id, payload); toast('Producto actualizado', 'success'); }
+      else { await api.post('/products', payload); toast('Producto creado', 'success'); }
       setModalOpen(false); load();
     }     catch (error: any) {
       const rawMessage = error?.response?.data?.message;
@@ -193,7 +196,7 @@ export default function ProductosPage() {
     dimensionUnit: editItem.dimensionUnit || 'cm',
     weight: editItem.weight || undefined,
     weightUnit: editItem.weightUnit || 'kg',
-    variants: editItem.variants || [],
+    variants: editItem.variants?.filter((variant: any) => variant.id !== `${editItem.id}-base`) || [],
   } : undefined;
 
   if (loading) return <PageLoader />;

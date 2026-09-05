@@ -21,6 +21,7 @@ export interface Brand {
 
 export interface ProductVariant {
   id: string;
+  isDefault?: boolean;
   sku: string;
   size: string;
   color?: string | null;

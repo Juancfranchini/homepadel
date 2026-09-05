@@ -47,13 +47,15 @@ export default function ProductoPage() {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedDimensions, setSelectedDimensions] = useState<string | null>(null);
   const [selectedWeight, setSelectedWeight] = useState<string | null>(null);
-  const activeProductVariants = product?.variants?.filter(v => v.active) ?? [];
+  const hasVariantProperties = !!(product?.hasSize || product?.hasColor || product?.hasDimensions || product?.hasWeight);
+  const activeProductVariants = product?.variants?.filter(v => v.active && (!v.isDefault || hasVariantProperties)) ?? [];
+  const defaultVariant = product?.variants?.find(v => v.active && v.isDefault);
   const selectedVariant = activeProductVariants.find(v =>
     (!product?.hasSize || v.size === selectedSize) &&
     (!product?.hasColor || v.color === selectedColor) &&
     (!product?.hasDimensions || dimensionLabel(v) === selectedDimensions) &&
     (!product?.hasWeight || weightLabel(v) === selectedWeight)
-  ) ?? (product && !product.hasSize && !product.hasColor && !product.hasDimensions && !product.hasWeight ? activeProductVariants[0] : null);
+  ) ?? (hasVariantProperties ? defaultVariant : undefined);
 
   useEffect(() => {
     if (!params.slug) return;

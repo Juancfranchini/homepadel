@@ -26,7 +26,7 @@ function ProductCard({ product }: { product: Product }) {
     e.preventDefault();
     e.stopPropagation();
     if (product.stock === 0 || adding) return;
-    if (product.variants?.some((variant) => variant.active)) {
+    if (product.variants?.some((variant) => variant.active && !variant.isDefault) || product.hasSize || product.hasColor || product.hasDimensions || product.hasWeight) {
       router.push('/producto/' + product.slug);
       return;
     }
