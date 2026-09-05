@@ -32,6 +32,10 @@ export class ProductsController {
   @ApiQuery({ name: 'search', required: false })
   @ApiQuery({ name: 'minPrice', required: false })
   @ApiQuery({ name: 'maxPrice', required: false })
+  @ApiQuery({ name: 'size', required: false })
+  @ApiQuery({ name: 'color', required: false })
+  @ApiQuery({ name: 'weight', required: false })
+  @ApiQuery({ name: 'weightUnit', required: false })
   findAll(@Query() query: any) {
     return this.productsService.findAll(query);
   }
@@ -73,5 +77,13 @@ export class ProductsController {
   @Roles(Role.ADMIN)
   remove(@Param('id') id: string) {
     return this.productsService.remove(id);
+  }
+
+  @Delete(':productId/variants/:variantId')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  removeVariant(@Param('productId') productId: string, @Param('variantId') variantId: string) {
+    return this.productsService.removeVariant(productId, variantId);
   }
 }

@@ -21,9 +21,17 @@ export interface Brand {
 
 export interface ProductVariant {
   id: string;
+  isDefault?: boolean;
   sku: string;
   size: string;
   color?: string | null;
+  dimensions?: string | null;
+  dimensionLength?: number | null;
+  dimensionWidth?: number | null;
+  dimensionHeight?: number | null;
+  dimensionUnit?: string | null;
+  weight?: number | null;
+  weightUnit?: string | null;
   imageUrl?: string | null;
   images?: string[];
   stock: number;
@@ -32,6 +40,18 @@ export interface ProductVariant {
 
 export interface Product {
   variants?: ProductVariant[];
+  hasSize?: boolean;
+  hasColor?: boolean;
+  hasDimensions?: boolean;
+  hasWeight?: boolean;
+  size?: string | null;
+  color?: string | null;
+  dimensionLength?: number | null;
+  dimensionWidth?: number | null;
+  dimensionHeight?: number | null;
+  dimensionUnit?: string | null;
+  weight?: number | null;
+  weightUnit?: string | null;
   id: string;
   name: string;
   slug: string;
@@ -67,6 +87,14 @@ export interface Product {
 export interface CartItem {
   product: Product;
   quantity: number;
+  variantId?: string;
+  variantSku?: string;
+  variantSize?: string;
+  variantColor?: string | null;
+  variantDimensions?: string | null;
+  variantWeight?: number | null;
+  variantWeightUnit?: string | null;
+  variantImageUrl?: string | null;
 }
 
 export interface Order {
@@ -89,6 +117,7 @@ export interface Order {
     quantity: number;
     price: number;
     product: { name: string; sku: string; images?: string[] };
+    variant?: { sku: string; size: string; color?: string | null } | null;
   }[];
 }
 

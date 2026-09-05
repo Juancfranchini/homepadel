@@ -1,4 +1,4 @@
-﻿// Upload de imágenes para productos, banners, categorías, etc.
+// Upload de imágenes para productos, banners, categorías, etc.
 // POST /api/uploads/image  sube una imagen a Cloudinary y retorna { url: "https://res.cloudinary.com/..." }
 // Requiere autenticación ADMIN
 // El campo del form-data debe llamarse 'file'
@@ -19,11 +19,6 @@ import { UploadsService } from './uploads.service';
 @Controller('uploads')
 export class UploadsController {
   constructor(private readonly uploadsService: UploadsService) {}
-
-  @Post('migrate-to-cloudinary')
-  async migrateToCloudinary() {
-    return this.uploadsService.migrateToCloudinary();
-  }
 
   @Post('image')
   @ApiConsumes('multipart/form-data')

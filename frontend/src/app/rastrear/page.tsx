@@ -24,7 +24,7 @@ interface TrackedOrder {
   buyerEmail?: string;
   buyerPhone?: string;
   buyerName?: string;
-  items: { quantity: number; product: { name: string; images: string[] } }[];
+  items: { quantity: number; product: { name: string; images: string[] }; variant?: { sku: string; size: string; color?: string | null; dimensions?: string | null; weight?: number | null; weightUnit?: string | null } | null }[];
 }
 
 function RastrearContent() {
@@ -118,7 +118,12 @@ function RastrearContent() {
               </div>
               <div className="flex items-center justify-between pt-4 border-t border-[#0D0F0F]">
                 <div><p className="text-xs text-[#8A8A85] uppercase tracking-wide">Productos</p><p className="text-sm font-semibold text-[#F7F6F7]">{order.items.map((item, i) => (
-                  <span key={i} className="text-sm font-semibold text-[#F7F6F7]">{item.product.name} <span className="text-[#8A8A85] font-normal">x {item.quantity}</span>{i < order.items.length - 1 ? ", " : ""}</span>
+                  <span key={i} className="text-sm font-semibold text-[#F7F6F7]">
+                    {item.product.name}
+                    {item.variant && <span className="text-[#8A8A85] font-normal"> ({item.variant.size}{item.variant.color ? ' / ' + item.variant.color : ''}{item.variant.dimensions ? ' / ' + item.variant.dimensions : ''}{item.variant.weight != null ? ' / ' + item.variant.weight + ' ' + (item.variant.weightUnit || '') : ''})</span>}
+                    <span className="text-[#8A8A85] font-normal"> x {item.quantity}</span>
+                    {i < order.items.length - 1 ? ", " : ""}
+                  </span>
                 ))}</p></div>
                 <div className="text-right"><p className="text-xs text-[#8A8A85] uppercase tracking-wide">Total</p><p className="text-lg font-black text-[#F7F6F7]">{formatPrice(order.total)}</p></div>
               </div>

@@ -10,7 +10,7 @@ export class PaymentsController {
   @Post('create-preference')
   async createPreference(@Body() body: {
     orderNumber: string;
-    items: { productId: string; name: string; quantity: number; price: number }[];
+    items: { productId: string; name: string; quantity: number; variantId?: string }[];
     payer: { name: string; email: string };
     externalReference: string;
   }) {

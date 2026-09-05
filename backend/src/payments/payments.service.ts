@@ -61,7 +61,11 @@ export class PaymentsService {
     // S3 / F6 — El precio sale de la base y se verifica el stock. Lo que haya
     // mandado el navegador en `price` se descarta por completo.
     const resolvedItems = await this.pricing.resolveItems(
-      (items || []).map((item: any) => ({ productId: item.productId, quantity: item.quantity })),
+      (items || []).map((item: any) => ({
+        productId: item.productId,
+        variantId: item.variantId,
+        quantity: item.quantity,
+      })),
     );
 
     const subtotal = resolvedItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
@@ -83,6 +87,7 @@ export class PaymentsService {
           notes: JSON.stringify({ externalReference, pendingPayment: true }),
           items: { create: resolvedItems.map((item) => ({
             productId: item.productId,
+            variantId: item.variantId,
             quantity: item.quantity,
             price: item.price,
           })) },
@@ -98,7 +103,7 @@ export class PaymentsService {
       payer: { name: payer.name, email: payer.email },
       items: resolvedItems.map((item) => ({
         id: item.productId,
-        title: item.name,
+        title: item.name + (item.variantId ? ' - variante ' + item.variantId : ''),
         quantity: item.quantity,
         unit_price: item.price,
         currency_id: 'ARS',
@@ -177,6 +182,7 @@ export class PaymentsService {
           await this.pricing.decrementStock(
             pendingOrder.items.map((item) => ({
               productId: item.productId,
+              variantId: item.variantId,
               name: item.product.name,
               quantity: item.quantity,
               price: item.price,
@@ -218,7 +224,12 @@ export class PaymentsService {
       await this.sendPurchaseToMeta(
         payment,
         pendingOrder?.number || 'HP-' + Date.now(),
-        pendingOrder?.items.map((item) => ({ productId: item.productId, quantity: item.quantity, price: item.price })) ?? [],
+        pendingOrder?.items.map((item) => ({
+          productId: item.productId,
+          variantId: item.variantId,
+          quantity: item.quantity,
+          price: item.price,
+        })) ?? [],
         email,
       );
     } catch (err) {

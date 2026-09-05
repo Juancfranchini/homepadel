@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ChevronRight, ShoppingCart, Heart } from 'lucide-react';
 import { Product } from '@/types';
 import { useCartStore } from '@/store/cartStore';
@@ -14,6 +15,7 @@ interface Props {
 
 function ProductCard({ product }: { product: Product }) {
   const addItem = useCartStore((s) => s.addItem);
+  const router = useRouter();
   const [wished, setWished] = useState(false);
   const [adding, setAdding] = useState(false);
 
@@ -24,6 +26,10 @@ function ProductCard({ product }: { product: Product }) {
     e.preventDefault();
     e.stopPropagation();
     if (product.stock === 0 || adding) return;
+    if (product.variants?.some((variant) => variant.active && !variant.isDefault) || product.hasSize || product.hasColor || product.hasDimensions || product.hasWeight) {
+      router.push('/producto/' + product.slug);
+      return;
+    }
     setAdding(true);
     addItem(product);
     setTimeout(() => setAdding(false), 900);

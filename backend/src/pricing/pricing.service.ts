@@ -13,11 +13,13 @@ import { PrismaService } from '../prisma/prisma.service';
 
 export interface RequestedItem {
   productId: string;
+  variantId?: string;
   quantity: number;
 }
 
 export interface ResolvedItem {
   productId: string;
+  variantId?: string;
   name: string;
   quantity: number;
   price: number;
@@ -46,7 +48,13 @@ export class PricingService {
 
         const product = await this.prisma.product.findUnique({
           where: { id: item.productId },
-          select: { name: true, price: true, salePrice: true, stock: true, active: true },
+          select: {
+            name: true, price: true, salePrice: true, stock: true, active: true,
+            variants: {
+              where: item.variantId ? { id: item.variantId } : undefined,
+              select: { id: true, stock: true, active: true },
+            },
+          },
         });
 
         if (!product) {
@@ -55,14 +63,26 @@ export class PricingService {
         if (!product.active) {
           throw new ConflictException(`"${product.name}" ya no está disponible`);
         }
-        if (product.stock < quantity) {
+        if (product.variants.length > 0 && !item.variantId) {
+          throw new ConflictException(`Debes seleccionar una variante de "${product.name}"`);
+        }
+        const variant = item.variantId ? product.variants[0] : null;
+        if (item.variantId && !variant) {
+          throw new NotFoundException(`La variante ${item.variantId} no pertenece al producto`);
+        }
+        if (variant && !variant.active) {
+          throw new ConflictException(`La variante de "${product.name}" ya no está disponible`);
+        }
+        const availableStock = variant ? variant.stock : product.stock;
+        if (availableStock < quantity) {
           throw new ConflictException(
-            `Quedan ${product.stock} unidades de "${product.name}" y pediste ${quantity}`,
+            `Quedan ${availableStock} unidades de "${product.name}" y pediste ${quantity}`,
           );
         }
 
         return {
           productId: item.productId,
+          variantId: item.variantId,
           name: product.name,
           quantity,
           price: this.effectivePrice(product.price, product.salePrice),
@@ -79,10 +99,15 @@ export class PricingService {
   async decrementStock(items: ResolvedItem[]): Promise<void> {
     await this.prisma.$transaction(async (tx) => {
       for (const item of items) {
-        const result = await tx.product.updateMany({
-          where: { id: item.productId, stock: { gte: item.quantity } },
-          data: { stock: { decrement: item.quantity } },
-        });
+        const result = item.variantId
+        ? await tx.productVariant.updateMany({
+             where: { id: item.variantId, productId: item.productId, stock: { gte: item.quantity }, active: true },
+             data: { stock: { decrement: item.quantity } },
+           })
+        : await tx.product.updateMany({
+             where: { id: item.productId, stock: { gte: item.quantity }, active: true },
+             data: { stock: { decrement: item.quantity } },
+           });
 
         if (result.count === 0) {
           throw new ConflictException(`Sin stock suficiente de "${item.name}"`);

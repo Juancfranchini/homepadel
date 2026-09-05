@@ -22,57 +22,41 @@ const schema = z.object({
   name: z.string().min(2, 'Nombre requerido'),
   sku: z.string().min(2, 'SKU requerido'),
   price: z.coerce.number().min(1, 'Precio requerido'),
-  salePrice: z.string().optional().transform((val) => {
-    if (val === "" || val === undefined || val === null) return undefined;
-    const num = Number(val);
-    return isNaN(num) ? undefined : num;
-  }),
-  transferPrice: z.string().optional().transform((val) => {
-    if (val === "" || val === undefined || val === null) return undefined;
-    const num = Number(val);
-    return isNaN(num) ? undefined : num;
-  }),
+  salePrice: z.preprocess((val) => val === '' || val === null ? undefined : val, z.coerce.number().finite().optional()),
+  transferPrice: z.preprocess((val) => val === '' || val === null ? undefined : val, z.coerce.number().finite().optional()),
   stock: z.coerce.number().int().min(0).default(0),
   active: z.boolean().default(true),
   featured: z.boolean().default(false),
   isNew: z.boolean().default(false),
   isOffer: z.boolean().default(false),
+  hasSize: z.boolean().default(false),
+  hasColor: z.boolean().default(false),
+  hasDimensions: z.boolean().default(false),
+  hasWeight: z.boolean().default(false),
+  size: z.string().optional(),
+  color: z.string().optional(),
+  dimensionLength: z.preprocess((val) => val === '' || val === null ? undefined : val, z.coerce.number().finite().optional()),
+  dimensionWidth: z.preprocess((val) => val === '' || val === null ? undefined : val, z.coerce.number().finite().optional()),
+  dimensionHeight: z.preprocess((val) => val === '' || val === null ? undefined : val, z.coerce.number().finite().optional()),
+  dimensionUnit: z.string().optional(),
+  weight: z.preprocess((val) => val === '' || val === null ? undefined : val, z.coerce.number().finite().optional()),
+  weightUnit: z.string().optional(),
   categoryId: z.string().min(1, 'Categoria requerida'),
   brandId: z.string().min(1, 'Marca requerida'),
   images: z.array(z.string()).optional(),
-  discountPercentage: z.string().optional().transform((val) => {
-    if (val === "" || val === undefined || val === null) return undefined;
-    const num = Number(val);
-    return isNaN(num) ? undefined : num;
-  }),
-  installments: z.string().optional().transform((val) => {
-    if (val === "" || val === undefined || val === null) return undefined;
-    const num = Number(val);
-    return isNaN(num) ? undefined : num;
-  }),
-  installmentsInterest: z.string().optional().transform((val) => {
-    if (val === "" || val === undefined || val === null) return undefined;
-    const num = Number(val);
-    return isNaN(num) ? undefined : num;
-  }),
+  discountPercentage: z.preprocess((val) => val === '' || val === null ? undefined : val, z.coerce.number().finite().optional()),
+  installments: z.preprocess((val) => val === '' || val === null ? undefined : val, z.coerce.number().finite().optional()),
+  installmentsInterest: z.preprocess((val) => val === '' || val === null ? undefined : val, z.coerce.number().finite().optional()),
   hasInstallmentsInterest: z.boolean().default(false),
   isMadeToOrder: z.boolean().default(false),
-  estimatedDays: z.string().optional().transform((val) => {
-    if (val === "" || val === undefined || val === null) return undefined;
-    const num = Number(val);
-    return isNaN(num) ? undefined : num;
-  }),
-  requiredDeposit: z.string().optional().transform((val) => {
-    if (val === "" || val === undefined || val === null) return undefined;
-    const num = Number(val);
-    return isNaN(num) ? undefined : num;
-  }),
+  estimatedDays: z.preprocess((val) => val === '' || val === null ? undefined : val, z.coerce.number().finite().optional()),
+  requiredDeposit: z.preprocess((val) => val === '' || val === null ? undefined : val, z.coerce.number().finite().optional()),
 });
 
 export type ProductFormData = z.infer<typeof schema> & {
   images?: string[];
   salePrice?: number;
-  variants?: { sku: string; size: string; color?: string; imageUrl?: string; images?: string[]; stock: number }[];
+  variants?: { id?: string; sku: string; size: string; color?: string; dimensions?: string; dimensionLength?: number; dimensionWidth?: number; dimensionHeight?: number; dimensionUnit?: string; weight?: number; weightUnit?: string; imageUrl?: string; images?: string[]; stock: number }[];
 };
 
 interface Category { id: string; name: string }
@@ -93,7 +77,7 @@ const labelClass = 'text-xs font-medium text-gray-400 uppercase tracking-wider';
 export default function ProductForm({
   defaultValues, onSave, onCancel, saving, categories, brands, ...rest }: Props) {
   const [uploading, setUploading] = useState(false);
-  const [variants, setVariants] = useState<{ sku: string; size: string; color?: string; imageUrl?: string; images?: string[]; stock: number }[]>(() => {
+  const [variants, setVariants] = useState<{ id?: string; sku: string; size: string; color?: string; dimensions?: string; dimensionLength?: number; dimensionWidth?: number; dimensionHeight?: number; dimensionUnit?: string; weight?: number; weightUnit?: string; imageUrl?: string; images?: string[]; stock: number }[]>(() => {
     return defaultValues?.variants || [];
   });
   const [hasSalePrice, setHasSalePrice] = useState<boolean>(() => {
@@ -131,6 +115,10 @@ export default function ProductForm({
   const active = watch('active');
   const isNew = watch('isNew');
   const isOffer = watch('isOffer');
+  const hasSize = watch('hasSize');
+  const hasColor = watch('hasColor');
+  const hasDimensions = watch('hasDimensions');
+  const hasWeight = watch('hasWeight');
   const hasInstallmentsInterest = watch('hasInstallmentsInterest');
   const isMadeToOrder = watch('isMadeToOrder');
 
@@ -169,6 +157,22 @@ export default function ProductForm({
 
     const skuSet = new Set<string>();
     for (const v of variants) {
+      if (hasSize && !v.size.trim()) {
+        alert('Todas las variantes deben tener talle');
+        return;
+      }
+      if (hasColor && !v.color?.trim()) {
+        alert('Todas las variantes deben tener color');
+        return;
+      }
+      if (hasDimensions && (!v.dimensionLength || !v.dimensionWidth || !v.dimensionHeight || !v.dimensionUnit)) {
+        alert('Todas las variantes deben tener largo, ancho, alto y unidad');
+        return;
+      }
+      if (hasWeight && (!v.weight || !v.weightUnit)) {
+        alert('Todas las variantes deben tener peso y unidad');
+        return;
+      }
       if (v.sku && v.sku.trim()) {
         const skuLower = v.sku.trim().toLowerCase();
         if (skuSet.has(skuLower)) {
@@ -225,6 +229,53 @@ export default function ProductForm({
           <label className={labelClass}>Nombre *</label>
           <input {...register('name')} className={inputClass + ' mt-1'} />
           {errors.name && <p className="text-xs text-red-600 mt-0.5">{errors.name.message}</p>}
+        </div>
+        <div className="sm:col-span-2 border-t border-gray-100 pt-4">
+          <label className={labelClass}>Propiedades de variantes</label>
+          <div className="flex flex-wrap gap-4 mt-2">
+            {[
+              ['hasSize', 'Talle', hasSize],
+              ['hasColor', 'Color', hasColor],
+              ['hasDimensions', 'Dimensiones', hasDimensions],
+              ['hasWeight', 'Peso', hasWeight],
+            ].map(([name, label]) => (
+              <label key={name as string} className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+                <input type="checkbox" {...register(name as 'hasSize' | 'hasColor' | 'hasDimensions' | 'hasWeight')} className="w-4 h-4 rounded accent-[#C8FF00]" />
+                {label as string}
+              </label>
+            ))}
+          </div>
+          <p className="text-[10px] text-gray-400 mt-1">Solo se mostrarán en cada variante las propiedades activadas.</p>
+        </div>
+        <div className="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3 border-b border-gray-100 pb-4">
+          {hasSize && <div>
+            <label className={labelClass}>Talle del producto</label>
+            <input {...register('size')} className={inputClass + ' mt-1'} placeholder="Ej: Único, M, 42" />
+          </div>}
+          {hasColor && <div>
+            <label className={labelClass}>Color del producto</label>
+            <input {...register('color')} className={inputClass + ' mt-1'} placeholder="Ej: Negro" />
+          </div>}
+          {hasDimensions && <div className="sm:col-span-2">
+            <label className={labelClass}>Dimensiones del producto</label>
+            <div className="grid grid-cols-4 gap-2 mt-1">
+              <input type="number" step="any" disabled={!hasDimensions} {...register('dimensionLength')} className={inputClass} placeholder="Largo" />
+              <input type="number" step="any" disabled={!hasDimensions} {...register('dimensionWidth')} className={inputClass} placeholder="Ancho" />
+              <input type="number" step="any" disabled={!hasDimensions} {...register('dimensionHeight')} className={inputClass} placeholder="Alto" />
+              <select {...register('dimensionUnit')} className={inputClass}>
+                {['mm', 'cm', 'm', 'in'].map((unit) => <option key={unit} value={unit}>{unit}</option>)}
+              </select>
+            </div>
+          </div>}
+          {hasWeight && <div>
+            <label className={labelClass}>Peso del producto</label>
+            <div className="grid grid-cols-[1fr_auto] gap-2 mt-1">
+              <input type="number" step="any" disabled={!hasWeight} {...register('weight')} className={inputClass} placeholder="Peso" />
+              <select {...register('weightUnit')} className={inputClass}>
+                {['mg', 'g', 'kg', 'lb'].map((unit) => <option key={unit} value={unit}>{unit}</option>)}
+              </select>
+            </div>
+          </div>}
         </div>
         <div>
           <label className={labelClass}>SKU *</label>
@@ -400,7 +451,7 @@ export default function ProductForm({
           </div>
         </div>
 
-        <VariantEditor variants={variants} onChange={setVariants} inputClass={inputClass} />
+        <VariantEditor variants={variants} onChange={setVariants} inputClass={inputClass} hasSize={hasSize} hasColor={hasColor} hasDimensions={hasDimensions} hasWeight={hasWeight} />
 
         <div className="sm:col-span-2 flex justify-end gap-3 pt-4 sm:pt-6 border-t border-gray-100">
           <button type="button" onClick={onCancel} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">Cancelar</button>

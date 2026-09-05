@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { X, Minus, Plus, ShoppingBag, ArrowRight } from 'lucide-react';
-import { useCartStore } from '@/store/cartStore';
+import { getItemKey, useCartStore } from '@/store/cartStore';
 import { formatPrice, getImageUrl } from '@/lib/utils';
 
 interface Props {
@@ -33,8 +33,7 @@ export default function CartDrawer({ isOpen, onClose }: Props) {
 
       <div className="absolute right-0 top-0 h-full w-full max-w-md bg-[#050606] flex flex-col shadow-2xl animate-slide-in"
         style={{ borderLeft: '1px solid rgba(183, 211, 26, 0.15)', boxShadow: '-4px 0 20px rgba(183, 211, 26, 0.06)' }}>
-        
-        {/* Header */}
+
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#0D0F0F]">
           <div className="flex items-center gap-3">
             <ShoppingBag className="w-5 h-5 text-[#B7D31A]" />
@@ -47,7 +46,6 @@ export default function CartDrawer({ isOpen, onClose }: Props) {
           </button>
         </div>
 
-        {/* Items */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
@@ -62,15 +60,21 @@ export default function CartDrawer({ isOpen, onClose }: Props) {
             </div>
           ) : (
             <div className="space-y-4">
-              {items.map(({ product, quantity }) => {
+              {items.map((item) => {
+                const { product, quantity, variantSize, variantColor, variantDimensions, variantWeight, variantWeightUnit, variantSku, variantImageUrl } = item;
                 const itemPrice = product.salePrice ?? product.price;
                 const itemSubtotal = itemPrice * quantity;
+                const imageToShow = variantImageUrl || product.images?.[0];
+                const itemKey = getItemKey(item);
+                const itemStock = item.variantId
+                  ? product.variants?.find((variant) => variant.id === item.variantId)?.stock ?? 0
+                  : product.stock;
 
                 return (
-                  <div key={product.id} className="flex gap-3 bg-[#0C0C0C] rounded-xl p-3 border border-[#0D0F0F]">
+                  <div key={product.id + '-' + (variantSku || '')} className="flex gap-3 bg-[#0C0C0C] rounded-xl p-3 border border-[#0D0F0F]">
                     <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-[#1A1F21]">
-                      {product.images?.[0] ? (
-                        <img src={getImageUrl(product.images[0])} alt={product.name} className="w-full h-full object-cover" />
+                      {imageToShow ? (
+                        <img src={getImageUrl(imageToShow)} alt={product.name} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-xs font-bold text-[#8A8A85]">
                           {product.name.slice(0, 2).toUpperCase()}
@@ -83,19 +87,29 @@ export default function CartDrawer({ isOpen, onClose }: Props) {
                         <div className="min-w-0">
                           <p className="text-xs text-[#8A8A85] uppercase mb-0.5">{product.brand?.name}</p>
                           <p className="text-sm font-semibold text-[#F7F6F7] truncate">{product.name}</p>
+                          {(variantSize || variantColor || variantDimensions) && (
+                            <p className="text-[10px] text-[#8A8A85] mt-0.5">
+                              {variantSize && 'Talle: ' + variantSize}
+                              {variantSize && variantColor && ' | '}
+                              {variantColor && 'Color: ' + variantColor}
+                              {variantDimensions && (variantSize || variantColor ? ' | ' : '') + 'Dimensiones: ' + variantDimensions}
+                              {variantWeight && ' | Peso: ' + variantWeight + ' ' + (variantWeightUnit || '')}
+                            </p>
+                          )}
+                          {variantSku && <p className="text-[9px] text-[#8A8A85] mt-0.5">SKU: {variantSku}</p>}
                         </div>
-                        <button onClick={() => removeItem(product.id)} className="text-[#8A8A85] hover:text-red-500 transition-colors flex-shrink-0">
+                        <button onClick={() => removeItem(itemKey)} className="text-[#8A8A85] hover:text-red-500 transition-colors flex-shrink-0">
                           <X className="w-4 h-4" />
                         </button>
                       </div>
 
                       <div className="flex items-center justify-between mt-2">
                         <div className="flex items-center border border-[#1A1F21] rounded-lg overflow-hidden">
-                          <button onClick={() => updateQuantity(product.id, quantity - 1)} className="w-7 h-7 flex items-center justify-center hover:bg-[#1A1F21] transition-colors text-[#C7C7C0]">
+                          <button onClick={() => updateQuantity(itemKey, quantity - 1)} className="w-7 h-7 flex items-center justify-center hover:bg-[#1A1F21] transition-colors text-[#C7C7C0]">
                             <Minus className="w-3 h-3" />
                           </button>
                           <span className="w-7 text-center text-xs font-bold text-[#F7F6F7]">{quantity}</span>
-                          <button onClick={() => updateQuantity(product.id, quantity + 1)} disabled={quantity >= product.stock} className="w-7 h-7 flex items-center justify-center hover:bg-[#1A1F21] transition-colors disabled:opacity-40 text-[#C7C7C0]">
+                          <button onClick={() => updateQuantity(itemKey, quantity + 1)} disabled={quantity >= itemStock} className="w-7 h-7 flex items-center justify-center hover:bg-[#1A1F21] transition-colors disabled:opacity-40 text-[#C7C7C0]">
                             <Plus className="w-3 h-3" />
                           </button>
                         </div>
@@ -109,7 +123,6 @@ export default function CartDrawer({ isOpen, onClose }: Props) {
           )}
         </div>
 
-        {/* Footer */}
         {items.length > 0 && (
           <div className="border-t border-[#0D0F0F] px-6 py-4 space-y-3">
             <div className="flex items-center justify-between">

@@ -72,7 +72,11 @@ export default function CheckoutPage() {
           productId: i.product.id,
           name: i.product.name,
           quantity: i.quantity,
-          price: i.product.salePrice ?? i.product.price,
+          variantId: i.variantId,
+          variantSku: i.variantSku,
+          variantSize: i.variantSize,
+          variantColor: i.variantColor,
+          variantDimensions: i.variantDimensions,
         }));
         const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
         const res = await fetch(API_URL + "/payments/create-preference", {
@@ -100,7 +104,15 @@ export default function CheckoutPage() {
     try {
       const address = data.street + ', ' + data.city + ', ' + data.province + ' (' + data.postalCode + ')';
       const orderData = {
-        items: items.map((i) => ({ productId: i.product.id, quantity: i.quantity, price: i.product.salePrice ?? i.product.price })),
+        items: items.map((i) => ({
+          productId: i.product.id,
+          quantity: i.quantity,
+          variantId: i.variantId,
+          variantSku: i.variantSku,
+          variantSize: i.variantSize,
+          variantColor: i.variantColor,
+          variantDimensions: i.variantDimensions,
+        })),
         address,
         buyerEmail: data.email,
         buyerPhone: data.phone,

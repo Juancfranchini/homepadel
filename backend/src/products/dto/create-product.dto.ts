@@ -36,6 +36,18 @@ export class CreateProductDto {
   @ApiPropertyOptional()    @IsBoolean() @IsOptional() showCompare?: boolean;
   @ApiPropertyOptional()    @IsBoolean() @IsOptional() showRelated?: boolean;
   @ApiPropertyOptional()    @IsBoolean() @IsOptional() isMadeToOrder?: boolean;
+  @ApiPropertyOptional()    @IsBoolean() @IsOptional()            hasSize?: boolean;
+  @ApiPropertyOptional()    @IsBoolean() @IsOptional()            hasColor?: boolean;
+  @ApiPropertyOptional()    @IsBoolean() @IsOptional()            hasDimensions?: boolean;
+  @ApiPropertyOptional()    @IsBoolean() @IsOptional()            hasWeight?: boolean;
+  @ApiPropertyOptional()    @IsString()  @IsOptional()            size?: string;
+  @ApiPropertyOptional()    @IsString()  @IsOptional()            color?: string;
+  @ApiPropertyOptional()    @IsNumber()  @IsOptional()            dimensionLength?: number;
+  @ApiPropertyOptional()    @IsNumber()  @IsOptional()            dimensionWidth?: number;
+  @ApiPropertyOptional()    @IsNumber()  @IsOptional()            dimensionHeight?: number;
+  @ApiPropertyOptional()    @IsString()  @IsOptional()            dimensionUnit?: string;
+  @ApiPropertyOptional()    @IsNumber()  @IsOptional()            weight?: number;
+  @ApiPropertyOptional()    @IsString()  @IsOptional()            weightUnit?: string;
   @ApiPropertyOptional()    @IsNumber()  @IsOptional() estimatedDays?: number;
   @ApiPropertyOptional()    @IsNumber()  @Min(0) @Max(100) @IsOptional() requiredDeposit?: number;
   @ApiPropertyOptional() @IsArray() @IsOptional() variants?: Record<string, any>[];

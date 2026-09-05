@@ -27,6 +27,15 @@ interface Props {
   onOfferChange: (v: boolean) => void;
   onClear: () => void;
   hasFilters: boolean;
+  sizes: string[];
+  colors: string[];
+  weights: string[];
+  selectedSize: string;
+  selectedColor: string;
+  selectedWeight: string;
+  onSizeChange: (value: string | null) => void;
+  onColorChange: (value: string | null) => void;
+  onWeightChange: (value: string | null) => void;
 }
 
 const MENU_ITEMS = [
@@ -42,6 +51,8 @@ export default function CatalogSidebar({
   categories, brands, selectedCategory, selectedBrand, isOffer, totalCount,
   viewMode, currentSort, onViewModeChange, onSortChange,
   onCategoryChange, onBrandChange, onOfferChange, onClear, hasFilters,
+  sizes, colors, weights, selectedSize, selectedColor, selectedWeight,
+  onSizeChange, onColorChange, onWeightChange,
 }: Props) {
   const [activePanel, setActivePanel] = useState<ActivePanel>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -119,6 +130,22 @@ export default function CatalogSidebar({
                     </label>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {activePanel === 'categories' && sizes.length > 0 && (
+              <div className="mt-5 border-t border-[#0D0F0F] pt-4">
+                <h3 className="text-xs font-semibold text-[#F7F6F7] uppercase tracking-wider mb-3">Talles</h3>
+                <select value={selectedSize} onChange={(e) => onSizeChange(e.target.value || null)} className="w-full bg-[#050606] border border-[#8A8A85] rounded-lg px-2 py-2 text-sm text-[#F7F6F7]">
+                  <option value="">Todos</option>{sizes.map((value) => <option key={value} value={value}>{value}</option>)}
+                </select>
+              </div>
+            )}
+
+            {activePanel === 'brands' && (colors.length > 0 || weights.length > 0) && (
+              <div className="mt-5 border-t border-[#0D0F0F] pt-4 space-y-4">
+                {colors.length > 0 && <div><h3 className="text-xs font-semibold text-[#F7F6F7] uppercase tracking-wider mb-3">Colores</h3><select value={selectedColor} onChange={(e) => onColorChange(e.target.value || null)} className="w-full bg-[#050606] border border-[#8A8A85] rounded-lg px-2 py-2 text-sm text-[#F7F6F7]"><option value="">Todos</option>{colors.map((value) => <option key={value} value={value}>{value}</option>)}</select></div>}
+                {weights.length > 0 && <div><h3 className="text-xs font-semibold text-[#F7F6F7] uppercase tracking-wider mb-3">Peso</h3><select value={selectedWeight} onChange={(e) => onWeightChange(e.target.value || null)} className="w-full bg-[#050606] border border-[#8A8A85] rounded-lg px-2 py-2 text-sm text-[#F7F6F7]"><option value="">Todos</option>{weights.map((value) => <option key={value} value={value}>{value}</option>)}</select></div>}
               </div>
             )}
 

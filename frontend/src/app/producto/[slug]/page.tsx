@@ -13,7 +13,7 @@ import ProductGallery from './components/ProductGallery';
 import ProductInfo from './components/ProductInfo';
 import ProductPrice from './components/ProductPrice';
 import ProductActions from './components/ProductActions';
-import VariantSelector from './components/VariantSelector';
+import VariantSelector, { dimensionLabel, weightLabel } from './components/VariantSelector';
 import ShippingCalc from './components/ShippingCalc';
 import TrustBadges from './components/TrustBadges';
 import StockAlert from './components/StockAlert';
@@ -45,6 +45,27 @@ export default function ProductoPage() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [selectedDimensions, setSelectedDimensions] = useState<string | null>(null);
+  const [selectedWeight, setSelectedWeight] = useState<string | null>(null);
+
+  // Auto-seleccionar talla única al seleccionar color
+  useEffect(() => {
+    if (selectedColor && !selectedSize && product?.hasSize && product?.variants) {
+      const colorVariants = product.variants.filter(v => v.color === selectedColor && v.active);
+      if (colorVariants.length === 1 && colorVariants[0].size) {
+        setSelectedSize(colorVariants[0].size);
+      }
+    }
+  }, [selectedColor, selectedSize, product]);
+  const hasVariantProperties = !!(product?.hasSize || product?.hasColor || product?.hasDimensions || product?.hasWeight);
+  const activeProductVariants = product?.variants?.filter(v => v.active && (!v.isDefault || hasVariantProperties)) ?? [];
+  const defaultVariant = product?.variants?.find(v => v.active && v.isDefault);
+  const selectedVariant = activeProductVariants.find(v =>
+    (!product?.hasSize || v.size === selectedSize) &&
+    (!product?.hasColor || v.color === selectedColor) &&
+    (!product?.hasDimensions || dimensionLabel(v) === selectedDimensions) &&
+    (!product?.hasWeight || weightLabel(v) === selectedWeight)
+  ) ?? (hasVariantProperties ? defaultVariant : undefined);
 
   useEffect(() => {
     if (!params.slug) return;
@@ -84,8 +105,25 @@ export default function ProductoPage() {
     }
   }, [product]);
 
-  const handleAddToCart = () => { if (!product) return; addItem(product, quantity); setAdded(true); setTimeout(() => setAdded(false), 1500); };
-  const handleBuyNow = () => { if (!product) return; addItem(product, quantity); router.push('/carrito'); };
+  const handleAddToCart = () => {
+    if (!product) return;
+    if (activeProductVariants.length && !selectedVariant) {
+      alert('Seleccioná las opciones de la variante antes de continuar');
+      return;
+    }
+    addItem(product, quantity, selectedVariant ?? undefined);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1500);
+  };
+  const handleBuyNow = () => {
+    if (!product) return;
+    if (activeProductVariants.length && !selectedVariant) {
+      alert('Seleccioná las opciones de la variante antes de continuar');
+      return;
+    }
+    addItem(product, quantity, selectedVariant ?? undefined);
+    router.push('/carrito');
+  };
 
   if (loading) {
     return (
@@ -110,13 +148,18 @@ export default function ProductoPage() {
   const discountPct = hasDiscount ? getDiscountPercent(product.price, product.salePrice!) : 0;
   const displayPrice = hasDiscount ? product.salePrice! : product.price;
   // Imágenes a mostrar: si hay variante seleccionada con color+size, usar sus imágenes
-  const selectedVariant = selectedColor && selectedSize
-    ? product.variants?.find(v => v.color === selectedColor && v.size === selectedSize)
-    : null;
+  const activeVariants = activeProductVariants;
 
   const images = selectedVariant?.imageUrl
     ? [selectedVariant.imageUrl, ...(selectedVariant.images || [])]
     : (product.images?.length > 0 ? product.images : []);
+
+  // Stock efectivo: variante seleccionada o stock del producto
+  const effectiveStock = selectedVariant
+    ? selectedVariant.stock
+    : activeProductVariants.length > 0
+      ? 0
+      : product.stock;
   const installments = product.installments || 0;
   const hasInstallmentsInterest = product.hasInstallmentsInterest || false;
   const installmentsInterest = product.installmentsInterest || 0;
@@ -169,17 +212,25 @@ export default function ProductoPage() {
             <ProductInfo brandName={product.brand.name} brandSlug={product.brand.slug} productName={product.name} />
             <ProductStars rating={product.rating || 0} count={product.reviewCount || 0} />
             <ProductPrice displayPrice={displayPrice} transferPrice={transferPrice} hasDiscount={hasDiscount} originalPrice={product.price} cuota={cuota} installments={installments} hasInstallmentsInterest={hasInstallmentsInterest} installmentsInterest={installmentsInterest} paymentMethods={paymentMethods} onShowPaymentModal={() => setShowPaymentModal(true)} isMadeToOrder={product.isMadeToOrder} estimatedDays={product.estimatedDays} requiredDeposit={product.requiredDeposit} />
-            <StockAlert stock={product.stock} isMadeToOrder={product.isMadeToOrder} estimatedDays={product.estimatedDays} />
+            <StockAlert stock={effectiveStock} isMadeToOrder={product.isMadeToOrder} estimatedDays={product.estimatedDays} />
             <div className="h-px bg-[#0D0F0F]" />
             <TrustBadges />
             <VariantSelector
-              variants={product.variants || []}
+              variants={activeVariants}
               selectedColor={selectedColor}
               selectedSize={selectedSize}
               onColorChange={setSelectedColor}
               onSizeChange={setSelectedSize}
+              selectedDimensions={selectedDimensions}
+              onDimensionsChange={setSelectedDimensions}
+              selectedWeight={selectedWeight}
+              onWeightChange={setSelectedWeight}
+              hasSize={!!product.hasSize}
+              hasColor={!!product.hasColor}
+              hasDimensions={!!product.hasDimensions}
+              hasWeight={!!product.hasWeight}
             />
-            <ProductActions stock={product.stock} quantity={quantity} onQuantityChange={setQuantity} onBuyNow={handleBuyNow} onAddToCart={handleAddToCart} added={added} wished={wished} onWish={() => setWished(!wished)} />
+            <ProductActions stock={effectiveStock} quantity={quantity} onQuantityChange={setQuantity} onBuyNow={handleBuyNow} onAddToCart={handleAddToCart} added={added} wished={wished} onWish={() => setWished(!wished)} />
             {hasSizeGuide && (<Link href="/talles" className="inline-flex items-center gap-2 px-4 py-2 bg-[#1A1F21] border border-[#0D0F0F] rounded-lg text-[#B7D31A] text-xs font-semibold hover:border-[#B7D31A]/50 transition-all w-fit"><Ruler size={14} />Guia de talles</Link>)}
             <ShippingCalc />
             <p className="text-[10px] text-[#8A8A85]">SKU: {product.sku}</p>
@@ -266,4 +317,3 @@ export default function ProductoPage() {
     </div>
   );
 }
-
