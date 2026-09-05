@@ -57,6 +57,21 @@ function CatálogoContent() {
   const selectedBrand = searchParams.get('marca') || '';
   const isOffer = searchParams.get('oferta') === 'true';
   const searchQuery = searchParams.get('q') || '';
+  const selectedSize = searchParams.get('talle') || '';
+  const selectedColor = searchParams.get('color') || '';
+  const selectedWeight = searchParams.get('peso') || '';
+  const sizes = [...new Set(products.flatMap((p) => [
+    ...(p.hasSize && p.size ? [p.size] : []),
+    ...(p.variants?.filter((v) => p.hasSize && v.active && v.size).map((v) => v.size) || []),
+  ]))];
+  const colors = [...new Set(products.flatMap((p) => [
+    ...(p.hasColor && p.color ? [p.color] : []),
+    ...(p.variants?.filter((v) => p.hasColor && v.active && v.color).map((v) => v.color as string) || []),
+  ]))];
+  const weights = [...new Set(products.flatMap((p) => [
+    ...(p.hasWeight && p.weight != null ? [`${p.weight} ${p.weightUnit || ''}`.trim()] : []),
+    ...(p.variants?.filter((v) => p.hasWeight && v.active && v.weight != null).map((v) => `${v.weight} ${v.weightUnit || ''}`.trim()) || []),
+  ]))];
 
   useEffect(() => { setSearchInput(searchQuery); }, [searchQuery]);
 
@@ -76,6 +91,13 @@ function CatálogoContent() {
       if (selectedBrand) params.brand = selectedBrand;
       if (isOffer) params.isOffer = 'true';
       if (searchQuery) params.search = searchQuery;
+      if (selectedSize) params.size = selectedSize;
+      if (selectedColor) params.color = selectedColor;
+      if (selectedWeight) {
+        const [weightValue, unit] = selectedWeight.split(' ');
+        params.weight = weightValue;
+        if (unit) params.weightUnit = unit;
+      }
       const data = await getProducts(params);
       const items: Product[] = Array.isArray(data) ? data : (data as any)?.items ?? [];
       const pages = (data as any)?.pages ?? Math.ceil(((data as any)?.total ?? 0) / ITEMS_PER_PAGE);
@@ -84,7 +106,7 @@ function CatálogoContent() {
       setTotalCount((data as any)?.total ?? items.length);
     } catch { setProducts([]); setTotalPages(1); setTotalCount(0); }
     finally { setLoading(false); }
-  }, [currentPage, selectedCategory, selectedBrand, isOffer, searchQuery]);
+  }, [currentPage, selectedCategory, selectedBrand, isOffer, searchQuery, selectedSize, selectedColor, selectedWeight]);
 
   useEffect(() => { loadProducts(); }, [loadProducts]);
 
@@ -98,12 +120,15 @@ function CatálogoContent() {
 
   const clearFilters = () => router.push('/catalogo');
   const handleSearch = (e: React.FormEvent) => { e.preventDefault(); setParam('q', searchInput.trim() || null); };
-  const hasFilters = !!selectedCategory || !!selectedBrand || isOffer || !!searchQuery;
+  const hasFilters = !!selectedCategory || !!selectedBrand || isOffer || !!searchQuery || !!selectedSize || !!selectedColor || !!selectedWeight;
 
   const activeChips: { label: string; onRemove: () => void }[] = [];
   if (isOffer) activeChips.push({ label: 'Ofertas', onRemove: () => setParam('oferta', null) });
   if (selectedCategory) activeChips.push({ label: selectedCategory, onRemove: () => setParam('categoria', null) });
   if (selectedBrand) activeChips.push({ label: selectedBrand, onRemove: () => setParam('marca', null) });
+  if (selectedSize) activeChips.push({ label: 'Talle: ' + selectedSize, onRemove: () => setParam('talle', null) });
+  if (selectedColor) activeChips.push({ label: 'Color: ' + selectedColor, onRemove: () => setParam('color', null) });
+  if (selectedWeight) activeChips.push({ label: 'Peso: ' + selectedWeight, onRemove: () => setParam('peso', null) });
   if (searchQuery) activeChips.push({ label: '"' + searchQuery + '"', onRemove: () => setParam('q', null) });
 
   const pageTitle = isOffer ? 'Ofertas' : selectedCategory
@@ -138,6 +163,9 @@ function CatálogoContent() {
               onBrandChange={(slug) => setParam('marca', slug)}
               onOfferChange={(v) => setParam('oferta', v ? 'true' : null)}
               onClear={clearFilters} hasFilters={hasFilters}
+              sizes={sizes} colors={colors} weights={weights}
+              selectedSize={selectedSize} selectedColor={selectedColor} selectedWeight={selectedWeight}
+              onSizeChange={(v) => setParam('talle', v)} onColorChange={(v) => setParam('color', v)} onWeightChange={(v) => setParam('peso', v)}
             />
           </aside>
 
@@ -185,6 +213,9 @@ function CatálogoContent() {
               onBrandChange={(slug) => setParam('marca', slug)}
               onOfferChange={(v) => setParam('oferta', v ? 'true' : null)}
               onClear={clearFilters} hasFilters={hasFilters}
+              sizes={sizes} colors={colors} weights={weights}
+              selectedSize={selectedSize} selectedColor={selectedColor} selectedWeight={selectedWeight}
+              onSizeChange={(v) => setParam('talle', v)} onColorChange={(v) => setParam('color', v)} onWeightChange={(v) => setParam('peso', v)}
             />
           </div>
         </div>

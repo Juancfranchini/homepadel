@@ -62,7 +62,7 @@ export default function CarritoPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-3">
             {items.map((item) => {
-              const { product, quantity, variantSize, variantColor, variantSku, variantImageUrl } = item;
+              const { product, quantity, variantSize, variantColor, variantDimensions, variantWeight, variantWeightUnit, variantSku, variantImageUrl } = item;
               const itemPrice = product.salePrice ?? product.price;
               const subtotalItem = itemPrice * quantity;
               const itemKey = getItemKey(item);
@@ -95,11 +95,13 @@ export default function CarritoPage() {
                       <span className="text-sm font-black text-[#F7F6F7]">{formatPrice(itemPrice)}</span>
                       {product.salePrice && <span className="text-xs text-[#8A8A85] line-through">{formatPrice(product.price)}</span>}
                     </div>
-                    {(variantSize || variantColor) && (
+                    {(variantSize || variantColor || variantDimensions) && (
                       <p className="text-[10px] text-[#8A8A85] mt-1">
                         {variantSize && 'Talle: ' + variantSize}
                         {variantSize && variantColor && ' | '}
                         {variantColor && 'Color: ' + variantColor}
+                        {variantDimensions && (variantSize || variantColor ? ' | ' : '') + 'Dimensiones: ' + variantDimensions}
+                        {variantWeight && ' | Peso: ' + variantWeight + ' ' + (variantWeightUnit || '')}
                       </p>
                     )}
                     {variantSku && <p className="text-[9px] text-[#8A8A85] mt-0.5">SKU: {variantSku}</p>}

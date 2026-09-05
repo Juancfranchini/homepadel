@@ -76,6 +76,7 @@ export default function CheckoutPage() {
           variantSku: i.variantSku,
           variantSize: i.variantSize,
           variantColor: i.variantColor,
+          variantDimensions: i.variantDimensions,
         }));
         const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
         const res = await fetch(API_URL + "/payments/create-preference", {
@@ -110,6 +111,7 @@ export default function CheckoutPage() {
           variantSku: i.variantSku,
           variantSize: i.variantSize,
           variantColor: i.variantColor,
+          variantDimensions: i.variantDimensions,
         })),
         address,
         buyerEmail: data.email,

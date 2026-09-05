@@ -61,7 +61,7 @@ export default function CartDrawer({ isOpen, onClose }: Props) {
           ) : (
             <div className="space-y-4">
               {items.map((item) => {
-                const { product, quantity, variantSize, variantColor, variantSku, variantImageUrl } = item;
+                const { product, quantity, variantSize, variantColor, variantDimensions, variantWeight, variantWeightUnit, variantSku, variantImageUrl } = item;
                 const itemPrice = product.salePrice ?? product.price;
                 const itemSubtotal = itemPrice * quantity;
                 const imageToShow = variantImageUrl || product.images?.[0];
@@ -87,11 +87,13 @@ export default function CartDrawer({ isOpen, onClose }: Props) {
                         <div className="min-w-0">
                           <p className="text-xs text-[#8A8A85] uppercase mb-0.5">{product.brand?.name}</p>
                           <p className="text-sm font-semibold text-[#F7F6F7] truncate">{product.name}</p>
-                          {(variantSize || variantColor) && (
+                          {(variantSize || variantColor || variantDimensions) && (
                             <p className="text-[10px] text-[#8A8A85] mt-0.5">
                               {variantSize && 'Talle: ' + variantSize}
                               {variantSize && variantColor && ' | '}
                               {variantColor && 'Color: ' + variantColor}
+                              {variantDimensions && (variantSize || variantColor ? ' | ' : '') + 'Dimensiones: ' + variantDimensions}
+                              {variantWeight && ' | Peso: ' + variantWeight + ' ' + (variantWeightUnit || '')}
                             </p>
                           )}
                           {variantSku && <p className="text-[9px] text-[#8A8A85] mt-0.5">SKU: {variantSku}</p>}

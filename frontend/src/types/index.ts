@@ -24,6 +24,13 @@ export interface ProductVariant {
   sku: string;
   size: string;
   color?: string | null;
+  dimensions?: string | null;
+  dimensionLength?: number | null;
+  dimensionWidth?: number | null;
+  dimensionHeight?: number | null;
+  dimensionUnit?: string | null;
+  weight?: number | null;
+  weightUnit?: string | null;
   imageUrl?: string | null;
   images?: string[];
   stock: number;
@@ -32,6 +39,18 @@ export interface ProductVariant {
 
 export interface Product {
   variants?: ProductVariant[];
+  hasSize?: boolean;
+  hasColor?: boolean;
+  hasDimensions?: boolean;
+  hasWeight?: boolean;
+  size?: string | null;
+  color?: string | null;
+  dimensionLength?: number | null;
+  dimensionWidth?: number | null;
+  dimensionHeight?: number | null;
+  dimensionUnit?: string | null;
+  weight?: number | null;
+  weightUnit?: string | null;
   id: string;
   name: string;
   slug: string;
@@ -71,6 +90,9 @@ export interface CartItem {
   variantSku?: string;
   variantSize?: string;
   variantColor?: string | null;
+  variantDimensions?: string | null;
+  variantWeight?: number | null;
+  variantWeightUnit?: string | null;
   variantImageUrl?: string | null;
 }
 

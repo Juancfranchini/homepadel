@@ -47,7 +47,19 @@ interface Product {
   categoryId?: string;
   brandId?: string;
   description?: string;
-  variants?: { sku: string; size: string; color?: string; imageUrl?: string; images?: string[]; stock: number }[];
+  hasSize?: boolean;
+  hasColor?: boolean;
+  hasDimensions?: boolean;
+  hasWeight?: boolean;
+  size?: string;
+  color?: string;
+  dimensionLength?: number;
+  dimensionWidth?: number;
+  dimensionHeight?: number;
+  dimensionUnit?: string;
+  weight?: number;
+  weightUnit?: string;
+  variants?: { sku: string; size: string; color?: string; dimensions?: string; dimensionLength?: number; dimensionWidth?: number; dimensionHeight?: number; dimensionUnit?: string; weight?: number; weightUnit?: string; imageUrl?: string; images?: string[]; stock: number }[];
 }
 
 interface Category { id: string; name: string }
@@ -109,7 +121,11 @@ export default function ProductosPage() {
       if (editItem) { await api.patch('/products/' + editItem.id, data); toast('Producto actualizado', 'success'); }
       else { await api.post('/products', data); toast('Producto creado', 'success'); }
       setModalOpen(false); load();
-    } catch { toast('Error al guardar', 'error'); } finally { setSaving(false); }
+    }     catch (error: any) {
+      const rawMessage = error?.response?.data?.message;
+      const message = Array.isArray(rawMessage) ? rawMessage.join(' · ') : rawMessage;
+      toast(message || 'Error al guardar', 'error');
+    } finally { setSaving(false); }
   };
 
   const toggleFeatured = async (p: Product) => {
@@ -165,6 +181,18 @@ export default function ProductosPage() {
     isMadeToOrder: editItem.isMadeToOrder || false,
     estimatedDays: editItem.estimatedDays || undefined,
     requiredDeposit: editItem.requiredDeposit || undefined,
+    hasSize: editItem.hasSize || false,
+    hasColor: editItem.hasColor || false,
+    hasDimensions: editItem.hasDimensions || false,
+    hasWeight: editItem.hasWeight || false,
+    size: editItem.size || '',
+    color: editItem.color || '',
+    dimensionLength: editItem.dimensionLength || undefined,
+    dimensionWidth: editItem.dimensionWidth || undefined,
+    dimensionHeight: editItem.dimensionHeight || undefined,
+    dimensionUnit: editItem.dimensionUnit || 'cm',
+    weight: editItem.weight || undefined,
+    weightUnit: editItem.weightUnit || 'kg',
     variants: editItem.variants || [],
   } : undefined;
 

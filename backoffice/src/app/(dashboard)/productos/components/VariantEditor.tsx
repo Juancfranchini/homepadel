@@ -5,9 +5,17 @@ import { useState } from 'react';
 import api from '@/lib/api';
 
 export interface VariantData {
+  id?: string;
   sku: string;
   size: string;
   color?: string;
+  dimensions?: string;
+  dimensionLength?: number;
+  dimensionWidth?: number;
+  dimensionHeight?: number;
+  dimensionUnit?: string;
+  weight?: number;
+  weightUnit?: string;
   imageUrl?: string;
   images?: string[];
   stock: number;
@@ -17,13 +25,17 @@ interface Props {
   variants: VariantData[];
   onChange: (variants: VariantData[]) => void;
   inputClass: string;
+  hasSize: boolean;
+  hasColor: boolean;
+  hasDimensions: boolean;
+  hasWeight: boolean;
 }
 
-export default function VariantEditor({ variants, onChange, inputClass }: Props) {
+export default function VariantEditor({ variants, onChange, inputClass, hasSize, hasColor, hasDimensions, hasWeight }: Props) {
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
 
   const addVariant = () => {
-    onChange([...variants, { sku: '', size: '', color: '', imageUrl: '', images: [], stock: 0 }]);
+    onChange([...variants, { sku: '', size: '', color: '', dimensions: '', dimensionUnit: 'cm', weightUnit: 'kg', imageUrl: '', images: [], stock: 0 }]);
   };
 
   const updateVariant = (index: number, field: keyof VariantData, value: any) => {
@@ -140,29 +152,41 @@ export default function VariantEditor({ variants, onChange, inputClass }: Props)
                 <div className="flex-1 flex flex-col gap-1.5">
                   <div className="grid grid-cols-2 gap-1.5">
                     <div className="flex flex-col justify-end">
-                      <div className="flex items-center justify-between">
-                        <label className="text-[10px] text-gray-400 uppercase">Talle *</label>
-                        {!v.size && <span className="text-[10px] text-red-500">Requerido</span>}
-                      </div>
-                      <input
-                        type="text"
-                        value={v.size}
-                        onChange={(e) => updateVariant(i, 'size', e.target.value)}
-                        className={inputClass + ' !py-1.5'}
-                        placeholder="S, M, L, XL"
-                      />
+                      {hasSize && <>
+                        <div className="flex items-center justify-between">
+                          <label className="text-[10px] text-gray-400 uppercase">Talle *</label>
+                          {!v.size && <span className="text-[10px] text-red-500">Requerido</span>}
+                        </div>
+                        <input type="text" value={v.size} onChange={(e) => updateVariant(i, 'size', e.target.value)} className={inputClass + ' !py-1.5'} placeholder="S, M, L, XL" />
+                      </>}
                     </div>
                     <div className="flex flex-col justify-end">
-                      <label className="text-[10px] text-gray-400 uppercase">Color</label>
-                      <input
-                        type="text"
-                        value={v.color || ''}
-                        onChange={(e) => updateVariant(i, 'color', e.target.value)}
-                        className={inputClass + ' !py-1.5'}
-                        placeholder="Negro, Blanco"
-                      />
+                      {hasColor && <>
+                        <label className="text-[10px] text-gray-400 uppercase">Color</label>
+                        <input type="text" value={v.color || ''} onChange={(e) => updateVariant(i, 'color', e.target.value)} className={inputClass + ' !py-1.5'} placeholder="Negro, Blanco" />
+                      </>}
                     </div>
                   </div>
+                  {hasDimensions && <div className="flex flex-col gap-1">
+                    <label className="text-[10px] text-gray-400 uppercase">Dimensiones *</label>
+                    <div className="grid grid-cols-4 gap-1">
+                      {(['dimensionLength', 'dimensionWidth', 'dimensionHeight'] as const).map((field, index) => (
+                        <input key={field} type="number" min="0" step="any" value={v[field] ?? ''} onChange={(e) => updateVariant(i, field, e.target.value === '' ? undefined : Number(e.target.value))} className={inputClass + ' !py-1.5'} placeholder={['Largo', 'Ancho', 'Alto'][index]} />
+                      ))}
+                      <select value={v.dimensionUnit || 'cm'} onChange={(e) => updateVariant(i, 'dimensionUnit', e.target.value)} className={inputClass + ' !py-1.5'}>
+                        {['mm', 'cm', 'm', 'in'].map((unit) => <option key={unit} value={unit}>{unit}</option>)}
+                      </select>
+                    </div>
+                  </div>}
+                  {hasWeight && <div className="flex flex-col gap-1">
+                    <label className="text-[10px] text-gray-400 uppercase">Peso *</label>
+                    <div className="grid grid-cols-[1fr_auto] gap-1">
+                      <input type="number" min="0" step="any" value={v.weight ?? ''} onChange={(e) => updateVariant(i, 'weight', e.target.value === '' ? undefined : Number(e.target.value))} className={inputClass + ' !py-1.5'} placeholder="Peso" />
+                      <select value={v.weightUnit || 'kg'} onChange={(e) => updateVariant(i, 'weightUnit', e.target.value)} className={inputClass + ' !py-1.5'}>
+                        {['mg', 'g', 'kg', 'lb'].map((unit) => <option key={unit} value={unit}>{unit}</option>)}
+                      </select>
+                    </div>
+                  </div>}
 
                   <div className="grid grid-cols-2 gap-1.5">
                     <div className="flex flex-col justify-end">

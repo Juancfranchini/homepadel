@@ -236,13 +236,6 @@ export default function CuentaPage() {
               </div>
               <button type="submit" disabled={loginForm.formState.isSubmitting} className="w-full bg-[#B7D31A] text-[#050606] py-3.5 rounded-xl font-black text-sm uppercase tracking-wider hover:bg-[#c8e81f] transition-colors disabled:opacity-70">{loginForm.formState.isSubmitting ? 'Ingresando...' : 'Iniciar sesión'}</button>
 
-              <div className="flex items-center gap-3 my-3">
-                <div className="flex-1 h-px bg-[#1A1F21]" />
-                <span className="text-xs text-[#8A8A85]">o</span>
-                <div className="flex-1 h-px bg-[#1A1F21]" />
-              </div>
-
-
               <button type="button" className="w-full text-center text-xs text-[#8A8A85] hover:text-[#B7D31A] transition-colors">
                 ¿Olvidaste tu contraseña?
               </button>
@@ -274,12 +267,6 @@ export default function CuentaPage() {
                 {registerForm.formState.errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{registerForm.formState.errors.confirmPassword.message}</p>}
               </div>
               <button type="submit" disabled={registerForm.formState.isSubmitting} className="w-full bg-[#B7D31A] text-[#050606] py-3.5 rounded-xl font-black text-sm uppercase tracking-wider hover:bg-[#c8e81f] transition-colors disabled:opacity-70">{registerForm.formState.isSubmitting ? 'Creando cuenta...' : 'Crear cuenta'}</button>
-
-              <div className="flex items-center gap-3 my-3">
-                <div className="flex-1 h-px bg-[#1A1F21]" />
-                <span className="text-xs text-[#8A8A85]">o</span>
-                <div className="flex-1 h-px bg-[#1A1F21]" />
-              </div>
 
             </form>
           )}

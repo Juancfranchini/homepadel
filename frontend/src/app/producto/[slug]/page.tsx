@@ -13,7 +13,7 @@ import ProductGallery from './components/ProductGallery';
 import ProductInfo from './components/ProductInfo';
 import ProductPrice from './components/ProductPrice';
 import ProductActions from './components/ProductActions';
-import VariantSelector from './components/VariantSelector';
+import VariantSelector, { dimensionLabel, weightLabel } from './components/VariantSelector';
 import ShippingCalc from './components/ShippingCalc';
 import TrustBadges from './components/TrustBadges';
 import StockAlert from './components/StockAlert';
@@ -45,11 +45,15 @@ export default function ProductoPage() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [selectedDimensions, setSelectedDimensions] = useState<string | null>(null);
+  const [selectedWeight, setSelectedWeight] = useState<string | null>(null);
   const activeProductVariants = product?.variants?.filter(v => v.active) ?? [];
   const selectedVariant = activeProductVariants.find(v =>
-    v.size === selectedSize &&
-    (!activeProductVariants.some(candidate => candidate.color) || v.color === selectedColor)
-  ) ?? null;
+    (!product?.hasSize || v.size === selectedSize) &&
+    (!product?.hasColor || v.color === selectedColor) &&
+    (!product?.hasDimensions || dimensionLabel(v) === selectedDimensions) &&
+    (!product?.hasWeight || weightLabel(v) === selectedWeight)
+  ) ?? (product && !product.hasSize && !product.hasColor && !product.hasDimensions && !product.hasWeight ? activeProductVariants[0] : null);
 
   useEffect(() => {
     if (!params.slug) return;
@@ -142,7 +146,7 @@ export default function ProductoPage() {
   const effectiveStock = selectedVariant
     ? selectedVariant.stock
     : activeProductVariants.length > 0
-      ? 1
+      ? 0
       : product.stock;
   const installments = product.installments || 0;
   const hasInstallmentsInterest = product.hasInstallmentsInterest || false;
@@ -205,6 +209,14 @@ export default function ProductoPage() {
               selectedSize={selectedSize}
               onColorChange={setSelectedColor}
               onSizeChange={setSelectedSize}
+              selectedDimensions={selectedDimensions}
+              onDimensionsChange={setSelectedDimensions}
+              selectedWeight={selectedWeight}
+              onWeightChange={setSelectedWeight}
+              hasSize={!!product.hasSize}
+              hasColor={!!product.hasColor}
+              hasDimensions={!!product.hasDimensions}
+              hasWeight={!!product.hasWeight}
             />
             <ProductActions stock={effectiveStock} quantity={quantity} onQuantityChange={setQuantity} onBuyNow={handleBuyNow} onAddToCart={handleAddToCart} added={added} wished={wished} onWish={() => setWished(!wished)} />
             {hasSizeGuide && (<Link href="/talles" className="inline-flex items-center gap-2 px-4 py-2 bg-[#1A1F21] border border-[#0D0F0F] rounded-lg text-[#B7D31A] text-xs font-semibold hover:border-[#B7D31A]/50 transition-all w-fit"><Ruler size={14} />Guia de talles</Link>)}

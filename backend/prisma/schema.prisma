@@ -85,6 +85,18 @@ model Product {
   showHighlights    Boolean @default(false)
   showCompare       Boolean @default(false)
   showRelated       Boolean @default(false)
+  hasSize           Boolean @default(false)
+  hasColor          Boolean @default(false)
+  hasDimensions     Boolean @default(false)
+  hasWeight         Boolean @default(false)
+  size              String?
+  color             String?
+  dimensionLength   Float?
+  dimensionWidth    Float?
+  dimensionHeight   Float?
+  dimensionUnit     String?
+  weight            Float?
+  weightUnit        String?
   highlights        Json?
   highlightsTitle   String?
   highlightsDescription String?
@@ -256,8 +268,15 @@ model ProductVariant {
   id        String   @id @default(cuid())
   productId String
   sku       String   @unique
-  size      String
+  size      String   @default("")
   color     String?
+  dimensions String?
+  dimensionLength Float?
+  dimensionWidth  Float?
+  dimensionHeight Float?
+  dimensionUnit   String?
+  weight          Float?
+  weightUnit      String?
   imageUrl  String?
   images    String[] @default([])
   stock     Int      @default(0)

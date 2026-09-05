@@ -9,7 +9,7 @@ import { trackMetaEvent } from '@/lib/metaPixel';
 
 interface CartStore {
   items: CartItem[];
-  addItem: (product: Product, quantity?: number, variant?: { id: string; sku: string; size: string; color?: string | null; imageUrl?: string | null }) => void;
+  addItem: (product: Product, quantity?: number, variant?: { id: string; sku: string; size: string; color?: string | null; dimensions?: string | null; weight?: number | null; weightUnit?: string | null; imageUrl?: string | null }) => void;
   removeItem: (itemKey: string) => void;
   updateQuantity: (itemKey: string, quantity: number) => void;
   clearCart: () => void;
@@ -53,6 +53,9 @@ export const useCartStore = create<CartStore>()(
               variantSku: variant?.sku,
               variantSize: variant?.size,
               variantColor: variant?.color,
+              variantDimensions: variant?.dimensions,
+              variantWeight: variant?.weight,
+              variantWeightUnit: variant?.weightUnit,
               variantImageUrl: variant?.imageUrl,
             }] 
           }));
