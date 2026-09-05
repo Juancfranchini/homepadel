@@ -34,7 +34,8 @@ function CatálogoContent() {
   const router = useRouter();
   const addItem = useCartStore((s) => s.addItem);
   const addCatalogItem = useCallback((product: Product) => {
-    if (product.variants?.some((variant) => variant.active)) {
+    if (product.variants?.some((variant) => variant.active && !variant.isDefault) ||
+        product.hasSize || product.hasColor || product.hasDimensions || product.hasWeight) {
       router.push('/producto/' + product.slug);
       return;
     }

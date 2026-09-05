@@ -56,16 +56,16 @@ export class ProductsService {
       this.prisma.product.count({ where }),
     ]);
 
-    return { items: items.map((product) => this.withDefaultVariant(product)), total, page: pageNumber, limit: pageSize, pages: Math.ceil(total / pageSize) };
+    return { items, total, page: pageNumber, limit: pageSize, pages: Math.ceil(total / pageSize) };
   }
 
   async findFeatured() {
     const products = await this.prisma.product.findMany({
       where: { featured: true, active: true },
-      include: { category: true, brand: true },
+      include: { category: true, brand: true, variants: true },
       take: 8,
     });
-    return products.map((product) => this.withDefaultVariant(product));
+    return products;
   }
 
   async findBestSellers() {
@@ -86,14 +86,14 @@ export class ProductsService {
     const productIds = grouped.map((g) => g.productId);
     const products = await this.prisma.product.findMany({
       where: { id: { in: productIds }, active: true },
-      include: { category: true, brand: true },
+      include: { category: true, brand: true, variants: true },
     });
 
     const productMap = new Map(products.map((p) => [p.id, p]));
     return grouped
       .map((g) => productMap.get(g.productId))
       .filter((p) => p !== undefined)
-      .map((product) => this.withDefaultVariant(product));
+      .map((product) => product);
   }
 
   async findBySlug(slugOrId: string) {
@@ -116,7 +116,7 @@ export class ProductsService {
 
     const { reviews: _, ...rest } = product as any;
     return {
-      ...this.withDefaultVariant(rest),
+      ...rest,
       rating: Math.round(averageRating * 10) / 10,
       reviewCount: totalReviews,
     };
@@ -142,11 +142,15 @@ export class ProductsService {
       const product = await this.prisma.product.create({
         data: {
           ...rest, slug, categoryId, brandId,
-          ...(variants && variants.length > 0 ? { variants: { create: variants } } : {}),
         },
-        include: { category: true, brand: true, variants: true },
       });
-      return this.withDefaultVariant(product);
+      await this.prisma.productVariant.createMany({
+        data: [
+          this.defaultVariantData(product),
+          ...(variants ?? []).map((variant: any) => ({ ...variant, productId: product.id })),
+        ],
+      });
+      return this.prisma.product.findUniqueOrThrow({ where: { id: product.id }, include: { category: true, brand: true, variants: true } });
     } catch (err: any) {
       // Traducir error de Prisma
       if (err?.code === 'P2002') {
@@ -163,7 +167,7 @@ export class ProductsService {
     if (dto.name) data.slug = slugify(dto.name, { lower: true, strict: true });
 
     if (variants !== undefined) {
-      const existing = await this.prisma.productVariant.findMany({ where: { productId: id }, select: { id: true } });
+      const existing = await this.prisma.productVariant.findMany({ where: { productId: id, isDefault: false }, select: { id: true } });
       const incomingIds = new Set(variants.map((variant: any) => variant.id).filter(Boolean));
       const existingIds = new Set(existing.map((variant) => variant.id));
       if ([...incomingIds].some((variantId: string) => !existingIds.has(variantId))) {
@@ -189,22 +193,22 @@ export class ProductsService {
       };
     }
 
-    const product = await this.prisma.product.update({ where: { id }, data, include: { category: true, brand: true, variants: true } });
-    return this.withDefaultVariant(product);
+    const product = await this.prisma.product.update({ where: { id }, data });
+    await this.prisma.productVariant.upsert({
+      where: { id: `${id}-base` },
+      update: this.defaultVariantData(product),
+      create: this.defaultVariantData(product),
+    });
+    return this.prisma.product.findUniqueOrThrow({ where: { id }, include: { category: true, brand: true, variants: true } });
   }
 
-  private withDefaultVariant<T extends { id: string; sku: string; size?: string | null; color?: string | null; dimensionLength?: number | null; dimensionWidth?: number | null; dimensionHeight?: number | null; dimensionUnit?: string | null; weight?: number | null; weightUnit?: string | null; images: string[]; stock: number; active: boolean; variants?: any[] }>(product: T) {
-    const variants = Array.isArray(product.variants) ? product.variants : [];
-    const defaultId = `${product.id}-base`;
-    const hasDefault = variants.some((variant) => variant.id === defaultId || variant.isDefault === true);
-    if (hasDefault) return product;
-
-    const defaultVariant = {
-      id: defaultId,
+  private defaultVariantData(product: any) {
+    return {
+      id: `${product.id}-base`,
+      productId: product.id,
       sku: product.sku,
       size: product.size ?? '',
       color: product.color ?? null,
-      dimensions: null,
       dimensionLength: product.dimensionLength ?? null,
       dimensionWidth: product.dimensionWidth ?? null,
       dimensionHeight: product.dimensionHeight ?? null,
@@ -217,8 +221,6 @@ export class ProductsService {
       active: product.active,
       isDefault: true,
     };
-
-    return { ...product, variants: [defaultVariant, ...variants] };
   }
 
   async remove(id: string) {
