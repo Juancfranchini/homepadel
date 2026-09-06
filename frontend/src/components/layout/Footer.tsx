@@ -21,9 +21,12 @@ export default function Footer() {
       .catch(() => {});
   }, []);
 
-  const phone = settings.phone || '+54 11 7234 5678';
-  const email = settings.contactEmail || 'info@homepadel.com';
-  const address = settings.address || 'Av. Padel 1234, CABA';
+  // Sin valores de relleno: un dato que no está cargado no se muestra.
+  // Publicar un teléfono o una dirección inventados es peor que no mostrar nada,
+  // porque el visitante los toma por buenos.
+  const phone = settings.phone;
+  const email = settings.contactEmail;
+  const address = settings.address;
 
   return (
     <footer className="bg-[#141A1D] text-[#C7C7C0] border-t border-[#0D0F0F]">
@@ -63,9 +66,9 @@ export default function Footer() {
           <div className="col-span-1 md:col-span-1 lg:col-span-1 flex flex-col items-center md:items-start">
             <h3 className="font-semibold text-xs sm:text-sm uppercase tracking-widest text-[#F7F6F7] mb-3 sm:mb-4">Contacto</h3>
             <ul className="space-y-4">
-              <li className="w-full flex justify-center md:justify-start"><a href={'mailto:' + email} className="flex items-center gap-3 group"><div className="w-8 h-8 rounded-lg bg-[#242A05] flex items-center justify-center flex-shrink-0 transition-colors group-hover:bg-[#B7D31A]"><Mail size={14} className="text-[#B7D31A] transition-colors group-hover:text-[#141A1D]" /></div><span className="text-sm group-hover:text-[#B7D31A] transition-colors break-all">{email}</span></a></li>
-              <li className="w-full flex justify-center md:justify-start"><a href={'tel:' + phone} className="flex items-center gap-3 group"><div className="w-8 h-8 rounded-lg bg-[#242A05] flex items-center justify-center flex-shrink-0 transition-colors group-hover:bg-[#B7D31A]"><Phone size={14} className="text-[#B7D31A] transition-colors group-hover:text-[#141A1D]" /></div><span className="text-sm group-hover:text-[#B7D31A] transition-colors">{phone}</span></a></li>
-              <li className="flex items-center justify-center md:justify-start gap-3 group"><div className="w-8 h-8 rounded-lg bg-[#242A05] flex items-center justify-center flex-shrink-0 transition-colors group-hover:bg-[#B7D31A]"><MapPin size={14} className="text-[#B7D31A] transition-colors group-hover:text-[#141A1D]" /></div><span className="text-sm">{address}</span></li>
+              {email && <li className="w-full flex justify-center md:justify-start"><a href={'mailto:' + email} className="flex items-center gap-3 group"><div className="w-8 h-8 rounded-lg bg-[#242A05] flex items-center justify-center flex-shrink-0 transition-colors group-hover:bg-[#B7D31A]"><Mail size={14} className="text-[#B7D31A] transition-colors group-hover:text-[#141A1D]" /></div><span className="text-sm group-hover:text-[#B7D31A] transition-colors break-all">{email}</span></a></li>}
+              {phone && <li className="w-full flex justify-center md:justify-start"><a href={'tel:' + phone} className="flex items-center gap-3 group"><div className="w-8 h-8 rounded-lg bg-[#242A05] flex items-center justify-center flex-shrink-0 transition-colors group-hover:bg-[#B7D31A]"><Phone size={14} className="text-[#B7D31A] transition-colors group-hover:text-[#141A1D]" /></div><span className="text-sm group-hover:text-[#B7D31A] transition-colors">{phone}</span></a></li>}
+              {address && <li className="flex items-center justify-center md:justify-start gap-3 group"><div className="w-8 h-8 rounded-lg bg-[#242A05] flex items-center justify-center flex-shrink-0 transition-colors group-hover:bg-[#B7D31A]"><MapPin size={14} className="text-[#B7D31A] transition-colors group-hover:text-[#141A1D]" /></div><span className="text-sm">{address}</span></li>}
               <li className="flex items-center justify-center md:justify-start gap-3 group"><div className="w-8 h-8 rounded-lg bg-[#242A05] flex items-center justify-center flex-shrink-0 transition-colors group-hover:bg-[#B7D31A]"><Clock size={14} className="text-[#B7D31A] transition-colors group-hover:text-[#141A1D]" /></div><span className="text-sm">Lunes a Viernes<br />9 a 18 hs</span></li>
             </ul>
           </div>

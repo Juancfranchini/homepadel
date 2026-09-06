@@ -16,8 +16,25 @@ async function getFaviconUrl(): Promise<string> {
   return '/logo-icon.svg';
 }
 
+/**
+ * Dirección pública del sitio, usada para resolver las URLs absolutas de los
+ * metadatos (Open Graph, canónica). Se lee del entorno porque no siempre
+ * coincide con el dominio comercial: hoy homepadel.com.ar sirve otra tienda,
+ * así que dejarla escrita a mano hacía que las previsualizaciones al compartir
+ * apuntaran al lugar equivocado.
+ */
+function getSiteUrl(): string {
+  const fromEnv = process.env.NEXT_PUBLIC_SITE_URL;
+  if (fromEnv) return fromEnv.replace(/\/+$/, '');
+  // Vercel expone el dominio del despliegue; sirve como valor razonable
+  // en previsualizaciones sin tener que configurar nada.
+  if (process.env.VERCEL_URL) return 'https://' + process.env.VERCEL_URL;
+  return 'http://localhost:3000';
+}
+
 export async function generateMetadata(): Promise<Metadata> {
   const faviconUrl = await getFaviconUrl();
+  const siteUrl = getSiteUrl();
 
   return {
     title: {
@@ -39,12 +56,12 @@ export async function generateMetadata(): Promise<Metadata> {
     creator: 'Home Padel',
     publisher: 'Home Padel',
     formatDetection: { email: false, address: false, telephone: false },
-    metadataBase: new URL('https://www.homepadel.com.ar'),
+    metadataBase: new URL(siteUrl),
     alternates: { canonical: '/' },
     openGraph: {
       type: 'website',
       locale: 'es_AR',
-      url: 'https://www.homepadel.com.ar',
+      url: siteUrl,
       siteName: 'Home Padel',
       title: 'Home Padel - Equipamiento profesional de padel',
       description: 'Las mejores paletas, indumentaria y accesorios para padel.',
