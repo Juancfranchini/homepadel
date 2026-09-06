@@ -117,7 +117,9 @@ export default function MarcasPage() {
         });
         const url = res.data?.url || res.data?.imageUrl || '';
         setValue('logo', url, { shouldDirty: true });
-      } catch {} finally { setUploading(false); }
+      } catch {
+        toast('No se pudo subir el logo', 'error');
+      } finally { setUploading(false); }
     };
     input.click();
   };

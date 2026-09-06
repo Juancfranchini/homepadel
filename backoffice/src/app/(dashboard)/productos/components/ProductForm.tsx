@@ -6,9 +6,18 @@ import { z } from 'zod';
 import { Upload, ImageIcon, Star } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import api from '@/lib/api';
+import { useToast } from '@/components/ui/Toast';
 import Toggle from '../../testimonios/components/Toggle';
 import ImageGalleryInput from './ImageGalleryInput';
 import VariantEditor from './VariantEditor';
+
+/** Extrae el mensaje que devolvió el backend; si no hay, usa uno genérico. */
+function mensajeDeError(err: unknown, porDefecto: string): string {
+  const respuesta = (err as { response?: { data?: { message?: string | string[] } } })?.response;
+  const mensaje = respuesta?.data?.message;
+  if (Array.isArray(mensaje)) return mensaje.join('. ');
+  return mensaje || porDefecto;
+}
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000').replace(/\/api\/?$/, '');
 
@@ -76,6 +85,7 @@ const labelClass = 'text-xs font-medium text-gray-400 uppercase tracking-wider';
 
 export default function ProductForm({
   defaultValues, onSave, onCancel, saving, categories, brands, ...rest }: Props) {
+  const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
   const [variants, setVariants] = useState<{ id?: string; sku: string; size: string; color?: string; dimensions?: string; dimensionLength?: number; dimensionWidth?: number; dimensionHeight?: number; dimensionUnit?: string; weight?: number; weightUnit?: string; imageUrl?: string; images?: string[]; stock: number }[]>(() => {
     return defaultValues?.variants || [];
@@ -140,7 +150,11 @@ export default function ProductForm({
         });
         const url = res.data?.url || res.data?.imageUrl || '';
         setMainImage(url);
-      } catch {} finally { setUploading(false); }
+      } catch (err) {
+        // Antes se descartaba en silencio: la imagen no subía y la pantalla
+        // quedaba igual, sin ninguna pista de qué había pasado.
+        toast(mensajeDeError(err, 'No se pudo subir la imagen'), 'error');
+      } finally { setUploading(false); }
     };
     input.click();
   };

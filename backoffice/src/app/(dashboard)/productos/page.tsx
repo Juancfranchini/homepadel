@@ -107,8 +107,11 @@ export default function ProductosPage() {
       setProducts(Array.isArray(pData) ? pData : []);
       setCategories(Array.isArray(cRes.data) ? cRes.data : []);
       setBrands(Array.isArray(bRes.data) ? bRes.data : []);
-    } catch {} finally { setLoading(false); }
-  }, []);
+    } catch {
+      // Sin este aviso, un backend caído se veía igual que un catálogo vacío.
+      toast('No se pudieron cargar los productos. Revisá la conexión con el servidor.', 'error');
+    } finally { setLoading(false); }
+  }, [toast]);
 
   useEffect(() => { load(); }, [load]);
 

@@ -159,7 +159,9 @@ export default function categoriasPage() {
         });
         const url = res.data?.url || res.data?.imageUrl || '';
         setValue('image', url, { shouldDirty: true });
-      } catch {} finally { setUploading(false); }
+      } catch {
+        toast('No se pudo subir la imagen', 'error');
+      } finally { setUploading(false); }
     };
     input.click();
   };
