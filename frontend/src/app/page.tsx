@@ -38,7 +38,16 @@ import {
   SiteSection,
 } from '@/types';
 
-export const revalidate = 60;
+/**
+ * Cada regeneración de esta página consulta trece endpoints del backend, así que
+ * su frecuencia se traduce en consumo de transferencia. Con 60 segundos llegaba a
+ * 1.440 regeneraciones diarias y agotó el plan de Vercel sin que hubiera visitantes.
+ *
+ * Una hora alcanza para una tienda que actualiza productos algunas veces por día.
+ * Si en algún momento se necesita que un cambio impacte al instante, la vía correcta
+ * es revalidación bajo demanda desde el backoffice, no bajar este número.
+ */
+export const revalidate = 3600;
 
 function arr<T>(raw: unknown): T[] {
   if (Array.isArray(raw)) return raw as T[];
