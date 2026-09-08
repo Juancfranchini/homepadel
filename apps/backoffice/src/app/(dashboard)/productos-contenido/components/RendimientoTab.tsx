@@ -1,0 +1,122 @@
+﻿import { useFieldArray, UseFormRegister } from 'react-hook-form';
+import Toggle from '../../testimonios/components/Toggle';
+import { createElement } from 'react';
+import { Plus, Trash2, Target, Circle, Scale, Ruler, User, Zap, Star, Shield, Award, Gauge, Wind, Package, Thermometer, Droplets, Maximize, Layers, Scissors, TrendingUp, Footprints } from 'lucide-react';
+
+const inputClass = 'w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00]';
+const labelClass = 'text-xs font-medium text-gray-400 uppercase tracking-wider';
+
+const SPEC_ICONS = [
+  { value: 'Target', label: 'Objetivo', icon: Target }, { value: 'Circle', label: 'Circulo', icon: Circle },
+  { value: 'Scale', label: 'Balance', icon: Scale }, { value: 'Ruler', label: 'Regla', icon: Ruler },
+  { value: 'User', label: 'Usuario', icon: User }, { value: 'Zap', label: 'Rayo', icon: Zap },
+  { value: 'Star', label: 'Estrella', icon: Star }, { value: 'Shield', label: 'Escudo', icon: Shield },
+  { value: 'Award', label: 'Premio', icon: Award }, { value: 'Gauge', label: 'Medidor', icon: Gauge },
+  { value: 'Wind', label: 'Viento', icon: Wind }, { value: 'Package', label: 'Caja', icon: Package },
+  { value: 'Thermometer', label: 'Termico', icon: Thermometer }, { value: 'Droplets', label: 'Gotas', icon: Droplets },
+  { value: 'Maximize', label: 'Expandir', icon: Maximize }, { value: 'Layers', label: 'Capas', icon: Layers },
+  { value: 'Scissors', label: 'Tijeras', icon: Scissors }, { value: 'TrendingUp', label: 'Tendencia', icon: TrendingUp },
+  { value: 'Footprints', label: 'Huellas', icon: Footprints },
+];
+
+const PERF_LABELS = ['Control', 'Potencia', 'Manejabilidad', 'Dureza', 'Jugabilidad'];
+
+interface Props {
+  register: UseFormRegister<any>;
+  control: any;
+  watch: any;
+  showPerformance: boolean;
+  onToggleShowPerformance: () => void;
+}
+
+function SpecRow({ index, register, currentIcon, onRemove }: { index: number; register: UseFormRegister<any>; currentIcon: string; onRemove: () => void }) {
+  const iconObj = SPEC_ICONS.find((o) => o.value === currentIcon);
+  const IconComp = iconObj?.icon || Target;
+  const iconSelect = (
+    <div className="relative">
+      <select {...register(('specs.' + index + '.icon') as any)} className={inputClass + ' text-xs pl-8 pr-2'}>
+        {SPEC_ICONS.map((o) => (
+          <option key={o.value} value={o.value}>{o.label}</option>
+        ))}
+      </select>
+      <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[#C8FF00] pointer-events-none">
+        {createElement(IconComp, { size: 14 })}
+      </span>
+    </div>
+  );
+
+  return (
+    <div className="mb-2">
+      {/* Mobile */}
+      <div className="sm:hidden grid grid-cols-2 gap-2 mb-2">
+        {iconSelect}
+        <input {...register(('specs.' + index + '.title') as any)} className={inputClass} placeholder="Ej: Carbono" />
+      </div>
+      <div className="sm:hidden flex gap-2">
+        <input {...register(('specs.' + index + '.value') as any)} className={inputClass + ' flex-1 min-w-0'} placeholder="Descripcion del producto" />
+        <button type="button" onClick={onRemove} className="p-2 text-red-400 hover:bg-red-50 rounded-lg flex-shrink-0"><Trash2 size={14} /></button>
+      </div>
+
+      {/* Tablet/Web */}
+      <div className="hidden sm:grid grid-cols-[130px_90px_1fr_40px] gap-2 items-center">
+        {iconSelect}
+        <input {...register(('specs.' + index + '.title') as any)} className={inputClass} placeholder="Ej: Carbono" />
+        <input {...register(('specs.' + index + '.value') as any)} className={inputClass + ' min-w-0'} placeholder="Descripcion del producto" />
+        <button type="button" onClick={onRemove} className="p-2 text-red-400 hover:bg-red-50 rounded-lg flex-shrink-0"><Trash2 size={14} /></button>
+      </div>
+    </div>
+  );
+}
+
+export default function RendimientoTab({ register, control, watch, showPerformance, onToggleShowPerformance }: Props) {
+  const specsArray = useFieldArray({ control, name: 'specs' });
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <label className={labelClass}>Barras de Rendimiento (0-100)</label>
+          <div className="flex items-center gap-2"><Toggle checked={showPerformance} onChange={onToggleShowPerformance} /><span className="text-xs text-gray-400">{showPerformance ? "Activado" : "Desactivado"}</span></div>
+        </div>
+        {PERF_LABELS.map((label, i) => (
+          <div key={i} className="flex items-center gap-2 sm:gap-3 mb-2">
+            <span className="w-20 sm:w-28 text-sm text-gray-600 flex-shrink-0">{label}</span>
+            <input type="range" min={0} max={100} {...register('performanceStats.' + i + '.value')} className="flex-1 accent-[#C8FF00] min-w-0" />
+            <span className="w-8 sm:w-10 text-xs text-gray-500 text-right flex-shrink-0">{watch('performanceStats.' + i + '.value') || 0}%</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="border-t border-gray-100 pt-4">
+        <div className="flex items-center justify-between mb-3">
+          <label className={labelClass}>Especificaciones (cards)</label>
+          <button type="button" onClick={() => specsArray.append({ icon: 'Target', title: '', value: '' })}
+            className="flex items-center gap-1 text-xs font-semibold px-2 py-1 bg-[#C8FF00] text-[#0f172a] rounded-lg hover:bg-[#b8ef00]"><Plus size={12} />Agregar</button>
+        </div>
+
+        {specsArray.fields.length > 0 && (
+          <div className="hidden sm:grid grid-cols-[130px_90px_1fr_40px] gap-2 mb-1 px-1">
+            <span className="text-[10px] font-semibold text-gray-400 uppercase">Icono</span>
+            <span className="text-[10px] font-semibold text-gray-400 uppercase">Titulo</span>
+            <span className="text-[10px] font-semibold text-gray-400 uppercase">Descripcion</span>
+            <span></span>
+          </div>
+        )}
+
+        {specsArray.fields.map((field, i) => (
+          <SpecRow
+            key={field.id}
+            index={i}
+            register={register}
+            currentIcon={watch('specs.' + i + '.icon') || 'Target'}
+            onRemove={() => specsArray.remove(i)}
+          />
+        ))}
+
+        {specsArray.fields.length === 0 && (
+          <p className="text-xs text-gray-400 text-center py-4">No hay especificaciones. Haz clic en Agregar.</p>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,266 @@
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Save, ArrowLeft, CreditCard, Landmark, Wallet, Truck, Eye, EyeOff } from 'lucide-react';
+import Link from 'next/link';
+import api from '@/lib/api';
+import { PageLoader } from '@/components/ui/LoadingSpinner';
+import { useToast } from '@/components/ui/Toast';
+import Toggle from '../../testimonios/components/Toggle';
+import ImageUpload from '@/components/ui/ImageUpload';
+
+const schema = z.object({
+  mercadopagoActive: z.boolean(), mercadopagoPublicKey: z.string().optional(), mercadopagoAccessToken: z.string().optional(), mercadopagoLogo: z.string().optional(),
+  transferenciaActive: z.boolean(), transferenciaCbu: z.string().optional(), transferenciaAlias: z.string().optional(), transferenciaTitular: z.string().optional(), transferenciaBanco: z.string().optional(), transferenciaLogo: z.string().optional(),
+  visaActive: z.boolean(), visaLogo: z.string().optional(),
+  mastercardActive: z.boolean(), mastercardLogo: z.string().optional(),
+  amexActive: z.boolean(), amexLogo: z.string().optional(),
+  caActive: z.boolean(), caLogo: z.string().optional(), caUsuario: z.string().optional(), caPassword: z.string().optional(), caApiKey: z.string().optional(), caAgreement: z.string().optional(),
+  caRemitenteNombre: z.string().optional(), caRemitenteCalle: z.string().optional(), caRemitenteNúmero: z.string().optional(), caRemitenteCiudad: z.string().optional(), caRemitenteCP: z.string().optional(), caRemitenteProvincia: z.string().optional(), caRemitenteTeléfono: z.string().optional(),
+  ocaActive: z.boolean(), ocaLogo: z.string().optional(),
+  andreaniActive: z.boolean(), andreaniLogo: z.string().optional(),
+});
+type FormData = z.infer<typeof schema>;
+
+const inputClass = 'w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00]';
+const labelClass = 'block text-xs font-medium text-gray-400 uppercase tracking-wider';
+const logoSuggestion = 'Medida recomendada: 200x80px. Logo horizontal, fondo transparente';
+
+function SecretField({ label, register, name, show, onToggleShow }: { label: string; register: any; name: string; show: boolean; onToggleShow: () => void }) {
+  return (
+    <div>
+      <label className={labelClass}>{label}</label>
+      <div className="relative">
+        <input {...register(name)} className={inputClass + ' pr-8'} type={show ? 'text' : 'password'} />
+        <button type="button" onClick={onToggleShow} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+          {show ? <EyeOff size={14} /> : <Eye size={14} />}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function MercadoPagoSection({ register, watch, setValue, showKey, onToggleShowKey, showToken, onToggleShowToken, logo }: {
+  register: any; watch: any; setValue: any; showKey: boolean; onToggleShowKey: () => void; showToken: boolean; onToggleShowToken: () => void; logo: string;
+}) {
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+      <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+        <h2 className="text-sm font-semibold text-gray-800 flex items-center gap-2"><Wallet className="w-4 h-4 text-[#C8FF00]" />Mercado Pago</h2>
+        <Toggle checked={watch('mercadopagoActive')} onChange={() => setValue('mercadopagoActive', !watch('mercadopagoActive'), { shouldDirty: true })} />
+      </div>
+      {watch('mercadopagoActive') && (
+        <div className="grid grid-cols-2 gap-4">
+          <SecretField label="Public Key" register={register} name="mercadopagoPublicKey" show={showKey} onToggleShow={onToggleShowKey} />
+          <SecretField label="Access Token" register={register} name="mercadopagoAccessToken" show={showToken} onToggleShow={onToggleShowToken} />
+          <div className="col-span-2"><label className={labelClass}>Logo</label><ImageUpload suggestion={logoSuggestion} value={logo} onChange={(url) => setValue('mercadopagoLogo', url, { shouldDirty: true })} width={200} height={80} /></div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TransferenciaSection({ register, watch, setValue, showCbu, onToggleShowCbu, showAlias, onToggleShowAlias, logo }: {
+  register: any; watch: any; setValue: any; showCbu: boolean; onToggleShowCbu: () => void; showAlias: boolean; onToggleShowAlias: () => void; logo: string;
+}) {
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+      <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+        <h2 className="text-sm font-semibold text-gray-800 flex items-center gap-2"><Landmark className="w-4 h-4 text-[#C8FF00]" />Transferencia Bancaria</h2>
+        <Toggle checked={watch('transferenciaActive')} onChange={() => setValue('transferenciaActive', !watch('transferenciaActive'), { shouldDirty: true })} />
+      </div>
+      {watch('transferenciaActive') && (
+        <div className="grid grid-cols-2 gap-4">
+          <SecretField label="CBU" register={register} name="transferenciaCbu" show={showCbu} onToggleShow={onToggleShowCbu} />
+          <SecretField label="Alias" register={register} name="transferenciaAlias" show={showAlias} onToggleShow={onToggleShowAlias} />
+          <div><label className={labelClass}>Titular</label><input {...register('transferenciaTitular')} className={inputClass} /></div>
+          <div><label className={labelClass}>Banco</label><input {...register('transferenciaBanco')} className={inputClass} /></div>
+          <div className="col-span-2"><label className={labelClass}>Logo</label><ImageUpload suggestion={logoSuggestion} value={logo} onChange={(url) => setValue('transferenciaLogo', url, { shouldDirty: true })} width={200} height={80} /></div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TarjetasSection({ setValue, cards }: { setValue: any; cards: { key: string; label: string; logo: string; active: boolean }[] }) {
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+      <h2 className="text-sm font-semibold text-gray-800 border-b border-gray-100 pb-3 flex items-center gap-2"><CreditCard className="w-4 h-4 text-[#C8FF00]" />Tarjetas</h2>
+      <div className="grid grid-cols-3 gap-4">
+        {cards.map((item) => (
+          <div key={item.key} className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-gray-700">{item.label}</span>
+              <Toggle checked={item.active} onChange={() => setValue((item.key + 'Active') as any, !item.active, { shouldDirty: true })} />
+            </div>
+            {item.active && <ImageUpload suggestion={logoSuggestion} value={item.logo} onChange={(url) => setValue((item.key + 'Logo') as any, url, { shouldDirty: true })} width={200} height={80} />}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CorreoArgentinoSection({ register, watch, setValue, showCaPassword, onToggleShowCaPassword, logo }: {
+  register: any; watch: any; setValue: any; showCaPassword: boolean; onToggleShowCaPassword: () => void; logo: string;
+}) {
+  return (
+    <div className="border border-gray-100 rounded-xl p-4 space-y-4">
+      <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+        <h3 className="text-sm font-semibold text-gray-800">Correo Argentino</h3>
+        <Toggle checked={watch('caActive')} onChange={() => setValue('caActive', !watch('caActive'), { shouldDirty: true })} />
+      </div>
+      {watch('caActive') && (
+        <>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Usuario (email)</label>
+              <input {...register('caUsuario')} className={inputClass} placeholder="facucrespo_97@hotmail.com" />
+            </div>
+            <SecretField label="Contraseña" register={register} name="caPassword" show={showCaPassword} onToggleShow={onToggleShowCaPassword} />
+            <div>
+              <label className={labelClass}>API Key</label>
+              <input {...register('caApiKey')} className={inputClass} placeholder="Pendiente de gestionar" />
+            </div>
+            <div>
+              <label className={labelClass}>Agreement</label>
+              <input {...register('caAgreement')} className={inputClass} placeholder="Pendiente de gestionar" />
+            </div>
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Datos del remitente</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div><label className={labelClass}>Nombre / Empresa</label><input {...register('caRemitenteNombre')} className={inputClass} placeholder="Home Padel" /></div>
+              <div><label className={labelClass}>Calle</label><input {...register('caRemitenteCalle')} className={inputClass} placeholder="Av. Corrientes" /></div>
+              <div><label className={labelClass}>Número</label><input {...register('caRemitenteNúmero')} className={inputClass} placeholder="1234" /></div>
+              <div><label className={labelClass}>Ciudad</label><input {...register('caRemitenteCiudad')} className={inputClass} placeholder="CABA" /></div>
+              <div><label className={labelClass}>Código Postal</label><input {...register('caRemitenteCP')} className={inputClass} placeholder="1043" /></div>
+              <div><label className={labelClass}>Provincia</label><input {...register('caRemitenteProvincia')} className={inputClass} placeholder="Buenos Aires" /></div>
+              <div><label className={labelClass}>Teléfono</label><input {...register('caRemitenteTeléfono')} className={inputClass} placeholder="11-5555-6666" /></div>
+            </div>
+          </div>
+          <div>
+            <label className={labelClass}>Logo</label>
+            <ImageUpload suggestion={logoSuggestion} value={logo} onChange={(url) => setValue('caLogo', url, { shouldDirty: true })} width={200} height={80} />
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function SimpleCarrierCard({ label, watch, setValue, activeKey, logoKey, logo }: { label: string; watch: any; setValue: any; activeKey: string; logoKey: string; logo: string }) {
+  const active = watch(activeKey);
+  return (
+    <div className="border border-gray-100 rounded-xl p-4 space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium text-gray-700">{label}</span>
+        <Toggle checked={active} onChange={() => setValue(activeKey as any, !active, { shouldDirty: true })} />
+      </div>
+      {active && <ImageUpload suggestion={logoSuggestion} value={logo} onChange={(url) => setValue(logoKey as any, url, { shouldDirty: true })} width={200} height={80} />}
+    </div>
+  );
+}
+
+function mapToFormData(data: any): FormData {
+  const mp = data.mercadopago || {}; const tf = data.transferencia || {};
+  const vi = data.visa || {}; const mc = data.mastercard || {}; const ax = data.amex || {};
+  const ca = data.ca || {}; const oc = data.oca || {}; const an = data.andreani || {};
+  const caRem = ca.remitente || {};
+  return {
+    mercadopagoActive: mp.active !== false, mercadopagoPublicKey: mp.publicKey || '', mercadopagoAccessToken: mp.accessToken || '', mercadopagoLogo: mp.logo || '',
+    transferenciaActive: tf.active !== false, transferenciaCbu: tf.cbu || '', transferenciaAlias: tf.alias || '', transferenciaTitular: tf.titular || '', transferenciaBanco: tf.banco || '', transferenciaLogo: tf.logo || '',
+    visaActive: vi.active !== false, visaLogo: vi.logo || '',
+    mastercardActive: mc.active !== false, mastercardLogo: mc.logo || '',
+    amexActive: ax.active !== false, amexLogo: ax.logo || '',
+    caActive: ca.active !== false, caLogo: ca.logo || '', caUsuario: ca.usuario || '', caPassword: ca.password || '', caApiKey: ca.apiKey || '', caAgreement: ca.agreement || '',
+    caRemitenteNombre: caRem.nombre || '', caRemitenteCalle: caRem.calle || '', caRemitenteNúmero: caRem.número || '', caRemitenteCiudad: caRem.ciudad || '', caRemitenteCP: caRem.códigoPostal || '', caRemitenteProvincia: caRem.provincia || '', caRemitenteTeléfono: caRem.teléfono || '',
+    ocaActive: oc.active !== false, ocaLogo: oc.logo || '',
+    andreaniActive: an.active !== false, andreaniLogo: an.logo || '',
+  };
+}
+
+function buildPayload(data: FormData) {
+  return {
+    mercadopago: { active: data.mercadopagoActive, publicKey: data.mercadopagoPublicKey, accessToken: data.mercadopagoAccessToken, logo: data.mercadopagoLogo },
+    transferencia: { active: data.transferenciaActive, cbu: data.transferenciaCbu, alias: data.transferenciaAlias, titular: data.transferenciaTitular, banco: data.transferenciaBanco, logo: data.transferenciaLogo },
+    visa: { active: data.visaActive, logo: data.visaLogo },
+    mastercard: { active: data.mastercardActive, logo: data.mastercardLogo },
+    amex: { active: data.amexActive, logo: data.amexLogo },
+    ca: { active: data.caActive, logo: data.caLogo, usuario: data.caUsuario, password: data.caPassword, apiKey: data.caApiKey, agreement: data.caAgreement, remitente: { nombre: data.caRemitenteNombre, calle: data.caRemitenteCalle, número: data.caRemitenteNúmero, ciudad: data.caRemitenteCiudad, códigoPostal: data.caRemitenteCP, provincia: data.caRemitenteProvincia, teléfono: data.caRemitenteTeléfono } },
+    oca: { active: data.ocaActive, logo: data.ocaLogo },
+    andreani: { active: data.andreaniActive, logo: data.andreaniLogo },
+  };
+}
+
+export default function MediosPagoPage() {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [visible, setVisible] = useState({ token: false, key: false, cbu: false, alias: false, caPassword: false });
+  const toggleVisible = (field: keyof typeof visible) => setVisible((v) => ({ ...v, [field]: !v[field] }));
+
+  const { register, handleSubmit, reset, setValue, watch } = useForm<FormData>({ resolver: zodResolver(schema) });
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await api.get('/site-sections/payment_methods');
+      const data = res.data?.data ?? res.data ?? {};
+      reset(mapToFormData(data));
+    } catch { toast('No se pudo cargar los medios de pago', 'error'); } finally { setLoading(false); }
+  }, [reset]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const onSubmit = async (data: FormData) => {
+    setSaving(true);
+    try {
+      await api.put('/site-sections/payment_methods', { data: buildPayload(data), active: true });
+      toast('Configuración guardada', 'success');
+    } catch { toast('Error al guardar', 'error'); } finally { setSaving(false); }
+  };
+
+  if (loading) return <PageLoader />;
+
+  const mpLogo = watch('mercadopagoLogo') || ''; const transfLogo = watch('transferenciaLogo') || '';
+  const visaLogo = watch('visaLogo') || ''; const mcLogo = watch('mastercardLogo') || ''; const amexLogo = watch('amexLogo') || '';
+  const caLogo = watch('caLogo') || ''; const ocaLogo = watch('ocaLogo') || ''; const andreaniLogo = watch('andreaniLogo') || '';
+
+  return (
+    <div className="space-y-6 w-full">
+      <div className="flex items-center gap-3">
+        <Link href="/configuracion" className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"><ArrowLeft className="w-4 h-4" /></Link>
+        <div><h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><CreditCard className="w-5 h-5 text-[#C8FF00]" />Medios de Pago y Envío</h1><p className="text-gray-500 text-sm mt-0.5">Configuración de medios de pago y envío</p></div>
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <MercadoPagoSection register={register} watch={watch} setValue={setValue} showKey={visible.key} onToggleShowKey={() => toggleVisible('key')} showToken={visible.token} onToggleShowToken={() => toggleVisible('token')} logo={mpLogo} />
+        <TransferenciaSection register={register} watch={watch} setValue={setValue} showCbu={visible.cbu} onToggleShowCbu={() => toggleVisible('cbu')} showAlias={visible.alias} onToggleShowAlias={() => toggleVisible('alias')} logo={transfLogo} />
+        <TarjetasSection setValue={setValue} cards={[
+          { key: 'visa', label: 'VISA', logo: visaLogo, active: watch('visaActive') },
+          { key: 'mastercard', label: 'Mastercard', logo: mcLogo, active: watch('mastercardActive') },
+          { key: 'amex', label: 'AMEX', logo: amexLogo, active: watch('amexActive') },
+        ]} />
+
+        <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+          <h2 className="text-sm font-semibold text-gray-800 border-b border-gray-100 pb-3 flex items-center gap-2"><Truck className="w-4 h-4 text-[#C8FF00]" />Medios de Envío</h2>
+          <CorreoArgentinoSection register={register} watch={watch} setValue={setValue} showCaPassword={visible.caPassword} onToggleShowCaPassword={() => toggleVisible('caPassword')} logo={caLogo} />
+          <div className="grid grid-cols-2 gap-4">
+            <SimpleCarrierCard label="OCA" watch={watch} setValue={setValue} activeKey="ocaActive" logoKey="ocaLogo" logo={ocaLogo} />
+            <SimpleCarrierCard label="Andreani" watch={watch} setValue={setValue} activeKey="andreaniActive" logoKey="andreaniLogo" logo={andreaniLogo} />
+          </div>
+        </div>
+
+        <div className="flex justify-end">
+          <button type="submit" disabled={saving} className="flex items-center gap-2 px-5 py-2.5 bg-[#C8FF00] text-[#0f172a] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] disabled:opacity-50 transition-colors">
+            <Save className="w-4 h-4" />{saving ? 'Guardando...' : 'Guardar cambios'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}

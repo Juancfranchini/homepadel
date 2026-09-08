@@ -1,0 +1,46 @@
+---
+description: Límite de tamaño de archivo/función, prohibición de any/eslint-disable, DRY sobre conocimiento
+alwaysApply: true
+---
+
+# Tamaño y DRY
+
+Aplica a `apps/backend/src/**/*.ts`, `apps/frontend/src/**/*.{ts,tsx}`, `apps/backoffice/src/**/*.{ts,tsx}`. Los tests (`*.spec.ts`) no cuentan para el límite de tamaño.
+
+| Qué | Límite |
+|---|---|
+| Archivo de lógica o componente | 400 líneas |
+| Función / componente | 80 líneas |
+
+## Dónde extraer
+
+- Lógica de dominio repetida en el backend → función/servicio compartido en `common/`.
+- Lógica de estado de un componente grande → hook propio (`use<Nombre>.ts`) al lado del componente.
+- UI repetida dentro de la misma app → `components/ui/` de esa app. **`frontend` y `backoffice` no comparten código** — no importar de una app a la otra.
+- Controller con demasiadas rutas → dividir por sub-recurso.
+
+## Cómo partir un componente
+
+```tsx
+// MAL
+export function ProductForm() { /* 300 líneas: estado, validación, submit, preview */ }
+
+// BIEN
+export function ProductForm() {
+  const form = useProductForm();
+  return (
+    <form onSubmit={form.handleSubmit}>
+      <ProductBasicFields form={form} />
+      <ProductPricingFields form={form} />
+    </form>
+  );
+}
+```
+
+## Prohibido
+
+- `eslint-disable`, `eslint-disable-next-line`, `eslint-disable-line`.
+- `any`. `@ts-ignore`. `@ts-expect-error` sin comentario de una línea justificando por qué.
+- Copiar el mismo bloque de lógica de negocio "porque se parece" — DRY es sobre conocimiento, no sobre texto parecido.
+
+Si el lint falla por tamaño o complejidad, se parte el archivo/función. No se silencia la regla. Detalle completo: `docs/convenciones-codigo.md`.
