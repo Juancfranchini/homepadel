@@ -1,0 +1,129 @@
+'use client';
+
+import { ChevronLeft } from 'lucide-react';
+import { Category, Brand } from '@/types';
+import CatalogCheckboxOption from './CatalogCheckboxOption';
+
+const SORT_OPTIONS = [
+  { value: 'newest', label: 'Novedades' },
+  { value: 'price_asc', label: 'Precio: menor a mayor' },
+  { value: 'price_desc', label: 'Precio: mayor a menor' },
+  { value: 'name_asc', label: 'Nombre A-Z' },
+];
+
+type ActivePanel = 'categories' | 'brands' | 'offers' | 'sort' | null;
+
+interface Props {
+  activePanel: ActivePanel;
+  onClose: () => void;
+  categories: Category[];
+  brands: Brand[];
+  selectedCategory: string;
+  selectedBrand: string;
+  isOffer: boolean;
+  currentSort: string;
+  onSortChange: (value: string) => void;
+  onCategoryChange: (slug: string | null) => void;
+  onBrandChange: (slug: string | null) => void;
+  onOfferChange: (v: boolean) => void;
+  onClear: () => void;
+  hasFilters: boolean;
+  sizes: string[];
+  colors: string[];
+  weights: string[];
+  selectedSize: string;
+  selectedColor: string;
+  selectedWeight: string;
+  onSizeChange: (value: string | null) => void;
+  onColorChange: (value: string | null) => void;
+  onWeightChange: (value: string | null) => void;
+}
+
+export default function CatalogSidebarPanel({
+  activePanel, onClose, categories, brands, selectedCategory, selectedBrand, isOffer,
+  currentSort, onSortChange, onCategoryChange, onBrandChange, onOfferChange, onClear, hasFilters,
+  sizes, colors, weights, selectedSize, selectedColor, selectedWeight,
+  onSizeChange, onColorChange, onWeightChange,
+}: Props) {
+  if (!activePanel) return null;
+
+  return (
+    <>
+      <div className="fixed inset-0 z-10" onClick={onClose} />
+
+      <div className="relative z-20 w-56 bg-[#0C0C0C] border border-[#0D0F0F] rounded-2xl p-4 ml-2 shadow-2xl animate-fade-in">
+        <button onClick={onClose}
+          className="absolute top-3 right-3 w-7 h-7 rounded-lg flex items-center justify-center text-[#C7C7C0] hover:text-[#F7F6F7] bg-white/[0.04] hover:bg-white/[0.08] transition-colors"
+          title="Cerrar panel">
+          <ChevronLeft size={16} />
+        </button>
+
+        {activePanel === 'categories' && (
+          <div>
+            <h3 className="text-xs font-semibold text-[#F7F6F7] uppercase tracking-wider mb-3 pr-6">Categorías</h3>
+            <div className="space-y-2">
+              {categories.map((cat) => (
+                <CatalogCheckboxOption key={cat.id} label={cat.name} checked={selectedCategory === cat.slug} onChange={() => onCategoryChange(selectedCategory === cat.slug ? null : cat.slug)} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activePanel === 'categories' && sizes.length > 0 && (
+          <div className="mt-5 border-t border-[#0D0F0F] pt-4">
+            <h3 className="text-xs font-semibold text-[#F7F6F7] uppercase tracking-wider mb-3">Talles</h3>
+            <select value={selectedSize} onChange={(e) => onSizeChange(e.target.value || null)} className="w-full bg-[#050606] border border-[#8A8A85] rounded-lg px-2 py-2 text-sm text-[#F7F6F7]">
+              <option value="">Todos</option>{sizes.map((value) => <option key={value} value={value}>{value}</option>)}
+            </select>
+          </div>
+        )}
+
+        {activePanel === 'brands' && (colors.length > 0 || weights.length > 0) && (
+          <div className="mt-5 border-t border-[#0D0F0F] pt-4 space-y-4">
+            {colors.length > 0 && <div><h3 className="text-xs font-semibold text-[#F7F6F7] uppercase tracking-wider mb-3">Colores</h3><select value={selectedColor} onChange={(e) => onColorChange(e.target.value || null)} className="w-full bg-[#050606] border border-[#8A8A85] rounded-lg px-2 py-2 text-sm text-[#F7F6F7]"><option value="">Todos</option>{colors.map((value) => <option key={value} value={value}>{value}</option>)}</select></div>}
+            {weights.length > 0 && <div><h3 className="text-xs font-semibold text-[#F7F6F7] uppercase tracking-wider mb-3">Peso</h3><select value={selectedWeight} onChange={(e) => onWeightChange(e.target.value || null)} className="w-full bg-[#050606] border border-[#8A8A85] rounded-lg px-2 py-2 text-sm text-[#F7F6F7]"><option value="">Todos</option>{weights.map((value) => <option key={value} value={value}>{value}</option>)}</select></div>}
+          </div>
+        )}
+
+        {activePanel === 'brands' && (
+          <div>
+            <h3 className="text-xs font-semibold text-[#F7F6F7] uppercase tracking-wider mb-3 pr-6">Marcas</h3>
+            <div className="space-y-2">
+              {brands.map((brand) => (
+                <CatalogCheckboxOption key={brand.id} label={brand.name} checked={selectedBrand === brand.slug} onChange={() => onBrandChange(selectedBrand === brand.slug ? null : brand.slug)} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activePanel === 'offers' && (
+          <div>
+            <h3 className="text-xs font-semibold text-[#F7F6F7] uppercase tracking-wider mb-3 pr-6">Ofertas</h3>
+            <CatalogCheckboxOption label="Solo ofertas" checked={isOffer} onChange={() => onOfferChange(!isOffer)} />
+          </div>
+        )}
+
+        {activePanel === 'sort' && (
+          <div>
+            <h3 className="text-xs font-semibold text-[#F7F6F7] uppercase tracking-wider mb-3 pr-6">Ordenar por</h3>
+            <div className="space-y-1">
+              {SORT_OPTIONS.map((opt) => (
+                <button key={opt.value} onClick={() => { onSortChange(opt.value); onClose(); }}
+                  className={'w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ' +
+                    (currentSort === opt.value ? 'text-[#B7D31A] bg-[#B7D31A]/5' : 'text-[#C7C7C0] hover:text-[#F7F6F7] hover:bg-white/[0.04]')}>
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {hasFilters && (
+          <button onClick={onClear} className="mt-4 text-xs text-red-400 hover:text-red-300 font-medium">
+            Limpiar filtros
+          </button>
+        )}
+      </div>
+    </>
+  );
+}

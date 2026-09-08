@@ -1,0 +1,8 @@
+node_modules
+dist
+.next
+build
+coverage
+*.tmp
+pnpm-lock.yaml
+package-lock.json

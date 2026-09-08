@@ -10,9 +10,10 @@ node_modules/
 .next/
 dist/
 build/
+*.tsbuildinfo
 
 # Uploads (imágenes subidas localmente)
-backend/uploads/
+apps/backend/uploads/
 
 # Logs
 *.log
@@ -29,7 +30,7 @@ Thumbs.db
 
 # Claude Code local settings
 .claude/settings.local.json
-frontend/.claude/
+apps/frontend/.claude/
 
 # Prisma
-backend/prisma/*.db
+apps/backend/prisma/*.db
