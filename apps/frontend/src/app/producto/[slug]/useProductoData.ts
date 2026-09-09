@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getProduct, getProducts } from '@/lib/api';
 import { Product } from '@/types';
 import { trackMetaEvent } from '@/lib/metaPixel';
@@ -9,14 +9,22 @@ export function useProductoData(slug: string | undefined) {
   const [product, setProduct] = useState<Product | null>(null);
   const [related, setRelated] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  // Distinto de "no existe" (404 real): la petición falló por red/servidor y
+  // no sabemos si el producto existe o no — no corresponde decir "no encontrado".
+  const [error, setError] = useState(false);
   const [hasSizeGuide, setHasSizeGuide] = useState(false);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     if (!slug) return;
     setLoading(true);
+    setError(false);
     Promise.allSettled([getProduct(slug + '?t=' + Date.now()), getProducts({ showAll: 1, limit: 50 })])
       .then(([prodRes, relRes]) => {
         const p = prodRes.status === 'fulfilled' ? (prodRes.value?.data ?? prodRes.value) : null;
+        if (prodRes.status === 'rejected') {
+          const status = (prodRes.reason as any)?.response?.status;
+          if (status !== 404) setError(true);
+        }
         setProduct(p ?? null);
         if (p) {
           fetch(process.env.NEXT_PUBLIC_API_URL + '/size-guides?categoryId=' + p.categoryId)
@@ -38,6 +46,8 @@ export function useProductoData(slug: string | undefined) {
       .finally(() => setLoading(false));
   }, [slug]);
 
+  useEffect(() => { load(); }, [load]);
+
   useEffect(() => {
     if (product) {
       trackMetaEvent('ViewContent', {
@@ -50,5 +60,5 @@ export function useProductoData(slug: string | undefined) {
     }
   }, [product]);
 
-  return { product, related, loading, hasSizeGuide };
+  return { product, related, loading, error, retry: load, hasSizeGuide };
 }

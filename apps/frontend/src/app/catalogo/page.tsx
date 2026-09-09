@@ -13,6 +13,7 @@ import CatalogGrid from './components/CatalogGrid';
 import CatalogList from './components/CatalogList';
 import CatalogPagination from './components/CatalogPagination';
 import CatalogEmpty from './components/CatalogEmpty';
+import CatalogError from './components/CatalogError';
 import CatalogSkeleton from './components/CatalogSkeleton';
 import CatalogMobileSidebar from './components/CatalogMobileSidebar';
 
@@ -41,7 +42,7 @@ function CatálogoContent() {
   }, [addItem, router]);
 
   const {
-    products, loading, totalPages, totalCount, currentPage, sidebarOpen, setSidebarOpen,
+    products, loading, error, retry, totalPages, totalCount, currentPage, sidebarOpen, setSidebarOpen,
     searchInput, setSearchInput, viewMode,
     hasFilters, activeChips, pageTitle, clearFilters, handleSearch, setParam,
     sidebarProps,
@@ -77,6 +78,7 @@ function CatálogoContent() {
             <CatalogChips chips={activeChips} onClearAll={clearFilters} />
 
             {loading ? <CatalogSkeleton /> :
+              error ? <CatalogError onRetry={retry} /> :
               products.length === 0 ? <CatalogEmpty hasFilters={hasFilters} onClear={clearFilters} /> :
                 (viewMode === 'grid' ?
                   <CatalogGrid products={products} onAddToCart={addCatalogItem} />

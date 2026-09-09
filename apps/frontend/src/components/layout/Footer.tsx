@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Instagram, Facebook, Youtube, Mail, Phone, MapPin, Clock } from 'lucide-react';
-import { useBranding } from '@/hooks/useBranding';
 import { usePaymentMethods } from '@/hooks/usePaymentMethods';
 import BrandLogo from '@/components/ui/BrandLogo';
 import FooterPaymentBadges from './FooterPaymentBadges';
@@ -10,7 +9,6 @@ import FooterPaymentBadges from './FooterPaymentBadges';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
 export default function Footer() {
-  const branding = useBranding();
   const { mercadopago, visa, mastercard, amex, ca, oca, andreani } = usePaymentMethods() as any;
   const [settings, setSettings] = useState<any>({});
 
@@ -34,7 +32,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 md:gap-6 lg:gap-4 text-center md:text-left">
           <div className="col-span-1 md:col-span-2 lg:col-span-1 flex flex-col items-center md:items-start">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <BrandLogo variant="light" size="md" showText={!branding.logoFooter} imageUrl={branding.logoFooter || undefined} />
+              <BrandLogo size="md" />
             </Link>
             <p className="text-sm leading-relaxed mb-4 sm:mb-6">Equipamiento profesional para jugadores apasionados. Las mejores marcas, los mejores precios.</p>
             <div className="flex gap-3 justify-center md:justify-start">

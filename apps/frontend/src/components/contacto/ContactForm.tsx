@@ -15,8 +15,17 @@ export default function ContactForm() {
     e.preventDefault();
     if (!form.name || !form.email || !form.message) { setError('Completa nombre, email y mensaje.'); return; }
     setSending(true); setError('');
-    try { await fetch(API_URL + '/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) }); } catch {}
-    setSent(true); setSending(false);
+    try {
+      const res = await fetch(API_URL + '/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
+      if (!res.ok) throw new Error('request failed');
+      setSent(true);
+    } catch {
+      // Antes esto se tragaba en silencio y igual mostraba "Mensaje
+      // enviado!" — el usuario creía que se había mandado y en realidad no.
+      setError('No pudimos enviar tu mensaje. Probá de nuevo en unos segundos.');
+    } finally {
+      setSending(false);
+    }
   };
 
   if (sent) {
@@ -31,23 +40,39 @@ export default function ContactForm() {
   }
 
   const inputClass = "w-full bg-[#0A0F12] border border-[#0D0F0F] rounded-xl px-4 py-3 text-sm text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A] focus:ring-1 focus:ring-[#B7D31A]/20 transition-all";
+  const labelClass = "block text-xs font-medium text-[#C7C7C0] mb-1.5";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <input type="text" placeholder="Nombre completo" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={inputClass} />
-        <input type="email" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={inputClass} />
+        <div>
+          <label htmlFor="contact-name" className={labelClass}>Nombre completo</label>
+          <input id="contact-name" type="text" placeholder="Nombre completo" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={inputClass} />
+        </div>
+        <div>
+          <label htmlFor="contact-email" className={labelClass}>Email</label>
+          <input id="contact-email" type="email" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={inputClass} />
+        </div>
       </div>
-      <input type="tel" placeholder="Teléfono (opciónal)" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className={inputClass} />
-      <select value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} className={inputClass + " appearance-none"}>
-        <option value="">En que podemos ayudarte?</option>
-        <option value="consulta-producto">Consulta sobre un producto</option>
-        <option value="seguimiento-pedido">Seguimiento de pedido</option>
-        <option value="cambio-devolución">Cambio o devolución</option>
-        <option value="mayorista">Consulta mayorista</option>
-        <option value="otro">Otro</option>
-      </select>
-      <textarea rows={5} placeholder="Tu mensaje" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} className={inputClass + " resize-none"} />
+      <div>
+        <label htmlFor="contact-phone" className={labelClass}>Teléfono (opcional)</label>
+        <input id="contact-phone" type="tel" placeholder="Teléfono (opciónal)" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className={inputClass} />
+      </div>
+      <div>
+        <label htmlFor="contact-subject" className={labelClass}>Asunto</label>
+        <select id="contact-subject" value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} className={inputClass + " appearance-none"}>
+          <option value="">En que podemos ayudarte?</option>
+          <option value="consulta-producto">Consulta sobre un producto</option>
+          <option value="seguimiento-pedido">Seguimiento de pedido</option>
+          <option value="cambio-devolución">Cambio o devolución</option>
+          <option value="mayorista">Consulta mayorista</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <div>
+        <label htmlFor="contact-message" className={labelClass}>Tu mensaje</label>
+        <textarea id="contact-message" rows={5} placeholder="Tu mensaje" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} className={inputClass + " resize-none"} />
+      </div>
       {error && <p className="text-red-400 text-xs">{error}</p>}
       <button type="submit" disabled={sending} className="w-full py-3.5 rounded-xl bg-[#B7D31A] text-[#050606] font-semibold text-sm uppercase tracking-wider btn-primary-glow flex items-center justify-center gap-2 disabled:opacity-60">
         <Send size={15} />{sending ? 'Enviando...' : 'ENVIAR MENSAJE'}

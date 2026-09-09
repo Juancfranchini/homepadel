@@ -24,6 +24,7 @@ export function useCatalogProducts(filters: Filters) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
@@ -37,6 +38,7 @@ export function useCatalogProducts(filters: Filters) {
 
   const loadProducts = useCallback(async () => {
     setLoading(true);
+    setError(false);
     try {
       const params: Record<string, unknown> = { page: currentPage, limit: ITEMS_PER_PAGE };
       if (selectedCategory) params.category = selectedCategory;
@@ -56,7 +58,7 @@ export function useCatalogProducts(filters: Filters) {
       setProducts(items);
       setTotalPages(pages);
       setTotalCount((data as any)?.total ?? items.length);
-    } catch { setProducts([]); setTotalPages(1); setTotalCount(0); }
+    } catch { setProducts([]); setTotalPages(1); setTotalCount(0); setError(true); }
     finally { setLoading(false); }
   }, [currentPage, selectedCategory, selectedBrand, isOffer, searchQuery, selectedSize, selectedColor, selectedWeight]);
 
@@ -75,5 +77,5 @@ export function useCatalogProducts(filters: Filters) {
     ...(p.variants?.filter((v) => p.hasWeight && v.active && v.weight != null).map((v) => `${v.weight} ${v.weightUnit || ''}`.trim()) || []),
   ]))];
 
-  return { products, categories, brands, loading, totalPages, totalCount, sizes, colors, weights };
+  return { products, categories, brands, loading, error, retry: loadProducts, totalPages, totalCount, sizes, colors, weights };
 }

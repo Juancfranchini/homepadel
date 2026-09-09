@@ -12,7 +12,7 @@ export function useCatalogPage() {
     setParam, clearFilters, hasFilters, activeChips, pageTitle,
   } = filters;
 
-  const { products, categories, brands, loading, totalPages, totalCount, sizes, colors, weights } = useCatalogProducts({
+  const { products, categories, brands, loading, error, retry, totalPages, totalCount, sizes, colors, weights } = useCatalogProducts({
     currentPage, selectedCategory, selectedBrand, isOffer, searchQuery, selectedSize, selectedColor, selectedWeight,
   });
 
@@ -39,7 +39,7 @@ export function useCatalogPage() {
   };
 
   return {
-    products, loading, totalPages, totalCount, currentPage, sidebarOpen, setSidebarOpen,
+    products, loading, error, retry, totalPages, totalCount, currentPage, sidebarOpen, setSidebarOpen,
     searchInput, setSearchInput, viewMode,
     hasFilters, activeChips, pageTitle, clearFilters, handleSearch, setParam,
     sidebarProps,
