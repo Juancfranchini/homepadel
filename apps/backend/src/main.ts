@@ -6,12 +6,14 @@
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { json, urlencoded } from 'express';
 import { AppModule } from './app.module';
+
+const logger = new Logger('CORS');
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -54,7 +56,13 @@ async function bootstrap() {
             return callback(null, true);
           }
 
-          callback(new Error(`CORS: origen no permitido  ${origin}`));
+          // callback(new Error(...)) hace que Nest devuelva 500 en vez de
+          // rechazar el CORS: el navegador ve "Failed to fetch" pero el
+          // request real vuelve como error de servidor, no como bloqueo de
+          // origen. callback(null, false) rechaza limpio — misma protección,
+          // sin fingir una falla del backend que no existe.
+          logger.warn(`Origen no permitido: ${origin}. Revisar FRONTEND_URL/BACKOFFICE_URL en las variables de entorno.`);
+          callback(null, false);
         },
     credentials: true,
   });
