@@ -3,6 +3,7 @@
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useProductoData } from './useProductoData';
+import { ProductoSkeleton, ProductoLoadError, ProductoNotFound } from './ProductoLoadingStates';
 import { useProductVariants } from './useProductVariants';
 import { useProductoActions } from './useProductoActions';
 import { deriveProductDisplay } from './deriveProductDisplay';
@@ -18,28 +19,13 @@ import TrustBottom from './components/TrustBottom';
 
 export default function ProductoPage() {
   const params = useParams<{ slug: string }>();
-  const { product, related, loading, hasSizeGuide } = useProductoData(params.slug);
+  const { product, related, loading, error, retry, hasSizeGuide } = useProductoData(params.slug);
   const variants = useProductVariants(product);
   const actions = useProductoActions(product, variants.selectedVariant, variants.activeProductVariants);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#050606] py-12">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 animate-pulse">
-          <div className="aspect-square bg-white/[0.04] rounded-2xl" />
-          <div className="space-y-4"><div className="h-3 bg-white/[0.06] rounded w-1/4" /><div className="h-8 bg-white/[0.06] rounded w-3/4" /><div className="h-12 bg-white/[0.06] rounded w-1/2" /></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!product) {
-    return (
-      <div className="min-h-screen bg-[#050606] flex items-center justify-center">
-        <div className="text-center"><p className="text-[#C7C7C0] mb-4">Producto no encontrado</p><Link href="/catalogo" className="text-[#B7D31A] font-semibold underline">Volver al catálogo</Link></div>
-      </div>
-    );
-  }
+  if (loading) return <ProductoSkeleton />;
+  if (error) return <ProductoLoadError onRetry={retry} />;
+  if (!product) return <ProductoNotFound />;
 
   const display = deriveProductDisplay(product, variants.selectedVariant, variants.activeProductVariants);
 

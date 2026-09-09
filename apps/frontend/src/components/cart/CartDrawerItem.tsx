@@ -11,7 +11,7 @@ interface Props {
 
 export default function CartDrawerItem({ item, onRemove, onUpdateQuantity }: Props) {
   const { product, quantity, variantSize, variantColor, variantDimensions, variantWeight, variantWeightUnit, variantSku, variantImageUrl } = item;
-  const itemPrice = product.salePrice ?? product.price;
+  const itemPrice = product.effectivePrice;
   const itemSubtotal = itemPrice * quantity;
   const imageToShow = variantImageUrl || product.images?.[0];
   const itemKey = getItemKey(item);

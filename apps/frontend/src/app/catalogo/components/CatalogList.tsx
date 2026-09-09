@@ -11,9 +11,9 @@ export default function CatalogList({ products, onAddToCart }: Props) {
   return (
     <div className="space-y-3">
       {products.map((product) => {
-        const hasDiscount = product.salePrice !== undefined && product.salePrice > 0 && product.salePrice < product.price;
-        const discountPct = hasDiscount ? getDiscountPercent(product.price, product.salePrice!) : 0;
-        const displayPrice = hasDiscount ? product.salePrice! : product.price;
+        const hasDiscount = product.effectivePrice < product.price;
+        const discountPct = hasDiscount ? getDiscountPercent(product.price, product.effectivePrice) : 0;
+        const displayPrice = product.effectivePrice;
         const imageUrl = product.images?.length > 0 ? getImageUrl(product.images[0]) : null;
 
         return (

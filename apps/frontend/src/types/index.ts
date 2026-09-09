@@ -58,6 +58,10 @@ export interface Product {
   description?: string;
   price: number;
   salePrice?: number;
+  /** Precio que realmente se cobra, calculado siempre por el backend
+   * (PricingService/ProductsService) — nunca lo recalcules acá con
+   * `salePrice ?? price`, eso trata un `salePrice` de 0 como oferta válida. */
+  effectivePrice: number;
   sku: string;
   stock: number;
   images: string[];

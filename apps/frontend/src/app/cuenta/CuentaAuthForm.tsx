@@ -7,7 +7,6 @@ import { z } from 'zod';
 import Link from 'next/link';
 import { login, register as registerUser } from '@/lib/api';
 import BrandLogo from '@/components/ui/BrandLogo';
-import { useBranding } from '@/hooks/useBranding';
 import CuentaLoginForm from './CuentaLoginForm';
 import CuentaRegisterForm from './CuentaRegisterForm';
 
@@ -31,7 +30,6 @@ interface Props {
 }
 
 export default function CuentaAuthForm({ onAuth }: Props) {
-  const branding = useBranding();
   const [isRegister, setIsRegister] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [apiError, setApiError] = useState('');
@@ -62,7 +60,7 @@ export default function CuentaAuthForm({ onAuth }: Props) {
         <div className="bg-[#0F1111] rounded-2xl border border-[#B7D31A]/20 p-8">
           <div className="text-center mb-6">
             <Link href="/" aria-label="Home Padel" className="inline-block">
-              <BrandLogo variant="light" size="lg" showText={!branding.logoHeader} imageUrl={branding.logoLogin || branding.logoHeader || undefined} />
+              <BrandLogo size="lg" />
             </Link>
             <h1 className="text-xl font-black mt-4 text-[#F7F6F7]">{isRegister ? 'Crear cuenta' : 'Bienvenido de vuelta'}</h1>
             <p className="text-[#8A8A85] text-sm mt-1">{isRegister ? 'Completa tus datos para registrarte' : 'Ingresa para acceder a tu cuenta'}</p>

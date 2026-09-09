@@ -9,17 +9,11 @@ interface Props {
 }
 
 export default function ContactChannelsSection({ channels }: Props) {
-  if (channels.length === 0) {
-    return (
-      <section className="relative bg-[#080D11]">
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#B7D31A]/25 to-transparent" />
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16 text-center">
-          <p className="text-[#8A8A85] text-sm">No hay canales disponibles.</p>
-        </div>
-        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#B7D31A]/25 to-transparent" />
-      </section>
-    );
-  }
+  // Sin datos (ya sea porque no hay canales cargados o porque falló la
+  // petición) no corresponde mostrar la sección — antes se veía un texto
+  // tipo "No hay canales disponibles." que parece un error de sistema
+  // filtrado a producción, no contenido pensado para el usuario.
+  if (channels.length === 0) return null;
 
   return (
     <section className="relative bg-[#080D11]">

@@ -7,7 +7,6 @@ import { useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
 import { usePathname } from 'next/navigation';
 import BrandLogo from '@/components/ui/BrandLogo';
-import { useBranding } from '@/hooks/useBranding';
 import CartDrawer from '@/components/cart/CartDrawer';
 
 const NAV_LINKS = [
@@ -20,17 +19,8 @@ const NAV_LINKS = [
 ];
 
 export default function Header() {
-  const branding = useBranding();
   const { user } = useAuthStore();
-  const [isMobile, setIsMobile] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
-
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
 
   const totalItems = useCartStore((s) => s.totalItems);
   const pathname = usePathname();
@@ -47,7 +37,7 @@ export default function Header() {
               {open ? <X size={20} /> : <Menu size={20} />}
             </button>
             <Link href="/" className="flex-shrink-0">
-              <BrandLogo variant="light" size="xl" showText={!branding.logoHeader} imageUrl={(isMobile ? (branding.logoMobile || branding.logoHeader) : branding.logoHeader) || undefined}  />
+              <BrandLogo size="xl" priority />
             </Link>
           </div>
 

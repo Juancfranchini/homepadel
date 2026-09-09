@@ -1,79 +1,33 @@
-﻿import BrandLogoMark from './BrandLogoMark';
+import Image from 'next/image';
 
 interface BrandLogoProps {
-  /** URL de imagen personalizada (desde backoffice) */
-  imageUrl?: string;
-  /** 'dark' para fondos oscuros, 'light' para fondos claros */
-  variant?: 'dark' | 'light';
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-  /** Mostrar el texto "HOME PÁDEL */
-  showText?: boolean;
   className?: string;
+  priority?: boolean;
 }
 
-// Mapa de tamannos: [icon width, icon height, text font-size, gap]
-const SIZE_MAP: Record<string, [number, number, string, number]> = {
-  xs: [22, 14, '7px', 2],
-  sm: [32, 20, '9px', 3],
-  md: [64, 47, '12px', 6],
-  lg: [84, 54, '16px', 8],
-  xl: [120, 77, '18px', 10],
+// El logo (/public/home-padel-logo.png) ya trae el texto "HOME PÁDEL"
+// dibujado adentro de la imagen — el ancho/alto de cada tamaño respeta su
+// proporción real (1774x887) para que next/image no la deforme.
+const SIZE_MAP: Record<string, [number, number]> = {
+  xs: [64, 32],
+  sm: [96, 48],
+  md: [140, 70],
+  lg: [180, 90],
+  xl: [220, 110],
 };
 
-export default function BrandLogo({
-  imageUrl,
-  variant = 'dark',
-  size = 'md',
-  showText = true,
-  className = '',
-}: BrandLogoProps) {
-  const isDark = variant === 'dark';
-
-  // Paleta de colores por variante
-  const chevronColor = isDark ? '#FFFFFF' : '#1699D3';
-  const ballColor = isDark ? '#B7D31A' : '#B7D31A';
-  const seamColor = isDark ? '#050606' : '#FFFFFF';
-  const textColor = isDark ? '#FFFFFF' : '#1699D3';
-
-  const [iconW, iconH, textSize, gap] = SIZE_MAP[size] ?? SIZE_MAP.md;
-
-  // Si hay una imagen personalizada del backoffice, mostrarla en vez del SVG
-  if (imageUrl) {
-    return (
-      <div className={`flex flex-col items-center select-none ${className}`} style={{ gap }}>
-        <img
-          src={imageUrl}
-          alt="Home Padel"
-          className="object-cover"
-          style={{ width: iconW, height: iconH }}
-        />
-        {showText && (
-          <span
-            className="font-black uppercase tracking-widest leading-none whitespace-nowrap"
-            style={{ color: textColor, fontSize: textSize, letterSpacing: '0.2em' }}
-          >
-            HOME PADEL
-          </span>
-        )}
-      </div>
-    );
-  }
+export default function BrandLogo({ size = 'md', className = '', priority = false }: BrandLogoProps) {
+  const [width, height] = SIZE_MAP[size] ?? SIZE_MAP.md;
 
   return (
-    <div
-      className={`flex flex-col items-center select-none ${className}`}
-      style={{ gap }}
-    >
-      <BrandLogoMark width={iconW} height={iconH} chevronColor={chevronColor} ballColor={ballColor} seamColor={seamColor} />
-
-      {showText && (
-        <span
-          className="font-black uppercase tracking-widest leading-none whitespace-nowrap"
-          style={{ color: textColor, fontSize: textSize, letterSpacing: '0.2em' }}
-        >
-          HOME PADEL
-        </span>
-      )}
-    </div>
+    <Image
+      src="/home-padel-logo.png"
+      alt="Home Pádel"
+      width={width}
+      height={height}
+      priority={priority}
+      className={`object-contain select-none ${className}`}
+    />
   );
 }

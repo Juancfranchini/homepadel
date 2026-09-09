@@ -2,7 +2,17 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { effectivePrice } from '../pricing/effective-price';
 import slugify from 'slugify';
+
+/**
+ * Agrega `effectivePrice` a cada producto antes de devolverlo — mismo cálculo
+ * que usa el checkout (PricingService). El frontend nunca vuelve a decidir
+ * solo qué precio mostrar.
+ */
+function withEffectivePrice<T extends { price: number; salePrice: number | null }>(product: T): T & { effectivePrice: number } {
+  return { ...product, effectivePrice: effectivePrice(product.price, product.salePrice) };
+}
 
 @Injectable()
 export class ProductsService {
@@ -56,7 +66,7 @@ export class ProductsService {
       this.prisma.product.count({ where }),
     ]);
 
-    return { items, total, page: pageNumber, limit: pageSize, pages: Math.ceil(total / pageSize) };
+    return { items: items.map(withEffectivePrice), total, page: pageNumber, limit: pageSize, pages: Math.ceil(total / pageSize) };
   }
 
   async findFeatured() {
@@ -65,7 +75,7 @@ export class ProductsService {
       include: { category: true, brand: true, variants: true },
       take: 8,
     });
-    return products;
+    return products.map(withEffectivePrice);
   }
 
   async findBestSellers() {
@@ -93,7 +103,7 @@ export class ProductsService {
     return grouped
       .map((g) => productMap.get(g.productId))
       .filter((p) => p !== undefined)
-      .map((product) => product);
+      .map((product) => withEffectivePrice(product));
   }
 
   async findBySlug(slugOrId: string) {
@@ -116,7 +126,7 @@ export class ProductsService {
 
     const { reviews: _, ...rest } = product as any;
     return {
-      ...rest,
+      ...withEffectivePrice(rest),
       rating: Math.round(averageRating * 10) / 10,
       reviewCount: totalReviews,
     };

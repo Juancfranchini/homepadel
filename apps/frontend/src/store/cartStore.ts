@@ -34,9 +34,9 @@ export const useCartStore = create<CartStore>()(
         trackMetaEvent('AddToCart', {
           content_ids: [product.id],
           content_type: 'product',
-          value: (product.salePrice ?? product.price) * quantity,
+          value: product.effectivePrice * quantity,
           currency: 'ARS',
-          contents: [{ id: product.id, quantity, item_price: product.salePrice ?? product.price }],
+          contents: [{ id: product.id, quantity, item_price: product.effectivePrice }],
         });
 
         if (existing) {
@@ -92,12 +92,10 @@ export const useCartStore = create<CartStore>()(
       // Suma total de unidades en el carrito
       totalItems: () => get().items.reduce((acc, i) => acc + i.quantity, 0),
 
-      // Precio total usando salePrice si existe, sino price regular
+      // Precio efectivo calculado por el backend (nunca `salePrice ?? price`
+      // acá: un salePrice de 0 no es una oferta válida).
       totalPrice: () =>
-        get().items.reduce((acc, i) => {
-          const price = i.product.salePrice ?? i.product.price;
-          return acc + price * i.quantity;
-        }, 0),
+        get().items.reduce((acc, i) => acc + i.product.effectivePrice * i.quantity, 0),
     }),
     { name: 'homepadel-cart' }
   )

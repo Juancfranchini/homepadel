@@ -22,7 +22,7 @@ export default function CheckoutOrderSummary({ items, subtotal, discount, coupon
         <h2 className="font-black text-base uppercase tracking-tight text-[#F7F6F7] mb-4">Tu pedido</h2>
         <div className="space-y-3 mb-4 max-h-64 overflow-y-auto">
           {items.map(({ product, quantity }) => {
-            const price = product.salePrice ?? product.price;
+            const price = product.effectivePrice;
             return (
               <div key={product.id} className="flex gap-3 items-center">
                 <div className="w-12 h-12 rounded-lg bg-[#1A1F21] flex-none overflow-hidden">
