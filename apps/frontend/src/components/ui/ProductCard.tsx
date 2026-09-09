@@ -16,8 +16,8 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
   const [adding, setAdding] = useState(false);
 
   const isMadeToOrder = product.isMadeToOrder === true;
-  const hasDiscount = !isMadeToOrder && product.salePrice !== undefined && product.salePrice > 0 && product.salePrice < product.price;
-  const discountPct = hasDiscount ? getDiscountPercent(product.price, product.salePrice!) : 0;
+  const hasDiscount = !isMadeToOrder && product.effectivePrice < product.price;
+  const discountPct = hasDiscount ? getDiscountPercent(product.price, product.effectivePrice) : 0;
 
   const initials = product.name
     .split(' ')

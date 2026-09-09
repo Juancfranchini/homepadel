@@ -44,7 +44,7 @@ export function useProductoData(slug: string | undefined) {
         content_ids: [product.id],
         content_type: 'product',
         content_name: product.name,
-        value: product.salePrice ?? product.price,
+        value: product.effectivePrice,
         currency: 'ARS',
       });
     }

@@ -29,7 +29,7 @@ export default function ProductCardContent({ product, isMadeToOrder, hasDiscount
       <div className="flex items-end gap-2 mt-auto pt-1">
         {hasDiscount && !isMadeToOrder ? (
           <>
-            <span className="text-lg font-black text-white">{formatPrice(product.salePrice!)}</span>
+            <span className="text-lg font-black text-white">{formatPrice(product.effectivePrice)}</span>
             <span className="text-sm text-[#A1A1AA] line-through">{formatPrice(product.price)}</span>
           </>
         ) : (
@@ -39,7 +39,7 @@ export default function ProductCardContent({ product, isMadeToOrder, hasDiscount
 
       {!isMadeToOrder && (
         <p className="text-[10px] font-semibold text-[#B7D31A]">
-          {product.installments || 6} x {formatPrice(Math.ceil((product.salePrice && product.salePrice > 0 ? product.salePrice : product.price) / (product.installments || 6)))} sin interes
+          {product.installments || 6} x {formatPrice(Math.ceil(product.effectivePrice / (product.installments || 6)))} sin interes
         </p>
       )}
 

@@ -14,7 +14,8 @@ interface Props {
 
 export default function CarritoItemRow({ item, onRemove, onUpdateQuantity }: Props) {
   const { product, quantity, variantSize, variantColor, variantDimensions, variantWeight, variantWeightUnit, variantSku, variantImageUrl } = item;
-  const itemPrice = product.salePrice ?? product.price;
+  const itemPrice = product.effectivePrice;
+  const hasDiscount = itemPrice < product.price;
   const subtotalItem = itemPrice * quantity;
   const itemKey = getItemKey(item);
   const itemStock = item.variantId
@@ -44,7 +45,7 @@ export default function CarritoItemRow({ item, onRemove, onUpdateQuantity }: Pro
 
         <div className="flex items-center gap-2 mt-1">
           <span className="text-sm font-black text-[#F7F6F7]">{formatPrice(itemPrice)}</span>
-          {product.salePrice && <span className="text-xs text-[#8A8A85] line-through">{formatPrice(product.price)}</span>}
+          {hasDiscount && <span className="text-xs text-[#8A8A85] line-through">{formatPrice(product.price)}</span>}
         </div>
         {(variantSize || variantColor || variantDimensions) && (
           <p className="text-[10px] text-[#8A8A85] mt-1">

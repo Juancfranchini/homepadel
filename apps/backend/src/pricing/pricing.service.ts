@@ -10,6 +10,7 @@
 
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { effectivePrice } from './effective-price';
 
 export interface RequestedItem {
   productId: string;
@@ -85,7 +86,7 @@ export class PricingService {
           variantId: item.variantId,
           name: product.name,
           quantity,
-          price: this.effectivePrice(product.price, product.salePrice),
+          price: effectivePrice(product.price, product.salePrice),
         };
       }),
     );
@@ -114,12 +115,6 @@ export class PricingService {
         }
       }
     });
-  }
-
-  /** Precio vigente: el promocional solo si es válido y menor al de lista. */
-  private effectivePrice(price: number, salePrice: number | null): number {
-    const hasValidSale = salePrice != null && salePrice > 0 && salePrice < price;
-    return hasValidSale ? salePrice : price;
   }
 
   /**

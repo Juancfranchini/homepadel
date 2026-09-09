@@ -15,8 +15,8 @@ export default function FeaturedProductCard({ product }: { product: Product }) {
   const [wished, setWished] = useState(false);
   const [adding, setAdding] = useState(false);
 
-  const hasDiscount = product.salePrice !== undefined && product.salePrice < product.price;
-  const discountPct = hasDiscount ? getDiscountPercent(product.price, product.salePrice!) : 0;
+  const hasDiscount = product.effectivePrice < product.price;
+  const discountPct = hasDiscount ? getDiscountPercent(product.price, product.effectivePrice) : 0;
 
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -56,7 +56,7 @@ export default function FeaturedProductCard({ product }: { product: Product }) {
         <div className="flex items-baseline gap-2 mt-1">
           {hasDiscount ? (
             <>
-              <span className="text-xl font-bold text-[#F7F6F7]">{formatPrice(product.salePrice!)}</span>
+              <span className="text-xl font-bold text-[#F7F6F7]">{formatPrice(product.effectivePrice)}</span>
               <span className="text-xs text-[#8A8A85] line-through">{formatPrice(product.price)}</span>
             </>
           ) : (

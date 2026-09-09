@@ -28,7 +28,7 @@ export default function RelatedProducts({ products }: Props) {
           </button>
           <div ref={scrollRef} className="flex gap-2 sm:gap-4 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollSnapType: 'x mandatory' }}>
             {products.map((p) => {
-              const relDiscount = p.salePrice !== undefined && p.salePrice > 0 && p.salePrice < p.price;
+              const relDiscount = p.effectivePrice < p.price;
               return (
                 <Link key={p.id} href={'/producto/' + p.slug}
                   className="flex-none w-36 sm:w-44 md:w-52 bg-[#1A1F21] border border-[#B7D31A]/20 rounded-lg sm:rounded-xl overflow-hidden hover:border-[#B7D31A]/60 transition-all group relative"
@@ -46,7 +46,7 @@ export default function RelatedProducts({ products }: Props) {
                     <p className="text-[10px] text-[#8A8A85] font-semibold uppercase tracking-wider">{p.brand?.name}</p>
                     <p className="text-[#F7F6F7] text-xs font-medium leading-snug mt-0.5 line-clamp-2">{p.name}</p>
                     <p className="text-[#F7F6F7] font-semibold text-sm mt-1.5">
-                      {formatPrice(relDiscount ? p.salePrice! : p.price)}
+                      {formatPrice(p.effectivePrice)}
                       {relDiscount && <span className="text-[#8A8A85] text-[10px] font-normal line-through ml-1.5">{formatPrice(p.price)}</span>}
                     </p>
                   </div>

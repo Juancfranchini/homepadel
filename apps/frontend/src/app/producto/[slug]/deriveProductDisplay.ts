@@ -11,9 +11,9 @@ function getVideoEmbedUrl(url?: string) {
 }
 
 export function deriveProductDisplay(product: Product, selectedVariant: any, activeProductVariants: any[]) {
-  const hasDiscount = !product.isMadeToOrder && product.salePrice !== undefined && product.salePrice > 0 && product.salePrice < product.price;
-  const discountPct = hasDiscount ? getDiscountPercent(product.price, product.salePrice!) : 0;
-  const displayPrice = hasDiscount ? product.salePrice! : product.price;
+  const hasDiscount = !product.isMadeToOrder && product.effectivePrice < product.price;
+  const discountPct = hasDiscount ? getDiscountPercent(product.price, product.effectivePrice) : 0;
+  const displayPrice = product.isMadeToOrder ? product.price : product.effectivePrice;
 
   const images = selectedVariant?.imageUrl
     ? [selectedVariant.imageUrl, ...(selectedVariant.images || [])]
