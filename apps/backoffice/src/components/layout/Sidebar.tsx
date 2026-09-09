@@ -194,7 +194,7 @@ export function Sidebar({ collapsed, mobileOpen, onMobileClose }: SidebarProps) 
       >
         <div className="px-6 py-5 border-b border-white/10 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2 overflow-hidden">
-            <NextImage src="/home-padel-logo.png" alt="Home Pádel" width={140} height={70} priority className="object-contain h-8 w-auto" />
+            <NextImage src="/home-padel-logo.png" alt="Home Pádel" width={93} height={70} priority className="object-contain h-8 w-auto" />
             <span className="w-2 h-2 rounded-full bg-[#C8FF00] shrink-0" />
           </div>
           <button

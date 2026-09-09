@@ -8,13 +8,13 @@ interface BrandLogoProps {
 
 // El logo (/public/home-padel-logo.png) ya trae el texto "HOME PÁDEL"
 // dibujado adentro de la imagen — el ancho/alto de cada tamaño respeta su
-// proporción real (1774x887) para que next/image no la deforme.
+// proporción real (1448x1086, 4:3) para que next/image no la deforme.
 const SIZE_MAP: Record<string, [number, number]> = {
-  xs: [64, 32],
-  sm: [96, 48],
-  md: [140, 70],
-  lg: [180, 90],
-  xl: [220, 110],
+  xs: [43, 32],
+  sm: [64, 48],
+  md: [93, 70],
+  lg: [120, 90],
+  xl: [147, 110],
 };
 
 export default function BrandLogo({ size = 'md', className = '', priority = false }: BrandLogoProps) {
