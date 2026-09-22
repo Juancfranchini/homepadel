@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import api from '@/lib/api';
@@ -49,7 +49,7 @@ function validateVariants(variants: Variant[], hasSize: boolean, hasColor: boole
   return null;
 }
 
-export function useProductFormLogic({ defaultValues, onSave }: Pick<Props, 'defaultValues' | 'onSave'>) {
+export function useProductFormLogic({ defaultValues, onSave, categories }: Pick<Props, 'defaultValues' | 'onSave' | 'categories'>) {
   const { toast } = useToast();
   const [variants, setVariants] = useState<Variant[]>(() => defaultValues?.variants || []);
   const [hasSalePrice, setHasSalePrice] = useState<boolean>(() => !!defaultValues?.salePrice && defaultValues.salePrice > 0);
@@ -98,11 +98,16 @@ export function useProductFormLogic({ defaultValues, onSave }: Pick<Props, 'defa
     if (validationError) { toast(validationError, 'error'); return; }
 
     const allImages = [imageState.mainImage, ...imageState.galleryImages].filter(Boolean) as string[];
+
+    const selectedCategory = categories?.find((cat) => cat.id === data.categoryId);
+    const isPaleta = selectedCategory?.slug === 'paletas';
+    const dataConShape = isPaleta ? data : { ...data, shape: null };
+
     if (!hasSalePrice) {
-      const cleanData: any = { ...data, salePrice: undefined };
+      const cleanData: any = { ...dataConShape, salePrice: undefined };
       onSave({ ...cleanData, images: allImages, variants });
     } else {
-      onSave({ ...data, images: allImages, variants });
+      onSave({ ...dataConShape, images: allImages, variants });
     }
   };
 

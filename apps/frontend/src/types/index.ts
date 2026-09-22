@@ -1,4 +1,4 @@
-// Tipos globales del frontend
+﻿// Tipos globales del frontend
 
 export interface Category {
   id: string;
@@ -52,6 +52,7 @@ export interface Product {
   dimensionUnit?: string | null;
   weight?: number | null;
   weightUnit?: string | null;
+  shape?: string | null;
   id: string;
   name: string;
   slug: string;

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { useCatalogFilters } from './useCatalogFilters';
@@ -8,12 +8,12 @@ export function useCatalogPage() {
   const filters = useCatalogFilters();
   const {
     currentPage, currentSort, selectedCategory, selectedBrand, isOffer, searchQuery,
-    selectedSize, selectedColor, selectedWeight,
+    selectedSize, selectedColor, selectedWeight, selectedShape,
     setParam, clearFilters, hasFilters, activeChips, pageTitle,
   } = filters;
 
   const { products, categories, brands, loading, error, retry, totalPages, totalCount, sizes, colors, weights } = useCatalogProducts({
-    currentPage, selectedCategory, selectedBrand, isOffer, searchQuery, selectedSize, selectedColor, selectedWeight,
+    currentPage, selectedCategory, selectedBrand, isOffer, searchQuery, selectedSize, selectedColor, selectedWeight, selectedShape,
   });
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -36,6 +36,8 @@ export function useCatalogPage() {
     onSizeChange: (v: string | null) => setParam('talle', v),
     onColorChange: (v: string | null) => setParam('color', v),
     onWeightChange: (v: string | null) => setParam('peso', v),
+    selectedShape,
+    onShapeChange: (v: string | null) => setParam('formato', v),
   };
 
   return {

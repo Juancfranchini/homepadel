@@ -89,6 +89,7 @@ model Product {
   hasColor          Boolean @default(false)
   hasDimensions     Boolean @default(false)
   hasWeight         Boolean @default(false)
+  shape             String?
   size              String?
   color             String?
   dimensionLength   Float?

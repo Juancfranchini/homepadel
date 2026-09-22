@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { getProducts, getCategories, getBrands } from '@/lib/api';
@@ -15,10 +15,11 @@ interface Filters {
   selectedSize: string;
   selectedColor: string;
   selectedWeight: string;
+  selectedShape: string;
 }
 
 export function useCatalogProducts(filters: Filters) {
-  const { currentPage, selectedCategory, selectedBrand, isOffer, searchQuery, selectedSize, selectedColor, selectedWeight } = filters;
+  const { currentPage, selectedCategory, selectedBrand, isOffer, searchQuery, selectedSize, selectedColor, selectedWeight, selectedShape } = filters;
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -47,6 +48,7 @@ export function useCatalogProducts(filters: Filters) {
       if (searchQuery) params.search = searchQuery;
       if (selectedSize) params.size = selectedSize;
       if (selectedColor) params.color = selectedColor;
+      if (selectedShape) params.shape = selectedShape;
       if (selectedWeight) {
         const [weightValue, unit] = selectedWeight.split(' ');
         params.weight = weightValue;
@@ -60,7 +62,7 @@ export function useCatalogProducts(filters: Filters) {
       setTotalCount((data as any)?.total ?? items.length);
     } catch { setProducts([]); setTotalPages(1); setTotalCount(0); setError(true); }
     finally { setLoading(false); }
-  }, [currentPage, selectedCategory, selectedBrand, isOffer, searchQuery, selectedSize, selectedColor, selectedWeight]);
+  }, [currentPage, selectedCategory, selectedBrand, isOffer, searchQuery, selectedSize, selectedColor, selectedWeight, selectedShape]);
 
   useEffect(() => { loadProducts(); }, [loadProducts]);
 

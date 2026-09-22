@@ -1,4 +1,4 @@
-import { z } from 'zod';
+﻿import { z } from 'zod';
 
 const optionalNumber = z.preprocess((val) => val === '' || val === null ? undefined : val, z.coerce.number().finite().optional());
 
@@ -17,6 +17,8 @@ export const schema = z.object({
   hasColor: z.boolean().default(false),
   hasDimensions: z.boolean().default(false),
   hasWeight: z.boolean().default(false),
+
+  shape: z.string().optional().nullable(),
   size: z.string().optional(),
   color: z.string().optional(),
   dimensionLength: optionalNumber,
@@ -49,7 +51,7 @@ export type ProductFormData = z.infer<typeof schema> & {
   variants?: Variant[];
 };
 
-export interface Category { id: string; name: string }
+export interface Category { id: string; name: string; slug: string }
 export interface Brand { id: string; name: string }
 
 export interface Props {

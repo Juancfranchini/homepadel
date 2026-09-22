@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
 import api from '@/lib/api';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useToast } from '@/components/ui/Toast';
 import { ProductAdvancedFilters } from './components/ProductAdvancedSearchModal';
 import { ProductFormData } from './components/ProductForm';
+import type { Category } from './components/product-form/schema';
 
 export interface Product {
   id: string;
@@ -43,10 +44,10 @@ export interface Product {
   dimensionUnit?: string;
   weight?: number;
   weightUnit?: string;
+  shape?: string;
   variants?: { sku: string; size: string; color?: string; dimensions?: string; dimensionLength?: number; dimensionWidth?: number; dimensionHeight?: number; dimensionUnit?: string; weight?: number; weightUnit?: string; imageUrl?: string; images?: string[]; stock: number }[];
 }
 
-export interface Category { id: string; name: string }
 export interface Brand { id: string; name: string }
 
 function useProductsData() {
@@ -108,6 +109,7 @@ function buildDefaultFormValues(editItem: Product | null) {
     dimensionUnit: editItem.dimensionUnit || 'cm',
     weight: editItem.weight || undefined,
     weightUnit: editItem.weightUnit || 'kg',
+    shape: editItem.shape || null,
     variants: editItem.variants?.filter((variant: any) => variant.id !== `${editItem.id}-base`) || [],
   };
 }
@@ -169,7 +171,16 @@ export function useProductosPage() {
 
   const toggleSort = (field: string) => { setSortField(field); setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); };
 
-  const filtered = products.filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase()));
+  const filtered = products.filter((p) => {
+    if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false;
+    if (!advancedFilters) return true;
+    if (advancedFilters.categoryId && p.category?.id !== advancedFilters.categoryId) return false;
+    if (advancedFilters.brandId && p.brand?.id !== advancedFilters.brandId) return false;
+    if (advancedFilters.active !== null && p.active !== advancedFilters.active) return false;
+    if (advancedFilters.featured !== null && p.featured !== advancedFilters.featured) return false;
+    if (advancedFilters.shape && p.shape !== advancedFilters.shape) return false;
+    return true;
+  });
 
   const sorted = [...filtered].sort((a, b) => {
     const aVal = a[sortField as keyof Product] ?? '';

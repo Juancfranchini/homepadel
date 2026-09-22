@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import VariantEditor from './VariantEditor';
 import ImagePanel from './product-form/ImagePanel';
@@ -6,6 +6,7 @@ import VariantPropertiesSection from './product-form/VariantPropertiesSection';
 import PricingFields from './product-form/PricingFields';
 import DiscountInstallmentsFields from './product-form/DiscountInstallmentsFields';
 import { StockOrLeadTimeField, CategoryField, MadeToOrderField, BrandField } from './product-form/CategoryStockFields';
+import ShapeField from './product-form/ShapeField';
 import StatusTogglesRow from './product-form/StatusTogglesRow';
 import { useProductFormLogic } from './product-form/useProductFormLogic';
 import { inputClass, labelClass, Props } from './product-form/schema';
@@ -15,7 +16,7 @@ export type { ProductFormData } from './product-form/schema';
 
 export default function ProductForm({ defaultValues, onSave, onCancel, saving, categories, brands }: Props) {
   const { toast } = useToast();
-  const { form, variants, setVariants, hasSalePrice, toggleSalePrice, imageState, handleFormSubmit, getImageUrl } = useProductFormLogic({ defaultValues, onSave });
+  const { form, variants, setVariants, hasSalePrice, toggleSalePrice, imageState, handleFormSubmit, getImageUrl } = useProductFormLogic({ defaultValues, onSave, categories });
   const { register, handleSubmit, setValue, watch, formState: { errors } } = form;
 
   const featured = watch('featured');
@@ -28,6 +29,11 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
   const hasWeight = watch('hasWeight');
   const hasInstallmentsInterest = watch('hasInstallmentsInterest');
   const isMadeToOrder = watch('isMadeToOrder');
+  const categoryId = watch('categoryId');
+  const shape = watch('shape');
+
+  const selectedCategory = categories.find((cat) => cat.id === categoryId);
+  const isPaleta = selectedCategory?.slug === 'paletas';
 
   const previewUrl = getImageUrl(imageState.mainImage);
 
@@ -69,6 +75,8 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
 
         <StockOrLeadTimeField register={register} isMadeToOrder={isMadeToOrder} />
         <CategoryField register={register} errors={errors} categories={categories} />
+
+        {isPaleta && <ShapeField value={shape} onChange={(next) => setValue('shape', next, { shouldDirty: true })} />}
         <MadeToOrderField isMadeToOrder={isMadeToOrder} onToggle={() => setValue('isMadeToOrder', !isMadeToOrder, { shouldDirty: true })} register={register} />
         <BrandField register={register} errors={errors} brands={brands} />
 
