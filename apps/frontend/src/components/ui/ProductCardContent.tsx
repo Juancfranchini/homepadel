@@ -1,7 +1,9 @@
-import Link from 'next/link';
-import { ShoppingCart } from 'lucide-react';
+﻿import Link from 'next/link';
+import { ShoppingCart, Diamond, Droplet, Circle } from 'lucide-react';
 import { Product } from '@/types';
 import { formatPrice } from '@/lib/utils';
+
+const SHAPE_ICONS: Record<string, typeof Diamond> = { Diamante: Diamond, Lagrima: Droplet, Redondo: Circle };
 
 interface Props {
   product: Product;
@@ -25,6 +27,8 @@ export default function ProductCardContent({ product, isMadeToOrder, hasDiscount
           {product.name}
         </h3>
       </Link>
+
+      {product.shape && SHAPE_ICONS[product.shape] && (() => { const ShapeIcon = SHAPE_ICONS[product.shape!]; return (<p className="flex items-center gap-1 text-[13px] text-[#A1A1AA]"><ShapeIcon size={13} />Formato: {product.shape}</p>); })()}
 
       <div className="flex items-end gap-2 mt-auto pt-1">
         {hasDiscount && !isMadeToOrder ? (

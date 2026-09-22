@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { ChevronLeft } from 'lucide-react';
 import { Category, Brand } from '@/types';
@@ -37,13 +37,15 @@ interface Props {
   onSizeChange: (value: string | null) => void;
   onColorChange: (value: string | null) => void;
   onWeightChange: (value: string | null) => void;
+  selectedShape: string;
+  onShapeChange: (value: string | null) => void;
 }
 
 export default function CatalogSidebarPanel({
   activePanel, onClose, categories, brands, selectedCategory, selectedBrand, isOffer,
   currentSort, onSortChange, onCategoryChange, onBrandChange, onOfferChange, onClear, hasFilters,
   sizes, colors, weights, selectedSize, selectedColor, selectedWeight,
-  onSizeChange, onColorChange, onWeightChange,
+  onSizeChange, onColorChange, onWeightChange, selectedShape, onShapeChange,
 }: Props) {
   if (!activePanel) return null;
 
@@ -66,6 +68,18 @@ export default function CatalogSidebarPanel({
                 <CatalogCheckboxOption key={cat.id} label={cat.name} checked={selectedCategory === cat.slug} onChange={() => onCategoryChange(selectedCategory === cat.slug ? null : cat.slug)} />
               ))}
             </div>
+          </div>
+        )}
+
+        {activePanel === 'categories' && selectedCategory === 'paletas' && (
+          <div className="mt-5 border-t border-[#0D0F0F] pt-4">
+            <h3 className="text-xs font-semibold text-[#F7F6F7] uppercase tracking-wider mb-3">Formato</h3>
+            <select value={selectedShape} onChange={(e) => onShapeChange(e.target.value || null)} className="w-full bg-[#050606] border border-[#8A8A85] rounded-lg px-2 py-2 text-sm text-[#F7F6F7]">
+              <option value="">Todos</option>
+              <option value="Diamante">Diamante</option>
+              <option value="Lagrima">Lágrima</option>
+              <option value="Redondo">Redondo</option>
+            </select>
           </div>
         )}
 

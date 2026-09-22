@@ -1,8 +1,9 @@
-'use client';
+﻿'use client';
 
 import { ChevronRight, Lock } from 'lucide-react';
 import { CartItem } from '@/types';
 import { formatPrice, getImageUrl } from '@/lib/utils';
+import { getItemKey } from '@/store/cartStore';
 
 interface Props {
   items: CartItem[];
@@ -21,10 +22,11 @@ export default function CheckoutOrderSummary({ items, subtotal, discount, coupon
       <div className="bg-[#0F1111] rounded-2xl border border-[#B7D31A]/20 p-6 sticky top-24">
         <h2 className="font-black text-base uppercase tracking-tight text-[#F7F6F7] mb-4">Tu pedido</h2>
         <div className="space-y-3 mb-4 max-h-64 overflow-y-auto">
-          {items.map(({ product, quantity }) => {
+          {items.map((item) => {
+            const { product, quantity } = item;
             const price = product.effectivePrice;
             return (
-              <div key={product.id} className="flex gap-3 items-center">
+              <div key={getItemKey(item)} className="flex gap-3 items-center">
                 <div className="w-12 h-12 rounded-lg bg-[#1A1F21] flex-none overflow-hidden">
                   {product.images[0] ? <img src={getImageUrl(product.images[0])} alt={product.name} className="w-full h-full object-cover" />
                     : <div className="w-full h-full flex items-center justify-center text-xs font-black text-[#8A8A85]">{product.name.slice(0, 2).toUpperCase()}</div>}

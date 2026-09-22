@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+﻿import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -21,7 +21,7 @@ export class ProductsService {
   async findAll(query: any) {
     const pageNumber = Math.max(1, Number.parseInt(String(query.page ?? 1), 10) || 1);
     const pageSize = Math.min(100, Math.max(1, Number.parseInt(String(query.limit ?? 20), 10) || 20));
-    const { category, brand, search, minPrice, maxPrice, showAll, isOffer, size, color, weight, weightUnit } = query;
+    const { category, brand, search, minPrice, maxPrice, showAll, isOffer, size, color, weight, weightUnit, shape } = query;
     const skip = (pageNumber - 1) * pageSize;
 
     const where: any = showAll === '1' ? {} : { active: true };
@@ -29,6 +29,7 @@ export class ProductsService {
     if (category) where.category = { slug: category };
     if (brand) where.brand = { slug: brand };
     if (isOffer === 'true') where.isOffer = true;
+    if (shape) where.shape = shape;
     if (size) propertyFilters.push({ OR: [{ size }, { variants: { some: { size, active: true } } }] });
     if (color) propertyFilters.push({ OR: [{ color }, { variants: { some: { color, active: true } } }] });
     if (weight && Number.isFinite(Number(weight))) {

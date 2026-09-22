@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import { SlidersHorizontal, Tags, Target, Grid3x3, Rows3, ArrowDownUp } from 'lucide-react';
@@ -29,6 +29,8 @@ interface Props {
   onSizeChange: (value: string | null) => void;
   onColorChange: (value: string | null) => void;
   onWeightChange: (value: string | null) => void;
+  selectedShape: string;
+  onShapeChange: (value: string | null) => void;
 }
 
 const MENU_ITEMS = [
