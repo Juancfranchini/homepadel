@@ -30,13 +30,14 @@ export default function ProductInfoColumn({ product, display, activeVariants, va
       <ProductInfo brandName={product.brand.name} brandSlug={product.brand.slug} productName={product.name} />
       <ProductStars rating={product.rating || 0} count={product.reviewCount || 0} />
       <ProductPrice
+        productName={product.name}
         displayPrice={display.displayPrice} transferPrice={display.transferPrice} hasDiscount={display.hasDiscount}
         originalPrice={product.price} cuota={display.cuota} installments={display.installments}
         hasInstallmentsInterest={display.hasInstallmentsInterest} installmentsInterest={display.installmentsInterest}
         paymentMethods={display.paymentMethods} onShowPaymentModal={() => actions.setShowPaymentModal(true)}
         isMadeToOrder={product.isMadeToOrder} estimatedDays={product.estimatedDays} requiredDeposit={product.requiredDeposit}
       />
-      <StockAlert stock={display.effectiveStock} isMadeToOrder={product.isMadeToOrder} estimatedDays={product.estimatedDays} />
+      {!product.isMadeToOrder && <StockAlert stock={display.effectiveStock} />}
       <div className="h-px bg-[#0D0F0F]" />
       <TrustBadges />
       <VariantSelector
@@ -55,7 +56,8 @@ export default function ProductInfoColumn({ product, display, activeVariants, va
         hasWeight={!!product.hasWeight}
       />
       <ProductActions
-        stock={display.effectiveStock} quantity={actions.quantity} onQuantityChange={actions.setQuantity}
+        stock={display.effectiveStock} isMadeToOrder={!!product.isMadeToOrder} productName={product.name}
+        quantity={actions.quantity} onQuantityChange={actions.setQuantity}
         onBuyNow={actions.handleBuyNow} onAddToCart={actions.handleAddToCart} added={actions.added}
         wished={actions.wished} onWish={() => actions.setWished(!actions.wished)}
       />

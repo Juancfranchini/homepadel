@@ -373,3 +373,50 @@ describe('PricingService — el envío sale de la tarifa configurada, no del nav
     expect(await service.calculateShipping(50000)).toBe(0);
   });
 });
+
+/**
+ * Productos por encargo.
+ *
+ * No se tienen: se piden al proveedor cuando alguien los reserva, así que su
+ * stock es cero y eso es lo normal. Al validarlos igual que al resto, la ficha
+ * los mostraba como agotados y el backend rechazaba toda reserva.
+ */
+describe('PricingService — productos por encargo', () => {
+  const POR_ENCARGO = {
+    name: 'Zapatillas por encargo',
+    price: 120000,
+    salePrice: null,
+    stock: 0,
+    active: true,
+    isMadeToOrder: true,
+    variants: [] as any[],
+  };
+
+  const catalogo = { 'enc-1': POR_ENCARGO, ...CATALOGO };
+
+  it('deja reservar aunque no haya stock', async () => {
+    const service = new PricingService(fakePrisma(catalogo));
+    const [item] = await service.resolveItems([{ productId: 'enc-1', quantity: 2 }]);
+
+    expect(item.quantity).toBe(2);
+    expect(item.isMadeToOrder).toBe(true);
+  });
+
+  it('no intenta descontar stock de un encargo', async () => {
+    const prisma = fakePrisma(catalogo);
+    const service = new PricingService(prisma);
+
+    await service.decrementStock([
+      { productId: 'enc-1', name: 'Zapatillas por encargo', quantity: 2, price: 120000, isMadeToOrder: true },
+    ]);
+
+    expect(prisma.product.updateMany).not.toHaveBeenCalled();
+  });
+
+  it('sigue controlando el stock de los productos normales', async () => {
+    const service = new PricingService(fakePrisma(catalogo));
+    await expect(
+      service.resolveItems([{ productId: 'pal-1', quantity: 99 }]),
+    ).rejects.toBeInstanceOf(ConflictException);
+  });
+});

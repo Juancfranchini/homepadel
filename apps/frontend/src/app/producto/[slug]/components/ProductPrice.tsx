@@ -6,6 +6,7 @@ import MadeToOrderPricing from './MadeToOrderPricing';
 import RegularPricing from './RegularPricing';
 
 interface Props {
+  productName: string;
   displayPrice: number;
   transferPrice: number;
   hasDiscount: boolean;
@@ -22,7 +23,7 @@ interface Props {
 }
 
 export default function ProductPrice({
-  displayPrice,
+  productName, displayPrice,
   transferPrice,
   hasDiscount,
   originalPrice,
@@ -59,6 +60,7 @@ export default function ProductPrice({
       {/* Producto por encargo */}
       {isMadeToOrder ? (
         <MadeToOrderPricing
+          productName={productName}
           estimatedDays={estimatedDays}
           depositAmount={depositAmount}
           remainingAmount={remainingAmount}

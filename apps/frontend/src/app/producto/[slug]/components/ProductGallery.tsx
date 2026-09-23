@@ -48,12 +48,10 @@ export default function ProductGallery({ images, productName, hasDiscount, disco
           de la columna de compra entera —más de mil píxeles— y dejaba la foto
           perdida en el medio. `aspect-square` no alcanza cuando la altura la
           impone la grilla. */}
-      <div className="flex gap-3 self-start">
-        <ProductGalleryThumbnails thumbnails={thumbnails} selectedImg={selectedImg} hoveredImg={hoveredImg} onSelect={setSelectedImg} onHover={setHoveredImg} />
-
+      <div className="flex flex-col gap-3 self-start">
         {/* Imagen principal - click para abrir lightbox */}
         <div
-          className="flex-1 aspect-square max-h-[30rem] bg-[#0C0C0C] rounded-2xl border border-[#0D0F0F] overflow-hidden relative cursor-zoom-in"
+          className="aspect-square max-h-[30rem] bg-[#0C0C0C] rounded-2xl border border-[#0D0F0F] overflow-hidden relative cursor-zoom-in"
           onClick={() => thumbnails.length > 0 && openLightbox(currentImageIndex)}
         >
           {images.length > 0 ? (
@@ -81,6 +79,8 @@ export default function ProductGallery({ images, productName, hasDiscount, disco
             +
           </div>
         </div>
+
+        <ProductGalleryThumbnails thumbnails={thumbnails} selectedImg={selectedImg} hoveredImg={hoveredImg} onSelect={setSelectedImg} onHover={setHoveredImg} />
       </div>
 
       {lightboxOpen && (

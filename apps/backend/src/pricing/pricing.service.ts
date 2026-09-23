@@ -24,6 +24,8 @@ export interface ResolvedItem {
   name: string;
   quantity: number;
   price: number;
+  /** Los productos por encargo no descuentan stock: no se tienen, se piden. */
+  isMadeToOrder?: boolean;
 }
 
 @Injectable()
@@ -50,7 +52,7 @@ export class PricingService {
         const product = await this.prisma.product.findUnique({
           where: { id: item.productId },
           select: {
-            name: true, price: true, salePrice: true, stock: true, active: true,
+            name: true, price: true, salePrice: true, stock: true, active: true, isMadeToOrder: true,
             // Sin variante elegida solo interesan las que el comprador
             // podría haber elegido: activas y que no sean la "base". Cada
             // producto tiene una variante base persistida que no se muestra
@@ -80,11 +82,16 @@ export class PricingService {
         if (variant && !variant.active) {
           throw new ConflictException(`La variante de "${product.name}" ya no está disponible`);
         }
-        const availableStock = variant ? variant.stock : product.stock;
-        if (availableStock < quantity) {
-          throw new ConflictException(
-            `Quedan ${availableStock} unidades de "${product.name}" y pediste ${quantity}`,
-          );
+        // Un producto por encargo no tiene stock por definición: se pide al
+        // proveedor cuando alguien lo reserva. Al validarlo igual que al resto,
+        // su stock en cero rechazaba toda reserva.
+        if (!product.isMadeToOrder) {
+          const availableStock = variant ? variant.stock : product.stock;
+          if (availableStock < quantity) {
+            throw new ConflictException(
+              `Quedan ${availableStock} unidades de "${product.name}" y pediste ${quantity}`,
+            );
+          }
         }
 
         return {
@@ -93,6 +100,7 @@ export class PricingService {
           name: product.name,
           quantity,
           price: effectivePrice(product.price, product.salePrice),
+          isMadeToOrder: product.isMadeToOrder,
         };
       }),
     );
@@ -106,6 +114,10 @@ export class PricingService {
   async decrementStock(items: ResolvedItem[]): Promise<void> {
     await this.prisma.$transaction(async (tx) => {
       for (const item of items) {
+        // Un encargo no tiene unidades que descontar: el UPDATE no afectaría
+        // ninguna fila y la venta se rechazaría después de cobrada.
+        if (item.isMadeToOrder) continue;
+
         const result = item.variantId
         ? await tx.productVariant.updateMany({
              where: { id: item.variantId, productId: item.productId, stock: { gte: item.quantity }, active: true },
