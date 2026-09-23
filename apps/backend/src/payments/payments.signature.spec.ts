@@ -29,7 +29,7 @@ function firmaLegitima(paymentId = PAYMENT_ID, requestId = REQUEST_ID, ts = TS, 
 
 /** El servicio solo necesita sus dependencias para otras operaciones. */
 function service() {
-  return new PaymentsService(null as any, null as any, null as any);
+  return new PaymentsService(null as any, null as any, null as any, { markRecovered: jest.fn() } as any);
 }
 
 /** `isSignatureValid` es privado; en TypeScript eso es solo de compilación. */
@@ -110,7 +110,7 @@ describe('Firma del webhook — sin secreto configurado', () => {
     jest.isolateModules(() => {
       process.env.NODE_ENV = 'development';
       const { PaymentsService: Dev } = require('./payments.service');
-      const svc = new Dev(null, null);
+      const svc = new Dev(null, null, null, { markRecovered: () => {} });
       expect((svc as any).isSignatureValid(PAYMENT_ID, '', REQUEST_ID)).toBe(true);
     });
   });
@@ -121,7 +121,7 @@ describe('Firma del webhook — sin secreto configurado', () => {
     jest.isolateModules(() => {
       process.env.NODE_ENV = 'production';
       const { PaymentsService: Prod } = require('./payments.service');
-      const svc = new Prod(null, null);
+      const svc = new Prod(null, null, null, { markRecovered: () => {} });
       expect((svc as any).isSignatureValid(PAYMENT_ID, firmaLegitima(), REQUEST_ID)).toBe(false);
     });
   });

@@ -35,6 +35,7 @@ import {
   UserCheck,
   FileCheck,
   X,
+  ShoppingCart,
 } from 'lucide-react';
 
 interface NavItem {
@@ -71,6 +72,7 @@ const navGroups: NavGroup[] = [
     items: [
       { label: 'Promociones', href: '/promociones', icon: Percent },
       { label: 'Cupones', href: '/cupones', icon: Tag },
+      { label: 'Carritos abandonados', href: '/carritos-abandonados', icon: ShoppingCart },
     ],
   },
   {

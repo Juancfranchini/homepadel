@@ -6,6 +6,7 @@ import { CouponsService } from '../coupons/coupons.service';
 import { CreatePreferenceDto, ShippingData } from './dto/create-preference.dto';
 import { enviarCompraAMeta } from './payments.meta';
 import { verificarFirma } from './payments.signature';
+import { AbandonedCartsService } from '../abandoned-carts/abandoned-carts.service';
 import * as bcrypt from 'bcrypt';
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
@@ -18,6 +19,7 @@ export class PaymentsService {
     private prisma: PrismaService,
     private pricing: PricingService,
     private coupons: CouponsService,
+    private abandonedCarts: AbandonedCartsService,
   ) {}
 
   /**
@@ -457,6 +459,10 @@ export class PaymentsService {
         }),
       },
     });
+
+    // Si esta persona tenía un carrito abandonado, queda marcado como
+    // recuperado: es lo que permite medir cuántos terminan en venta.
+    this.abandonedCarts.markRecovered((datosPrevios.buyerEmail as string) || email, pendingOrder.number);
 
     this.logger.log(`Orden ${pendingOrder.number} marcada como pagada.`);
   }

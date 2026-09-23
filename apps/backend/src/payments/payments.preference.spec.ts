@@ -54,7 +54,7 @@ function construirServicio() {
   };
   const coupons = { validate: jest.fn(), calculateDiscount: jest.fn() };
 
-  const service = new PaymentsService(prisma as any, pricing as any, coupons as any);
+  const service = new PaymentsService(prisma as any, pricing as any, coupons as any, { markRecovered: jest.fn() } as any);
   return { service, prisma, pricing, ordenesCreadas };
 }
 

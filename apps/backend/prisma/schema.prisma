@@ -268,6 +268,30 @@ model FAQ {
   updatedAt DateTime @updatedAt
 }
 
+/// Checkout empezado que nunca terminó en compra.
+///
+/// Se guarda cuando alguien deja su email en el checkout y todavía no hay
+/// pedido. Si después compra, la fila queda marcada como recuperada en vez de
+/// borrarse: así se ve cuántos se rescataron.
+model AbandonedCart {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  name        String?
+  phone       String?
+  /// Los ítems tal como estaban en el carrito, con su precio de ese momento.
+  items       Json
+  total       Float
+  /// Cuándo alguien de la tienda se contactó. Null = sin contactar.
+  contactedAt DateTime?
+  /// Cuándo terminó comprando, y con qué pedido.
+  recoveredAt DateTime?
+  orderNumber String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([recoveredAt, updatedAt])
+}
+
 model ProductVariant {
   id        String   @id @default(cuid())
   productId String

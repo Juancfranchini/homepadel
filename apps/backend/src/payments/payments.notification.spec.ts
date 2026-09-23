@@ -15,7 +15,7 @@
 import { PaymentsService } from './payments.service';
 
 function service() {
-  return new PaymentsService(null as any, null as any, null as any);
+  return new PaymentsService(null as any, null as any, null as any, { markRecovered: jest.fn() } as any);
 }
 
 /** `identificarAviso` es privado; en TypeScript eso es solo de compilación. */
@@ -69,7 +69,7 @@ describe('handleWebhook — salidas tempranas', () => {
     delete process.env.MERCADOPAGO_WEBHOOK_SECRET;
 
     const prisma = { order: { findFirst: jest.fn().mockResolvedValue({ id: 'ya-procesada' }) } };
-    const svc = new PaymentsService(prisma as any, null as any, null as any);
+    const svc = new PaymentsService(prisma as any, null as any, null as any, { markRecovered: jest.fn() } as any);
 
     const resultado = await svc.handleWebhook({}, '', '', { topic: 'payment', id: '123' });
 

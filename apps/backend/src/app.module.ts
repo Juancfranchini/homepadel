@@ -23,6 +23,7 @@ import { ContactModule } from './contact/contact.module';
 import { ContactChannelsModule } from './contact-channels/contact-channels.module';
 import { SizeGuidesModule } from './size-guides/size-guides.module';
 import { NewsletterModule } from './newsletter/newsletter.module';
+import { AbandonedCartsModule } from './abandoned-carts/abandoned-carts.module';
 import { InstagramModule } from './instagram/instagram.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { PaymentsModule } from './payments/payments.module';
@@ -57,6 +58,7 @@ import { TrackModule } from './track/track.module';
     ContactChannelsModule,
     SizeGuidesModule,
     NewsletterModule,
+    AbandonedCartsModule,
     ReviewsModule,
     PaymentsModule,
     EmailModule,

@@ -63,6 +63,10 @@ export const trackOrder = (orderNumber: string) =>
 export const createPaymentPreference = (data: Record<string, unknown>) =>
   api.post('/payments/create-preference', data).then((r) => r.data);
 
+/** Registra el carrito de quien empezó el checkout y todavía no compró. */
+export const saveAbandonedCart = (data: Record<string, unknown>) =>
+  api.post('/abandoned-carts', data).then((r) => r.data);
+
 /**
  * Pide al servidor que consulte el pago en Mercado Pago y registre la venta.
  * No espera el aviso de Mercado Pago, que es un solo canal y puede fallar.

@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { EmailService } from '../email/email.service';
 import { PricingService } from '../pricing/pricing.service';
 import { CouponsService } from '../coupons/coupons.service';
+import { AbandonedCartsService } from '../abandoned-carts/abandoned-carts.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderStatus } from '@prisma/client';
 
@@ -13,6 +14,7 @@ export class OrdersService {
     private emailService: EmailService,
     private pricing: PricingService,
     private coupons: CouponsService,
+    private abandonedCarts: AbandonedCartsService,
   ) {}
 
   async findAll() {
@@ -154,6 +156,10 @@ export class OrdersService {
         console.error('Error incrementando uso de cupón:', err),
       );
     }
+
+    // Si esta persona tenía un carrito abandonado registrado, queda marcado
+    // como recuperado: es lo que permite medir cuántos terminan en venta.
+    this.abandonedCarts.markRecovered(dto.buyerEmail || order.user?.email, number);
 
     const customerEmail = dto.buyerEmail || order.user?.email;
     if (customerEmail) {

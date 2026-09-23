@@ -4,9 +4,10 @@ import { PaymentsService } from './payments.service';
 import { PaymentsReconciliationService } from './payments.reconciliation';
 import { PricingModule } from '../pricing/pricing.module';
 import { CouponsModule } from '../coupons/coupons.module';
+import { AbandonedCartsModule } from '../abandoned-carts/abandoned-carts.module';
 
 @Module({
-  imports: [PricingModule, CouponsModule],
+  imports: [PricingModule, CouponsModule, AbandonedCartsModule],
   controllers: [PaymentsController],
   providers: [PaymentsService, PaymentsReconciliationService],
 })

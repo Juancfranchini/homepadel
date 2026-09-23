@@ -12,6 +12,7 @@ import { useShippingRates } from '@/hooks/useShippingRates';
 import { validateCoupon } from '@/lib/api';
 import { useCheckoutSubmit } from './useCheckoutSubmit';
 import { useCheckoutDraft, limpiarBorrador } from './useCheckoutDraft';
+import { useAbandonedCart } from './useAbandonedCart';
 import CheckoutEmptyCart from './CheckoutEmptyCart';
 import CheckoutSuccessScreen from './CheckoutSuccessScreen';
 import CheckoutPersonalDataFields from './CheckoutPersonalDataFields';
@@ -61,6 +62,10 @@ export default function CheckoutPage() {
   });
 
   useCheckoutDraft(watch, reset);
+
+  // Queda registrado el carrito de quien deja su email y no termina la compra,
+  // para que la tienda pueda recuperarlo desde el backoffice.
+  useAbandonedCart(items, { email: watch('email'), name: watch('name'), phone: watch('phone') }, orderSuccess);
 
   const selectedPayment = watch('paymentMethod');
 
