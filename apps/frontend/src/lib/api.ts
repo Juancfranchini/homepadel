@@ -56,6 +56,13 @@ export const createOrder = (data: Record<string, unknown>) =>
 export const getMyOrders = () =>
   api.get('/orders/my').then((r) => r.data);
 
+/** Estado real de una orden por su número. Lo usan las pantallas de vuelta de Mercado Pago. */
+export const trackOrder = (orderNumber: string) =>
+  api.get(`/orders/track/${encodeURIComponent(orderNumber)}`).then((r) => r.data);
+
+export const createPaymentPreference = (data: Record<string, unknown>) =>
+  api.post('/payments/create-preference', data).then((r) => r.data);
+
 // Banners
 export const getBanners = () =>
   api.get('/banners').then((r) => r.data);

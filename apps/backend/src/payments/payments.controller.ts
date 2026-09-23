@@ -1,6 +1,7 @@
 ﻿import { Controller, Post, Body, Req, Headers } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { PaymentsService } from './payments.service';
+import { CreatePreferenceDto } from './dto/create-preference.dto';
 
 @ApiTags('Payments')
 @Controller('payments')
@@ -8,20 +9,8 @@ export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @Post('create-preference')
-  async createPreference(@Body() body: {
-    orderNumber: string;
-    items: { productId: string; name: string; quantity: number; variantId?: string }[];
-    payer: { name: string; email: string };
-    externalReference: string;
-    couponCode?: string;
-  }) {
-    return this.paymentsService.createPreference(
-      body.orderNumber,
-      body.items,
-      body.payer,
-      body.externalReference,
-      body.couponCode,
-    );
+  async createPreference(@Body() dto: CreatePreferenceDto) {
+    return this.paymentsService.createPreference(dto);
   }
 
   @Post('webhook')

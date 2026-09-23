@@ -3,6 +3,7 @@ import * as crypto from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { PricingService, ResolvedItem } from '../pricing/pricing.service';
 import { CouponsService } from '../coupons/coupons.service';
+import { CreatePreferenceDto, ShippingData } from './dto/create-preference.dto';
 import * as bcrypt from 'bcrypt';
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
@@ -53,23 +54,24 @@ export class PaymentsService {
     return process.env.MERCADOPAGO_ACCESS_TOKEN || mp.accessToken || '';
   }
 
-  async createPreference(
-    orderNumber: string,
-    items: any[],
-    payer: { name: string; email: string },
-    externalReference: string,
-    couponCode?: string,
-  ) {
+  async createPreference(dto: CreatePreferenceDto) {
     // Se leen las URLs antes de tocar la base: si la configuración falta,
     // conviene fallar acá y no después de haber creado una orden huérfana.
     const frontendUrl = this.FRONTEND_URL;
     const backendUrl = this.BACKEND_URL;
     const accessToken = await this.getMPAccessToken();
 
+    // El identificador lo genera el servidor. Antes lo elegía el navegador
+    // (`'HP-' + Date.now()`), así que cualquiera podía repetir el número de
+    // una orden existente o adivinar el de otra.
+    const orderNumber = 'HP-' + Date.now() + '-' + crypto.randomBytes(3).toString('hex');
+    const externalReference = 'ref_' + crypto.randomBytes(12).toString('hex');
+    const { items, payer, couponCode } = dto;
+
     // S3 / F6 — El precio sale de la base y se verifica el stock. Lo que haya
     // mandado el navegador en `price` se descarta por completo.
     const resolvedItems = await this.pricing.resolveItems(
-      (items || []).map((item: any) => ({
+      (items || []).map((item) => ({
         productId: item.productId,
         variantId: item.variantId,
         quantity: item.quantity,
@@ -80,7 +82,7 @@ export class PaymentsService {
 
     // P1 — mismo cálculo de envío que en el checkout directo (OrdersService):
     // el monto siempre sale de `shipping_rates`, nunca del navegador.
-    const shipping = await this.pricing.calculateShipping(subtotal);
+    const shippingCost = await this.pricing.calculateShipping(subtotal);
 
     // P2 — mismo cupón validado y descontado en el servidor. Si es inválido,
     // la preferencia de pago ni se crea.
@@ -94,7 +96,9 @@ export class PaymentsService {
     // El stock se descuenta recién cuando el pago se aprueba (ver handleWebhook),
     // para no reservar unidades por carritos que quedan abandonados. El
     // cupón, si hay, recién se consume ahí también.
-    await this.createPendingOrder(orderNumber, externalReference, resolvedItems, { subtotal, shipping, discount, couponCode });
+    await this.createPendingOrder(orderNumber, externalReference, resolvedItems, {
+      subtotal, shipping: shippingCost, discount, couponCode,
+    }, payer, dto.shipping);
 
     const preferenceItems = this.buildPreferenceItems(resolvedItems, discount, couponCode);
 
@@ -104,12 +108,18 @@ export class PaymentsService {
       payer: { name: payer.name, email: payer.email },
       items: preferenceItems,
       // El envío sí tiene campo propio en la API de Mercado Pago.
-      shipments: { cost: shipping, mode: 'not_specified' },
+      shipments: { cost: shippingCost, mode: 'not_specified' },
       back_urls: {
         success: frontendUrl + '/checkout/success?order=' + orderNumber,
         failure: frontendUrl + '/checkout/error?order=' + orderNumber,
         pending: frontendUrl + '/checkout/pending?order=' + orderNumber,
       },
+      // Sin `auto_return`, Mercado Pago no devuelve al comprador: lo deja en
+      // su propia pantalla con un botón "Volver al sitio" cuyo destino
+      // depende de cómo clasifique el pago en ese instante. Con un pago
+      // acreditado eso terminaba en /checkout/error. Con auto_return, un pago
+      // aprobado vuelve solo y siempre a back_urls.success.
+      auto_return: 'approved',
     };
 
     const response = await fetch('https://api.mercadopago.com/checkout/preferences', {
@@ -117,7 +127,30 @@ export class PaymentsService {
       headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
-    return response.json();
+
+    const preference = await response.json();
+
+    if (!response.ok || !preference?.init_point) {
+      // El detalle de Mercado Pago queda en el log del servidor, no se le
+      // devuelve al navegador: trae datos de la cuenta del vendedor.
+      this.logger.error(
+        `Mercado Pago rechazó la preferencia de ${orderNumber} (HTTP ${response.status}): ${JSON.stringify(preference)}`,
+      );
+      throw new InternalServerErrorException(
+        'No se pudo iniciar el pago con Mercado Pago. Probá de nuevo o elegí otro método.',
+      );
+    }
+
+    return { id: preference.id, init_point: preference.init_point, orderNumber };
+  }
+
+  /**
+   * Arma el domicilio con el mismo formato que usa el checkout directo
+   * (OrdersService), para que las dos vías se lean igual en el backoffice.
+   */
+  private formatAddress(shipping?: ShippingData): string {
+    if (!shipping) return 'Sin domicilio: pedírselo al comprador';
+    return `${shipping.street}, ${shipping.city}, ${shipping.province} (${shipping.postalCode})`;
   }
 
   private async createPendingOrder(
@@ -125,6 +158,8 @@ export class PaymentsService {
     externalReference: string,
     resolvedItems: ResolvedItem[],
     totals: { subtotal: number; shipping: number; discount: number; couponCode?: string },
+    payer: { name: string; email: string },
+    shipping?: ShippingData,
   ) {
     try {
       await this.prisma.order.create({
@@ -137,8 +172,17 @@ export class PaymentsService {
           shipping: totals.shipping,
           discount: totals.discount,
           couponCode: totals.couponCode || null,
-          address: 'Pendiente de pago',
-          notes: JSON.stringify({ externalReference, pendingPayment: true }),
+          // El domicilio se guarda al crear la orden: el aviso de pago de
+          // Mercado Pago no lo trae, así que si no queda acá la venta se
+          // registra sin dirección a la que enviar.
+          address: this.formatAddress(shipping),
+          notes: JSON.stringify({
+            externalReference,
+            pendingPayment: true,
+            buyerEmail: payer.email,
+            buyerName: payer.name,
+            buyerPhone: shipping?.phone || null,
+          }),
           items: { create: resolvedItems.map((item) => ({
             productId: item.productId,
             variantId: item.variantId,
@@ -257,7 +301,7 @@ export class PaymentsService {
 
   private async settlePaidOrder(
     pendingOrder: {
-      id: string; number: string; userId: string | null; couponCode: string | null; total: number;
+      id: string; number: string; userId: string | null; couponCode: string | null; total: number; notes: string | null;
       items: { productId: string; variantId: string | null; quantity: number; price: number; product: { name: string } }[];
     },
     payment: any,
@@ -277,17 +321,42 @@ export class PaymentsService {
       this.incrementCouponUsage(pendingOrder.couponCode);
     }
 
+    // Los datos del comprador ya se guardaron al crear la orden pendiente:
+    // se conservan en vez de pisarlos, porque el aviso de Mercado Pago no
+    // trae el teléfono y antes se perdía al marcar la orden como pagada.
+    const datosPrevios = this.parseNotes(pendingOrder.notes);
+
     await this.prisma.order.update({
       where: { id: pendingOrder.id },
       data: {
         status: 'PAID',
         userId: user?.id ?? pendingOrder.userId,
         total: payment.transaction_amount || pendingOrder.total,
-        notes: JSON.stringify({ paymentId: payment.id, paymentMethod: 'mercadopago', paymentStatus: payment.status, buyerEmail: email, buyerName: name }),
+        notes: JSON.stringify({
+          ...datosPrevios,
+          pendingPayment: false,
+          paymentId: payment.id,
+          paymentMethod: 'mercadopago',
+          paymentStatus: payment.status,
+          buyerEmail: datosPrevios.buyerEmail || email,
+          buyerName: datosPrevios.buyerName || name,
+        }),
       },
     });
 
     this.logger.log(`Orden ${pendingOrder.number} marcada como pagada.`);
+  }
+
+  /** `notes` guarda un JSON; si viene roto se sigue sin los datos, no se corta la venta. */
+  private parseNotes(notes: string | null): Record<string, unknown> {
+    if (!notes) return {};
+    try {
+      const parsed = JSON.parse(notes);
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch {
+      this.logger.warn('No se pudo leer el JSON de `notes` de una orden.');
+      return {};
+    }
   }
 
   /** Cubre el caso raro en que el webhook llega sin una orden PENDING previa. */

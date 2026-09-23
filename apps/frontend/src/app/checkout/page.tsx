@@ -11,6 +11,7 @@ import { usePaymentMethods } from '@/hooks/usePaymentMethods';
 import { useShippingRates } from '@/hooks/useShippingRates';
 import { validateCoupon } from '@/lib/api';
 import { useCheckoutSubmit } from './useCheckoutSubmit';
+import { useCheckoutDraft, limpiarBorrador } from './useCheckoutDraft';
 import CheckoutEmptyCart from './CheckoutEmptyCart';
 import CheckoutSuccessScreen from './CheckoutSuccessScreen';
 import CheckoutPersonalDataFields from './CheckoutPersonalDataFields';
@@ -32,7 +33,7 @@ const checkoutSchema = z.object({
 type CheckoutFormData = z.infer<typeof checkoutSchema>;
 
 export default function CheckoutPage() {
-  const { items, totalPrice, clearCart, couponCode, setCoupon } = useCartStore();
+  const { items, totalPrice, clearCart, couponCode, setCoupon, updateQuantity, removeItem } = useCartStore();
   const { user } = useAuthStore();
   const { mercadopago, visa, mastercard, amex } = usePaymentMethods();
   const { flatRate, freeShippingThreshold } = useShippingRates();
@@ -54,14 +55,28 @@ export default function CheckoutPage() {
     }
   }, [couponCode, subtotal, setCoupon]);
 
-  const { register, handleSubmit, formState: { errors, isSubmitting }, watch } = useForm<CheckoutFormData>({
+  const { register, handleSubmit, formState: { errors, isSubmitting }, watch, reset } = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: { name: user?.name || '', email: user?.email || '', paymentMethod: 'card' },
   });
 
+  useCheckoutDraft(watch, reset);
+
   const selectedPayment = watch('paymentMethod');
 
-  if (items.length === 0 && !orderSuccess) {
+  // Si el carrito se vacía editándolo acá, el formulario NO se desmonta: al
+  // hacerlo se perdía todo lo cargado. La pantalla de carrito vacío queda
+  // solo para quien entra directo al checkout sin nada.
+  const [huboItems, setHuboItems] = useState(false);
+  useEffect(() => {
+    if (items.length > 0) setHuboItems(true);
+  }, [items.length]);
+
+  useEffect(() => {
+    if (orderSuccess) limpiarBorrador();
+  }, [orderSuccess]);
+
+  if (items.length === 0 && !orderSuccess && !huboItems) {
     return <CheckoutEmptyCart />;
   }
 
@@ -104,6 +119,8 @@ export default function CheckoutPage() {
               total={total}
               orderError={orderError}
               isSubmitting={isSubmitting}
+              onQuantityChange={updateQuantity}
+              onRemove={removeItem}
             />
           </div>
         </form>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { CartItem } from '@/types';
-import { createOrder } from '@/lib/api';
+import { createOrder, createPaymentPreference } from '@/lib/api';
 
 interface CheckoutFormData {
   name: string;
@@ -13,6 +13,16 @@ interface CheckoutFormData {
   province: string;
   postalCode: string;
   paymentMethod: 'card' | 'mercadopago' | 'transfer';
+}
+
+/**
+ * El backend valida con class-validator, que devuelve un array de mensajes
+ * cuando falla más de un campo. Mostrarlo tal cual dejaba "[object Object]".
+ */
+function mensajeDeError(err: unknown, porDefecto: string): string {
+  const detalle = (err as { response?: { data?: { message?: unknown } } })?.response?.data?.message;
+  if (Array.isArray(detalle)) return detalle.join('. ');
+  return typeof detalle === 'string' ? detalle : porDefecto;
 }
 
 interface Params {
@@ -38,27 +48,29 @@ export function useCheckoutSubmit({ items, couponCode, clearCart }: Params) {
         variantColor: i.variantColor,
         variantDimensions: i.variantDimensions,
       }));
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
-      const res = await fetch(API_URL + '/payments/create-preference', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          orderNumber: 'HP-' + Date.now(),
-          items: orderItems,
-          payer: { name: data.name, email: data.email },
-          externalReference: 'order_' + Date.now(),
-          couponCode: couponCode || undefined,
-        }),
+      // El domicilio y el teléfono viajan con la preferencia: el aviso de pago
+      // de Mercado Pago no los trae, así que si no se mandan acá la venta se
+      // registra sin dirección a la que enviar. El número de orden lo genera
+      // el servidor.
+      const pref = await createPaymentPreference({
+        items: orderItems,
+        payer: { name: data.name, email: data.email },
+        shipping: {
+          street: data.street,
+          city: data.city,
+          province: data.province,
+          postalCode: data.postalCode,
+          phone: data.phone,
+        },
+        couponCode: couponCode || undefined,
       });
-      const pref = await res.json();
       if (pref?.init_point) {
         window.location.href = pref.init_point;
         return;
       }
       setOrderError('No se pudo iniciar el pago con Mercado Pago. Probá de nuevo o elegí otro método.');
     } catch (err) {
-      console.error('Error MP:', err);
-      setOrderError('Error al conectar con Mercado Pago. Probá de nuevo o elegí otro método.');
+      setOrderError(mensajeDeError(err, 'Error al conectar con Mercado Pago. Probá de nuevo o elegí otro método.'));
     }
   };
 
@@ -84,10 +96,10 @@ export function useCheckoutSubmit({ items, couponCode, clearCart }: Params) {
       setOrderNumber(result.number);
       clearCart();
       setOrderSuccess(true);
-    } catch (err: any) {
+    } catch (err) {
       // Antes, cualquier error acá se tragaba y se mostraba "pedido
       // confirmado" con un número inventado sin que la orden existiera.
-      setOrderError(err?.response?.data?.message || 'Hubo un error al procesar tu pedido. Intentá de nuevo.');
+      setOrderError(mensajeDeError(err, 'Hubo un error al procesar tu pedido. Intentá de nuevo.'));
     }
   };
 
