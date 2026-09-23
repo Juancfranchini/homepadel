@@ -126,3 +126,45 @@ describe('Firma del webhook — sin secreto configurado', () => {
     });
   });
 });
+
+/**
+ * `x-request-id` es una cabecera que los proxies y balanceadores suelen
+ * inyectar o reescribir. Si la plataforma donde corre el backend la cambia,
+ * el valor que llega no es el que firmó Mercado Pago y el HMAC no coincide
+ * jamás, aunque el secreto sea el correcto — que es exactamente el síntoma
+ * que se vio en producción: "Firma inválida" en todos los avisos.
+ */
+describe('Firma del webhook — cuando el request-id no es de fiar', () => {
+  const original = process.env.MERCADOPAGO_WEBHOOK_SECRET;
+
+  beforeEach(() => { process.env.MERCADOPAGO_WEBHOOK_SECRET = SECRETO; });
+  afterAll(() => {
+    if (original === undefined) delete process.env.MERCADOPAGO_WEBHOOK_SECRET;
+    else process.env.MERCADOPAGO_WEBHOOK_SECRET = original;
+  });
+
+  /** Firma armada omitiendo el tramo `request-id`, como hace Mercado Pago cuando no lo tiene. */
+  function firmaSinRequestId(paymentId = PAYMENT_ID, ts = TS, secreto = SECRETO) {
+    const v1 = crypto.createHmac('sha256', secreto).update(`id:${paymentId};ts:${ts};`).digest('hex');
+    return `ts=${ts},v1=${v1}`;
+  }
+
+  it('acepta una firma sin el tramo request-id aunque llegue la cabecera', () => {
+    expect(validar(service(), PAYMENT_ID, firmaSinRequestId(), 'request-id-puesto-por-el-proxy')).toBe(true);
+  });
+
+  it('acepta la firma sin request-id cuando la cabecera directamente no llega', () => {
+    expect(validar(service(), PAYMENT_ID, firmaSinRequestId(), '')).toBe(true);
+  });
+
+  it('sigue exigiendo el secreto correcto en esa variante', () => {
+    const otra = firmaSinRequestId(PAYMENT_ID, TS, 'secreto-equivocado');
+    expect(validar(service(), PAYMENT_ID, otra, REQUEST_ID)).toBe(false);
+  });
+
+  it('sigue atando la firma al pago y a la marca de tiempo', () => {
+    expect(validar(service(), '999999', firmaSinRequestId(), REQUEST_ID)).toBe(false);
+    const otroTs = firmaSinRequestId().replace(`ts=${TS}`, 'ts=1704908999');
+    expect(validar(service(), PAYMENT_ID, otroTs, REQUEST_ID)).toBe(false);
+  });
+});

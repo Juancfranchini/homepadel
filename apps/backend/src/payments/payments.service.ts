@@ -491,20 +491,47 @@ export class PaymentsService {
     }
 
     const id = /^[a-z0-9]+$/i.test(paymentId) ? paymentId.toLowerCase() : paymentId;
-    let manifest = `id:${id};`;
-    if (xRequestId) manifest += `request-id:${xRequestId};`;
-    manifest += `ts:${ts};`;
+    const candidatos = this.manifiestosPosibles(id, ts, xRequestId);
+    const valid = candidatos.some((manifest) => this.coincide(manifest, secret, received));
 
+    if (!valid) {
+      // El detalle importa: sin él, "firma inválida" no distingue un secreto
+      // equivocado de un manifiesto mal armado. No se registra el secreto,
+      // solo su longitud, que alcanza para detectar un pegado incompleto.
+      this.logger.error(
+        `Firma inválida en el aviso del pago ${paymentId}. ` +
+        `Manifiestos probados: ${candidatos.map((m) => `"${m}"`).join(' | ')}. ` +
+        `Longitud del secreto configurado: ${secret.length}.`,
+      );
+    }
+    return valid;
+  }
+
+  /**
+   * Mercado Pago firma `id:<data.id>;request-id:<x-request-id>;ts:<ts>;`, pero
+   * omite los tramos cuyo valor no tiene.
+   *
+   * Se prueban las dos variantes porque `x-request-id` es una cabecera que
+   * los proxies suelen reescribir o inyectar: si la plataforma donde corre el
+   * backend la cambia, el valor que llega acá no es el que firmó Mercado Pago
+   * y el HMAC no coincide nunca, por más que el secreto esté bien.
+   *
+   * Aceptar la variante sin `request-id` no debilita nada: sigue haciendo
+   * falta el secreto, y la firma sigue atada al pago y a la marca de tiempo.
+   */
+  private manifiestosPosibles(id: string, ts: string, xRequestId: string): string[] {
+    const manifiestos: string[] = [];
+    if (xRequestId) manifiestos.push(`id:${id};request-id:${xRequestId};ts:${ts};`);
+    manifiestos.push(`id:${id};ts:${ts};`);
+    return manifiestos;
+  }
+
+  /** Comparación de tiempo constante: no filtra información por su duración. */
+  private coincide(manifest: string, secret: string, received: string): boolean {
     const expected = crypto.createHmac('sha256', secret).update(manifest).digest('hex');
-
-    // Comparación de tiempo constante: evita filtrar información por la
-    // duración de la comparación. timingSafeEqual exige longitudes iguales.
     const a = Buffer.from(expected, 'utf8');
     const b = Buffer.from(received, 'utf8');
-    const valid = a.length === b.length && crypto.timingSafeEqual(a, b);
-
-    if (!valid) this.logger.error(`Firma inválida en el aviso del pago ${paymentId}.`);
-    return valid;
+    return a.length === b.length && crypto.timingSafeEqual(a, b);
   }
 
 }
