@@ -1,4 +1,4 @@
-﻿import { Controller, Post, Body, Req, Headers } from '@nestjs/common';
+﻿import { Controller, Post, Get, Body, Query, Headers, Logger } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { PaymentsService } from './payments.service';
 import { CreatePreferenceDto } from './dto/create-preference.dto';
@@ -6,6 +6,8 @@ import { CreatePreferenceDto } from './dto/create-preference.dto';
 @ApiTags('Payments')
 @Controller('payments')
 export class PaymentsController {
+  private readonly logger = new Logger(PaymentsController.name);
+
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @Post('create-preference')
@@ -13,15 +15,33 @@ export class PaymentsController {
     return this.paymentsService.createPreference(dto);
   }
 
+  /**
+   * Aviso de pago de Mercado Pago.
+   *
+   * Se acepta también por GET: la modalidad IPN manda los datos en la query
+   * string y, según cómo esté configurada la cuenta, puede llegar por
+   * cualquiera de los dos métodos. Antes solo había POST y el aviso se perdía.
+   */
   @Post('webhook')
   async webhook(
-    @Req() req: any,
+    @Query() query: Record<string, string>,
     @Body() body: any,
     @Headers('x-signature') signature?: string,
     @Headers('x-request-id') xRequestId?: string,
   ) {
-    console.log('Webhook MP:', JSON.stringify(body));
-    await this.paymentsService.handleWebhook(body, signature || '', xRequestId || '');
+    this.logger.log(`Aviso de Mercado Pago — query: ${JSON.stringify(query)} | cuerpo: ${JSON.stringify(body)}`);
+    await this.paymentsService.handleWebhook(body, signature || '', xRequestId || '', query);
+    return { status: 'ok' };
+  }
+
+  @Get('webhook')
+  async webhookGet(
+    @Query() query: Record<string, string>,
+    @Headers('x-signature') signature?: string,
+    @Headers('x-request-id') xRequestId?: string,
+  ) {
+    this.logger.log(`Aviso de Mercado Pago (GET) — query: ${JSON.stringify(query)}`);
+    await this.paymentsService.handleWebhook({}, signature || '', xRequestId || '', query);
     return { status: 'ok' };
   }
 }

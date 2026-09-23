@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { PricingService, ResolvedItem } from '../pricing/pricing.service';
 import { CouponsService } from '../coupons/coupons.service';
 import { CreatePreferenceDto, ShippingData } from './dto/create-preference.dto';
+import { enviarCompraAMeta } from './payments.meta';
 import * as bcrypt from 'bcrypt';
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
@@ -223,13 +224,40 @@ export class PaymentsService {
     return preferenceItems;
   }
 
-  async handleWebhook(body: any, signature: string, xRequestId: string) {
-    if (body.type !== 'payment') return { received: true };
-    const paymentId = body.data?.id;
-    if (!paymentId) return { received: true };
+  /**
+   * Mercado Pago avisa de dos maneras distintas según cómo esté configurada
+   * la integración:
+   *
+   *   · Webhooks: el detalle va en el cuerpo — {type:'payment', data:{id}}
+   *   · IPN: el cuerpo viene vacío y los datos van en la query string,
+   *     como ?topic=payment&id=123
+   *
+   * Solo se entendía la primera. Con la cuenta configurada en IPN el aviso
+   * se descartaba en silencio: el pago entraba en Mercado Pago y la orden se
+   * quedaba en pendiente para siempre, que es lo que venía pasando.
+   */
+  private identificarAviso(body: any, query: Record<string, string>) {
+    const topic = body?.type || body?.topic || query?.type || query?.topic || null;
+    const id = body?.data?.id ?? query?.['data.id'] ?? query?.id ?? null;
+    return { topic, paymentId: id ? String(id) : null };
+  }
+
+  async handleWebhook(body: any, signature: string, xRequestId: string, query: Record<string, string> = {}) {
+    const { topic, paymentId } = this.identificarAviso(body, query);
+
+    // Cada salida deja constancia: un aviso descartado sin explicación era
+    // indistinguible de uno que nunca llegó.
+    if (topic !== 'payment') {
+      this.logger.log(`Aviso ignorado: no corresponde a un pago (topic "${topic ?? 'ausente'}").`);
+      return { received: true };
+    }
+    if (!paymentId) {
+      this.logger.warn('Aviso de pago sin identificador: no hay qué consultar en Mercado Pago.');
+      return { received: true };
+    }
 
     // N2 - Validación de firma según la especificación de Mercado Pago
-    if (!this.isSignatureValid(String(paymentId), signature, xRequestId)) {
+    if (!this.isSignatureValid(paymentId, signature, xRequestId)) {
       return { received: true, signatureInvalid: true };
     }
 
@@ -270,28 +298,36 @@ export class PaymentsService {
 
       // Buscar la orden pendiente creada en createPreference, con sus ítems:
       // hacen falta para descontar el stock ahora que el pago se confirmó.
-      const pendingOrder = await this.prisma.order.findFirst({
-        where: { notes: { contains: ref } },
-        include: { items: { include: { product: { select: { name: true } } } } },
-      });
+      // Si el pago viniera sin referencia, `contains: undefined` haría que
+      // Prisma ignore el filtro y devuelva cualquier orden: se daría por
+      // pagada una ajena. Por eso se exige la referencia.
+      const pendingOrder = ref
+        ? await this.prisma.order.findFirst({
+            where: { notes: { contains: ref } },
+            include: { items: { include: { product: { select: { name: true } } } } },
+          })
+        : null;
 
       if (pendingOrder) {
         await this.settlePaidOrder(pendingOrder, payment, user, email, name, paymentId);
       } else {
+        this.logger.warn(
+          `Pago ${paymentId} aprobado sin orden pendiente para la referencia "${ref ?? 'ausente'}": se registra como venta suelta.`,
+        );
         await this.createFallbackPaidOrder(payment, user, email, name);
       }
 
-      await this.sendPurchaseToMeta(
+      await enviarCompraAMeta(this.prisma, {
         payment,
-        pendingOrder?.number || 'HP-' + Date.now(),
-        pendingOrder?.items.map((item) => ({
+        orderNumber: pendingOrder?.number || 'HP-' + Date.now(),
+        items: pendingOrder?.items.map((item) => ({
           productId: item.productId,
-          variantId: item.variantId,
           quantity: item.quantity,
           price: item.price,
         })) ?? [],
         email,
-      );
+        frontendUrl: this.FRONTEND_URL,
+      });
     } catch (err) {
       this.logger.error(`Error procesando el aviso del pago ${paymentId}: ${err}`);
     }
@@ -471,59 +507,4 @@ export class PaymentsService {
     return valid;
   }
 
-  private async sendPurchaseToMeta(payment: any, orderNumber: string, items: any[], email: string) {
-    try {
-      const metaConfig = await this.prisma.siteSection.findUnique({ where: { key: 'meta_pixel' } });
-      const config: any = metaConfig?.data || {};
-      if (!config.pixelId || !config.accessToken) return;
-
-      const hashEmail = (email: string) => {
-        const normalized = email.trim().toLowerCase();
-        return crypto.createHash('sha256').update(normalized).digest('hex');
-      };
-
-      const apiUrl = 'https://graph.facebook.com/v21.0/' + config.pixelId + '/events';
-      const eventId = 'purchase_' + orderNumber;
-      const value = payment.transaction_amount || items.reduce((acc: number, item: any) => acc + (Number(item.price) * item.quantity), 0);
-
-      const payload = {
-        data: [{
-          event_name: 'Purchase',
-          event_time: Math.floor(Date.now() / 1000),
-          event_id: eventId,
-          event_source_url: this.FRONTEND_URL + '/checkout/success?order=' + orderNumber,
-          action_source: 'website',
-          user_data: {
-            em: email ? [hashEmail(email)] : undefined,
-            client_ip_address: payment.payer?.ip_address || undefined,
-            client_user_agent: payment.payer?.user_agent || undefined,
-          },
-          custom_data: {
-            currency: 'ARS',
-            value: value,
-            content_ids: items.map((item: any) => item.productId),
-            content_type: 'product',
-            contents: items.map((item: any) => ({
-              id: item.productId,
-              quantity: item.quantity,
-              item_price: Number(item.price),
-            })),
-          },
-        }],
-      };
-
-      const params: any = { access_token: config.accessToken };
-      if (config.testEventCode) {
-        params.test_event_code = config.testEventCode;
-      }
-
-      await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-    } catch (err) {
-      console.error('Error enviando Purchase a Meta:', err);
-    }
-  }
 }
