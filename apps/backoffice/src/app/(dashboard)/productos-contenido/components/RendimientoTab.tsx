@@ -36,7 +36,7 @@ function SpecRow({ index, register, currentIcon, onIconChange, onRemove }: {
       </div>
 
       {/* Tablet/Web */}
-      <div className="hidden sm:grid grid-cols-[130px_90px_1fr_40px] gap-2 items-center">
+      <div className="hidden sm:grid grid-cols-[158px_90px_1fr_40px] gap-2 items-center">
         {iconSelect}
         <input {...register(('specs.' + index + '.title') as any)} className={inputClass} placeholder="Ej: Carbono" />
         <input {...register(('specs.' + index + '.value') as any)} className={inputClass + ' min-w-0'} placeholder="Descripcion del producto" />
@@ -73,7 +73,7 @@ export default function RendimientoTab({ register, control, watch, setValue, sho
         </div>
 
         {specsArray.fields.length > 0 && (
-          <div className="hidden sm:grid grid-cols-[130px_90px_1fr_40px] gap-2 mb-1 px-1">
+          <div className="hidden sm:grid grid-cols-[158px_90px_1fr_40px] gap-2 mb-1 px-1">
             <span className="text-[10px] font-semibold text-gray-400 uppercase">Icono</span>
             <span className="text-[10px] font-semibold text-gray-400 uppercase">Titulo</span>
             <span className="text-[10px] font-semibold text-gray-400 uppercase">Descripcion</span>
