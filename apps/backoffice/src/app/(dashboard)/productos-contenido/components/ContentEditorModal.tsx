@@ -39,13 +39,14 @@ export default function ContentEditorModal({ isOpen, selected, products, activeT
 
         <form onSubmit={onSubmit} className="space-y-4">
           {activeTab === 'video' && <VideoTab register={register} control={control} showVideo={watch('showVideo')} onToggleShowVideo={() => setValue('showVideo', !watch('showVideo'), { shouldDirty: true })} />}
-          {activeTab === 'rendimiento' && <RendimientoTab register={register} control={control} watch={watch} showPerformance={watch('showPerformance')} onToggleShowPerformance={() => setValue('showPerformance', !watch('showPerformance'), { shouldDirty: true })} />}
+          {activeTab === 'rendimiento' && <RendimientoTab register={register} control={control} watch={watch} setValue={setValue} showPerformance={watch('showPerformance')} onToggleShowPerformance={() => setValue('showPerformance', !watch('showPerformance'), { shouldDirty: true })} />}
           {activeTab === 'highlights' && <HighlightsTab register={register} control={control} showHighlights={watch('showHighlights')} onToggleShowHighlights={() => setValue('showHighlights', !watch('showHighlights'), { shouldDirty: true })} />}
           {activeTab === 'relacionados' && <RelacionadosTab products={products} selectedId={selected.id} register={register} setValue={setValue} control={control} showRelated={watch('showRelated')} onToggleShowRelated={() => setValue('showRelated', !watch('showRelated'), { shouldDirty: true })} />}
           {activeTab === 'compara' && (
             <ComparaTab
               value={watch('compareData') || { fields: [], products: [] }}
               onChange={(data) => setValue('compareData', data, { shouldDirty: true })}
+              catalogo={products}
               showCompare={watch('showCompare')}
               onToggleShowCompare={() => setValue('showCompare', !watch('showCompare'), { shouldDirty: true })}
             />

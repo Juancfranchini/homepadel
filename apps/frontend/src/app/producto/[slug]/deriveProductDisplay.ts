@@ -1,13 +1,29 @@
 import { Product } from '@/types';
 import { getDiscountPercent } from '@/lib/utils';
 
+/**
+ * Convierte el enlace que se pega en el backoffice en uno reproducible.
+ *
+ * Contempla las formas en que YouTube comparte hoy un video: además de
+ * `watch?v=` y `youtu.be`, los **Shorts** —que es lo que da el botón
+ * "Compartir" desde el celular— y los directos. Antes solo se entendían las
+ * dos primeras, así que un Short cargado en el backoffice devolvía null y la
+ * sección de video no aparecía nunca, aunque estuviera activada.
+ */
 function getVideoEmbedUrl(url?: string) {
   if (!url) return null;
-  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+
+  const ytMatch = url.match(
+    /(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+  );
   if (ytMatch) return 'https://www.youtube.com/embed/' + ytMatch[1] + '?rel=0&modestbranding=1';
+
   const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
   if (vimeoMatch) return 'https://player.vimeo.com/video/' + vimeoMatch[1] + '?dnt=1';
-  return url.includes('youtube.com/embed/') || url.includes('player.vimeo.com/') ? url : null;
+
+  return url.includes('youtube.com/embed/') || url.includes('youtube-nocookie.com/embed/') || url.includes('player.vimeo.com/')
+    ? url
+    : null;
 }
 
 export function deriveProductDisplay(product: Product, selectedVariant: any, activeProductVariants: any[]) {

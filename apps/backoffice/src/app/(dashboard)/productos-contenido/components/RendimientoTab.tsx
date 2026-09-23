@@ -1,23 +1,10 @@
 ﻿import { useFieldArray, UseFormRegister } from 'react-hook-form';
 import Toggle from '../../testimonios/components/Toggle';
-import { createElement } from 'react';
-import { Plus, Trash2, Target, Circle, Scale, Ruler, User, Zap, Star, Shield, Award, Gauge, Wind, Package, Thermometer, Droplets, Maximize, Layers, Scissors, TrendingUp, Footprints } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
+import SpecIconPicker from './SpecIconPicker';
 
 const inputClass = 'w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00]';
 const labelClass = 'text-xs font-medium text-gray-400 uppercase tracking-wider';
-
-const SPEC_ICONS = [
-  { value: 'Target', label: 'Objetivo', icon: Target }, { value: 'Circle', label: 'Circulo', icon: Circle },
-  { value: 'Scale', label: 'Balance', icon: Scale }, { value: 'Ruler', label: 'Regla', icon: Ruler },
-  { value: 'User', label: 'Usuario', icon: User }, { value: 'Zap', label: 'Rayo', icon: Zap },
-  { value: 'Star', label: 'Estrella', icon: Star }, { value: 'Shield', label: 'Escudo', icon: Shield },
-  { value: 'Award', label: 'Premio', icon: Award }, { value: 'Gauge', label: 'Medidor', icon: Gauge },
-  { value: 'Wind', label: 'Viento', icon: Wind }, { value: 'Package', label: 'Caja', icon: Package },
-  { value: 'Thermometer', label: 'Termico', icon: Thermometer }, { value: 'Droplets', label: 'Gotas', icon: Droplets },
-  { value: 'Maximize', label: 'Expandir', icon: Maximize }, { value: 'Layers', label: 'Capas', icon: Layers },
-  { value: 'Scissors', label: 'Tijeras', icon: Scissors }, { value: 'TrendingUp', label: 'Tendencia', icon: TrendingUp },
-  { value: 'Footprints', label: 'Huellas', icon: Footprints },
-];
 
 const PERF_LABELS = ['Control', 'Potencia', 'Manejabilidad', 'Dureza', 'Jugabilidad'];
 
@@ -25,25 +12,16 @@ interface Props {
   register: UseFormRegister<any>;
   control: any;
   watch: any;
+  setValue: any;
   showPerformance: boolean;
   onToggleShowPerformance: () => void;
 }
 
-function SpecRow({ index, register, currentIcon, onRemove }: { index: number; register: UseFormRegister<any>; currentIcon: string; onRemove: () => void }) {
-  const iconObj = SPEC_ICONS.find((o) => o.value === currentIcon);
-  const IconComp = iconObj?.icon || Target;
-  const iconSelect = (
-    <div className="relative">
-      <select {...register(('specs.' + index + '.icon') as any)} className={inputClass + ' text-xs pl-8 pr-2'}>
-        {SPEC_ICONS.map((o) => (
-          <option key={o.value} value={o.value}>{o.label}</option>
-        ))}
-      </select>
-      <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[#C8FF00] pointer-events-none">
-        {createElement(IconComp, { size: 14 })}
-      </span>
-    </div>
-  );
+function SpecRow({ index, register, currentIcon, onIconChange, onRemove }: {
+  index: number; register: UseFormRegister<any>; currentIcon: string;
+  onIconChange: (value: string) => void; onRemove: () => void;
+}) {
+  const iconSelect = <SpecIconPicker value={currentIcon} onChange={onIconChange} />;
 
   return (
     <div className="mb-2">
@@ -68,7 +46,7 @@ function SpecRow({ index, register, currentIcon, onRemove }: { index: number; re
   );
 }
 
-export default function RendimientoTab({ register, control, watch, showPerformance, onToggleShowPerformance }: Props) {
+export default function RendimientoTab({ register, control, watch, setValue, showPerformance, onToggleShowPerformance }: Props) {
   const specsArray = useFieldArray({ control, name: 'specs' });
 
   return (
@@ -90,7 +68,7 @@ export default function RendimientoTab({ register, control, watch, showPerforman
       <div className="border-t border-gray-100 pt-4">
         <div className="flex items-center justify-between mb-3">
           <label className={labelClass}>Especificaciones (cards)</label>
-          <button type="button" onClick={() => specsArray.append({ icon: 'Target', title: '', value: '' })}
+          <button type="button" onClick={() => specsArray.append({ icon: 'Zap', title: '', value: '' })}
             className="flex items-center gap-1 text-xs font-semibold px-2 py-1 bg-[#C8FF00] text-[#0f172a] rounded-lg hover:bg-[#b8ef00]"><Plus size={12} />Agregar</button>
         </div>
 
@@ -108,7 +86,8 @@ export default function RendimientoTab({ register, control, watch, showPerforman
             key={field.id}
             index={i}
             register={register}
-            currentIcon={watch('specs.' + i + '.icon') || 'Target'}
+            currentIcon={watch('specs.' + i + '.icon') || 'Zap'}
+            onIconChange={(valor) => setValue('specs.' + i + '.icon', valor, { shouldDirty: true })}
             onRemove={() => specsArray.remove(i)}
           />
         ))}

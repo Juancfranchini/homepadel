@@ -3,11 +3,24 @@
 import Toggle from '../../testimonios/components/Toggle';
 import CompareFieldsEditor, { CompareField } from './CompareFieldsEditor';
 import CompareProductsEditor, { CompareProduct } from './CompareProductsEditor';
+import { Product } from '../useProductosContenido';
 
 interface CompareData { fields: CompareField[]; products: CompareProduct[]; }
-interface Props { value: CompareData; onChange: (data: CompareData) => void; showCompare: boolean; onToggleShowCompare: () => void; }
+interface Props {
+  value: CompareData;
+  onChange: (data: CompareData) => void;
+  /** Catálogo completo, para comparar contra un producto que ya existe. */
+  catalogo: Product[];
+  showCompare: boolean;
+  onToggleShowCompare: () => void;
+}
 
-export default function ComparaTab({ value, onChange, showCompare, onToggleShowCompare }: Props) {
+/** Las barras de rendimiento van de 0 a 100 y la comparación en 5 estrellas. */
+function aEstrellas(valor: number): number {
+  return Math.round((Math.max(0, Math.min(100, valor)) / 20) * 2) / 2;
+}
+
+export default function ComparaTab({ value, onChange, catalogo, showCompare, onToggleShowCompare }: Props) {
   const data: CompareData = value || { fields: [], products: [] };
 
   const addField = () => onChange({ ...data, fields: [...data.fields, { label: '', type: 'stars' }] });
@@ -42,6 +55,27 @@ export default function ComparaTab({ value, onChange, showCompare, onToggleShowC
     onChange({ ...data, products });
   };
 
+  /**
+   * Al elegir un producto del catálogo se copian sus barras de rendimiento a
+   * las características cuyo nombre coincida —"Control" con "Control"—, así no
+   * hay que volver a cargar a mano lo que ya está cargado en ese producto. Las
+   * características que no coinciden quedan como estaban.
+   */
+  const pickProduct = (pi: number, producto: Product) => {
+    const stats = producto.performanceStats || [];
+    const previos = data.products[pi]?.values || [];
+
+    const values = data.fields.map((field, fi) => {
+      if (field.type !== 'stars') return previos[fi] ?? '';
+      const stat = stats.find((s) => s.label?.trim().toLowerCase() === field.label.trim().toLowerCase());
+      return stat ? aEstrellas(Number(stat.value)) : (previos[fi] ?? 0);
+    });
+
+    const products = [...data.products];
+    products[pi] = { name: producto.name, image: producto.images?.[0] || '', values };
+    onChange({ ...data, products });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -58,9 +92,11 @@ export default function ComparaTab({ value, onChange, showCompare, onToggleShowC
         <CompareProductsEditor
           fields={data.fields}
           products={data.products}
+          catalogo={catalogo}
           onAdd={addProduct}
           onRemove={removeProduct}
           onNameChange={updateProductName}
+          onPickProduct={pickProduct}
           onStarChange={updateProductValue}
           onTextChange={updateProductValue}
         />

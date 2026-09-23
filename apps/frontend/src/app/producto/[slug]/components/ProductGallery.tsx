@@ -43,19 +43,24 @@ export default function ProductGallery({ images, productName, hasDiscount, disco
 
   return (
     <>
-      <div className="flex gap-3">
+      {/* `self-start` es lo que mantiene la galería cuadrada: es una celda de
+          la grilla de dos columnas y, al estirarse por defecto, tomaba el alto
+          de la columna de compra entera —más de mil píxeles— y dejaba la foto
+          perdida en el medio. `aspect-square` no alcanza cuando la altura la
+          impone la grilla. */}
+      <div className="flex gap-3 self-start">
         <ProductGalleryThumbnails thumbnails={thumbnails} selectedImg={selectedImg} hoveredImg={hoveredImg} onSelect={setSelectedImg} onHover={setHoveredImg} />
 
         {/* Imagen principal - click para abrir lightbox */}
-        <div 
-          className="flex-1 aspect-square bg-[#0C0C0C] rounded-2xl border border-[#0D0F0F] overflow-hidden relative cursor-zoom-in"
+        <div
+          className="flex-1 aspect-square max-h-[30rem] bg-[#0C0C0C] rounded-2xl border border-[#0D0F0F] overflow-hidden relative cursor-zoom-in"
           onClick={() => thumbnails.length > 0 && openLightbox(currentImageIndex)}
         >
           {images.length > 0 ? (
             <img
               src={getImageUrl(images[currentImageIndex] ?? images[0])}
               alt={productName}
-              className="w-full h-full object-contain p-8 transition-opacity duration-200"
+              className="w-full h-full object-contain p-5 sm:p-6 transition-opacity duration-200"
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center gap-3">

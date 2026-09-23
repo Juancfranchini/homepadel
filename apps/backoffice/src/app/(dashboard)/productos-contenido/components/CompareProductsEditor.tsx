@@ -1,12 +1,15 @@
 import { Plus, Trash2 } from 'lucide-react';
 import CompareStarRating from './CompareStarRating';
+import CompareProductPicker from './CompareProductPicker';
 import { CompareField } from './CompareFieldsEditor';
+import { Product } from '../useProductosContenido';
 
-export interface CompareProduct { name: string; image?: string; values: number[]; }
+export interface CompareProduct { name: string; image?: string; values: (number | string)[]; }
 
-export default function CompareProductsEditor({ fields, products, onAdd, onRemove, onNameChange, onStarChange, onTextChange }: {
-  fields: CompareField[]; products: CompareProduct[]; onAdd: () => void; onRemove: (i: number) => void;
-  onNameChange: (pi: number, name: string) => void; onStarChange: (pi: number, fi: number, val: number) => void; onTextChange: (pi: number, fi: number, val: string) => void;
+export default function CompareProductsEditor({ fields, products, catalogo, onAdd, onRemove, onNameChange, onPickProduct, onStarChange, onTextChange }: {
+  fields: CompareField[]; products: CompareProduct[]; catalogo: Product[]; onAdd: () => void; onRemove: (i: number) => void;
+  onNameChange: (pi: number, name: string) => void; onPickProduct: (pi: number, producto: Product) => void;
+  onStarChange: (pi: number, fi: number, val: number) => void; onTextChange: (pi: number, fi: number, val: string) => void;
 }) {
   return (
     <div>
@@ -22,9 +25,12 @@ export default function CompareProductsEditor({ fields, products, onAdd, onRemov
         {products.map((prod, pi) => (
           <div key={pi} className="border border-gray-200 rounded-lg p-4 space-y-3">
             <div className="flex items-center gap-3">
-              <input value={prod.name} onChange={(e) => onNameChange(pi, e.target.value)}
-                className="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00] flex-1"
-                placeholder="Nombre del producto" />
+              <CompareProductPicker
+                value={prod.name}
+                catalogo={catalogo}
+                onPick={(producto) => onPickProduct(pi, producto)}
+                onNameChange={(name) => onNameChange(pi, name)}
+              />
               <button type="button" onClick={() => onRemove(pi)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg flex-shrink-0"><Trash2 size={14} /></button>
             </div>
 
