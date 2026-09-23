@@ -8,6 +8,7 @@ import { useAuthStore } from '@/store/authStore';
 import { usePathname } from 'next/navigation';
 import BrandLogo from '@/components/ui/BrandLogo';
 import CartDrawer from '@/components/cart/CartDrawer';
+import MobileNav from './MobileNav';
 
 const NAV_LINKS = [
   { label: 'Inicio',                href: '/' },
@@ -32,14 +33,21 @@ export default function Header() {
     <>
       <header className="w-full sticky top-0 z-50 bg-[#050606] border-b border-[#0D0F0F]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-2 sm:gap-4">
-          <div className="flex items-center gap-3 lg:gap-0">
-            <button className="lg:hidden text-[#C7C7C0] hover:text-[#F7F6F7]" onClick={() => setOpen(!open)} aria-label="Menu">
-              {open ? <X size={20} /> : <Menu size={20} />}
-            </button>
-            <Link href="/" className="flex-shrink-0">
-              <BrandLogo size="xl" priority />
-            </Link>
-          </div>
+          {/* En móvil el logo va chico y a la izquierda: en xl ocupaba media
+              pantalla de alto y empujaba el contenido fuera de la vista. */}
+          <Link href="/" className="flex-shrink-0" aria-label="Home Pádel — Inicio">
+            <span className="lg:hidden"><BrandLogo size="sm" priority /></span>
+            <span className="hidden lg:block"><BrandLogo size="xl" priority /></span>
+          </Link>
+
+          <button
+            className="lg:hidden text-[#C7C7C0] transition-colors hover:text-[#F7F6F7]"
+            onClick={() => setOpen(!open)}
+            aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
+            aria-expanded={open}
+          >
+            {open ? <X size={24} /> : <Menu size={24} />}
+          </button>
 
           <nav className="hidden lg:flex items-center gap-1">
             {NAV_LINKS.map((link) => {
@@ -77,18 +85,7 @@ export default function Header() {
           </div>
         </div>
 
-        {open && (
-          <nav className="lg:hidden border-t border-[#0D0F0F] bg-[#050606]">
-            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-4 flex flex-col gap-1">
-              {NAV_LINKS.map((link) => (
-                <Link key={link.href} href={link.href} className="block py-3 text-sm font-semibold text-[#C7C7C0] hover:text-[#F7F6F7] uppercase tracking-wide" onClick={() => setOpen(false)}>
-                  {link.label}
-                </Link>
-              ))}
-              <Link href="/cuenta" className="block py-3 text-sm font-semibold text-[#C7C7C0] hover:text-[#F7F6F7]" onClick={() => setOpen(false)}>Mi cuenta</Link>
-            </div>
-          </nav>
-        )}
+        {open && <MobileNav links={NAV_LINKS} onNavigate={() => setOpen(false)} />}
       </header>
 
       <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />
