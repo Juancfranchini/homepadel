@@ -24,7 +24,7 @@ export interface ResolvedItem {
   name: string;
   quantity: number;
   price: number;
-  /** Los productos por encargo no descuentan stock: no se tienen, se piden. */
+  /** Con reserva activada no se descuenta stock: lo que se vende no está en el local. */
   isMadeToOrder?: boolean;
 }
 
@@ -82,9 +82,9 @@ export class PricingService {
         if (variant && !variant.active) {
           throw new ConflictException(`La variante de "${product.name}" ya no está disponible`);
         }
-        // Un producto por encargo no tiene stock por definición: se pide al
-        // proveedor cuando alguien lo reserva. Al validarlo igual que al resto,
-        // su stock en cero rechazaba toda reserva.
+        // Con la reserva activada el stock no interviene: la tienda toma la
+        // seña y lo trae. El stock que se lleva es el del local y no dice nada
+        // sobre lo que se puede encargar afuera.
         if (!product.isMadeToOrder) {
           const availableStock = variant ? variant.stock : product.stock;
           if (availableStock < quantity) {
@@ -114,8 +114,9 @@ export class PricingService {
   async decrementStock(items: ResolvedItem[]): Promise<void> {
     await this.prisma.$transaction(async (tx) => {
       for (const item of items) {
-        // Un encargo no tiene unidades que descontar: el UPDATE no afectaría
-        // ninguna fila y la venta se rechazaría después de cobrada.
+        // Un encargo no descuenta del stock del local: lo que se vende se trae
+        // aparte. Si se intentara, el UPDATE no afectaría ninguna fila y la
+        // venta se rechazaría después de cobrada.
         if (item.isMadeToOrder) continue;
 
         const result = item.variantId

@@ -6,7 +6,7 @@ import { ShoppingCart, Heart, Zap, Minus, Plus, MessageCircle } from 'lucide-rea
 
 interface Props {
   stock: number;
-  /** Un producto por encargo se vende sin stock: se encarga al proveedor. */
+  /** Con reserva activada se puede comprar siempre: el stock no interviene. */
   isMadeToOrder?: boolean;
   productName: string;
   quantity: number;
@@ -19,9 +19,11 @@ interface Props {
 }
 
 export default function ProductActions({ stock, isMadeToOrder, productName, quantity, onQuantityChange, onBuyNow, onAddToCart, added, wished, onWish }: Props) {
-  // Un producto por encargo tiene stock 0 por definición: no se tiene, se
-  // encarga. Al mirar solo el stock, la ficha lo daba por agotado y no dejaba
-  // comprarlo, que es justo lo contrario de lo que se quiere.
+  // Con la reserva activada el stock no se mira, valga lo que valga: si el
+  // producto está publicado con esa opción es porque la tienda puede tomar la
+  // seña y traerlo. El stock que se lleva es el del local, y no tiene nada que
+  // ver con lo que se encarga afuera. Antes la ficha miraba solo el stock y
+  // daba por agotado justo lo que está pensado para venderse sin tenerlo.
   const sinStock = !isMadeToOrder && stock === 0;
   const tope = isMadeToOrder ? 99 : stock || 99;
 

@@ -6,7 +6,7 @@
  * marca, porque ninguna se llama "royal". Lo mismo con "bolso" o con un SKU.
  */
 
-import { buildSearchFilter } from './products.service';
+import { buildSearchFilter, palabrasDeBusqueda } from './products.search';
 
 /** Los campos contra los que se compara una palabra. */
 function camposDe(filtro: any, indicePalabra = 0): string[] {
@@ -58,5 +58,26 @@ describe('buildSearchFilter', () => {
   it('corta en seis palabras: una frase larga no debe armar una consulta enorme', () => {
     const filtro: any = buildSearchFilter('una dos tres cuatro cinco seis siete ocho');
     expect(filtro.AND).toHaveLength(6);
+  });
+});
+
+/**
+ * La búsqueda sin acentos usa la extensión `unaccent` de Postgres y no se
+ * puede ejercitar sin base. Lo que sí se comprueba acá es el troceo en
+ * palabras que comparten las dos variantes, y que el filtro con tildes —el
+ * respaldo cuando la extensión no está— siga funcionando.
+ */
+describe('palabrasDeBusqueda', () => {
+  it('trocea por espacios y descarta los sobrantes', () => {
+    expect(palabrasDeBusqueda('  royal   padel  ')).toEqual(['royal', 'padel']);
+  });
+
+  it('corta en seis palabras', () => {
+    expect(palabrasDeBusqueda('una dos tres cuatro cinco seis siete')).toHaveLength(6);
+  });
+
+  it('devuelve vacío cuando no hay nada que buscar', () => {
+    expect(palabrasDeBusqueda('   ')).toEqual([]);
+    expect(palabrasDeBusqueda(undefined)).toEqual([]);
   });
 });

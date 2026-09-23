@@ -36,9 +36,13 @@ export default function ProductCardContent({ product, isMadeToOrder, hasDiscount
         <p className="text-[10px] text-orange-400 font-semibold">Solo quedan {product.stock}!</p>
       )}
 
-      {isMadeToOrder && product.estimatedDays && (
+      {/* `&&` con un número imprime el número cuando vale 0: con
+          `estimatedDays` en 0 la tarjeta mostraba un "0" suelto. */}
+      {isMadeToOrder && (
         <p className="text-[10px] font-semibold text-[#B7D31A]">
-          Fabricacion: {product.estimatedDays} días
+          {product.estimatedDays && product.estimatedDays > 0
+            ? `Se encarga: llega en unos ${product.estimatedDays} días`
+            : 'Se encarga: llega entre 7 y 14 días'}
         </p>
       )}
 
