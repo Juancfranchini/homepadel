@@ -25,6 +25,38 @@ function withEffectivePrice<T extends { price: number; salePrice: number | null 
  * calcula después de la consulta; para el orden alcanza, ya que la promoción se
  * carga en `salePrice` y el precio de lista mantiene la misma escala relativa.
  */
+/**
+ * Filtro de la búsqueda por texto del catálogo.
+ *
+ * Antes solo se miraba el nombre del producto, así que buscar "royal" no
+ * devolvía nada: ninguna paleta se llama así, la marca sí. Se busca también
+ * por marca, categoría, descripción y SKU.
+ *
+ * Cada palabra tiene que aparecer en alguno de esos campos, no la frase
+ * entera: así "bolso nox" encuentra el bolso de Nox, y no todo lo que sea un
+ * bolso más todo lo que sea Nox.
+ *
+ * Limitación conocida: la comparación no ignora tildes, porque la hace
+ * Postgres con ILIKE. "padel" no encuentra la marca "Royal Pádel"; "royal"
+ * sí. Resolverlo requiere la extensión `unaccent` en la base.
+ */
+export function buildSearchFilter(search: unknown): Record<string, unknown> | null {
+  const palabras = String(search ?? '').trim().split(/\s+/).filter(Boolean).slice(0, 6);
+  if (palabras.length === 0) return null;
+
+  return {
+    AND: palabras.map((palabra) => ({
+      OR: [
+        { name: { contains: palabra, mode: 'insensitive' } },
+        { description: { contains: palabra, mode: 'insensitive' } },
+        { sku: { contains: palabra, mode: 'insensitive' } },
+        { brand: { name: { contains: palabra, mode: 'insensitive' } } },
+        { category: { name: { contains: palabra, mode: 'insensitive' } } },
+      ],
+    })),
+  };
+}
+
 export function resolveOrderBy(sort: unknown): Record<string, 'asc' | 'desc'> {
   const opciones: Record<string, Record<string, 'asc' | 'desc'>> = {
     newest: { createdAt: 'desc' },
@@ -71,8 +103,9 @@ export class ProductsService {
         ],
       });
     }
+    const searchFilter = buildSearchFilter(search);
+    if (searchFilter) propertyFilters.push(searchFilter);
     if (propertyFilters.length > 0) where.AND = propertyFilters;
-    if (search) where.name = { contains: search, mode: 'insensitive' };
     if (minPrice || maxPrice) {
       where.price = {};
       if (minPrice) where.price.gte = Number(minPrice);
