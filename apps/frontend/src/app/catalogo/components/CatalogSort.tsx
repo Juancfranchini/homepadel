@@ -3,15 +3,7 @@
 import { useState } from 'react';
 import { ArrowDownUp, ChevronDown } from 'lucide-react';
 
-// Los valores tienen que coincidir con los que acepta resolveOrderBy() en el
-// backend: el orden se resuelve en la base, no acá.
-const SORT_OPTIONS = [
-  { value: 'featured', label: 'Destacados' },
-  { value: 'price_asc', label: 'Menor precio' },
-  { value: 'price_desc', label: 'Mayor precio' },
-  { value: 'newest', label: 'Nuevos ingresos' },
-  { value: 'name_asc', label: 'Nombre A-Z' },
-];
+import { SORT_OPTIONS, sortLabel } from '../sortOptions';
 
 interface Props {
   value: string;
@@ -21,7 +13,7 @@ interface Props {
 export default function CatalogSort({ value, onChange }: Props) {
   const [open, setOpen] = useState(false);
 
-  const currentLabel = SORT_OPTIONS.find(o => o.value === value)?.label || 'Ordenar';
+  const currentLabel = sortLabel(value);
 
   return (
     <div className="relative">

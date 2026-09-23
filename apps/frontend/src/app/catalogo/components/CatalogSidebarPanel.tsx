@@ -1,21 +1,20 @@
-﻿'use client';
+'use client';
 
 import { ChevronLeft } from 'lucide-react';
 import { Category, Brand } from '@/types';
+import { SORT_OPTIONS } from '../sortOptions';
 import CatalogCheckboxOption from './CatalogCheckboxOption';
+import CatalogAttributeSelect from './CatalogAttributeSelect';
 
-const SORT_OPTIONS = [
-  { value: 'newest', label: 'Novedades' },
-  { value: 'price_asc', label: 'Precio: menor a mayor' },
-  { value: 'price_desc', label: 'Precio: mayor a menor' },
-  { value: 'name_asc', label: 'Nombre A-Z' },
+export type ActivePanel = 'categories' | 'brands' | 'attributes' | 'sort' | null;
+
+const SHAPE_OPTIONS = [
+  { value: 'Diamante', label: 'Diamante' },
+  { value: 'Lagrima', label: 'Lágrima' },
+  { value: 'Redondo', label: 'Redondo' },
 ];
 
-type ActivePanel = 'categories' | 'brands' | 'offers' | 'sort' | null;
-
-interface Props {
-  activePanel: ActivePanel;
-  onClose: () => void;
+export interface PanelProps {
   categories: Category[];
   brands: Brand[];
   selectedCategory: string;
@@ -34,110 +33,154 @@ interface Props {
   selectedSize: string;
   selectedColor: string;
   selectedWeight: string;
+  selectedShape: string;
   onSizeChange: (value: string | null) => void;
   onColorChange: (value: string | null) => void;
   onWeightChange: (value: string | null) => void;
-  selectedShape: string;
   onShapeChange: (value: string | null) => void;
 }
 
-export default function CatalogSidebarPanel({
-  activePanel, onClose, categories, brands, selectedCategory, selectedBrand, isOffer,
-  currentSort, onSortChange, onCategoryChange, onBrandChange, onOfferChange, onClear, hasFilters,
-  sizes, colors, weights, selectedSize, selectedColor, selectedWeight,
-  onSizeChange, onColorChange, onWeightChange, selectedShape, onShapeChange,
-}: Props) {
+const toOptions = (values: string[]) => values.map((value) => ({ value, label: value }));
+
+/**
+ * Contenido del panel lateral del catálogo.
+ *
+ * Los atributos quedaron agrupados en una sola sección. Antes estaban repartidos
+ * por criterios que no se sostenían —formato y talle colgaban de "Categorías",
+ * color y peso de "Marcas"—, así que encontrarlos dependía de adivinar.
+ */
+export default function CatalogSidebarPanel(props: PanelProps & { activePanel: ActivePanel; onClose: () => void }) {
+  const { activePanel, onClose, hasFilters, onClear } = props;
   if (!activePanel) return null;
 
   return (
     <>
       <div className="fixed inset-0 z-10" onClick={onClose} />
-
-      <div className="relative z-20 w-56 bg-[#0C0C0C] border border-[#0D0F0F] rounded-2xl p-4 ml-2 shadow-2xl animate-fade-in">
-        <button onClick={onClose}
-          className="absolute top-3 right-3 w-7 h-7 rounded-lg flex items-center justify-center text-[#C7C7C0] hover:text-[#F7F6F7] bg-white/[0.04] hover:bg-white/[0.08] transition-colors"
-          title="Cerrar panel">
+      <div className="animate-fade-in relative z-20 ml-2 w-56 rounded-2xl border border-[#0D0F0F] bg-[#0C0C0C] p-4 shadow-2xl">
+        <button
+          onClick={onClose}
+          className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-lg bg-white/[0.04] text-[#C7C7C0] transition-colors hover:bg-white/[0.08] hover:text-[#F7F6F7]"
+          title="Cerrar panel"
+        >
           <ChevronLeft size={16} />
         </button>
 
-        {activePanel === 'categories' && (
-          <div>
-            <h3 className="text-xs font-semibold text-[#F7F6F7] uppercase tracking-wider mb-3 pr-6">Categorías</h3>
-            <div className="space-y-2">
-              {categories.map((cat) => (
-                <CatalogCheckboxOption key={cat.id} label={cat.name} checked={selectedCategory === cat.slug} onChange={() => onCategoryChange(selectedCategory === cat.slug ? null : cat.slug)} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activePanel === 'categories' && selectedCategory === 'paletas' && (
-          <div className="mt-5 border-t border-[#0D0F0F] pt-4">
-            <h3 className="text-xs font-semibold text-[#F7F6F7] uppercase tracking-wider mb-3">Formato</h3>
-            <select value={selectedShape} onChange={(e) => onShapeChange(e.target.value || null)} className="w-full bg-[#050606] border border-[#8A8A85] rounded-lg px-2 py-2 text-sm text-[#F7F6F7]">
-              <option value="">Todos</option>
-              <option value="Diamante">Diamante</option>
-              <option value="Lagrima">Lágrima</option>
-              <option value="Redondo">Redondo</option>
-            </select>
-          </div>
-        )}
-
-        {activePanel === 'categories' && sizes.length > 0 && (
-          <div className="mt-5 border-t border-[#0D0F0F] pt-4">
-            <h3 className="text-xs font-semibold text-[#F7F6F7] uppercase tracking-wider mb-3">Talles</h3>
-            <select value={selectedSize} onChange={(e) => onSizeChange(e.target.value || null)} className="w-full bg-[#050606] border border-[#8A8A85] rounded-lg px-2 py-2 text-sm text-[#F7F6F7]">
-              <option value="">Todos</option>{sizes.map((value) => <option key={value} value={value}>{value}</option>)}
-            </select>
-          </div>
-        )}
-
-        {activePanel === 'brands' && (colors.length > 0 || weights.length > 0) && (
-          <div className="mt-5 border-t border-[#0D0F0F] pt-4 space-y-4">
-            {colors.length > 0 && <div><h3 className="text-xs font-semibold text-[#F7F6F7] uppercase tracking-wider mb-3">Colores</h3><select value={selectedColor} onChange={(e) => onColorChange(e.target.value || null)} className="w-full bg-[#050606] border border-[#8A8A85] rounded-lg px-2 py-2 text-sm text-[#F7F6F7]"><option value="">Todos</option>{colors.map((value) => <option key={value} value={value}>{value}</option>)}</select></div>}
-            {weights.length > 0 && <div><h3 className="text-xs font-semibold text-[#F7F6F7] uppercase tracking-wider mb-3">Peso</h3><select value={selectedWeight} onChange={(e) => onWeightChange(e.target.value || null)} className="w-full bg-[#050606] border border-[#8A8A85] rounded-lg px-2 py-2 text-sm text-[#F7F6F7]"><option value="">Todos</option>{weights.map((value) => <option key={value} value={value}>{value}</option>)}</select></div>}
-          </div>
-        )}
-
-        {activePanel === 'brands' && (
-          <div>
-            <h3 className="text-xs font-semibold text-[#F7F6F7] uppercase tracking-wider mb-3 pr-6">Marcas</h3>
-            <div className="space-y-2">
-              {brands.map((brand) => (
-                <CatalogCheckboxOption key={brand.id} label={brand.name} checked={selectedBrand === brand.slug} onChange={() => onBrandChange(selectedBrand === brand.slug ? null : brand.slug)} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activePanel === 'offers' && (
-          <div>
-            <h3 className="text-xs font-semibold text-[#F7F6F7] uppercase tracking-wider mb-3 pr-6">Ofertas</h3>
-            <CatalogCheckboxOption label="Solo ofertas" checked={isOffer} onChange={() => onOfferChange(!isOffer)} />
-          </div>
-        )}
-
-        {activePanel === 'sort' && (
-          <div>
-            <h3 className="text-xs font-semibold text-[#F7F6F7] uppercase tracking-wider mb-3 pr-6">Ordenar por</h3>
-            <div className="space-y-1">
-              {SORT_OPTIONS.map((opt) => (
-                <button key={opt.value} onClick={() => { onSortChange(opt.value); onClose(); }}
-                  className={'w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ' +
-                    (currentSort === opt.value ? 'text-[#B7D31A] bg-[#B7D31A]/5' : 'text-[#C7C7C0] hover:text-[#F7F6F7] hover:bg-white/[0.04]')}>
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+        <PanelBody {...props} />
 
         {hasFilters && (
-          <button onClick={onClear} className="mt-4 text-xs text-red-400 hover:text-red-300 font-medium">
+          <button onClick={onClear} className="mt-4 text-xs font-medium text-red-400 hover:text-red-300">
             Limpiar filtros
           </button>
         )}
       </div>
     </>
+  );
+}
+
+function PanelBody(props: PanelProps & { activePanel: ActivePanel }) {
+  const { activePanel } = props;
+  if (activePanel === 'categories') return <CategoriesSection {...props} />;
+  if (activePanel === 'brands') return <BrandsSection {...props} />;
+  if (activePanel === 'attributes') return <AttributesSection {...props} />;
+  if (activePanel === 'sort') return <SortSection {...props} />;
+  return null;
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return <h3 className="mb-3 pr-6 text-xs font-semibold uppercase tracking-wider text-[#F7F6F7]">{children}</h3>;
+}
+
+function CategoriesSection({ categories, selectedCategory, onCategoryChange }: PanelProps) {
+  return (
+    <div>
+      <SectionTitle>Categorías</SectionTitle>
+      <div className="space-y-2">
+        {categories.map((cat) => (
+          <CatalogCheckboxOption
+            key={cat.id}
+            label={cat.name}
+            checked={selectedCategory === cat.slug}
+            onChange={() => onCategoryChange(selectedCategory === cat.slug ? null : cat.slug)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function BrandsSection({ brands, selectedBrand, onBrandChange }: PanelProps) {
+  return (
+    <div>
+      <SectionTitle>Marcas</SectionTitle>
+      <div className="space-y-2">
+        {brands.map((brand) => (
+          <CatalogCheckboxOption
+            key={brand.id}
+            label={brand.name.trim()}
+            checked={selectedBrand === brand.slug}
+            onChange={() => onBrandChange(selectedBrand === brand.slug ? null : brand.slug)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AttributesSection(props: PanelProps) {
+  const { selectedCategory, selectedShape, onShapeChange, sizes, selectedSize, onSizeChange,
+    colors, selectedColor, onColorChange, weights, selectedWeight, onWeightChange } = props;
+
+  const mostrarFormato = selectedCategory === 'paletas';
+  const hayAlguno = mostrarFormato || sizes.length > 0 || colors.length > 0 || weights.length > 0;
+
+  if (!hayAlguno) {
+    return (
+      <div>
+        <SectionTitle>Atributos</SectionTitle>
+        <p className="text-xs text-[#8A8A85]">No hay atributos para filtrar en esta selección.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <SectionTitle>Atributos</SectionTitle>
+      {mostrarFormato && (
+        <CatalogAttributeSelect label="Formato" value={selectedShape} options={SHAPE_OPTIONS} onChange={onShapeChange} />
+      )}
+      {sizes.length > 0 && (
+        <CatalogAttributeSelect label="Talle" value={selectedSize} options={toOptions(sizes)} onChange={onSizeChange} />
+      )}
+      {colors.length > 0 && (
+        <CatalogAttributeSelect label="Color" value={selectedColor} options={toOptions(colors)} onChange={onColorChange} />
+      )}
+      {weights.length > 0 && (
+        <CatalogAttributeSelect label="Peso" value={selectedWeight} options={toOptions(weights)} onChange={onWeightChange} />
+      )}
+    </div>
+  );
+}
+
+function SortSection({ currentSort, onSortChange }: PanelProps) {
+  return (
+    <div>
+      <SectionTitle>Ordenar por</SectionTitle>
+      <div className="space-y-1">
+        {SORT_OPTIONS.map((opt) => (
+          <button
+            key={opt.value}
+            onClick={() => onSortChange(opt.value)}
+            className={
+              'w-full rounded-lg px-3 py-2 text-left text-sm transition-colors ' +
+              (currentSort === opt.value
+                ? 'bg-[#B7D31A]/5 text-[#B7D31A]'
+                : 'text-[#C7C7C0] hover:bg-white/[0.04] hover:text-[#F7F6F7]')
+            }
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }

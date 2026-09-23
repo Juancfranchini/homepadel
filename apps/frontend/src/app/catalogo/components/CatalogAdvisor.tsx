@@ -7,18 +7,28 @@ import { trackMetaEvent } from '@/lib/metaPixel';
 const MENSAJE =
   'Hola! Estoy mirando el catálogo y quiero ayuda para elegir una paleta.';
 
+/** Categorías donde el asesoramiento aporta: elegir es difícil y el precio es alto. */
+const CATEGORIAS_CON_ASESORAMIENTO = ['paletas'];
+
+interface Props {
+  selectedCategory: string;
+}
+
 /**
  * Invitación a pedir asesoramiento, arriba del catálogo.
  *
- * Elegir una paleta es la decisión donde más gente abandona: las diferencias
- * entre modelos no se leen en una grilla. El bloque no se dibuja si no hay un
- * número de WhatsApp cargado en el backoffice, para no ofrecer un canal que
- * no existe.
+ * Aparece solo en las categorías donde la elección es genuinamente difícil.
+ * Ofrecer asesoramiento para comprar un grip o unas pelotitas no ayuda a nadie
+ * y le quita peso al mensaje donde sí importa.
+ *
+ * Tampoco se dibuja si no hay un número de WhatsApp cargado en el backoffice,
+ * para no ofrecer un canal que no existe.
  */
-export default function CatalogAdvisor() {
+export default function CatalogAdvisor({ selectedCategory }: Props) {
   const settings = useSiteSettings();
   const url = buildWhatsappUrl(settings.whatsapp || settings.phone, MENSAJE);
 
+  if (!CATEGORIAS_CON_ASESORAMIENTO.includes(selectedCategory)) return null;
   if (!url) return null;
 
   return (

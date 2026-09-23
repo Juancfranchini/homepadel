@@ -68,7 +68,7 @@ function CatálogoContent() {
           onBrandChange={sidebarProps.onBrandChange}
         />
 
-        <CatalogAdvisor />
+        <CatalogAdvisor selectedCategory={sidebarProps.selectedCategory} />
 
         <div className="flex gap-6">
           <aside className="hidden lg:block">
