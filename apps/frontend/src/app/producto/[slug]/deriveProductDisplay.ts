@@ -13,7 +13,7 @@ export interface VideoIncrustado {
  * Contempla las formas en que se comparte un video hoy: de YouTube, además de
  * `watch?v=` y `youtu.be`, los **Shorts** —que es lo que da el botón
  * "Compartir" desde el celular— y los directos; de TikTok, el enlace de un
- * video; y Vimeo.
+ * video; de Instagram, una publicación o un reel; y Vimeo.
  *
  * TikTok no se puede resolver desde los enlaces cortos `vm.tiktok.com`: son
  * redirecciones que solo se siguen desde un servidor. Hay que pegar el enlace
@@ -33,6 +33,15 @@ function getVideoEmbedUrl(url?: string): VideoIncrustado | null {
   const tiktok = url.match(/tiktok\.com\/(?:@[\w.-]+\/video\/|v\/|embed\/v2\/)(\d{6,})/);
   if (tiktok) {
     return { url: 'https://www.tiktok.com/embed/v2/' + tiktok[1], vertical: true };
+  }
+
+  // Instagram: el reproductor público no pide credenciales ni aprobación de
+  // Meta. Es otra cosa que la sección de feed del inicio, que sí necesita una
+  // app aprobada para listar las publicaciones de la cuenta.
+  const instagram = url.match(/instagram\.com\/(?:reel|reels|p|tv)\/([a-zA-Z0-9_-]+)/);
+  if (instagram) {
+    const tipo = url.includes('/p/') ? 'p' : 'reel';
+    return { url: `https://www.instagram.com/${tipo}/${instagram[1]}/embed`, vertical: true };
   }
 
   const vimeo = url.match(/vimeo\.com\/(\d+)/);
