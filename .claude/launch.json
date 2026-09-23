@@ -4,8 +4,15 @@
     {
       "name": "homepadel-frontend",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev:preview", "--prefix", "frontend"],
+      "runtimeArgs": ["run", "dev:preview", "--prefix", "apps/frontend"],
       "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "homepadel-backoffice",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "apps/backoffice"],
+      "port": 3001,
       "autoPort": true
     }
   ]
