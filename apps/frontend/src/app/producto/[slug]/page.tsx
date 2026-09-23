@@ -1,86 +1,74 @@
-'use client';
+import type { Metadata } from 'next';
+import { getSiteUrl } from '@/lib/siteUrl';
+import ProductoContent from './ProductoContent';
+import ProductJsonLd from './ProductJsonLd';
+import { getProductoParaSeo } from './getProductoParaSeo';
 
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
-import { useProductoData } from './useProductoData';
-import { ProductoSkeleton, ProductoLoadError, ProductoNotFound } from './ProductoLoadingStates';
-import { useProductVariants } from './useProductVariants';
-import { useProductoActions } from './useProductoActions';
-import { deriveProductDisplay } from './deriveProductDisplay';
-import ProductGallery from './components/ProductGallery';
-import ProductDescription from './components/ProductDescription';
-import ProductInfoColumn from './ProductInfoColumn';
-import PaymentModal from './components/PaymentModal';
-import PerformanceSection from './components/PerformanceSection';
-import ProductVideoHighlightsSection from './ProductVideoHighlightsSection';
-import CompareModels from './components/CompareModels';
-import ProductReviewsSection from './ProductReviewsSection';
-import RelatedProducts from './components/RelatedProducts';
-import TrustBottom from './components/TrustBottom';
+/**
+ * Ficha de producto.
+ *
+ * Esta parte corre en el servidor y existe solo para el buscador: arma el
+ * título, la descripción y los datos estructurados con el producto real. La
+ * página era enteramente del navegador, así que Google recibía un cascarón
+ * vacío —las 43 fichas compartían el mismo título y el nombre del producto no
+ * aparecía ni una vez en el HTML—, y ninguna podía rankear por su propio
+ * nombre.
+ *
+ * Todo lo interactivo sigue en el navegador, en ProductoContent.
+ */
+export const revalidate = 3600;
 
-export default function ProductoPage() {
-  const params = useParams<{ slug: string }>();
-  const { product, related, loading, error, retry, hasSizeGuide } = useProductoData(params.slug);
-  const variants = useProductVariants(product);
-  const actions = useProductoActions(product, variants.selectedVariant, variants.activeProductVariants);
+interface Props {
+  params: Promise<{ slug: string }>;
+}
 
-  if (loading) return <ProductoSkeleton />;
-  if (error) return <ProductoLoadError onRetry={retry} />;
-  if (!product) return <ProductoNotFound />;
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const producto = await getProductoParaSeo(slug);
+  const siteUrl = getSiteUrl();
+  const canonical = '/producto/' + slug;
 
-  const display = deriveProductDisplay(product, variants.selectedVariant, variants.activeProductVariants);
+  if (!producto) {
+    // Sin producto no se inventa un título: se deja el del sitio y se pide no
+    // indexar, para no sumar una página vacía al buscador.
+    return { alternates: { canonical }, robots: { index: false, follow: true } };
+  }
+
+  const marca = producto.brand?.name?.trim();
+  const titulo = marca ? `${producto.name} — ${marca}` : producto.name;
+  const descripcion =
+    producto.description?.trim() ||
+    `Comprá ${producto.name}${marca ? ' de ' + marca : ''} en Home Pádel. Envíos a todo el país y múltiples medios de pago.`;
+  const imagen = producto.images?.[0];
+
+  return {
+    title: titulo,
+    description: descripcion.slice(0, 300),
+    alternates: { canonical },
+    openGraph: {
+      type: 'website',
+      url: siteUrl + canonical,
+      title: titulo,
+      description: descripcion.slice(0, 300),
+      images: imagen ? [{ url: imagen, alt: producto.name }] : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: titulo,
+      description: descripcion.slice(0, 300),
+      images: imagen ? [imagen] : undefined,
+    },
+  };
+}
+
+export default async function ProductoPage({ params }: Props) {
+  const { slug } = await params;
+  const producto = await getProductoParaSeo(slug);
 
   return (
-    <div className="min-h-screen bg-[#050606] text-[#F7F6F7]">
-      {actions.showPaymentModal && display.paymentMethods.length > 0 && (
-        <PaymentModal onClose={() => actions.setShowPaymentModal(false)} methods={display.paymentMethods} displayPrice={display.displayPrice} transferPrice={display.transferPrice} />
-      )}
-
-      <div className="border-b border-[#0D0F0F]">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-2.5 flex items-center gap-1.5 text-[10px] sm:text-[11px] text-[#8A8A85]">
-          <Link href="/" className="hover:text-[#F7F6F7] transition-colors">Inicio</Link><span>/</span>
-          <Link href="/catalogo" className="hover:text-[#F7F6F7] transition-colors">Catálogo</Link><span>/</span>
-          <Link href={'/catalogo?marca=' + product.brand.slug} className="hover:text-[#F7F6F7] transition-colors">{product.brand.name}</Link><span>/</span>
-          <span className="text-[#F7F6F7] truncate">{product.name}</span>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 lg:py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 xl:gap-16">
-          <ProductGallery images={display.images} productName={product.name} hasDiscount={display.hasDiscount} discountPct={display.discountPct} isNew={product.isNew || false} />
-          <ProductInfoColumn
-            product={product}
-            display={display}
-            activeVariants={variants.activeProductVariants}
-            variants={variants}
-            actions={actions}
-            hasSizeGuide={hasSizeGuide}
-          />
-        </div>
-      </div>
-
-      <ProductDescription description={product.description} />
-
-      {display.showPerformance && <PerformanceSection stats={display.performanceStats} specs={display.specs} />}
-
-      <ProductVideoHighlightsSection
-        showVideo={display.showVideo}
-        showHighlights={display.showHighlights}
-        embedUrl={display.embedUrl}
-        embedVertical={display.embedVertical}
-        relatedVideos={display.relatedVideos}
-        highlights={display.highlights}
-        highlightsTitle={display.highlightsTitle}
-        highlightsDescription={display.highlightsDescription}
-      />
-
-      {display.showCompare && <CompareModels data={display.compareData} />}
-
-      {(product.reviewCount || 0) > 0 && <ProductReviewsSection productId={product.id} />}
-
-      {display.showRelated && <RelatedProducts products={related} />}
-
-      <TrustBottom />
-    </div>
+    <>
+      {producto && <ProductJsonLd producto={producto} slug={slug} />}
+      <ProductoContent />
+    </>
   );
 }

@@ -3,6 +3,7 @@ import './globals.css';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import MetaPixel from '@/components/layout/MetaPixel';
+import { getSiteUrl } from '@/lib/siteUrl';
 
 async function getFaviconUrl(): Promise<string> {
   try {
@@ -14,22 +15,6 @@ async function getFaviconUrl(): Promise<string> {
     if (isotipo) { if (isotipo.startsWith('data:') || isotipo.startsWith('http')) return isotipo; return baseUrl + isotipo; }
   } catch { }
   return '/logo-icon.svg';
-}
-
-/**
- * Dirección pública del sitio, usada para resolver las URLs absolutas de los
- * metadatos (Open Graph, canónica). Se lee del entorno porque no siempre
- * coincide con el dominio comercial: hoy homepadel.com.ar sirve otra tienda,
- * así que dejarla escrita a mano hacía que las previsualizaciones al compartir
- * apuntaran al lugar equivocado.
- */
-function getSiteUrl(): string {
-  const fromEnv = process.env.NEXT_PUBLIC_SITE_URL;
-  if (fromEnv) return fromEnv.replace(/\/+$/, '');
-  // Vercel expone el dominio del despliegue; sirve como valor razonable
-  // en previsualizaciones sin tener que configurar nada.
-  if (process.env.VERCEL_URL) return 'https://' + process.env.VERCEL_URL;
-  return 'http://localhost:3000';
 }
 
 export async function generateMetadata(): Promise<Metadata> {

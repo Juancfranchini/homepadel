@@ -10,6 +10,7 @@ import { useAuthStore } from '@/store/authStore';
 import { usePaymentMethods } from '@/hooks/usePaymentMethods';
 import { useShippingRates } from '@/hooks/useShippingRates';
 import { validateCoupon } from '@/lib/api';
+import { useInitiateCheckout } from './useInitiateCheckout';
 import { useCheckoutSubmit } from './useCheckoutSubmit';
 import { useCheckoutDraft, limpiarBorrador } from './useCheckoutDraft';
 import { useAbandonedCart } from './useAbandonedCart';
@@ -62,6 +63,8 @@ export default function CheckoutPage() {
   });
 
   useCheckoutDraft(watch, reset);
+  useInitiateCheckout(items, subtotal);
+
 
   // Queda registrado el carrito de quien deja su email y no termina la compra,
   // para que la tienda pueda recuperarlo desde el backoffice.
