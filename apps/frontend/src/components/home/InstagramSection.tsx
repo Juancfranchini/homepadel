@@ -5,13 +5,6 @@ import { InstagramConfig } from '@/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
-const FALLBACK: InstagramConfig = {
-  title: 'No te pierdas ninguna publicacion',
-  username: '@home.padel',
-  buttonText: 'Seguinos en Instagram',
-  buttonUrl: 'https://instagram.com/home.padel',
-};
-
 interface InstagramPost {
   id: string;
   url: string;
@@ -28,21 +21,24 @@ function InstagramIcon({ size = 24 }: { size?: number }) {
   );
 }
 
-const PLACEHOLDER_POSTS = [
-  { id: 1, bg: 'from-[#1A1F21] to-[#242A05]', label: 'Padel' },
-  { id: 2, bg: 'from-[#0C0C0C] to-[#1A1F21]', label: 'Equipo' },
-  { id: 3, bg: 'from-[#242A05] to-[#030F14]', label: 'Cancha' },
-  { id: 4, bg: 'from-[#030F14] to-[#0C0C0C]', label: 'Torneo' },
-  { id: 5, bg: 'from-[#1A1F21] to-[#0C0C0C]', label: 'Paleta' },
-  { id: 6, bg: 'from-[#0C0C0C] to-[#242A05]', label: 'Accion' },
-];
-
 interface Props {
   config?: InstagramConfig | null;
 }
 
+/**
+ * Publicaciones de Instagram en el inicio.
+ *
+ * Son las que la tienda carga a mano desde el backoffice, con su enlace y su
+ * miniatura. No se traen solas del perfil: para eso hace falta una app de Meta
+ * aprobada, que no se tramitó.
+ *
+ * Antes, cuando no había ninguna, se dibujaban seis recuadros de relleno con
+ * etiquetas inventadas —"Padel", "Equipo", "Cancha"— que no llevaban a ninguna
+ * publicación real. Ahora, sin publicaciones cargadas, queda solo el
+ * encabezado con el enlace al perfil; y sin datos de la sección, no se muestra
+ * nada.
+ */
 export default function InstagramSection({ config }: Props) {
-  const ig = config ?? FALLBACK;
   const [posts, setPosts] = useState<InstagramPost[]>([]);
 
   useEffect(() => {
@@ -55,6 +51,11 @@ export default function InstagramSection({ config }: Props) {
       })
       .catch(() => {});
   }, []);
+
+  // Sin título ni enlace al perfil no hay nada real que mostrar. Antes se
+  // rellenaba con un usuario y una cuenta inventados.
+  const ig = config;
+  if (!ig?.title?.trim() || !ig?.buttonUrl?.trim()) return null;
 
   return (
     <section className="section-gradient bg-[#030F14] border-t border-[#0D0F0F] py-8 sm:py-12 md:py-16">
@@ -75,44 +76,23 @@ export default function InstagramSection({ config }: Props) {
           </a>
         </div>
 
-        <div className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-1.5 sm:gap-3">
-          {[...posts, ...PLACEHOLDER_POSTS].slice(0, 6).map((item, idx) => {
-            if (idx < posts.length) {
-              const post = item as InstagramPost;
-              return (
-                <a key={post.id} href={post.url} target="_blank" rel="noopener noreferrer"
-                  className="aspect-square rounded-xl overflow-hidden relative group cursor-pointer"
-                  aria-label={'Ver post de Instagram'}>
-                  {post.thumbnail_url ? (
-                    <img src={post.thumbnail_url} alt="" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onError={(e) => { e.currentTarget.style.display = "none"; }} />
-                  ) : (
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#1A1F21] to-[#242A05] transition-transform duration-500 group-hover:scale-110" />
-                  )}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors duration-300 flex items-center justify-center">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white flex flex-col items-center gap-2">
-                      <InstagramIcon size={32} />
-                      <span className="text-xs font-semibold uppercase tracking-wider">Ver</span>
-                    </div>
-                  </div>
-                </a>
-              );
-            }
-            const placeholder = item as typeof PLACEHOLDER_POSTS[0];
-            return (
-              <a key={placeholder.id} href={ig.buttonUrl} target="_blank" rel="noopener noreferrer"
-                className="aspect-square rounded-xl overflow-hidden relative group cursor-pointer"
-                aria-label={'Ver perfil de Instagram de ' + ig.username}>
-                <div className={'absolute inset-0 bg-gradient-to-br ' + placeholder.bg + ' transition-transform duration-500 group-hover:scale-110'} />
+        {posts.length > 0 && (
+          <div className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-1.5 sm:gap-3">
+            {posts.map((post) => (
+              <a key={post.id} href={post.url} target="_blank" rel="noopener noreferrer"
+                className="aspect-square rounded-xl overflow-hidden relative group cursor-pointer bg-[#0C0C0C]"
+                aria-label="Ver publicación en Instagram">
+                <img src={post.thumbnail_url} alt="" loading="lazy"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors duration-300 flex items-center justify-center">
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white flex flex-col items-center gap-2">
-                    <InstagramIcon size={32} />
-                    <span className="text-xs font-semibold uppercase tracking-wider">{placeholder.label}</span>
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white">
+                    <InstagramIcon size={30} />
                   </div>
                 </div>
               </a>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

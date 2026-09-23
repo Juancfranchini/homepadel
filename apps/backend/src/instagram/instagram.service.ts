@@ -26,26 +26,54 @@ export class InstagramService {
     return section.data as Record<string, any>;
   }
 
+  /**
+   * Las publicaciones que se muestran en el inicio.
+   *
+   * Son las que carga la tienda a mano en el backoffice, con su enlace y una
+   * miniatura propia. No se traen solas del perfil: listar las publicaciones
+   * de una cuenta exige una app de Meta aprobada, que no se tramitó.
+   *
+   * Antes esto exigía esas credenciales incluso para las cargadas a mano: sin
+   * `appId` y `appSecret` cortaba en la primera línea y devolvía vacío. Así
+   * que las miniaturas que el backoffice pedía subir —y decía que iba a usar
+   * si la API fallaba— no se usaban nunca y la sección quedaba en blanco.
+   *
+   * Con miniatura propia no se llama a Meta: es más rápido y no depende de
+   * nadie. La API queda solo para completar las que no tengan imagen.
+   */
   async getRecentPosts(limit: number = 6): Promise<InstagramPost[]> {
     const config = await this.getConfig();
-    if (!config || !config.appId || !config.appSecret) {
-      return [];
-    }
+    const cargadas = this.normalizarManuales(config?.manualUrls).slice(0, limit);
+    if (cargadas.length === 0) return [];
 
-    const accessToken = config.appId + '|' + config.appSecret;
+    const accessToken =
+      config?.appId && config?.appSecret ? config.appId + '|' + config.appSecret : null;
 
-    try {
-      if (config.manualUrls && Array.isArray(config.manualUrls) && config.manualUrls.length > 0) {
-        const posts = await Promise.all(
-          config.manualUrls.slice(0, limit).map((url: string) => this.fetchOEmbed(url, accessToken)),
-        );
-        const validPosts = posts.filter((p): p is InstagramPost => p !== null);
-        if (validPosts.length > 0) return validPosts;
-      }
-      return [];
-    } catch {
-      return [];
-    }
+    const posts = await Promise.all(
+      cargadas.map(async (item): Promise<InstagramPost | null> => {
+        if (item.thumbnail) {
+          return { id: item.url, url: item.url, thumbnail_url: item.thumbnail, author_name: '' };
+        }
+        // Sin imagen subida solo queda preguntarle a Meta. Si no hay
+        // credenciales, la publicación se omite: mostrar un recuadro vacío en
+        // su lugar es peor que no mostrarla.
+        return accessToken ? this.fetchOEmbed(item.url, accessToken) : null;
+      }),
+    );
+
+    return posts.filter((p): p is InstagramPost => p !== null);
+  }
+
+  /** El backoffice guardó `string[]` en versiones viejas y `{url, thumbnail}[]` ahora. */
+  private normalizarManuales(valor: unknown): { url: string; thumbnail: string }[] {
+    if (!Array.isArray(valor)) return [];
+    return valor
+      .map((item) =>
+        typeof item === 'string'
+          ? { url: item, thumbnail: '' }
+          : { url: String(item?.url ?? ''), thumbnail: String(item?.thumbnail ?? '') },
+      )
+      .filter((item) => item.url.trim().length > 0);
   }
 
   async fetchOEmbed(postUrl: string, accessToken: string): Promise<InstagramPost | null> {
