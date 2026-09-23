@@ -1,29 +1,50 @@
 import { Product } from '@/types';
 import { getDiscountPercent } from '@/lib/utils';
 
+export interface VideoIncrustado {
+  url: string;
+  /** Los Shorts y TikTok son verticales: en un marco 16:9 quedan con bandas negras. */
+  vertical: boolean;
+}
+
 /**
  * Convierte el enlace que se pega en el backoffice en uno reproducible.
  *
- * Contempla las formas en que YouTube comparte hoy un video: además de
+ * Contempla las formas en que se comparte un video hoy: de YouTube, además de
  * `watch?v=` y `youtu.be`, los **Shorts** —que es lo que da el botón
- * "Compartir" desde el celular— y los directos. Antes solo se entendían las
- * dos primeras, así que un Short cargado en el backoffice devolvía null y la
- * sección de video no aparecía nunca, aunque estuviera activada.
+ * "Compartir" desde el celular— y los directos; de TikTok, el enlace de un
+ * video; y Vimeo.
+ *
+ * TikTok no se puede resolver desde los enlaces cortos `vm.tiktok.com`: son
+ * redirecciones que solo se siguen desde un servidor. Hay que pegar el enlace
+ * largo, el que trae `/video/`.
  */
-function getVideoEmbedUrl(url?: string) {
+function getVideoEmbedUrl(url?: string): VideoIncrustado | null {
   if (!url) return null;
 
-  const ytMatch = url.match(
-    /(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
-  );
-  if (ytMatch) return 'https://www.youtube.com/embed/' + ytMatch[1] + '?rel=0&modestbranding=1';
+  const yt = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  if (yt) {
+    return {
+      url: 'https://www.youtube.com/embed/' + yt[1] + '?rel=0&modestbranding=1',
+      vertical: url.includes('/shorts/'),
+    };
+  }
 
-  const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
-  if (vimeoMatch) return 'https://player.vimeo.com/video/' + vimeoMatch[1] + '?dnt=1';
+  const tiktok = url.match(/tiktok\.com\/(?:@[\w.-]+\/video\/|v\/|embed\/v2\/)(\d{6,})/);
+  if (tiktok) {
+    return { url: 'https://www.tiktok.com/embed/v2/' + tiktok[1], vertical: true };
+  }
 
-  return url.includes('youtube.com/embed/') || url.includes('youtube-nocookie.com/embed/') || url.includes('player.vimeo.com/')
-    ? url
-    : null;
+  const vimeo = url.match(/vimeo\.com\/(\d+)/);
+  if (vimeo) {
+    return { url: 'https://player.vimeo.com/video/' + vimeo[1] + '?dnt=1', vertical: false };
+  }
+
+  const yaIncrustable =
+    url.includes('youtube.com/embed/') ||
+    url.includes('youtube-nocookie.com/embed/') ||
+    url.includes('player.vimeo.com/');
+  return yaIncrustable ? { url, vertical: false } : null;
 }
 
 export function deriveProductDisplay(product: Product, selectedVariant: any, activeProductVariants: any[]) {
@@ -59,13 +80,15 @@ export function deriveProductDisplay(product: Product, selectedVariant: any, act
   const showHighlights = (product as any).showHighlights !== false;
   const showCompare = (product as any).showCompare !== false;
   const showRelated = (product as any).showRelated !== false;
-  const embedUrl = getVideoEmbedUrl(product.videoUrl);
+  const video = getVideoEmbedUrl(product.videoUrl);
+  const embedUrl = video?.url ?? null;
+  const embedVertical = video?.vertical ?? false;
 
   return {
     hasDiscount, discountPct, displayPrice, images, effectiveStock,
     installments, hasInstallmentsInterest, installmentsInterest, cuota, transferPrice,
     paymentMethods, performanceStats, highlights, specs, relatedVideos, compareData,
     highlightsTitle, highlightsDescription, showVideo, showPerformance, showHighlights,
-    showCompare, showRelated, embedUrl,
+    showCompare, showRelated, embedUrl, embedVertical,
   };
 }

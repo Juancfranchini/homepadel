@@ -67,6 +67,7 @@ export default function ProductoPage() {
         showVideo={display.showVideo}
         showHighlights={display.showHighlights}
         embedUrl={display.embedUrl}
+        embedVertical={display.embedVertical}
         relatedVideos={display.relatedVideos}
         highlights={display.highlights}
         highlightsTitle={display.highlightsTitle}

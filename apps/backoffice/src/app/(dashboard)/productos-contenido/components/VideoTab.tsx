@@ -19,10 +19,14 @@ export default function VideoTab({ register, control, showVideo, onToggleShowVid
     <div className="space-y-4">
       <div>
         <div className="flex items-center justify-between">
-          <label className={labelClass}>Video Principal (YouTube/Vimeo)</label>
+          <label className={labelClass}>Video Principal (YouTube / TikTok / Vimeo)</label>
           <div className="flex items-center gap-2"><Toggle checked={showVideo} onChange={onToggleShowVideo} /><span className="text-xs text-gray-400">{showVideo ? "Activado" : "Desactivado"}</span></div>
         </div>
         <input {...register('videoUrl')} className={inputClass + ' mt-1'} placeholder="https://youtu.be/abc123" />
+        <p className="text-[10px] text-gray-400 mt-1">
+          Sirve un enlace de YouTube (incluidos Shorts), de TikTok o de Vimeo. De TikTok tiene que
+          ser el enlace largo, el que incluye /video/ — los cortos de vm.tiktok.com no se pueden abrir.
+        </p>
       </div>
       <div className="border-t border-gray-100 pt-4">
         <div className="flex items-center justify-between mb-2">
