@@ -53,6 +53,8 @@ export interface Product {
   weight?: number | null;
   weightUnit?: string | null;
   shape?: string | null;
+  /** Hombre | Mujer | Unisex. Puede no estar cargado. */
+  gender?: string | null;
   id: string;
   name: string;
   slug: string;

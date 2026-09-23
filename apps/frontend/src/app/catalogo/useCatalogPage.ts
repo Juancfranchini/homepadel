@@ -8,12 +8,12 @@ export function useCatalogPage() {
   const filters = useCatalogFilters();
   const {
     currentPage, currentSort, selectedCategory, selectedBrand, isOffer, searchQuery,
-    selectedSize, selectedColor, selectedWeight, selectedShape,
+    selectedSize, selectedColor, selectedWeight, selectedShape, selectedGender,
     setParam, clearFilters, hasFilters, activeChips, pageTitle,
   } = filters;
 
-  const { products, categories, brands, loading, error, retry, totalPages, totalCount, sizes, colors, weights } = useCatalogProducts({
-    currentPage, selectedCategory, selectedBrand, isOffer, searchQuery, selectedSize, selectedColor, selectedWeight, selectedShape, currentSort,
+  const { products, categories, brands, loading, error, retry, totalPages, totalCount, sizes, colors, weights, genders } = useCatalogProducts({
+    currentPage, selectedCategory, selectedBrand, isOffer, searchQuery, selectedSize, selectedColor, selectedWeight, selectedShape, selectedGender, currentSort,
   });
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -31,13 +31,14 @@ export function useCatalogPage() {
     onBrandChange: (slug: string | null) => setParam('marca', slug),
     onOfferChange: (v: boolean) => setParam('oferta', v ? 'true' : null),
     onClear: clearFilters, hasFilters,
-    sizes, colors, weights,
+    sizes, colors, weights, genders,
     selectedSize, selectedColor, selectedWeight,
     onSizeChange: (v: string | null) => setParam('talle', v),
     onColorChange: (v: string | null) => setParam('color', v),
     onWeightChange: (v: string | null) => setParam('peso', v),
-    selectedShape,
+    selectedShape, selectedGender,
     onShapeChange: (v: string | null) => setParam('formato', v),
+    onGenderChange: (v: string | null) => setParam('genero', v),
   };
 
   return {

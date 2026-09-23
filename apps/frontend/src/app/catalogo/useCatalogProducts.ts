@@ -16,11 +16,12 @@ interface Filters {
   selectedColor: string;
   selectedWeight: string;
   selectedShape: string;
+  selectedGender: string;
   currentSort: string;
 }
 
 export function useCatalogProducts(filters: Filters) {
-  const { currentPage, selectedCategory, selectedBrand, isOffer, searchQuery, selectedSize, selectedColor, selectedWeight, selectedShape, currentSort } = filters;
+  const { currentPage, selectedCategory, selectedBrand, isOffer, searchQuery, selectedSize, selectedColor, selectedWeight, selectedShape, selectedGender, currentSort } = filters;
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -52,6 +53,7 @@ export function useCatalogProducts(filters: Filters) {
       if (selectedSize) params.size = selectedSize;
       if (selectedColor) params.color = selectedColor;
       if (selectedShape) params.shape = selectedShape;
+      if (selectedGender) params.gender = selectedGender;
       if (selectedWeight) {
         const [weightValue, unit] = selectedWeight.split(' ');
         params.weight = weightValue;
@@ -65,7 +67,7 @@ export function useCatalogProducts(filters: Filters) {
       setTotalCount((data as any)?.total ?? items.length);
     } catch { setProducts([]); setTotalPages(1); setTotalCount(0); setError(true); }
     finally { setLoading(false); }
-  }, [currentPage, selectedCategory, selectedBrand, isOffer, searchQuery, selectedSize, selectedColor, selectedWeight, selectedShape, currentSort]);
+  }, [currentPage, selectedCategory, selectedBrand, isOffer, searchQuery, selectedSize, selectedColor, selectedWeight, selectedShape, selectedGender, currentSort]);
 
   useEffect(() => { loadProducts(); }, [loadProducts]);
 
@@ -82,5 +84,7 @@ export function useCatalogProducts(filters: Filters) {
     ...(p.variants?.filter((v) => p.hasWeight && v.active && v.weight != null).map((v) => `${v.weight} ${v.weightUnit || ''}`.trim()) || []),
   ]))];
 
-  return { products, categories, brands, loading, error, retry: loadProducts, totalPages, totalCount, sizes, colors, weights };
+  const genders = [...new Set(products.map((p) => p.gender).filter((g): g is string => !!g))];
+
+  return { products, categories, brands, loading, error, retry: loadProducts, totalPages, totalCount, sizes, colors, weights, genders };
 }

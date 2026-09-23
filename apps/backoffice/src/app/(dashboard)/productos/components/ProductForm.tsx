@@ -7,6 +7,7 @@ import PricingFields from './product-form/PricingFields';
 import DiscountInstallmentsFields from './product-form/DiscountInstallmentsFields';
 import { StockOrLeadTimeField, CategoryField, MadeToOrderField, BrandField } from './product-form/CategoryStockFields';
 import ShapeField from './product-form/ShapeField';
+import GenderField from './product-form/GenderField';
 import StatusTogglesRow from './product-form/StatusTogglesRow';
 import { useProductFormLogic } from './product-form/useProductFormLogic';
 import { inputClass, labelClass, Props } from './product-form/schema';
@@ -31,6 +32,7 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
   const isMadeToOrder = watch('isMadeToOrder');
   const categoryId = watch('categoryId');
   const shape = watch('shape');
+  const gender = watch('gender');
 
   const selectedCategory = categories.find((cat) => cat.id === categoryId);
   const isPaleta = selectedCategory?.slug === 'paletas';
@@ -77,6 +79,7 @@ export default function ProductForm({ defaultValues, onSave, onCancel, saving, c
         <CategoryField register={register} errors={errors} categories={categories} />
 
         {isPaleta && <ShapeField value={shape} onChange={(next) => setValue('shape', next, { shouldDirty: true })} />}
+        <GenderField value={gender} onChange={(next) => setValue('gender', next, { shouldDirty: true })} />
         <MadeToOrderField isMadeToOrder={isMadeToOrder} onToggle={() => setValue('isMadeToOrder', !isMadeToOrder, { shouldDirty: true })} register={register} />
         <BrandField register={register} errors={errors} brands={brands} />
 

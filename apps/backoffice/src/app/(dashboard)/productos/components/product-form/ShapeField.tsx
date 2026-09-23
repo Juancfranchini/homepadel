@@ -1,4 +1,4 @@
-﻿import { inputClass, labelClass } from './schema';
+﻿import { labelClass } from './schema';
 
 const SHAPES = ['Diamante', 'Lagrima', 'Redondo'];
 

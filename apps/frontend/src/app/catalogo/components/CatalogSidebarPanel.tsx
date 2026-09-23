@@ -1,6 +1,5 @@
 'use client';
 
-import { ChevronLeft } from 'lucide-react';
 import { Category, Brand } from '@/types';
 import { SORT_OPTIONS } from '../sortOptions';
 import CatalogCheckboxOption from './CatalogCheckboxOption';
@@ -34,50 +33,30 @@ export interface PanelProps {
   selectedColor: string;
   selectedWeight: string;
   selectedShape: string;
+  /** Valores de género realmente cargados. Vacío mientras nadie los use. */
+  genders: string[];
+  selectedGender: string;
   onSizeChange: (value: string | null) => void;
   onColorChange: (value: string | null) => void;
   onWeightChange: (value: string | null) => void;
   onShapeChange: (value: string | null) => void;
+  onGenderChange: (value: string | null) => void;
 }
 
 const toOptions = (values: string[]) => values.map((value) => ({ value, label: value }));
 
 /**
- * Contenido del panel lateral del catálogo.
+ * Contenido de una sección de filtros de la barra lateral.
  *
- * Los atributos quedaron agrupados en una sola sección. Antes estaban repartidos
- * por criterios que no se sostenían —formato y talle colgaban de "Categorías",
+ * Se renderiza dentro de la barra, debajo del control que la abre. Antes vivía
+ * en un panel flotante con su propia capa y su botón de cerrar, que se
+ * superponía al listado y lo empujaba a la derecha.
+ *
+ * Los atributos van agrupados en una sola sección. Antes estaban repartidos por
+ * criterios que no se sostenían —formato y talle colgaban de "Categorías",
  * color y peso de "Marcas"—, así que encontrarlos dependía de adivinar.
  */
-export default function CatalogSidebarPanel(props: PanelProps & { activePanel: ActivePanel; onClose: () => void }) {
-  const { activePanel, onClose, hasFilters, onClear } = props;
-  if (!activePanel) return null;
-
-  return (
-    <>
-      <div className="fixed inset-0 z-10" onClick={onClose} />
-      <div className="animate-fade-in relative z-20 ml-2 w-56 rounded-2xl border border-[#0D0F0F] bg-[#0C0C0C] p-4 shadow-2xl">
-        <button
-          onClick={onClose}
-          className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-lg bg-white/[0.04] text-[#C7C7C0] transition-colors hover:bg-white/[0.08] hover:text-[#F7F6F7]"
-          title="Cerrar panel"
-        >
-          <ChevronLeft size={16} />
-        </button>
-
-        <PanelBody {...props} />
-
-        {hasFilters && (
-          <button onClick={onClear} className="mt-4 text-xs font-medium text-red-400 hover:text-red-300">
-            Limpiar filtros
-          </button>
-        )}
-      </div>
-    </>
-  );
-}
-
-function PanelBody(props: PanelProps & { activePanel: ActivePanel }) {
+export default function CatalogSidebarPanel(props: PanelProps & { activePanel: ActivePanel }) {
   const { activePanel } = props;
   if (activePanel === 'categories') return <CategoriesSection {...props} />;
   if (activePanel === 'brands') return <BrandsSection {...props} />;
@@ -86,14 +65,9 @@ function PanelBody(props: PanelProps & { activePanel: ActivePanel }) {
   return null;
 }
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <h3 className="mb-3 pr-6 text-xs font-semibold uppercase tracking-wider text-[#F7F6F7]">{children}</h3>;
-}
-
 function CategoriesSection({ categories, selectedCategory, onCategoryChange }: PanelProps) {
   return (
     <div>
-      <SectionTitle>Categorías</SectionTitle>
       <div className="space-y-2">
         {categories.map((cat) => (
           <CatalogCheckboxOption
@@ -111,7 +85,6 @@ function CategoriesSection({ categories, selectedCategory, onCategoryChange }: P
 function BrandsSection({ brands, selectedBrand, onBrandChange }: PanelProps) {
   return (
     <div>
-      <SectionTitle>Marcas</SectionTitle>
       <div className="space-y-2">
         {brands.map((brand) => (
           <CatalogCheckboxOption
@@ -128,15 +101,18 @@ function BrandsSection({ brands, selectedBrand, onBrandChange }: PanelProps) {
 
 function AttributesSection(props: PanelProps) {
   const { selectedCategory, selectedShape, onShapeChange, sizes, selectedSize, onSizeChange,
-    colors, selectedColor, onColorChange, weights, selectedWeight, onWeightChange } = props;
+    colors, selectedColor, onColorChange, weights, selectedWeight, onWeightChange,
+    genders, selectedGender, onGenderChange } = props;
 
   const mostrarFormato = selectedCategory === 'paletas';
-  const hayAlguno = mostrarFormato || sizes.length > 0 || colors.length > 0 || weights.length > 0;
+  // El género se ofrece solo si algún producto lo tiene cargado: igual que
+  // talle, color y peso, las opciones salen de los datos. Un filtro fijo de
+  // Hombre/Mujer/Unisex devolvería cero resultados hasta que se cargue.
+  const hayAlguno = mostrarFormato || genders.length > 0 || sizes.length > 0 || colors.length > 0 || weights.length > 0;
 
   if (!hayAlguno) {
     return (
       <div>
-        <SectionTitle>Atributos</SectionTitle>
         <p className="text-xs text-[#8A8A85]">No hay atributos para filtrar en esta selección.</p>
       </div>
     );
@@ -144,7 +120,9 @@ function AttributesSection(props: PanelProps) {
 
   return (
     <div className="space-y-4">
-      <SectionTitle>Atributos</SectionTitle>
+      {genders.length > 0 && (
+        <CatalogAttributeSelect label="Género" value={selectedGender} options={toOptions(genders)} onChange={onGenderChange} />
+      )}
       {mostrarFormato && (
         <CatalogAttributeSelect label="Formato" value={selectedShape} options={SHAPE_OPTIONS} onChange={onShapeChange} />
       )}
@@ -164,7 +142,6 @@ function AttributesSection(props: PanelProps) {
 function SortSection({ currentSort, onSortChange }: PanelProps) {
   return (
     <div>
-      <SectionTitle>Ordenar por</SectionTitle>
       <div className="space-y-1">
         {SORT_OPTIONS.map((opt) => (
           <button

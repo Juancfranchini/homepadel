@@ -1,3 +1,4 @@
+import { ChevronDown } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 interface Props {
@@ -6,6 +7,8 @@ interface Props {
   /** Filtro aplicado hoy. Se muestra debajo de la etiqueta cuando existe. */
   value?: string;
   active?: boolean;
+  /** Presente solo en los controles que despliegan contenido debajo. */
+  expanded?: boolean;
   /** Para controles de dos estados, como Ofertas. */
   pressed?: boolean;
   onClick: () => void;
@@ -20,11 +23,12 @@ interface Props {
  * debajo. La etiqueta resuelve el "qué hace esto"; el valor, el "qué tengo
  * aplicado", que antes obligaba a abrir los cuatro paneles para averiguarlo.
  */
-export default function CatalogSidebarButton({ icon: Icon, label, value, active, pressed, onClick }: Props) {
+export default function CatalogSidebarButton({ icon: Icon, label, value, active, expanded, onClick, pressed }: Props) {
   return (
     <button
       onClick={onClick}
       aria-pressed={pressed}
+      aria-expanded={expanded}
       className={
         'flex w-full items-start gap-2 rounded-xl px-2.5 py-2 text-left transition-colors ' +
         (active
@@ -33,7 +37,7 @@ export default function CatalogSidebarButton({ icon: Icon, label, value, active,
       }
     >
       <Icon size={17} className="mt-0.5 flex-shrink-0" />
-      <span className="min-w-0 flex flex-col">
+      <span className="flex min-w-0 flex-1 flex-col">
         <span className="text-xs font-semibold leading-tight">{label}</span>
         {value && (
           <span className="truncate text-[10px] leading-tight text-[#C7C7C0]" title={value}>
@@ -41,6 +45,12 @@ export default function CatalogSidebarButton({ icon: Icon, label, value, active,
           </span>
         )}
       </span>
+      {expanded !== undefined && (
+        <ChevronDown
+          size={14}
+          className={'mt-0.5 flex-shrink-0 transition-transform duration-200 ' + (expanded ? 'rotate-180' : '')}
+        />
+      )}
     </button>
   );
 }

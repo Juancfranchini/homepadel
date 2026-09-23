@@ -90,6 +90,9 @@ model Product {
   hasDimensions     Boolean @default(false)
   hasWeight         Boolean @default(false)
   shape             String?
+  // Hombre | Mujer | Unisex. Queda opcional: los productos que ya están
+  // cargados no lo tienen, y una paleta no siempre tiene género.
+  gender            String?
   size              String?
   color             String?
   dimensionLength   Float?

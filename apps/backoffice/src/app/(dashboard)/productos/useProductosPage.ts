@@ -45,6 +45,7 @@ export interface Product {
   weight?: number;
   weightUnit?: string;
   shape?: string;
+  gender?: string;
   variants?: { sku: string; size: string; color?: string; dimensions?: string; dimensionLength?: number; dimensionWidth?: number; dimensionHeight?: number; dimensionUnit?: string; weight?: number; weightUnit?: string; imageUrl?: string; images?: string[]; stock: number }[];
 }
 
@@ -110,6 +111,7 @@ function buildDefaultFormValues(editItem: Product | null) {
     weight: editItem.weight || undefined,
     weightUnit: editItem.weightUnit || 'kg',
     shape: editItem.shape || null,
+    gender: editItem.gender || null,
     variants: editItem.variants?.filter((variant: any) => variant.id !== `${editItem.id}-base`) || [],
   };
 }

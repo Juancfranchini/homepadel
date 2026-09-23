@@ -16,6 +16,7 @@ export function useCatalogFilters() {
   const selectedColor = searchParams.get('color') || '';
   const selectedWeight = searchParams.get('peso') || '';
   const selectedShape = searchParams.get('formato') || '';
+  const selectedGender = searchParams.get('genero') || '';
 
   const setParam = (key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -26,7 +27,7 @@ export function useCatalogFilters() {
   };
 
   const clearFilters = () => router.push('/catalogo');
-  const hasFilters = !!selectedCategory || !!selectedBrand || isOffer || !!searchQuery || !!selectedSize || !!selectedColor || !!selectedWeight || !!selectedShape;
+  const hasFilters = !!selectedCategory || !!selectedBrand || isOffer || !!searchQuery || !!selectedSize || !!selectedColor || !!selectedWeight || !!selectedShape || !!selectedGender;
 
   const activeChips: { label: string; onRemove: () => void }[] = [];
   if (isOffer) activeChips.push({ label: 'Ofertas', onRemove: () => setParam('oferta', null) });
@@ -36,6 +37,7 @@ export function useCatalogFilters() {
   if (selectedColor) activeChips.push({ label: 'Color: ' + selectedColor, onRemove: () => setParam('color', null) });
   if (selectedWeight) activeChips.push({ label: 'Peso: ' + selectedWeight, onRemove: () => setParam('peso', null) });
   if (selectedShape) activeChips.push({ label: 'Formato: ' + selectedShape, onRemove: () => setParam('formato', null) });
+  if (selectedGender) activeChips.push({ label: 'Género: ' + selectedGender, onRemove: () => setParam('genero', null) });
   if (searchQuery) activeChips.push({ label: '"' + searchQuery + '"', onRemove: () => setParam('q', null) });
 
   const pageTitle = isOffer ? 'Ofertas' : selectedCategory
@@ -43,7 +45,7 @@ export function useCatalogFilters() {
 
   return {
     currentPage, currentSort, selectedCategory, selectedBrand, isOffer, searchQuery,
-    selectedSize, selectedColor, selectedWeight, selectedShape,
+    selectedSize, selectedColor, selectedWeight, selectedShape, selectedGender,
     setParam, clearFilters, hasFilters, activeChips, pageTitle,
   };
 }

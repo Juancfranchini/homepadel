@@ -49,6 +49,8 @@ export class CreateProductDto {
   @ApiPropertyOptional()    @IsNumber()  @IsOptional()            weight?: number;
   @ApiPropertyOptional()    @IsString()  @IsOptional()            weightUnit?: string;
   @ApiPropertyOptional()    @IsString()  @IsOptional()            shape?: string;
+  // Hombre | Mujer | Unisex
+  @ApiPropertyOptional()    @IsString()  @IsOptional()            gender?: string;
   @ApiPropertyOptional()    @IsNumber()  @IsOptional() estimatedDays?: number;
   @ApiPropertyOptional()    @IsNumber()  @Min(0) @Max(100) @IsOptional() requiredDeposit?: number;
   @ApiPropertyOptional() @IsArray() @IsOptional() variants?: Record<string, any>[];

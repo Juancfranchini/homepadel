@@ -19,6 +19,7 @@ export const schema = z.object({
   hasWeight: z.boolean().default(false),
 
   shape: z.string().optional().nullable(),
+  gender: z.string().optional().nullable(),
   size: z.string().optional(),
   color: z.string().optional(),
   dimensionLength: optionalNumber,

@@ -43,7 +43,7 @@ export class ProductsService {
   async findAll(query: any) {
     const pageNumber = Math.max(1, Number.parseInt(String(query.page ?? 1), 10) || 1);
     const pageSize = Math.min(100, Math.max(1, Number.parseInt(String(query.limit ?? 20), 10) || 20));
-    const { category, brand, search, minPrice, maxPrice, showAll, isOffer, size, color, weight, weightUnit, shape, sort } = query;
+    const { category, brand, search, minPrice, maxPrice, showAll, isOffer, size, color, weight, weightUnit, shape, gender, sort } = query;
     const skip = (pageNumber - 1) * pageSize;
 
     const where: any = showAll === '1' ? {} : { active: true };
@@ -52,6 +52,7 @@ export class ProductsService {
     if (brand) where.brand = { slug: brand };
     if (isOffer === 'true') where.isOffer = true;
     if (shape) where.shape = shape;
+    if (gender) where.gender = gender;
     if (size) propertyFilters.push({ OR: [{ size }, { variants: { some: { size, active: true } } }] });
     if (color) propertyFilters.push({ OR: [{ color }, { variants: { some: { color, active: true } } }] });
     if (weight && Number.isFinite(Number(weight))) {

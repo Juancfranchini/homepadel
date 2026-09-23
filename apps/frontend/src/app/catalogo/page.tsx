@@ -7,7 +7,6 @@ import { Product } from '@/types';
 import { useCartStore } from '@/store/cartStore';
 import { useCatalogPage } from './useCatalogPage';
 import CatalogHeader from './components/CatalogHeader';
-import CatalogBrandStrip from './components/CatalogBrandStrip';
 import CatalogAdvisor from './components/CatalogAdvisor';
 import CatalogChips from './components/CatalogChips';
 import CatalogSidebar from './components/CatalogSidebar';
@@ -62,12 +61,6 @@ function CatálogoContent() {
       />
 
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-6">
-        <CatalogBrandStrip
-          brands={sidebarProps.brands}
-          selectedBrand={sidebarProps.selectedBrand}
-          onBrandChange={sidebarProps.onBrandChange}
-        />
-
         <CatalogAdvisor selectedCategory={sidebarProps.selectedCategory} />
 
         <div className="flex gap-6">
