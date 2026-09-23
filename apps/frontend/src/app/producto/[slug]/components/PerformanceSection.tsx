@@ -1,6 +1,8 @@
 'use client';
 
 import { createElement, useEffect, useRef, useState } from 'react';
+import { Crosshair, Gauge, Hand, Scale, Shield, Star, Zap } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { specIcon } from './specIcons';
 
 interface PerformanceStat { label: string; value: number; }
@@ -20,38 +22,64 @@ function nivel(value: number): string {
   return 'Muy bajo';
 }
 
+/** En cuántos bloques se parte cada barra. Diez hace que cada uno valga 10%. */
+const SEGMENTOS = 10;
+
 /**
- * Barra de una característica.
+ * Icono de cada característica, por nombre.
  *
- * Crece desde cero cuando la sección entra en pantalla: antes se dibujaba ya
- * completa —la transición ocurría en el primer render, donde nadie la veía— y
- * eran cinco líneas finas casi iguales entre sí.
+ * Las barras las define la tienda con nombres fijos, así que se reconocen por
+ * su texto. Una que no esté en la lista sencillamente va sin icono, no con uno
+ * equivocado.
+ */
+const ICONO_POR_BARRA: Record<string, LucideIcon> = {
+  control: Crosshair,
+  potencia: Zap,
+  'salida de bola': Gauge,
+  manejabilidad: Hand,
+  dureza: Shield,
+  jugabilidad: Star,
+  balance: Scale,
+};
+
+/**
+ * Barra de una característica, partida en bloques.
+ *
+ * Una barra continua se lee como una mancha: un 90 y un 65 se ven casi igual.
+ * En bloques se cuentan de un vistazo. Se llenan de a uno cuando la sección
+ * entra en pantalla; antes la animación ocurría en el primer render, donde no
+ * la veía nadie.
  */
 function BarraRendimiento({ stat, visible }: { stat: PerformanceStat; visible: boolean }) {
   const valor = Math.max(0, Math.min(100, Number(stat.value) || 0));
+  const llenos = Math.round((valor / 100) * SEGMENTOS);
+  const Icono = ICONO_POR_BARRA[stat.label?.trim().toLowerCase()];
 
   return (
     <div>
-      <div className="flex items-baseline justify-between mb-1.5">
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-[#F7F6F7]">{stat.label}</p>
+      <div className="flex items-baseline justify-between mb-2 gap-2">
+        <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-[#F7F6F7]">
+          {Icono && <Icono size={13} className="flex-shrink-0 text-[#B7D31A]" />}
+          {stat.label}
+        </p>
         <div className="flex items-baseline gap-2">
           <span className="text-[10px] uppercase tracking-wide text-[#8A8A85]">{nivel(valor)}</span>
           <span className="text-[#B7D31A] font-bold text-sm tabular-nums w-9 text-right">{valor}</span>
         </div>
       </div>
-      <div className="relative h-2.5 rounded-full bg-[#0D0F0F] overflow-hidden">
-        {/* Marcas cada 25% para que la barra se lea como una escala y no como
-            una mancha de color. */}
-        <div className="absolute inset-0 flex justify-between px-[25%] pointer-events-none">
-          <span className="w-px bg-white/10" />
-          <span className="w-px bg-white/10" />
-        </div>
-        <div
-          className="relative h-full rounded-full bg-gradient-to-r from-[#7E9412] to-[#CAE52E] transition-[width] duration-1000 ease-out"
-          style={{ width: (visible ? valor : 0) + '%' }}
-        >
-          <span className="absolute right-0 top-1/2 h-3.5 w-1 -translate-y-1/2 rounded-full bg-[#F7F6F7]" />
-        </div>
+
+      <div className="flex gap-1">
+        {Array.from({ length: SEGMENTOS }).map((_, i) => (
+          <span
+            key={i}
+            className={
+              'h-2.5 flex-1 rounded-[3px] transition-colors duration-300 ' +
+              (visible && i < llenos ? 'bg-[#B7D31A]' : 'bg-[#0D0F0F]')
+            }
+            // Se encienden uno detrás de otro, como si se fueran cargando.
+            style={{ transitionDelay: i * 45 + 'ms' }}
+          />
+        ))}
       </div>
     </div>
   );

@@ -51,14 +51,14 @@ export default function ProductGallery({ images, productName, hasDiscount, disco
       <div className="flex flex-col gap-3 self-start">
         {/* Imagen principal - click para abrir lightbox */}
         <div
-          className="aspect-square max-h-[30rem] bg-[#0C0C0C] rounded-2xl border border-[#0D0F0F] overflow-hidden relative cursor-zoom-in"
+          className="aspect-square max-h-[36rem] bg-[#0C0C0C] rounded-2xl border border-[#0D0F0F] overflow-hidden relative cursor-zoom-in"
           onClick={() => thumbnails.length > 0 && openLightbox(currentImageIndex)}
         >
           {images.length > 0 ? (
             <img
               src={getImageUrl(images[currentImageIndex] ?? images[0])}
               alt={productName}
-              className="w-full h-full object-contain p-5 sm:p-6 transition-opacity duration-200"
+              className="w-full h-full object-contain p-3 sm:p-4 transition-opacity duration-200"
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center gap-3">
