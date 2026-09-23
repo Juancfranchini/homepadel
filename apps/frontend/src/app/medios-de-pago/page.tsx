@@ -12,7 +12,7 @@ export default function MediosPagoPage() {
 
   const paymentMethods = [
     { name: 'Mercado Pago', icon: Wallet, logo: mercadopago?.logo, active: mercadopago?.active !== false, desc: 'Paga con tu cuenta de Mercado Pago, tarjeta de credito, debito o efectivo.' },
-    { name: 'Transferencia Bancaria', icon: Landmark, logo: transferencia?.logo, active: transferencia?.active !== false, desc: 'Transferi directamente desde tu banco. Te enviamos los datos por email.' },
+    { name: 'Transferencia Bancaria', icon: Landmark, logo: transferencia?.logo, active: transferencia?.active !== false, desc: 'Transferi directamente desde tu banco. Te pasamos los datos de la cuenta al confirmar el pedido.' },
     { name: 'VISA', icon: CreditCard, logo: visa?.logo, active: visa?.active !== false, desc: 'Aceptamos todas las tarjetas VISA.' },
     { name: 'Mastercard', icon: CreditCard, logo: mastercard?.logo, active: mastercard?.active !== false, desc: 'Aceptamos todas las tarjetas Mastercard.' },
     { name: 'American Express', icon: CreditCard, logo: amex?.logo, active: amex?.active !== false, desc: 'Aceptamos American Express.' },

@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@nestjs/common';
+﻿import { Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import * as fs from 'fs';
@@ -8,6 +8,8 @@ export type SectionKey = 'categories' | 'meta_pixel' | 'hero' | 'benefits' | 'pr
 
 @Injectable()
 export class SiteSectionsService {
+  private readonly logger = new Logger(SiteSectionsService.name);
+
   constructor(private prisma: PrismaService) {}
 
   async findOne(key: SectionKey) {
@@ -24,11 +26,51 @@ export class SiteSectionsService {
       await this.saveMetaPixelEnv(dto.data);
     }
 
-    return this.prisma.siteSection.upsert({
+    const seccion = await this.prisma.siteSection.upsert({
       where: { key },
       update: { data: dto.data as Prisma.InputJsonValue, active: dto.active ?? true },
       create: { key, data: dto.data as Prisma.InputJsonValue, active: dto.active ?? true },
     });
+
+    await this.revalidarHome();
+    return seccion;
+  }
+
+  /**
+   * Avisa a la tienda que borre el caché de la portada.
+   *
+   * La home se genera y se cachea, así que apagar una sección acá no se veía
+   * hasta que venciera ese plazo. El visitante no puede forzarlo refrescando:
+   * el caché es del servidor. El backoffice decía "los cambios se aplican al
+   * instante" y no era cierto.
+   *
+   * Si falta la configuración no se corta el guardado: la sección ya quedó
+   * guardada y la portada se va a actualizar igual cuando venza su plazo.
+   */
+  private async revalidarHome(): Promise<void> {
+    const secret = process.env.REVALIDATE_SECRET;
+    const frontendUrl = process.env.FRONTEND_URL;
+
+    if (!secret || !frontendUrl) {
+      this.logger.warn(
+        'Sin REVALIDATE_SECRET o FRONTEND_URL: el cambio se verá en la tienda recién cuando venza su caché.',
+      );
+      return;
+    }
+
+    try {
+      const respuesta = await fetch(frontendUrl.replace(/\/+$/, '') + '/api/revalidate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-revalidate-secret': secret },
+        body: JSON.stringify({ path: '/' }),
+        signal: AbortSignal.timeout(5000),
+      });
+      if (!respuesta.ok) {
+        this.logger.warn(`La tienda rechazó la revalidación (HTTP ${respuesta.status}).`);
+      }
+    } catch (err) {
+      this.logger.warn(`No se pudo avisar a la tienda para refrescar la portada: ${err}`);
+    }
   }
 
   private async saveMetaPixelEnv(data: Record<string, unknown>) {

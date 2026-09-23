@@ -7,7 +7,7 @@ import { getImageUrl } from '@/lib/utils';
 const PAYMENT_OPTIONS = [
   { value: 'card', label: 'Tarjeta de credito / debito', desc: 'Visa, Mastercard, American Express', badge: ['VISA', 'MC', 'AMEX'] },
   { value: 'mercadopago', label: 'Mercado Pago', desc: 'Paga con tu cuenta o en efectivo', badge: ['MP'] },
-  { value: 'transfer', label: 'Transferencia bancaria', desc: 'Te enviamos los datos por email', badge: [] },
+  { value: 'transfer', label: 'Transferencia bancaria', desc: 'Te pasamos los datos para transferir', badge: [] },
 ];
 
 interface Props {

@@ -16,7 +16,9 @@ const NAV_LINKS = [
   { label: 'Politica de Devolucion', href: '/politica-de-devolucion' },
   { label: 'Preguntas Frecuentes',   href: '/faq' },
   { label: 'Contacto',              href: '/contacto' },
-  { label: 'Rastrear Pedido',       href: '/rastrear' },
+  // El rastreo de envíos queda fuera del menú: no hay credenciales del correo
+  // y la página no puede informar nada. La ruta /rastrear sigue existiendo,
+  // así que reponerlo es volver a agregar esta línea.
 ];
 
 export default function Header() {
@@ -32,22 +34,29 @@ export default function Header() {
   return (
     <>
       <header className="w-full sticky top-0 z-50 bg-[#050606] border-b border-[#0D0F0F]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-2 sm:gap-4">
-          {/* En móvil el logo va chico y a la izquierda: en xl ocupaba media
-              pantalla de alto y empujaba el contenido fuera de la vista. */}
-          <Link href="/" className="flex-shrink-0" aria-label="Home Pádel — Inicio">
-            <span className="lg:hidden"><BrandLogo size="sm" priority /></span>
-            <span className="hidden lg:block"><BrandLogo size="xl" priority /></span>
-          </Link>
-
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-2 sm:gap-4">
+          {/* En móvil: hamburguesa a la izquierda y logo centrado. El logo se
+              centra con posición absoluta y no con flex, porque los bloques de
+              los costados no miden lo mismo —un ícono contra login + carrito—
+              y quedaría corrido. En escritorio vuelve al flujo normal, que al
+              estar oculta la hamburguesa lo deja primero, a la izquierda. */}
           <button
-            className="lg:hidden text-[#C7C7C0] transition-colors hover:text-[#F7F6F7]"
+            className="lg:hidden flex-shrink-0 text-[#C7C7C0] transition-colors hover:text-[#F7F6F7]"
             onClick={() => setOpen(!open)}
             aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
             aria-expanded={open}
           >
             {open ? <X size={24} /> : <Menu size={24} />}
           </button>
+
+          <Link
+            href="/"
+            className="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 lg:flex-shrink-0"
+            aria-label="Home Pádel — Inicio"
+          >
+            <span className="lg:hidden"><BrandLogo size="sm" priority /></span>
+            <span className="hidden lg:block"><BrandLogo size="xl" priority /></span>
+          </Link>
 
           <nav className="hidden lg:flex items-center gap-1">
             {NAV_LINKS.map((link) => {

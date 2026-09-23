@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Package, Truck, CheckCircle, ChevronRight } from 'lucide-react';
+import { Package, CheckCircle, ChevronRight } from 'lucide-react';
 import { Order } from '@/types';
 import { formatPrice } from '@/lib/utils';
 
@@ -19,11 +19,11 @@ interface Props {
 export default function CuentaOrdersTab({ orders, loading }: Props) {
   return (
     <div>
-      <div className="flex items-center justify-between mb-5">
+      {/* Sin botón de rastreo: la página de seguimiento está fuera de uso
+          hasta que haya credenciales del correo. El estado de cada pedido ya
+          se ve en su propia fila, que era lo único que informaba. */}
+      <div className="mb-5">
         <h2 className="font-black text-lg uppercase tracking-tight text-[#F7F6F7] flex items-center gap-2"><Package size={20} className="text-[#B7D31A]" />Mis pedidos</h2>
-        <Link href="/rastrear" className="inline-flex items-center gap-2 text-sm text-[#B7D31A] hover:text-[#c8e81f] transition-colors border border-[#B7D31A]/30 rounded-xl px-4 py-2">
-          <Truck size={16} /> Rastrear pedido
-        </Link>
       </div>
       {loading ? (
         <div className="space-y-3">{[1, 2].map((i) => <div key={i} className="h-16 bg-[#1A1F21] rounded-lg animate-pulse" />)}</div>
@@ -39,8 +39,8 @@ export default function CuentaOrdersTab({ orders, loading }: Props) {
           {orders.map((order) => {
             const status = ORDER_STATUS_MAP[order.status] ?? { label: order.status, color: 'bg-[#1A1F21] text-[#8A8A85]' };
             return (
-              <Link key={order.id} href={'/rastrear?order=' + order.number}
-                className="flex items-center justify-between p-4 border border-[#1A1F21] rounded-xl hover:border-[#B7D31A]/30 hover:bg-[#0C0C0C] transition-all">
+              <div key={order.id}
+                className="flex items-center justify-between p-4 border border-[#1A1F21] rounded-xl">
                 <div className="flex items-center gap-3">
                   {order.status === 'DELIVERED' ? <CheckCircle size={18} className="text-green-500" /> : <Package size={18} className="text-[#8A8A85]" />}
                   <div>
@@ -51,9 +51,8 @@ export default function CuentaOrdersTab({ orders, loading }: Props) {
                 <div className="flex items-center gap-3">
                   <span className={'text-xs font-bold px-2.5 py-1 rounded-full ' + status.color}>{status.label}</span>
                   <span className="font-black text-sm text-[#F7F6F7]">{formatPrice(order.total)}</span>
-                  <ChevronRight size={16} className="text-[#8A8A85]" />
                 </div>
-              </Link>
+              </div>
             );
           })}
         </div>

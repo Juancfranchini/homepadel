@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
-import { CheckCircle, Clock, Loader2, Truck, XCircle } from 'lucide-react';
+import { CheckCircle, Clock, Loader2, XCircle } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { limpiarBorrador } from './useCheckoutDraft';
 import { Resultado, useOrderOutcome } from './useOrderOutcome';
@@ -10,7 +10,8 @@ import { Resultado, useOrderOutcome } from './useOrderOutcome';
 const TEXTOS: Record<Exclude<Resultado, 'cargando'>, { titulo: string; detalle: string; borde: string }> = {
   aprobado: {
     titulo: '¡Pago aprobado!',
-    detalle: 'Tu pago fue procesado y ya registramos el pedido. Te enviamos un email con los detalles.',
+    // Sin prometer un email: el envío de correos no está en servicio.
+    detalle: 'Tu pago fue procesado y ya registramos el pedido. Guardá el número de orden; nos comunicamos con vos para coordinar el envío.',
     borde: 'border-[#B7D31A]/30',
   },
   acreditando: {
@@ -20,7 +21,7 @@ const TEXTOS: Record<Exclude<Resultado, 'cargando'>, { titulo: string; detalle: 
   },
   pendiente: {
     titulo: 'Pago en proceso',
-    detalle: 'Mercado Pago todavía no confirmó el pago. Te avisamos por email en cuanto se acredite.',
+    detalle: 'Mercado Pago todavía no confirmó el pago. Guardá el número de orden y consultanos si no se acredita.',
     borde: 'border-amber-500/30',
   },
   rechazado: {
@@ -73,11 +74,6 @@ export default function CheckoutOutcome({ porDefecto }: { porDefecto: Resultado 
         <p className="text-[#8A8A85] text-sm mb-8">{texto?.detalle ?? 'Estamos verificando el estado de tu pago con Mercado Pago.'}</p>
 
         <div className="flex flex-col gap-3">
-          {cobrado && orderNumber && (
-            <Link href={'/rastrear?order=' + orderNumber} className="bg-[#B7D31A] text-[#050606] py-3 rounded-xl font-bold text-sm hover:bg-[#c8e81f] transition-colors flex items-center justify-center gap-2">
-              <Truck size={16} /> Rastrear pedido
-            </Link>
-          )}
           {resultado === 'rechazado' && (
             <Link href="/checkout" className="bg-[#B7D31A] text-[#050606] py-3 rounded-xl font-bold text-sm hover:bg-[#c8e81f] transition-colors">Intentar de nuevo</Link>
           )}

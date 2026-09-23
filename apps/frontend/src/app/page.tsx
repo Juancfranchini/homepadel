@@ -47,7 +47,10 @@ import {
  * Si en algún momento se necesita que un cambio impacte al instante, la vía correcta
  * es revalidación bajo demanda desde el backoffice, no bajar este número.
  */
-export const revalidate = 3600;
+// Plazo de respaldo. Lo normal es que el backoffice avise al guardar y la
+// portada se refresque al instante (ver app/api/revalidate). Esto cubre el
+// caso de que ese aviso no llegue.
+export const revalidate = 300;
 
 function arr<T>(raw: unknown): T[] {
   if (Array.isArray(raw)) return raw as T[];
