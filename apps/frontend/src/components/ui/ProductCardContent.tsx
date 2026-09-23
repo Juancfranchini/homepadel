@@ -1,7 +1,7 @@
 ﻿import Link from 'next/link';
 import { ShoppingCart, Diamond, Droplet, Circle } from 'lucide-react';
 import { Product } from '@/types';
-import { formatPrice } from '@/lib/utils';
+import ProductCardPricing from './ProductCardPricing';
 
 const SHAPE_ICONS: Record<string, typeof Diamond> = { Diamante: Diamond, Lagrima: Droplet, Redondo: Circle };
 
@@ -30,22 +30,7 @@ export default function ProductCardContent({ product, isMadeToOrder, hasDiscount
 
       {product.shape && SHAPE_ICONS[product.shape] && (() => { const ShapeIcon = SHAPE_ICONS[product.shape!]; return (<p className="flex items-center gap-1 text-[13px] text-[#A1A1AA]"><ShapeIcon size={13} />Formato: {product.shape}</p>); })()}
 
-      <div className="flex items-end gap-2 mt-auto pt-1">
-        {hasDiscount && !isMadeToOrder ? (
-          <>
-            <span className="text-lg font-black text-white">{formatPrice(product.effectivePrice)}</span>
-            <span className="text-sm text-[#A1A1AA] line-through">{formatPrice(product.price)}</span>
-          </>
-        ) : (
-          <span className="text-lg font-black text-white">{formatPrice(product.price)}</span>
-        )}
-      </div>
-
-      {!isMadeToOrder && (
-        <p className="text-[10px] font-semibold text-[#B7D31A]">
-          {product.installments || 6} x {formatPrice(Math.ceil(product.effectivePrice / (product.installments || 6)))} sin interes
-        </p>
-      )}
+      <ProductCardPricing product={product} isMadeToOrder={isMadeToOrder} hasDiscount={hasDiscount} />
 
       {!isMadeToOrder && product.stock > 0 && product.stock <= 5 && (
         <p className="text-[10px] text-orange-400 font-semibold">Solo quedan {product.stock}!</p>
