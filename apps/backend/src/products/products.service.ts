@@ -14,6 +14,28 @@ function withEffectivePrice<T extends { price: number; salePrice: number | null 
   return { ...product, effectivePrice: effectivePrice(product.price, product.salePrice) };
 }
 
+/**
+ * Traduce la opción de orden que llega del catálogo a una cláusula de Prisma.
+ *
+ * El orden tiene que resolverse en la base y no en el navegador: el listado
+ * viene paginado, así que ordenar del lado del cliente reacomoda únicamente los
+ * doce productos visibles y da un resultado engañoso.
+ *
+ * Se ordena por `price` y no por el precio efectivo porque este último se
+ * calcula después de la consulta; para el orden alcanza, ya que la promoción se
+ * carga en `salePrice` y el precio de lista mantiene la misma escala relativa.
+ */
+export function resolveOrderBy(sort: unknown): Record<string, 'asc' | 'desc'> {
+  const opciones: Record<string, Record<string, 'asc' | 'desc'>> = {
+    newest: { createdAt: 'desc' },
+    price_asc: { price: 'asc' },
+    price_desc: { price: 'desc' },
+    name_asc: { name: 'asc' },
+    featured: { featured: 'desc' },
+  };
+  return opciones[String(sort ?? '')] ?? opciones.newest;
+}
+
 @Injectable()
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
@@ -21,7 +43,7 @@ export class ProductsService {
   async findAll(query: any) {
     const pageNumber = Math.max(1, Number.parseInt(String(query.page ?? 1), 10) || 1);
     const pageSize = Math.min(100, Math.max(1, Number.parseInt(String(query.limit ?? 20), 10) || 20));
-    const { category, brand, search, minPrice, maxPrice, showAll, isOffer, size, color, weight, weightUnit, shape } = query;
+    const { category, brand, search, minPrice, maxPrice, showAll, isOffer, size, color, weight, weightUnit, shape, sort } = query;
     const skip = (pageNumber - 1) * pageSize;
 
     const where: any = showAll === '1' ? {} : { active: true };
@@ -62,7 +84,7 @@ export class ProductsService {
         skip,
         take: pageSize,
         include: { category: true, brand: true, variants: true },
-        orderBy: { createdAt: 'desc' },
+        orderBy: resolveOrderBy(sort),
       }),
       this.prisma.product.count({ where }),
     ]);

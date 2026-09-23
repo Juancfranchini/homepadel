@@ -34,5 +34,4 @@ apps/frontend/.claude/
 
 # Prisma
 apps/backend/prisma/*.db
-backend/
 _backup_uploads/

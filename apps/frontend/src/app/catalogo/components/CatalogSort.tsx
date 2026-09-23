@@ -3,10 +3,13 @@
 import { useState } from 'react';
 import { ArrowDownUp, ChevronDown } from 'lucide-react';
 
+// Los valores tienen que coincidir con los que acepta resolveOrderBy() en el
+// backend: el orden se resuelve en la base, no acá.
 const SORT_OPTIONS = [
-  { value: 'newest', label: 'Novedades' },
-  { value: 'price_asc', label: 'Precio: menor a mayor' },
-  { value: 'price_desc', label: 'Precio: mayor a menor' },
+  { value: 'featured', label: 'Destacados' },
+  { value: 'price_asc', label: 'Menor precio' },
+  { value: 'price_desc', label: 'Mayor precio' },
+  { value: 'newest', label: 'Nuevos ingresos' },
   { value: 'name_asc', label: 'Nombre A-Z' },
 ];
 

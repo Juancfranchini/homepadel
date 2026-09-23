@@ -13,7 +13,7 @@ export function useCatalogPage() {
   } = filters;
 
   const { products, categories, brands, loading, error, retry, totalPages, totalCount, sizes, colors, weights } = useCatalogProducts({
-    currentPage, selectedCategory, selectedBrand, isOffer, searchQuery, selectedSize, selectedColor, selectedWeight, selectedShape,
+    currentPage, selectedCategory, selectedBrand, isOffer, searchQuery, selectedSize, selectedColor, selectedWeight, selectedShape, currentSort,
   });
 
   const [sidebarOpen, setSidebarOpen] = useState(false);

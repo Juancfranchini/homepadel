@@ -16,10 +16,11 @@ interface Filters {
   selectedColor: string;
   selectedWeight: string;
   selectedShape: string;
+  currentSort: string;
 }
 
 export function useCatalogProducts(filters: Filters) {
-  const { currentPage, selectedCategory, selectedBrand, isOffer, searchQuery, selectedSize, selectedColor, selectedWeight, selectedShape } = filters;
+  const { currentPage, selectedCategory, selectedBrand, isOffer, searchQuery, selectedSize, selectedColor, selectedWeight, selectedShape, currentSort } = filters;
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -41,7 +42,9 @@ export function useCatalogProducts(filters: Filters) {
     setLoading(true);
     setError(false);
     try {
-      const params: Record<string, unknown> = { page: currentPage, limit: ITEMS_PER_PAGE };
+      // El orden viaja a la API: ordenar del lado del navegador solo reacomodaría
+      // los doce productos de la página visible.
+      const params: Record<string, unknown> = { page: currentPage, limit: ITEMS_PER_PAGE, sort: currentSort };
       if (selectedCategory) params.category = selectedCategory;
       if (selectedBrand) params.brand = selectedBrand;
       if (isOffer) params.isOffer = 'true';
@@ -62,7 +65,7 @@ export function useCatalogProducts(filters: Filters) {
       setTotalCount((data as any)?.total ?? items.length);
     } catch { setProducts([]); setTotalPages(1); setTotalCount(0); setError(true); }
     finally { setLoading(false); }
-  }, [currentPage, selectedCategory, selectedBrand, isOffer, searchQuery, selectedSize, selectedColor, selectedWeight, selectedShape]);
+  }, [currentPage, selectedCategory, selectedBrand, isOffer, searchQuery, selectedSize, selectedColor, selectedWeight, selectedShape, currentSort]);
 
   useEffect(() => { loadProducts(); }, [loadProducts]);
 
