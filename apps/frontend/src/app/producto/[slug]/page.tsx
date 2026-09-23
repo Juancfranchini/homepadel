@@ -8,6 +8,7 @@ import { useProductVariants } from './useProductVariants';
 import { useProductoActions } from './useProductoActions';
 import { deriveProductDisplay } from './deriveProductDisplay';
 import ProductGallery from './components/ProductGallery';
+import ProductDescription from './components/ProductDescription';
 import ProductInfoColumn from './ProductInfoColumn';
 import PaymentModal from './components/PaymentModal';
 import PerformanceSection from './components/PerformanceSection';
@@ -57,6 +58,8 @@ export default function ProductoPage() {
           />
         </div>
       </div>
+
+      <ProductDescription description={product.description} />
 
       {display.showPerformance && <PerformanceSection stats={display.performanceStats} specs={display.specs} />}
 
