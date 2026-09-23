@@ -62,3 +62,10 @@ export class CreatePreferenceDto {
 }
 
 export type ShippingData = ShippingDto;
+
+export class ConfirmOrderDto {
+  @ApiProperty()
+  @IsString()
+  @MaxLength(60)
+  orderNumber: string;
+}

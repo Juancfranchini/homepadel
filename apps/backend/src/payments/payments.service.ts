@@ -1,10 +1,11 @@
-﻿import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
+﻿import { Injectable, Logger, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import * as crypto from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { PricingService, ResolvedItem } from '../pricing/pricing.service';
 import { CouponsService } from '../coupons/coupons.service';
 import { CreatePreferenceDto, ShippingData } from './dto/create-preference.dto';
 import { enviarCompraAMeta } from './payments.meta';
+import { verificarFirma } from './payments.signature';
 import * as bcrypt from 'bcrypt';
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
@@ -271,68 +272,145 @@ export class PaymentsService {
     }
 
     try {
-      const accessToken = await this.getMPAccessToken();
-      const response = await fetch('https://api.mercadopago.com/v1/payments/' + paymentId, {
-        headers: { 'Authorization': 'Bearer ' + accessToken },
-      });
-      const payment = await response.json();
+      const payment = await this.consultarPago(paymentId);
 
-      if (payment.status !== 'approved') {
-        this.logger.log(`Pago ${paymentId} en estado "${payment.status}": no se registra la venta.`);
+      if (payment?.status !== 'approved') {
+        this.logger.log(`Pago ${paymentId} en estado "${payment?.status}": no se registra la venta.`);
         return { received: true };
       }
 
-      const ref = payment.external_reference;
-      const email = payment.payer?.email || '';
-      const name = payment.payer?.first_name || 'Cliente MP';
-
-      let user = await this.prisma.user.findUnique({ where: { email } });
-      if (!user && email) {
-        // P4 - Password con bcrypt
-        const randomPassword = 'mp_' + Math.random().toString(36).slice(2) + Date.now();
-        const hashed = await bcrypt.hash(randomPassword, 10);
-        user = await this.prisma.user.create({
-          data: { email, name, password: hashed, role: 'CUSTOMER' },
-        });
-      }
-
-      // Buscar la orden pendiente creada en createPreference, con sus ítems:
-      // hacen falta para descontar el stock ahora que el pago se confirmó.
-      // Si el pago viniera sin referencia, `contains: undefined` haría que
-      // Prisma ignore el filtro y devuelva cualquier orden: se daría por
-      // pagada una ajena. Por eso se exige la referencia.
-      const pendingOrder = ref
-        ? await this.prisma.order.findFirst({
-            where: { notes: { contains: ref } },
-            include: { items: { include: { product: { select: { name: true } } } } },
-          })
-        : null;
-
-      if (pendingOrder) {
-        await this.settlePaidOrder(pendingOrder, payment, user, email, name, paymentId);
-      } else {
-        this.logger.warn(
-          `Pago ${paymentId} aprobado sin orden pendiente para la referencia "${ref ?? 'ausente'}": se registra como venta suelta.`,
-        );
-        await this.createFallbackPaidOrder(payment, user, email, name);
-      }
-
-      await enviarCompraAMeta(this.prisma, {
-        payment,
-        orderNumber: pendingOrder?.number || 'HP-' + Date.now(),
-        items: pendingOrder?.items.map((item) => ({
-          productId: item.productId,
-          quantity: item.quantity,
-          price: item.price,
-        })) ?? [],
-        email,
-        frontendUrl: this.FRONTEND_URL,
-      });
+      await this.liquidarPagoAprobado(payment);
     } catch (err) {
       this.logger.error(`Error procesando el aviso del pago ${paymentId}: ${err}`);
     }
 
     return { received: true };
+  }
+
+  /** Consulta un pago puntual en Mercado Pago. */
+  private async consultarPago(paymentId: string): Promise<any> {
+    const accessToken = await this.getMPAccessToken();
+    const respuesta = await fetch('https://api.mercadopago.com/v1/payments/' + paymentId, {
+      headers: { Authorization: 'Bearer ' + accessToken },
+    });
+    return respuesta.json();
+  }
+
+  /**
+   * Registra la venta de un pago que Mercado Pago ya dio por aprobado.
+   *
+   * Es el mismo trabajo para las dos vías por las que nos podemos enterar de
+   * un pago —el aviso de Mercado Pago y la consulta que hacemos nosotros—,
+   * así que vive en un solo lugar. Es idempotente: si el pago ya quedó
+   * registrado, no vuelve a descontar stock ni a consumir el cupón.
+   */
+  private async liquidarPagoAprobado(payment: any): Promise<'registrado' | 'ya-estaba'> {
+    const paymentId = String(payment.id);
+
+    const yaRegistrado = await this.prisma.order.findFirst({
+      where: { notes: { contains: paymentId } },
+    });
+    if (yaRegistrado) {
+      this.logger.log(`Pago ya procesado, se ignora: ${paymentId}`);
+      return 'ya-estaba';
+    }
+
+    const ref = payment.external_reference;
+    const email = payment.payer?.email || '';
+    const name = payment.payer?.first_name || 'Cliente MP';
+
+    let user = email ? await this.prisma.user.findUnique({ where: { email } }) : null;
+    if (!user && email) {
+      // P4 - Password con bcrypt
+      const randomPassword = 'mp_' + Math.random().toString(36).slice(2) + Date.now();
+      const hashed = await bcrypt.hash(randomPassword, 10);
+      user = await this.prisma.user.create({ data: { email, name, password: hashed, role: 'CUSTOMER' } });
+    }
+
+    // La orden pendiente se creó en createPreference y trae sus ítems: hacen
+    // falta para descontar el stock ahora que el pago se confirmó. Si el pago
+    // viniera sin referencia, `contains: undefined` haría que Prisma ignore
+    // el filtro y devuelva una orden cualquiera: se daría por pagada una
+    // ajena. Por eso se exige la referencia.
+    const pendingOrder = ref
+      ? await this.prisma.order.findFirst({
+          where: { notes: { contains: ref } },
+          include: { items: { include: { product: { select: { name: true } } } } },
+        })
+      : null;
+
+    if (pendingOrder) {
+      await this.settlePaidOrder(pendingOrder, payment, user, email, name, paymentId);
+    } else {
+      this.logger.warn(
+        `Pago ${paymentId} aprobado sin orden pendiente para la referencia "${ref ?? 'ausente'}": se registra como venta suelta.`,
+      );
+      await this.createFallbackPaidOrder(payment, user, email, name);
+    }
+
+    await enviarCompraAMeta(this.prisma, {
+      payment,
+      orderNumber: pendingOrder?.number || 'HP-' + Date.now(),
+      items: pendingOrder?.items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        price: item.price,
+      })) ?? [],
+      email,
+      frontendUrl: this.FRONTEND_URL,
+    });
+
+    return 'registrado';
+  }
+
+  /**
+   * Confirma una orden preguntándole a Mercado Pago, sin esperar su aviso.
+   *
+   * El aviso (webhook) es un solo canal de entrega y puede fallar —de hecho
+   * viene fallando: la firma no valida y las órdenes quedan en PENDING para
+   * siempre, con el stock sin descontar y el cupón sin consumir—. Acá el
+   * servidor consulta la API de Mercado Pago por la referencia de la orden y
+   * la registra si encuentra un pago aprobado.
+   *
+   * El navegador solo manda un número de orden: no puede afirmar que algo se
+   * pagó. Quién decide es Mercado Pago, con el token del vendedor. Conocer un
+   * número de orden ajeno no sirve para darla por pagada — solo dispara la
+   * misma consulta que haríamos igual.
+   */
+  async confirmarOrden(orderNumber: string): Promise<{ status: string; confirmada: boolean }> {
+    const orden = await this.prisma.order.findUnique({ where: { number: orderNumber } });
+    if (!orden) throw new NotFoundException('No encontramos esa orden.');
+    if (orden.status !== 'PENDING') return { status: orden.status, confirmada: false };
+
+    const ref = this.parseNotes(orden.notes).externalReference;
+    if (typeof ref !== 'string' || !ref) {
+      this.logger.warn(`La orden ${orderNumber} no tiene referencia de pago: no se puede consultar.`);
+      return { status: orden.status, confirmada: false };
+    }
+
+    try {
+      const accessToken = await this.getMPAccessToken();
+      const respuesta = await fetch(
+        'https://api.mercadopago.com/v1/payments/search?external_reference=' + encodeURIComponent(ref),
+        { headers: { Authorization: 'Bearer ' + accessToken }, signal: AbortSignal.timeout(8000) },
+      );
+
+      if (!respuesta.ok) {
+        this.logger.warn(`Mercado Pago no respondió la búsqueda de ${orderNumber} (HTTP ${respuesta.status}).`);
+        return { status: orden.status, confirmada: false };
+      }
+
+      const { results } = await respuesta.json();
+      const aprobado = (results || []).find((p: any) => p.status === 'approved');
+      if (!aprobado) return { status: orden.status, confirmada: false };
+
+      const resultado = await this.liquidarPagoAprobado(aprobado);
+      this.logger.log(`Orden ${orderNumber} confirmada por consulta directa (${resultado}).`);
+      return { status: 'PAID', confirmada: resultado === 'registrado' };
+    } catch (err) {
+      this.logger.error(`Error consultando el pago de la orden ${orderNumber}: ${err}`);
+      return { status: orden.status, confirmada: false };
+    }
   }
 
   private async settlePaidOrder(
@@ -470,68 +548,26 @@ export class PaymentsService {
       return true;
     }
 
-    if (!signature) {
+    const resultado = verificarFirma(paymentId, signature, xRequestId, secret);
+
+    if (resultado.motivo === 'sin-firma') {
       this.logger.error('Aviso de pago sin cabecera x-signature.');
-      return false;
-    }
-
-    // La cabecera trae pares separados por coma: ts=... , v1=...
-    const parts = new Map(
-      signature.split(',').map((chunk) => {
-        const [name, ...rest] = chunk.split('=');
-        return [name.trim(), rest.join('=').trim()] as const;
-      }),
-    );
-
-    const ts = parts.get('ts');
-    const received = parts.get('v1');
-    if (!ts || !received) {
+    } else if (resultado.motivo === 'formato-inesperado') {
       this.logger.error('Cabecera x-signature con formato inesperado.');
-      return false;
-    }
-
-    const id = /^[a-z0-9]+$/i.test(paymentId) ? paymentId.toLowerCase() : paymentId;
-    const candidatos = this.manifiestosPosibles(id, ts, xRequestId);
-    const valid = candidatos.some((manifest) => this.coincide(manifest, secret, received));
-
-    if (!valid) {
+    } else if (!resultado.valida) {
       // El detalle importa: sin él, "firma inválida" no distingue un secreto
       // equivocado de un manifiesto mal armado. No se registra el secreto,
       // solo su longitud, que alcanza para detectar un pegado incompleto.
       this.logger.error(
         `Firma inválida en el aviso del pago ${paymentId}. ` +
-        `Manifiestos probados: ${candidatos.map((m) => `"${m}"`).join(' | ')}. ` +
+        `Manifiestos probados: ${resultado.manifiestosProbados.map((m) => `"${m}"`).join(' | ')}. ` +
         `Longitud del secreto configurado: ${secret.length}.`,
       );
     }
-    return valid;
+
+    return resultado.valida;
   }
 
-  /**
-   * Mercado Pago firma `id:<data.id>;request-id:<x-request-id>;ts:<ts>;`, pero
-   * omite los tramos cuyo valor no tiene.
-   *
-   * Se prueban las dos variantes porque `x-request-id` es una cabecera que
-   * los proxies suelen reescribir o inyectar: si la plataforma donde corre el
-   * backend la cambia, el valor que llega acá no es el que firmó Mercado Pago
-   * y el HMAC no coincide nunca, por más que el secreto esté bien.
-   *
-   * Aceptar la variante sin `request-id` no debilita nada: sigue haciendo
-   * falta el secreto, y la firma sigue atada al pago y a la marca de tiempo.
-   */
-  private manifiestosPosibles(id: string, ts: string, xRequestId: string): string[] {
-    const manifiestos: string[] = [];
-    if (xRequestId) manifiestos.push(`id:${id};request-id:${xRequestId};ts:${ts};`);
-    manifiestos.push(`id:${id};ts:${ts};`);
-    return manifiestos;
-  }
 
-  /** Comparación de tiempo constante: no filtra información por su duración. */
-  private coincide(manifest: string, secret: string, received: string): boolean {
-    const expected = crypto.createHmac('sha256', secret).update(manifest).digest('hex');
-    const a = Buffer.from(expected, 'utf8');
-    const b = Buffer.from(received, 'utf8');
-    return a.length === b.length && crypto.timingSafeEqual(a, b);
-  }
 
 }

@@ -53,6 +53,22 @@ const DESCONTINUADA = {
   variants: [] as any[],
 };
 
+/**
+ * Cada producto tiene una variante "base" persistida que no se ofrece: no
+ * tiene talle ni color y no aparece en ningún selector. Al contarla como si
+ * fuera elegible, el checkout rechazaba el pedido pidiendo elegir una
+ * variante inexistente, y ningún producto agregado desde el catálogo se podía
+ * comprar.
+ */
+const ZAPATILLAS = {
+  name: 'Zapatillas Bullpadel Vertex 23',
+  price: 10,
+  salePrice: null,
+  stock: 1,
+  active: true,
+  variants: [{ id: 'zap-base', stock: 1, active: true, isDefault: true }],
+};
+
 const REMERA = {
   name: 'Remera Home Pádel',
   price: 45000,
@@ -68,6 +84,7 @@ const CATALOGO: Record<string, any> = {
   'pal-3': DESCONTINUADA,
   'pal-4': OFERTA_INVALIDA,
   'rem-1': REMERA,
+  'zap-1': ZAPATILLAS,
 };
 
 /**
@@ -83,9 +100,16 @@ function fakePrisma(catalogo = CATALOGO) {
         if (!producto) return null;
 
         const filtroVariante = select?.variants?.where;
+        // Se respeta el filtro tal como lo manda el servicio, incluido el
+        // que descarta las variantes base: si no, la prueba no distingue
+        // entre pedir todas las variantes y pedir solo las elegibles.
         const variants = filtroVariante?.id
           ? producto.variants.filter((v: any) => v.id === filtroVariante.id)
-          : producto.variants;
+          : producto.variants.filter(
+              (v: any) =>
+                (filtroVariante?.active === undefined || v.active === filtroVariante.active) &&
+                (filtroVariante?.isDefault === undefined || !!v.isDefault === filtroVariante.isDefault),
+            );
 
         return { ...producto, variants };
       }),
@@ -174,6 +198,25 @@ describe('PricingService — productos con talles', () => {
     const service = new PricingService(fakePrisma());
     await expect(
       service.resolveItems([{ productId: 'rem-1', quantity: 1 }]),
+    ).rejects.toBeInstanceOf(ConflictException);
+  });
+
+  it('deja comprar un producto cuya única variante es la base, sin elegir nada', async () => {
+    // El caso que rompía el checkout: unas zapatillas sin talles, agregadas
+    // desde el catálogo, se rechazaban con "Debes seleccionar una variante"
+    // porque se contaba la variante base, que no se ofrece en ningún lado.
+    const service = new PricingService(fakePrisma());
+    const [item] = await service.resolveItems([{ productId: 'zap-1', quantity: 1 }]);
+
+    expect(item.name).toBe('Zapatillas Bullpadel Vertex 23');
+    expect(item.price).toBe(10);
+    expect(item.variantId).toBeUndefined();
+  });
+
+  it('sigue tomando el stock del producto cuando solo hay variante base', async () => {
+    const service = new PricingService(fakePrisma());
+    await expect(
+      service.resolveItems([{ productId: 'zap-1', quantity: 2 }]),
     ).rejects.toBeInstanceOf(ConflictException);
   });
 

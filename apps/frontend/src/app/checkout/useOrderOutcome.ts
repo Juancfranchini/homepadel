@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { trackOrder } from '@/lib/api';
+import { confirmPayment, trackOrder } from '@/lib/api';
 
 export type Resultado = 'cargando' | 'aprobado' | 'acreditando' | 'pendiente' | 'rechazado';
 
@@ -54,6 +54,14 @@ export function useOrderOutcome(porDefecto: Resultado): { resultado: Resultado; 
 
     const consultar = async () => {
       try {
+        // Se le pide al servidor que consulte el pago en Mercado Pago y
+        // registre la venta. No se espera el aviso de Mercado Pago: es un
+        // solo canal de entrega y si falla la orden queda en pendiente para
+        // siempre, con el stock sin descontar. Si el aviso ya llegó, esto no
+        // hace nada: la confirmación es idempotente.
+        await confirmPayment(orderNumber).catch(() => {});
+        if (!vigente) return;
+
         const orden = await trackOrder(orderNumber);
         if (!vigente) return;
 

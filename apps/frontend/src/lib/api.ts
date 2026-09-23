@@ -63,6 +63,13 @@ export const trackOrder = (orderNumber: string) =>
 export const createPaymentPreference = (data: Record<string, unknown>) =>
   api.post('/payments/create-preference', data).then((r) => r.data);
 
+/**
+ * Pide al servidor que consulte el pago en Mercado Pago y registre la venta.
+ * No espera el aviso de Mercado Pago, que es un solo canal y puede fallar.
+ */
+export const confirmPayment = (orderNumber: string) =>
+  api.post('/payments/confirm', { orderNumber }).then((r) => r.data);
+
 // Banners
 export const getBanners = () =>
   api.get('/banners').then((r) => r.data);

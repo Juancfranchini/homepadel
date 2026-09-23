@@ -51,8 +51,14 @@ export class PricingService {
           where: { id: item.productId },
           select: {
             name: true, price: true, salePrice: true, stock: true, active: true,
+            // Sin variante elegida solo interesan las que el comprador
+            // podría haber elegido: activas y que no sean la "base". Cada
+            // producto tiene una variante base persistida que no se muestra
+            // en ningún lado; al contarla, este bloque daba por hecho que
+            // faltaba elegir una y rechazaba el pedido. Cualquier producto
+            // agregado desde el catálogo era incomprable.
             variants: {
-              where: item.variantId ? { id: item.variantId } : undefined,
+              where: item.variantId ? { id: item.variantId } : { active: true, isDefault: false },
               select: { id: true, stock: true, active: true },
             },
           },

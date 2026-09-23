@@ -1,7 +1,7 @@
 ﻿import { Controller, Post, Get, Body, Query, Headers, Logger } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { PaymentsService } from './payments.service';
-import { CreatePreferenceDto } from './dto/create-preference.dto';
+import { CreatePreferenceDto, ConfirmOrderDto } from './dto/create-preference.dto';
 
 @ApiTags('Payments')
 @Controller('payments')
@@ -13,6 +13,19 @@ export class PaymentsController {
   @Post('create-preference')
   async createPreference(@Body() dto: CreatePreferenceDto) {
     return this.paymentsService.createPreference(dto);
+  }
+
+  /**
+   * Confirma una orden preguntándole a Mercado Pago, sin esperar su aviso.
+   *
+   * Lo llama la tienda cuando el comprador vuelve del pago. El navegador solo
+   * manda un número de orden: quién decide si está pagada es Mercado Pago,
+   * consultado desde el servidor con el token del vendedor. Conocer un número
+   * ajeno no sirve para dar nada por pagado.
+   */
+  @Post('confirm')
+  async confirm(@Body() dto: ConfirmOrderDto) {
+    return this.paymentsService.confirmarOrden(dto.orderNumber);
   }
 
   /**
