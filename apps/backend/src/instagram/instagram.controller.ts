@@ -11,26 +11,17 @@ import { Role } from '@prisma/client';
 export class InstagramController {
   constructor(private readonly instagramService: InstagramService) {}
 
+  /**
+   * Publicaciones que se muestran en el inicio.
+   *
+   * Solo las que tienen imagen. Había un respaldo acá que devolvía la
+   * publicación igual, con `thumbnail_url` vacío: en el inicio eso se veía
+   * como un recuadro negro que enlazaba a Instagram pero no mostraba nada.
+   * También inventaba el nombre de usuario cuando no estaba configurado.
+   */
   @Get('posts')
-  async getPosts(@Query('limit') limit: string) {
-    const posts = await this.instagramService.getRecentPosts(parseInt(limit) || 6);
-    if (posts.length > 0) return posts;
-
-    // Fallback: devolver thumbnails de URLs manuales
-    const config = await this.instagramService.getConfig();
-    if (config?.manualUrls && Array.isArray(config.manualUrls)) {
-      return config.manualUrls.slice(0, parseInt(limit) || 6).map((item: any) => {
-        const url = typeof item === 'string' ? item : item.url;
-        const thumbnail = typeof item === 'object' ? item.thumbnail : null;
-        return {
-          id: url,
-          url: url,
-          thumbnail_url: thumbnail || this.instagramService.getThumbnailUrl(url) || '',
-          author_name: config.username || '@home.padel',
-        };
-      });
-    }
-    return [];
+  getPosts(@Query('limit') limit: string) {
+    return this.instagramService.getRecentPosts(parseInt(limit) || 6);
   }
 
   @Post('test-connection')

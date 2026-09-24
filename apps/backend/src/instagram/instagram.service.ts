@@ -95,13 +95,11 @@ export class InstagramService {
     }
   }
 
-  getThumbnailUrl(postUrl: string): string | null {
-    const match = postUrl.match(/instagram\.com\/(reel|p)\/([a-zA-Z0-9_-]+)/);
-    if (!match) return null;
-    const type = match[1];
-    const code = match[2];
-    return `https://www.instagram.com/${type}/${code}/media/?size=m`;
-  }
+  // Había acá un `getThumbnailUrl` que armaba la dirección
+  // `instagram.com/<tipo>/<código>/media/?size=m`. Instagram dejó de servir esa
+  // ruta hace años: siempre devolvía una imagen rota, y encima no reconocía los
+  // enlaces que incluyen el usuario. La miniatura sale de la que sube la
+  // tienda, o de la API de Meta si está configurada.
 
   async testConnection(appId: string, appSecret: string, postUrl: string): Promise<boolean> {
     try {

@@ -33,14 +33,14 @@ function MetaApiSection({ register, testing, testResult, onTest }: { register: a
           {testing ? 'Probando...' : 'Probar conexion'}
         </button>
       </div>
-      <p className="text-xs text-gray-400">Necesitas crear una App en Meta for Developers y activar oEmbed Read. Si la API no funciona, las imagenes subidas manualmente se usaran en el frontend.</p>
+      <p className="text-xs text-gray-400">Opcional. Las publicaciones se muestran con la imagen que subis vos, sin necesidad de esto. Configurar una App de Meta solo sirve para traer la miniatura automaticamente en las que no tengan imagen propia.</p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div><label className={labelClass}>Meta App ID</label><input {...register('appId')} className={inputClass} placeholder="123456789" /></div>
         <div><label className={labelClass}>Meta App Secret</label><input {...register('appSecret')} type="password" className={inputClass} placeholder="abc123..." /></div>
       </div>
       {testResult === false && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-700">
-          La API de Meta no esta funcionando. Las miniaturas subidas manualmente se usaran en el frontend. Si no hay miniatura, se mostrara un card degradado.
+          La API de Meta no responde. No es un problema: alcanza con subir la imagen de cada publicacion.
         </div>
       )}
     </div>
@@ -83,7 +83,7 @@ function PostUrlsSection({ register, fields, uploadingIndex, fileRef, onAppend, 
           <Plus className="w-3 h-3" />Agregar
         </button>
       </div>
-      <p className="text-xs text-gray-400">Pega las URLs de Instagram. Si la API no funciona, subi una imagen miniatura para que se muestre en el frontend. Sin imagen, se mostrara un card degradado.</p>
+      <p className="text-xs text-gray-400">Pega el enlace de cada publicacion y subi su imagen. La imagen es obligatoria: sin ella la publicacion no se muestra en la tienda. No hace falta configurar nada con Meta.</p>
       <input type="file" ref={fileRef} className="hidden" accept="image/*" onChange={onFileChange} />
       <div className="space-y-3">
         {fields.map((field, index) => (
