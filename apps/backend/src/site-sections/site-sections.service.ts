@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import * as fs from 'fs';
 import * as path from 'path';
 
-export type SectionKey = 'categories' | 'meta_pixel' | 'hero' | 'benefits' | 'promo_destacada' | 'featured_products' | 'banners' | 'about' | 'testimonials' | 'brands' | 'instagram' | 'final_message' | 'branding' | 'settings' | 'trust_bottom' | 'politica_devolución' | 'envíos' | 'medios_pago' | 'terminos' | 'privacidad' | 'contacto' | 'talles' | 'reviews_info' | 'payment_methods' | 'email_settings' | 'shipping_rates';
+export type SectionKey = 'categories' | 'meta_pixel' | 'hero' | 'benefits' | 'promo_destacada' | 'featured_products' | 'banners' | 'about' | 'testimonials' | 'brands' | 'instagram' | 'final_message' | 'branding' | 'settings' | 'trust_bottom' | 'politica_devolución' | 'envíos' | 'medios_pago' | 'terminos' | 'privacidad' | 'contacto' | 'talles' | 'reviews_info' | 'payment_methods' | 'email_settings' | 'shipping_rates' | 'formatos_paleta';
 
 @Injectable()
 export class SiteSectionsService {
@@ -176,6 +176,9 @@ export class SiteSectionsService {
           contactForm: true
         }
       },
+      // Imagen por formato de paleta, para mostrar al lado del texto en el
+      // catálogo. Vacío a propósito: sin imagen cargada no se dibuja nada.
+      'formatos_paleta': { Diamante: '', Lagrima: '', Redondo: '' },
       'reviews_info': { content: 'Las opiniones son realizadas por clientes verificados que compraron el producto. El promedio se calcula en base a todas las resenas aprobadas.' },
       about: {
         title: 'Somos Home Padel',

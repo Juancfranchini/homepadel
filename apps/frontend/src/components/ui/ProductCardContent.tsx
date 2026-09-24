@@ -2,7 +2,7 @@
 import { ShoppingCart } from 'lucide-react';
 import { Product } from '@/types';
 import ProductCardPricing from './ProductCardPricing';
-import ShapeIcon from './ShapeIcon';
+import ShapeImage from './ShapeImage';
 
 interface Props {
   product: Product;
@@ -29,7 +29,7 @@ export default function ProductCardContent({ product, isMadeToOrder, hasDiscount
 
       {product.shape && (
         <p className="flex items-center gap-1.5 text-[13px] text-[#A1A1AA]">
-          <ShapeIcon shape={product.shape} size={15} className="flex-shrink-0 text-[#B7D31A]" />
+          <ShapeImage shape={product.shape} />
           Formato: {product.shape}
         </p>
       )}

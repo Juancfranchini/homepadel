@@ -36,6 +36,7 @@ import {
   FileCheck,
   X,
   ShoppingCart,
+  Shapes,
 } from 'lucide-react';
 
 interface NavItem {
@@ -91,6 +92,7 @@ const navGroups: NavGroup[] = [
       { label: 'Medios de Pago', href: '/configuracion/medios-pago', icon: CreditCard },
       { label: 'Politica de Devolucion', href: '/configuracion/paginas', icon: RefreshCw },
       { label: 'Guia de Talles', href: '/configuracion/talles', icon: Ruler },
+      { label: 'Formatos de paleta', href: '/configuracion/formatos-paleta', icon: Shapes },
       { label: 'Envios', href: '/configuracion/envios', icon: Truck },
       { label: 'Tarifa de Envío', href: '/configuracion/tarifa-envio', icon: Banknote },
       { label: 'Politica de Privacidad', href: '/configuracion/privacidad', icon: UserCheck },
