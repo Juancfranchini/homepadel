@@ -13,6 +13,9 @@ const nextConfig: NextConfig = {
       // Railway (backend en producción)
       { protocol: 'https', hostname: '*.railway.app' },
       { protocol: 'https', hostname: '*.up.railway.app' },
+      // Catálogo y foto oficial de respaldo para el pack de overgrips.
+      { protocol: 'https', hostname: 'res.cloudinary.com' },
+      { protocol: 'https', hostname: 'www.bullpadel.com' },
     ],
   },
 };
