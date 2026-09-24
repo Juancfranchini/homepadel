@@ -1,6 +1,11 @@
+'use client';
+
 import Link from 'next/link';
+import { Truck } from 'lucide-react';
 import { Product } from '@/types';
 import { formatPrice, getDiscountPercent, getImageUrl } from '@/lib/utils';
+import { formatDiscountPercent, getInstallmentTerms } from '@/lib/productPricing';
+import { useShippingRates } from '@/hooks/useShippingRates';
 
 interface Props {
   products: Product[];
@@ -8,12 +13,17 @@ interface Props {
 }
 
 export default function CatalogList({ products, onAddToCart }: Props) {
+  const { freeShippingThreshold, isLoaded } = useShippingRates();
+
   return (
     <div className="space-y-3">
       {products.map((product) => {
-        const hasDiscount = product.effectivePrice < product.price;
+        const isMadeToOrder = product.isMadeToOrder === true;
+        const hasDiscount = !isMadeToOrder && product.effectivePrice < product.price;
         const discountPct = hasDiscount ? getDiscountPercent(product.price, product.effectivePrice) : 0;
-        const displayPrice = product.effectivePrice;
+        const displayPrice = isMadeToOrder ? product.price : product.effectivePrice;
+        const installments = isMadeToOrder ? null : getInstallmentTerms(product);
+        const freeShipping = isLoaded && !isMadeToOrder && displayPrice >= freeShippingThreshold;
         const imageUrl = product.images?.length > 0 ? getImageUrl(product.images[0]) : null;
 
         return (
@@ -36,18 +46,13 @@ export default function CatalogList({ products, onAddToCart }: Props) {
                 <Link href={'/producto/' + product.slug} className="text-[#F7F6F7] font-semibold text-sm hover:text-[#B7D31A] transition-colors line-clamp-2">
                   {product.name}
                 </Link>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-lg font-bold text-[#F7F6F7]">{formatPrice(displayPrice)}</span>
-                  {hasDiscount && (
-                    <span className="text-xs text-[#8A8A85] line-through">{formatPrice(product.price)}</span>
-                  )}
-                  {hasDiscount && (
-                    <span className="text-xs font-bold text-red-400">-{discountPct}%</span>
-                  )}
+                {hasDiscount && <p className="text-[11px] text-[#8A8A85] line-through mt-1">{formatPrice(product.price)}</p>}
+                <div className="flex items-baseline gap-2">
+                  <span className="text-xl font-black text-[#F7F6F7]">{formatPrice(displayPrice)}</span>
+                  {hasDiscount && <span className="text-xs font-bold text-[#B7D31A]">{formatDiscountPercent(discountPct)}% OFF</span>}
                 </div>
-                {displayPrice >= 10000 && (
-                  <p className="text-xs text-[#C7C7C0] mt-0.5">Hasta 9 cuotas sin interes</p>
-                )}
+                {installments && <p className="text-xs text-[#B7D31A] mt-0.5">{installments.count} cuotas de {formatPrice(installments.amount)} {installments.interestText}</p>}
+                {freeShipping && <p className="flex items-center gap-1 text-xs font-bold text-[#B7D31A] mt-1"><Truck size={12} />Envío gratis</p>}
               </div>
 
               {/* Boton */}

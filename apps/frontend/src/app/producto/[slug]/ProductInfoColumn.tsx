@@ -31,7 +31,7 @@ export default function ProductInfoColumn({ product, display, activeVariants, va
       <ProductStars rating={product.rating || 0} count={product.reviewCount || 0} />
       <ProductPrice
         productName={product.name}
-        displayPrice={display.displayPrice} hasDiscount={display.hasDiscount}
+        displayPrice={display.displayPrice} hasDiscount={display.hasDiscount} discountPct={display.discountPct}
         originalPrice={product.price} cuota={display.cuota} installments={display.installments}
         hasInstallmentsInterest={display.hasInstallmentsInterest} installmentsInterest={display.installmentsInterest}
         onShowPaymentModal={() => actions.setShowPaymentModal(true)}
