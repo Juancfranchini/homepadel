@@ -8,6 +8,7 @@ import { useAuthStore } from '@/store/authStore';
 import { usePathname } from 'next/navigation';
 import BrandLogo from '@/components/ui/BrandLogo';
 import CartDrawer from '@/components/cart/CartDrawer';
+import CartAddedFeedback from '@/components/cart/CartAddedFeedback';
 import MobileNav from './MobileNav';
 import { isNavActive } from './navState';
 
@@ -26,7 +27,7 @@ export default function Header() {
   const { user } = useAuthStore();
   const [cartOpen, setCartOpen] = useState(false);
 
-  const totalItems = useCartStore((s) => s.totalItems);
+  const itemCount = useCartStore((state) => state.items.reduce((total, item) => total + item.quantity, 0));
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -86,9 +87,9 @@ export default function Header() {
             )}
             <button onClick={() => setCartOpen(true)} className="relative text-[#C7C7C0] hover:text-[#F7F6F7] transition-colors" aria-label="Carrito">
               <ShoppingCart size={20} />
-              {mounted && totalItems() > 0 && (
-                <span className="absolute -top-2 -right-2 bg-[#B7D31A] text-[#050606] text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                  {totalItems() > 9 ? '9+' : totalItems()}
+              {mounted && itemCount > 0 && (
+                <span key={itemCount} className="cart-badge-pop absolute -right-2.5 -top-2.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#E53935] px-1 text-[10px] font-black text-white shadow-[0_0_0_2px_#101416]">
+                  {itemCount > 99 ? '99+' : itemCount}
                 </span>
               )}
             </button>
@@ -99,6 +100,7 @@ export default function Header() {
       </header>
 
       <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+      <CartAddedFeedback />
     </>
   );
 }
