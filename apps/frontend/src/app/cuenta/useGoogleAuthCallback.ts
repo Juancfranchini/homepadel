@@ -25,6 +25,13 @@ export function useGoogleAuthCallback() {
     const fragment = new URLSearchParams(window.location.hash.slice(1));
     const token = fragment.get('token');
 
+    if (status === 'off' || status === 'error') {
+      try {
+        sessionStorage.removeItem('homepadel-checkout-resume-after-auth');
+      } catch {
+        // El mensaje de error se puede mostrar aunque el storage esté bloqueado.
+      }
+    }
     if (status === 'off') setError('El inicio con Google todavía no está configurado.');
     if (status === 'error') setError('No pudimos iniciar sesión con Google. Intentá nuevamente.');
     if (!token) return;

@@ -9,6 +9,22 @@ import { validateCoupon } from '@/lib/api';
 import CarritoItemRow from './CarritoItemRow';
 import CarritoSummary from './CarritoSummary';
 import CarritoEmpty from './CarritoEmpty';
+import AuthModal from '@/components/auth/AuthModal';
+import { useCheckoutNavigation } from '@/components/auth/useCheckoutNavigation';
+
+function couponErrorMessage(error: unknown): string {
+  const message = (error as { response?: { data?: { message?: unknown } } })?.response?.data?.message;
+  return typeof message === 'string' ? message : 'Cupón inválido o vencido';
+}
+
+function CartTitle({ count, onClear }: { count: number; onClear: () => void }) {
+  return (
+    <div className="flex items-center justify-between mb-8">
+      <h1 className="text-2xl font-black uppercase tracking-tight text-[#F7F6F7]">Mi carrito ({count} {count === 1 ? 'producto' : 'productos'})</h1>
+      <button onClick={onClear} className="text-sm text-red-500 hover:text-red-400 transition-colors flex items-center gap-1"><X size={14} /> Vaciar carrito</button>
+    </div>
+  );
+}
 
 export default function CarritoPage() {
   const { items, removeItem, updateQuantity, clearCart, totalItems, totalPrice, couponCode, setCoupon } = useCartStore();
@@ -17,6 +33,7 @@ export default function CarritoPage() {
   const [couponError, setCouponError] = useState('');
   const [couponLoading, setCouponLoading] = useState(false);
   const { flatRate, freeShippingThreshold } = useShippingRates();
+  const checkoutNavigation = useCheckoutNavigation();
 
   const subtotal = totalPrice();
   // Estimación para mostrar en pantalla — el monto que se cobra de verdad lo
@@ -43,10 +60,10 @@ export default function CarritoPage() {
       const data = await validateCoupon(couponInput.trim(), subtotal);
       setCoupon(data.code);
       setDiscount(data.discountAmount ?? 0);
-    } catch (err: any) {
+    } catch (error: unknown) {
       setCoupon(null);
       setDiscount(0);
-      setCouponError(err?.response?.data?.message || 'Cupón inválido o vencido');
+      setCouponError(couponErrorMessage(error));
     } finally {
       setCouponLoading(false);
     }
@@ -59,14 +76,7 @@ export default function CarritoPage() {
   return (
     <div className="min-h-screen bg-[#050606]">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-black uppercase tracking-tight text-[#F7F6F7]">
-            Mi carrito ({totalItems()} {totalItems() === 1 ? 'producto' : 'productos'})
-          </h1>
-          <button onClick={clearCart} className="text-sm text-red-500 hover:text-red-400 transition-colors flex items-center gap-1">
-            <X size={14} /> Vaciar carrito
-          </button>
-        </div>
+        <CartTitle count={totalItems()} onClear={clearCart} />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-3">
@@ -91,9 +101,16 @@ export default function CarritoPage() {
             shippingCost={shippingCost}
             freeShippingThreshold={freeShippingThreshold}
             total={total}
+            onCheckout={checkoutNavigation.handleCheckout}
           />
         </div>
       </div>
+      <AuthModal
+        isOpen={checkoutNavigation.authOpen}
+        returnTo="/checkout"
+        onClose={checkoutNavigation.closeAuth}
+        onAuthenticated={checkoutNavigation.handleAuthenticated}
+      />
     </div>
   );
 }

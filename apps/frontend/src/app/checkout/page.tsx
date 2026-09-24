@@ -20,6 +20,8 @@ import CheckoutPersonalDataFields from './CheckoutPersonalDataFields';
 import CheckoutShippingFields from './CheckoutShippingFields';
 import CheckoutPaymentMethodFields from './CheckoutPaymentMethodFields';
 import CheckoutOrderSummary from './CheckoutOrderSummary';
+import AuthModal from '@/components/auth/AuthModal';
+import { useCheckoutAuthGate } from './useCheckoutAuthGate';
 
 const checkoutSchema = z.object({
   name: z.string().min(2, 'El nombre es requerido'),
@@ -34,9 +36,20 @@ const checkoutSchema = z.object({
 
 type CheckoutFormData = z.infer<typeof checkoutSchema>;
 
+function CheckoutHeader() {
+  return (
+    <div className="mb-8">
+      <p className="text-xs text-[#8A8A85] mb-1">
+        <Link href="/" className="hover:text-[#F7F6F7]">Inicio</Link> / <Link href="/carrito" className="hover:text-[#F7F6F7]">Carrito</Link> / <span className="text-[#C7C7C0]">Checkout</span>
+      </p>
+      <h1 className="text-2xl font-black uppercase tracking-tight text-[#F7F6F7]">Completar compra</h1>
+    </div>
+  );
+}
+
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart, couponCode, setCoupon, updateQuantity, removeItem } = useCartStore();
-  const { user } = useAuthStore();
+  const { user, setAuth } = useAuthStore();
   const { mercadopago, visa, mastercard, amex } = usePaymentMethods();
   const { flatRate, freeShippingThreshold } = useShippingRates();
   const [discount, setDiscount] = useState(0);
@@ -64,6 +77,7 @@ export default function CheckoutPage() {
 
   useCheckoutDraft(watch, reset);
   useInitiateCheckout(items, subtotal);
+  const checkoutAuth = useCheckoutAuthGate(user, setAuth, handleSubmit, onSubmit);
 
 
   // Queda registrado el carrito de quien deja su email y no termina la compra,
@@ -88,21 +102,14 @@ export default function CheckoutPage() {
     return <CheckoutEmptyCart />;
   }
 
-  if (orderSuccess) {
-    return <CheckoutSuccessScreen orderNumber={orderNumber} />;
-  }
+  if (orderSuccess) return <CheckoutSuccessScreen orderNumber={orderNumber} />;
 
   return (
     <div className="min-h-screen bg-[#050606]">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <p className="text-xs text-[#8A8A85] mb-1">
-            <Link href="/" className="hover:text-[#F7F6F7]">Inicio</Link> / <Link href="/carrito" className="hover:text-[#F7F6F7]">Carrito</Link> / <span className="text-[#C7C7C0]">Checkout</span>
-          </p>
-          <h1 className="text-2xl font-black uppercase tracking-tight text-[#F7F6F7]">Completar compra</h1>
-        </div>
+        <CheckoutHeader />
 
-        <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <form onSubmit={checkoutAuth.handleProtectedSubmit} noValidate>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
               <CheckoutPersonalDataFields register={register} errors={errors} />
@@ -133,6 +140,12 @@ export default function CheckoutPage() {
           </div>
         </form>
       </div>
+      <AuthModal
+        isOpen={checkoutAuth.authOpen}
+        returnTo="/checkout"
+        onClose={checkoutAuth.closeAuth}
+        onAuthenticated={checkoutAuth.handleAuthenticated}
+      />
     </div>
   );
 }

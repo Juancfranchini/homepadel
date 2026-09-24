@@ -31,6 +31,8 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 interface Props {
   onAuth: (user: User, token: string) => void;
   initialError?: string;
+  embedded?: boolean;
+  returnTo?: string;
 }
 
 function apiErrorMessage(error: unknown, fallback: string): string {
@@ -38,7 +40,7 @@ function apiErrorMessage(error: unknown, fallback: string): string {
   return error.response?.data?.message || fallback;
 }
 
-export default function CuentaAuthForm({ onAuth, initialError = '' }: Props) {
+export default function CuentaAuthForm({ onAuth, initialError = '', embedded = false, returnTo = '/cuenta' }: Props) {
   const [isRegister, setIsRegister] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [apiError, setApiError] = useState(initialError);
@@ -63,14 +65,14 @@ export default function CuentaAuthForm({ onAuth, initialError = '' }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-[#050606] flex items-center justify-center py-12">
-      <div className="w-full max-w-md mx-4">
+    <div className={embedded ? 'w-full' : 'min-h-screen bg-[#050606] flex items-center justify-center py-12'}>
+      <div className={embedded ? 'w-full' : 'w-full max-w-md mx-4'}>
         <div className="flex rounded-xl overflow-hidden border border-[#1A1F21] mb-6">
           <button onClick={() => { setIsRegister(false); setApiError(''); }} className={'flex-1 py-3 text-sm font-bold transition-colors ' + (!isRegister ? 'bg-[#B7D31A] text-[#050606]' : 'bg-transparent text-[#8A8A85] hover:text-[#F7F6F7]')}>Iniciar sesión</button>
           <button onClick={() => { setIsRegister(true); setApiError(''); }} className={'flex-1 py-3 text-sm font-bold transition-colors ' + (isRegister ? 'bg-[#B7D31A] text-[#050606]' : 'bg-transparent text-[#8A8A85] hover:text-[#F7F6F7]')}>Crear cuenta</button>
         </div>
 
-        <div className="bg-[#0F1111] rounded-2xl border border-[#B7D31A]/20 p-8">
+        <div className={'bg-[#0F1111] rounded-2xl border border-[#B7D31A]/20 ' + (embedded ? 'p-6 sm:p-8' : 'p-8')}>
           <div className="text-center mb-6">
             <Link href="/" aria-label="Home Padel" className="inline-block">
               <BrandLogo size="lg" />
@@ -81,7 +83,7 @@ export default function CuentaAuthForm({ onAuth, initialError = '' }: Props) {
 
           {apiError && <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 mb-4"><p className="text-red-500 text-sm">{apiError}</p></div>}
 
-          <GoogleAuthButton />
+          <GoogleAuthButton returnTo={returnTo} />
           <div className="my-5 flex items-center gap-3" aria-hidden="true">
             <span className="h-px flex-1 bg-[#252A2C]" />
             <span className="text-xs uppercase tracking-wider text-[#8A8A85]">o con email</span>

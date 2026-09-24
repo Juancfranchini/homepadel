@@ -5,6 +5,8 @@ import { X, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import CartDrawerItem from './CartDrawerItem';
 import CartDrawerFooter from './CartDrawerFooter';
+import AuthModal from '@/components/auth/AuthModal';
+import { useCheckoutNavigation } from '@/components/auth/useCheckoutNavigation';
 
 interface Props {
   isOpen: boolean;
@@ -13,6 +15,7 @@ interface Props {
 
 export default function CartDrawer({ isOpen, onClose }: Props) {
   const { items, removeItem, updateQuantity, totalItems, totalPrice } = useCartStore();
+  const checkoutNavigation = useCheckoutNavigation(onClose);
 
   useEffect(() => {
     if (isOpen) {
@@ -72,8 +75,14 @@ export default function CartDrawer({ isOpen, onClose }: Props) {
           )}
         </div>
 
-        {items.length > 0 && <CartDrawerFooter subtotal={subtotal} onClose={onClose} />}
+        {items.length > 0 && <CartDrawerFooter subtotal={subtotal} onClose={onClose} onCheckout={checkoutNavigation.handleCheckout} />}
       </div>
+      <AuthModal
+        isOpen={checkoutNavigation.authOpen}
+        returnTo="/checkout"
+        onClose={checkoutNavigation.closeAuth}
+        onAuthenticated={checkoutNavigation.handleAuthenticated}
+      />
     </div>
   );
 }

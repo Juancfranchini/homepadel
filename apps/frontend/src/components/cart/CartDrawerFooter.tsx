@@ -5,9 +5,10 @@ import { formatPrice } from '@/lib/utils';
 interface Props {
   subtotal: number;
   onClose: () => void;
+  onCheckout: () => void;
 }
 
-export default function CartDrawerFooter({ subtotal, onClose }: Props) {
+export default function CartDrawerFooter({ subtotal, onClose, onCheckout }: Props) {
   return (
     <div className="border-t border-[#0D0F0F] px-6 py-4 space-y-3">
       <div className="flex items-center justify-between">
@@ -25,14 +26,14 @@ export default function CartDrawerFooter({ subtotal, onClose }: Props) {
           Ver carrito
           <ArrowRight className="w-4 h-4" />
         </Link>
-        <Link
-          href="/checkout"
-          onClick={onClose}
+        <button
+          type="button"
+          onClick={onCheckout}
           className="flex items-center justify-center gap-1 px-4 py-3 rounded-lg text-sm font-semibold bg-[#B7D31A] text-[#050606] hover:bg-[#c8e81f] transition-colors"
         >
           Finalizar compra
           <ShoppingBag className="w-4 h-4" />
-        </Link>
+        </button>
       </div>
     </div>
   );

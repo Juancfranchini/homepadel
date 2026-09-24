@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { Tag, ArrowRight } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
 
@@ -16,11 +15,12 @@ interface Props {
   shippingCost: number;
   freeShippingThreshold: number;
   total: number;
+  onCheckout: () => void;
 }
 
 export default function CarritoSummary({
   couponInput, onCouponInputChange, onApplyCoupon, couponLoading, couponError,
-  couponCode, discount, subtotal, shippingCost, freeShippingThreshold, total,
+  couponCode, discount, subtotal, shippingCost, freeShippingThreshold, total, onCheckout,
 }: Props) {
   return (
     <div className="lg:col-span-1">
@@ -53,9 +53,9 @@ export default function CarritoSummary({
           <div className="flex justify-between font-black text-base pt-2 border-t border-[#0D0F0F] text-[#F7F6F7]"><span>Total</span><span>{formatPrice(total)}</span></div>
         </div>
 
-        <Link href="/checkout" className="mt-5 w-full flex items-center justify-center gap-2 bg-[#B7D31A] text-[#050606] py-4 rounded-xl font-black text-sm uppercase tracking-wider hover:bg-[#c8e81f] transition-colors">
+        <button type="button" onClick={onCheckout} className="mt-5 w-full flex items-center justify-center gap-2 bg-[#B7D31A] text-[#050606] py-4 rounded-xl font-black text-sm uppercase tracking-wider hover:bg-[#c8e81f] transition-colors">
           Finalizar compra <ArrowRight size={15} />
-        </Link>
+        </button>
 
         <p className="text-[#8A8A85] text-xs text-center mt-3">Envío gratis en compras superiores a {formatPrice(freeShippingThreshold)}</p>
       </div>
