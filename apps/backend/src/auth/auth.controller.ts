@@ -7,6 +7,7 @@ import { GoogleOAuthService } from './google-oauth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { GoogleCallbackDto, GoogleStartDto } from './dto/google-oauth.dto';
+import { ChangePasswordDto, ForgotPasswordDto, ResetPasswordDto } from './dto/password.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
@@ -96,13 +97,13 @@ export class AuthController {
   @Post('forgot-password')
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @ApiOperation({ summary: 'Solicitar recuperacion de contraseña' })
-  forgotPassword(@Body() body: { email: string }) {
+  forgotPassword(@Body() body: ForgotPasswordDto) {
     return this.authService.forgotPassword(body.email);
   }
 
   @Post('reset-password')
   @ApiOperation({ summary: 'Resetear contraseña con token' })
-  resetPassword(@Body() body: { token: string; newPassword: string }) {
+  resetPassword(@Body() body: ResetPasswordDto) {
     return this.authService.resetPassword(body.token, body.newPassword);
   }
 
@@ -112,7 +113,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Cambiar contraseña' })
   changePassword(
     @CurrentUser() user: AuthenticatedUser,
-    @Body() body: { currentPassword: string; newPassword: string },
+    @Body() body: ChangePasswordDto,
   ) {
     return this.authService.changePassword(user.id, body.currentPassword, body.newPassword);
   }

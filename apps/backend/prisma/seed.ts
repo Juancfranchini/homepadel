@@ -1,17 +1,20 @@
-﻿import { PrismaClient, Role, OrderStatus } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+﻿import { PrismaClient, Role } from '@prisma/client';
+import { hashPassword } from '../src/common/security/password';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log(' Iniciando seed...\n');
 
-  //  Admin 
-  const hash = await bcrypt.hash('admin123', 10);
+  //  Admin
+  const adminEmail = process.env.SEED_ADMIN_EMAIL || 'admin@homepadel.com';
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD;
+  if (!adminPassword) throw new Error('Falta SEED_ADMIN_PASSWORD para crear el usuario administrador');
+  const hash = await hashPassword(adminPassword);
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@homepadel.com' },
+    where: { email: adminEmail },
     update: {},
-    create: { email: 'admin@homepadel.com', password: hash, name: 'Admin', role: Role.ADMIN },
+    create: { email: adminEmail, password: hash, name: 'Admin', role: Role.ADMIN },
   });
   console.log(' Admin:', admin.email);
 
