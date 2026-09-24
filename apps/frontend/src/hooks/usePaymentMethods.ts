@@ -17,6 +17,7 @@ interface PaymentMethodsData {
   mastercard?: PaymentMethodConfig;
   amex?: PaymentMethodConfig;
   ca?: PaymentMethodConfig;
+  correo_argentino?: PaymentMethodConfig;
   oca?: PaymentMethodConfig;
   andreani?: PaymentMethodConfig;
 }
@@ -46,7 +47,7 @@ export function usePaymentMethods() {
     visa: { ...(data?.visa || {}), active: false },
     mastercard: { ...(data?.mastercard || {}), active: false },
     amex: { ...(data?.amex || {}), active: false },
-    ca: data?.ca || { active: true },
+    ca: data?.ca || data?.correo_argentino || { active: true },
     oca: data?.oca || { active: true },
     andreani: data?.andreani || { active: true },
     isLoaded: data !== null,

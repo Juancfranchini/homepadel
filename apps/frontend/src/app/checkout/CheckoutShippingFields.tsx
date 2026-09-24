@@ -3,6 +3,7 @@
 import { Truck } from 'lucide-react';
 import { UseFormRegister, FieldErrors } from 'react-hook-form';
 import { CheckoutFormData } from './checkoutSchema';
+import { formatPrice } from '@/lib/utils';
 
 const inputClass = 'w-full bg-[#161818] border border-[#1A1F21] rounded-lg px-4 py-2.5 text-sm text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A]/60 transition-colors';
 const errorInputClass = 'w-full bg-[#161818] border border-red-500/50 rounded-lg px-4 py-2.5 text-sm text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-red-500 transition-colors';
@@ -16,9 +17,17 @@ const PROVINCES = [
 interface Props {
   register: UseFormRegister<CheckoutFormData>;
   errors: FieldErrors<CheckoutFormData>;
+  selectedMethod: CheckoutFormData['shippingMethod'];
+  correoCost: number;
 }
 
-export default function CheckoutShippingFields({ register, errors }: Props) {
+const SHIPPING_OPTIONS: { value: CheckoutFormData['shippingMethod']; label: string; detail: string }[] = [
+  { value: 'correo_argentino', label: 'Correo Argentino', detail: 'Opción principal' },
+  { value: 'andreani', label: 'Andreani', detail: 'Costo a coordinar por WhatsApp' },
+  { value: 'oca', label: 'OCA', detail: 'Costo a coordinar por WhatsApp' },
+];
+
+export default function CheckoutShippingFields({ register, errors, selectedMethod, correoCost }: Props) {
   return (
     <div className="bg-[#0F1111] rounded-2xl border border-[#B7D31A]/20 p-6">
       <div className="flex items-center gap-3 mb-5">
@@ -49,6 +58,19 @@ export default function CheckoutShippingFields({ register, errors }: Props) {
           </select>
           {errors.province && <p className="text-red-500 text-xs mt-1">{String(errors.province.message)}</p>}
         </div>
+      </div>
+      <div className="mt-5 pt-5 border-t border-[#1A1F21]">
+        <p className="block text-xs font-semibold text-[#8A8A85] uppercase tracking-wide mb-3">Transportista</p>
+        <div className="grid gap-2 sm:grid-cols-3">
+          {SHIPPING_OPTIONS.map((option) => (
+            <label key={option.value} className={'rounded-xl border p-3 cursor-pointer transition-colors ' + (selectedMethod === option.value ? 'border-[#B7D31A] bg-[#B7D31A]/5' : 'border-[#1A1F21] hover:border-[#B7D31A]/30')}>
+              <input {...register('shippingMethod')} type="radio" value={option.value} className="sr-only" />
+              <span className="block text-sm font-bold text-[#F7F6F7]">{option.label}</span>
+              <span className="block text-[11px] text-[#8A8A85] mt-1">{option.value === 'correo_argentino' ? (correoCost === 0 ? 'Envío gratis' : formatPrice(correoCost)) : option.detail}</span>
+            </label>
+          ))}
+        </div>
+        {selectedMethod !== 'correo_argentino' && <p className="text-xs text-amber-300 mt-3">No se realizará ningún cobro: enviaremos el detalle del pedido por WhatsApp para coordinar el costo.</p>}
       </div>
     </div>
   );

@@ -8,6 +8,7 @@ export const checkoutSchema = z.object({
   city: z.string().trim().min(2, 'La ciudad es requerida'),
   province: z.string().min(2, 'La provincia es requerida'),
   postalCode: z.string().trim().min(4, 'El código postal es requerido').max(8, 'Código postal inválido'),
+  shippingMethod: z.enum(['correo_argentino', 'andreani', 'oca']),
   paymentMethod: z.enum(['mercadopago', 'transfer'], { required_error: 'Seleccioná un método de pago' }),
 });
 

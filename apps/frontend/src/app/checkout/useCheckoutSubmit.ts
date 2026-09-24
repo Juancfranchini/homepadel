@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { CartItem } from '@/types';
 import { createOrder, createPaymentPreference } from '@/lib/api';
+import { buildWhatsappUrl } from '@/hooks/useSiteSettings';
+import { formatPrice } from '@/lib/utils';
 import { CheckoutFormData } from './checkoutSchema';
 
 /**
@@ -19,9 +21,27 @@ interface Params {
   items: CartItem[];
   couponCode: string | null;
   clearCart: () => void;
+  whatsapp?: string;
 }
 
-export function useCheckoutSubmit({ items, couponCode, clearCart }: Params) {
+function shippingCoordinationMessage(data: CheckoutFormData, items: CartItem[], couponCode: string | null): string {
+  const carrier = data.shippingMethod === 'andreani' ? 'Andreani' : 'OCA';
+  const itemLines = items.map((item) => {
+    const variant = [item.variantSize, item.variantColor, item.variantDimensions].filter(Boolean).join(' / ');
+    return `- ${item.quantity} x ${item.product.name}${variant ? ` (${variant})` : ''}`;
+  });
+  const subtotal = items.reduce((sum, item) => sum + item.product.effectivePrice * item.quantity, 0);
+  return [
+    `Hola, quiero coordinar el envío por ${carrier}.`, '', 'Detalle del pedido:', ...itemLines,
+    `Subtotal de productos: ${formatPrice(subtotal)}`,
+    ...(couponCode ? [`Cupón aplicado: ${couponCode}`] : []), '',
+    `Cliente: ${data.name}`, `Email: ${data.email}`, `Teléfono: ${data.phone}`,
+    `Entrega: ${data.street}, ${data.city}, ${data.province} (${data.postalCode})`,
+    '', 'Quedo a la espera del costo de envío y los pasos para terminar la compra.',
+  ].join('\n');
+}
+
+export function useCheckoutSubmit({ items, couponCode, clearCart, whatsapp }: Params) {
   const [orderError, setOrderError] = useState('');
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
@@ -51,6 +71,7 @@ export function useCheckoutSubmit({ items, couponCode, clearCart }: Params) {
           province: data.province,
           postalCode: data.postalCode,
           phone: data.phone,
+          carrier: 'correo_argentino',
         },
         couponCode: couponCode || undefined,
       });
@@ -85,6 +106,15 @@ export function useCheckoutSubmit({ items, couponCode, clearCart }: Params) {
 
   const onSubmit = async (data: CheckoutFormData) => {
     setOrderError('');
+    if (data.shippingMethod !== 'correo_argentino') {
+      const url = buildWhatsappUrl(whatsapp, shippingCoordinationMessage(data, items, couponCode));
+      if (!url) {
+        setOrderError('No hay un número de WhatsApp configurado para coordinar este envío. Elegí Correo Argentino o contactanos por email.');
+        return;
+      }
+      window.location.href = url;
+      return;
+    }
     if (data.paymentMethod === 'transfer') {
       await submitTransfer(data);
       return;

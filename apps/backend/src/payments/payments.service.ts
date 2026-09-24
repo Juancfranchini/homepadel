@@ -186,6 +186,7 @@ export class PaymentsService {
             buyerEmail: payer.email,
             buyerName: payer.name,
             buyerPhone: shipping?.phone || null,
+            shippingCarrier: shipping?.carrier || 'correo_argentino',
           }),
           items: { create: resolvedItems.map((item) => ({
             productId: item.productId,

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ChevronRight, Lock } from 'lucide-react';
+import { ChevronRight, Lock, MessageCircle } from 'lucide-react';
 import { CartItem } from '@/types';
 import { formatPrice } from '@/lib/utils';
 import { getItemKey } from '@/store/cartStore';
@@ -17,13 +17,14 @@ interface Props {
   orderError: string;
   isSubmitting: boolean;
   paymentMethod: 'mercadopago' | 'transfer';
+  shippingToCoordinate: boolean;
   onQuantityChange: (itemKey: string, quantity: number) => void;
   onRemove: (itemKey: string) => void;
 }
 
 export default function CheckoutOrderSummary({
   items, subtotal, discount, couponCode, shippingCost, total, orderError, isSubmitting,
-  paymentMethod, onQuantityChange, onRemove,
+  paymentMethod, shippingToCoordinate, onQuantityChange, onRemove,
 }: Props) {
   const vacio = items.length === 0;
 
@@ -59,15 +60,15 @@ export default function CheckoutOrderSummary({
         <div className="border-t border-[#0D0F0F] pt-4 space-y-2 text-sm">
           <div className="flex justify-between text-[#C7C7C0]"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
           {discount > 0 && <div className="flex justify-between text-green-500"><span>Descuento{couponCode ? ' (' + couponCode + ')' : ''}</span><span>-{formatPrice(discount)}</span></div>}
-          <div className="flex justify-between text-[#C7C7C0]"><span>Envío</span><span className={shippingCost === 0 ? 'text-green-500 font-semibold' : ''}>{shippingCost === 0 ? 'GRATIS' : formatPrice(shippingCost)}</span></div>
-          <div className="flex justify-between font-black text-base pt-2 border-t border-[#0D0F0F] text-[#F7F6F7]"><span>Total</span><span>{formatPrice(total)}</span></div>
+          <div className="flex justify-between text-[#C7C7C0]"><span>Envío</span><span className={shippingToCoordinate ? 'text-amber-300 font-semibold' : shippingCost === 0 ? 'text-green-500 font-semibold' : ''}>{shippingToCoordinate ? 'A coordinar' : shippingCost === 0 ? 'GRATIS' : formatPrice(shippingCost)}</span></div>
+          <div className="flex justify-between font-black text-base pt-2 border-t border-[#0D0F0F] text-[#F7F6F7]"><span>{shippingToCoordinate ? 'Total sin envío' : 'Total'}</span><span>{formatPrice(total)}</span></div>
         </div>
 
         {orderError && <p className="text-red-500 text-xs text-center mt-3">{orderError}</p>}
 
         <button type="submit" disabled={isSubmitting || vacio}
           className="mt-5 w-full flex items-center justify-center gap-2 bg-[#B7D31A] text-[#050606] py-4 rounded-xl font-black text-sm uppercase tracking-wider hover:bg-[#c8e81f] transition-colors disabled:opacity-70 disabled:cursor-not-allowed">
-          {isSubmitting ? 'Procesando...' : <><Lock size={15} /> {paymentMethod === 'transfer' ? 'Solicitar compra' : 'Ir a Mercado Pago'} <ChevronRight size={15} /></>}
+          {isSubmitting ? 'Procesando...' : shippingToCoordinate ? <><MessageCircle size={15} /> Coordinar por WhatsApp <ChevronRight size={15} /></> : <><Lock size={15} /> {paymentMethod === 'transfer' ? 'Solicitar compra' : 'Ir a Mercado Pago'} <ChevronRight size={15} /></>}
         </button>
         <p className="text-[#8A8A85] text-xs text-center mt-3">Tus datos estan protegidos con encriptacion SSL</p>
       </div>

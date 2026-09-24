@@ -138,7 +138,7 @@ async function main() {
     { category: 'COMPRAS', question: 'Puedo modificar o cancelar mi pedido?', answer: 'Podes cancelar sin costo dentro de las 2 horas posteriores a la compra. Luego contactanos por WhatsApp.', order: 2 },
     { category: 'COMPRAS', question: 'Ofrecen factura A?', answer: 'Si, emitimos factura A para responsables inscriptos. Solicitarla al momento de la compra.', order: 3 },
     { category: 'ENVIOS', question: 'Cuanto tarda el envio?', answer: 'CABA y GBA: 24-72hs. Interior: 3-7 dias habiles segun la provincia.', order: 4 },
-    { category: 'ENVIOS', question: 'Cual es el costo de envio?', answer: 'Envio gratis en compras superiores a .000. Para compras menores, el costo se calcula en el checkout segun tu codigo postal.', order: 5 },
+    { category: 'ENVIOS', question: 'Cual es el costo de envio?', answer: 'Correo Argentino usa una tarifa plana que se muestra en el carrito y puede ser gratis desde el monto configurado. Andreani y OCA tienen costo a coordinar por WhatsApp.', order: 5 },
     { category: 'ENVIOS', question: 'Hacen envios al exterior?', answer: 'Por el momento solo realizamos envios dentro de Argentina.', order: 6 },
     { category: 'PAGOS', question: 'Que metodos de pago aceptan?', answer: 'Trabajamos exclusivamente con Mercado Pago Checkout Pro. Dentro de Mercado Pago podes elegir tarjeta, saldo u otros medios disponibles.', order: 7 },
     { category: 'PAGOS', question: 'Ofrecen cuotas sin interes?', answer: 'Las cuotas disponibles para cada producto se muestran antes de comprar y se confirman al ingresar a Mercado Pago.', order: 8 },

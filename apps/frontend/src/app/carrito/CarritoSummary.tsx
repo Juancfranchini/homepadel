@@ -48,7 +48,7 @@ export default function CarritoSummary({
           <div className="flex justify-between text-[#C7C7C0]"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
           {discount > 0 && <div className="flex justify-between text-green-500"><span>Descuento</span><span>-{formatPrice(discount)}</span></div>}
           <div className="flex justify-between text-[#C7C7C0]">
-            <span>Envío</span>
+            <span>Correo Argentino (estimado)</span>
             <span className={shippingCost === 0 ? 'text-green-500 font-semibold' : ''}>{shippingCost === 0 ? 'GRATIS' : formatPrice(shippingCost)}</span>
           </div>
           <div className="flex justify-between font-black text-base pt-2 border-t border-[#0D0F0F] text-[#F7F6F7]"><span>Total</span><span>{formatPrice(total)}</span></div>
@@ -58,7 +58,7 @@ export default function CarritoSummary({
           Finalizar compra <ArrowRight size={15} />
         </button>
 
-        <p className="text-[#8A8A85] text-xs text-center mt-3">Envío gratis en compras superiores a {formatPrice(freeShippingThreshold)}</p>
+        <p className="text-[#8A8A85] text-xs text-center mt-3">Correo Argentino gratis en compras superiores a {formatPrice(freeShippingThreshold)}. Andreani y OCA se coordinan por WhatsApp.</p>
       </div>
     </div>
   );

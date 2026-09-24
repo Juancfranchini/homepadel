@@ -8,6 +8,7 @@ import { useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
 import { usePaymentMethods } from '@/hooks/usePaymentMethods';
 import { useShippingRates } from '@/hooks/useShippingRates';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { validateCoupon } from '@/lib/api';
 import { useInitiateCheckout } from './useInitiateCheckout';
 import { useCheckoutSubmit } from './useCheckoutSubmit';
@@ -15,9 +16,7 @@ import { limpiarBorrador, useCheckoutDraft } from './useCheckoutDraft';
 import { useAbandonedCart } from './useAbandonedCart';
 import CheckoutEmptyCart from './CheckoutEmptyCart';
 import CheckoutSuccessScreen from './CheckoutSuccessScreen';
-import CheckoutPersonalDataFields from './CheckoutPersonalDataFields';
-import CheckoutShippingFields from './CheckoutShippingFields';
-import CheckoutPaymentMethodFields from './CheckoutPaymentMethodFields';
+import CheckoutFormSections from './CheckoutFormSections';
 import CheckoutOrderSummary from './CheckoutOrderSummary';
 import AuthModal from '@/components/auth/AuthModal';
 import { useCheckoutAuthGate } from './useCheckoutAuthGate';
@@ -39,15 +38,15 @@ export default function CheckoutPage() {
   const { user, setAuth } = useAuthStore();
   const { mercadopago, transferencia } = usePaymentMethods();
   const { flatRate, freeShippingThreshold } = useShippingRates();
+  const settings = useSiteSettings();
   const [discount, setDiscount] = useState(0);
-  const { onSubmit, orderError, orderSuccess, orderNumber } = useCheckoutSubmit({ items, couponCode, clearCart });
+  const { onSubmit, orderError, orderSuccess, orderNumber } = useCheckoutSubmit({ items, couponCode, clearCart, whatsapp: settings.whatsapp || settings.phone });
 
   const subtotal = totalPrice();
   // Estimación para mostrar en pantalla — el servidor recalcula envío y
   // descuento al crear la orden o la preferencia de pago (P1/P2); esto nunca
   // es lo que se cobra de verdad.
-  const shippingCost = subtotal >= freeShippingThreshold ? 0 : flatRate;
-  const total = subtotal + shippingCost - discount;
+  const correoCost = subtotal >= freeShippingThreshold ? 0 : flatRate;
 
   useEffect(() => {
     if (couponCode && subtotal > 0) {
@@ -59,7 +58,7 @@ export default function CheckoutPage() {
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, watch, reset } = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
-    defaultValues: { name: user?.name || '', email: user?.email || '', paymentMethod: 'mercadopago' },
+    defaultValues: { name: user?.name || '', email: user?.email || '', shippingMethod: 'correo_argentino', paymentMethod: 'mercadopago' },
   });
 
   useCheckoutDraft(watch, reset, transferencia.active === true);
@@ -71,6 +70,10 @@ export default function CheckoutPage() {
   // para que la tienda pueda recuperarlo desde el backoffice.
   useAbandonedCart(items, { email: watch('email'), name: watch('name'), phone: watch('phone') }, orderSuccess);
   const selectedPayment = watch('paymentMethod');
+  const selectedShipping = watch('shippingMethod');
+  const shippingToCoordinate = selectedShipping !== 'correo_argentino';
+  const shippingCost = shippingToCoordinate ? 0 : correoCost;
+  const total = subtotal + shippingCost - discount;
 
   // Si el carrito se vacía editándolo acá, el formulario NO se desmonta: al
   // hacerlo se perdía todo lo cargado. La pantalla de carrito vacío queda
@@ -97,17 +100,11 @@ export default function CheckoutPage() {
 
         <form onSubmit={checkoutAuth.handleProtectedSubmit} noValidate>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-6">
-              <CheckoutPersonalDataFields register={register} errors={errors} />
-              <CheckoutShippingFields register={register} errors={errors} />
-              <CheckoutPaymentMethodFields
-                register={register}
-                errors={errors}
-                selectedPayment={selectedPayment}
-                mercadopago={mercadopago}
-                transferencia={transferencia}
-              />
-            </div>
+            <CheckoutFormSections
+              register={register} errors={errors} selectedShipping={selectedShipping} selectedPayment={selectedPayment}
+              correoCost={correoCost} shippingToCoordinate={shippingToCoordinate}
+              mercadopago={mercadopago} transferencia={transferencia}
+            />
 
             <CheckoutOrderSummary
               items={items}
@@ -119,6 +116,7 @@ export default function CheckoutPage() {
               orderError={orderError}
               isSubmitting={isSubmitting}
               paymentMethod={selectedPayment}
+              shippingToCoordinate={shippingToCoordinate}
               onQuantityChange={updateQuantity}
               onRemove={removeItem}
             />
