@@ -1,12 +1,27 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
+interface PublicChannelIdentity {
+  title: string;
+  url: string;
+}
+
+export function shouldExposePublicChannel(channel: PublicChannelIdentity): boolean {
+  if (process.env.MESSENGER_CHANNEL_ENABLED === 'true') return true;
+  const isMessenger = /messenger/i.test(channel.title) || /(^|\/\/)(www\.)?m\.me\//i.test(channel.url);
+  return !isMessenger;
+}
+
 @Injectable()
 export class ContactChannelsService {
   constructor(private prisma: PrismaService) {}
 
-  findAll() {
-    return this.prisma.contactChannel.findMany({ where: { active: true }, orderBy: { order: 'asc' } });
+  async findAll() {
+    const channels = await this.prisma.contactChannel.findMany({
+      where: { active: true },
+      orderBy: { order: 'asc' },
+    });
+    return channels.filter(shouldExposePublicChannel);
   }
 
   findAllAdmin() {
