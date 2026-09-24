@@ -65,9 +65,11 @@ export default function NewsletterSection({ title, text }: Props) {
                 <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 sm:gap-2">
                   <input
                     type="email"
+                    autoComplete="email"
+                    aria-label="Email para suscribirte"
                     value={email}
                     onChange={(e) => { setEmail(e.target.value); if (status === 'error') setStatus('idle'); }}
-                    placeholder="Tu email"
+                    placeholder="Escribí tu email"
                     required
                     disabled={status === 'loading'}
                     className="flex-1 min-w-0 bg-[#11181D] border border-[#B7D31A]/30 rounded-xl px-3 sm:px-4 py-3 text-sm text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A] focus:ring-1 focus:ring-[#B7D31A]/20 transition-all disabled:opacity-50"

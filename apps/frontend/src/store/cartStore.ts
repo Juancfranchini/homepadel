@@ -6,6 +6,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { CartItem, Product } from '@/types';
 import { trackMetaEvent } from '@/lib/metaPixel';
+import { useCartFeedbackStore } from './cartFeedbackStore';
 
 interface CartStore {
   items: CartItem[];
@@ -38,6 +39,7 @@ export const useCartStore = create<CartStore>()(
           currency: 'ARS',
           contents: [{ id: product.id, quantity, item_price: product.effectivePrice }],
         });
+        useCartFeedbackStore.getState().showAdded(product.name, quantity);
 
         if (existing) {
           set((state) => ({

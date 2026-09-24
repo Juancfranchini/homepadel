@@ -17,7 +17,8 @@ export default function CatalogSearch({ value, onChange, onSubmit }: Props) {
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="Buscar producto..."
+          aria-label="Buscar productos"
+          placeholder="Escribí el producto que buscás"
           className="w-56 pl-10 pr-4 py-2 bg-[#0A0F12] border border-[#B7D31A]/50 rounded-lg text-sm text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A] focus:ring-1 focus:ring-[#B7D31A]/20 transition-all"
         />
       </div>

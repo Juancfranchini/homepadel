@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
-import { UseFormReset, UseFormWatch, FieldValues } from 'react-hook-form';
+import { UseFormReset, UseFormWatch } from 'react-hook-form';
+import { CheckoutFormData } from './checkoutSchema';
 
 const CLAVE = 'homepadel-checkout';
 
@@ -25,7 +26,7 @@ export function limpiarBorrador(): void {
   }
 }
 
-function leerBorrador<T extends FieldValues>(): Partial<T> | null {
+function leerBorrador(): Partial<CheckoutFormData> | null {
   try {
     const crudo = sessionStorage.getItem(CLAVE);
     if (!crudo) return null;
@@ -36,13 +37,16 @@ function leerBorrador<T extends FieldValues>(): Partial<T> | null {
   }
 }
 
-export function useCheckoutDraft<T extends FieldValues>(watch: UseFormWatch<T>, reset: UseFormReset<T>): void {
+export function useCheckoutDraft(watch: UseFormWatch<CheckoutFormData>, reset: UseFormReset<CheckoutFormData>, allowTransfer = false): void {
   useEffect(() => {
-    const borrador = leerBorrador<T>();
+    const borrador = leerBorrador();
     // `keepDefaultValues` deja intactos el nombre y el email que vienen de la
     // sesión si el borrador no los trae.
-    if (borrador) reset(borrador as T, { keepDefaultValues: true });
-  }, [reset]);
+    if (borrador) {
+      const paymentMethod = allowTransfer && borrador.paymentMethod === 'transfer' ? 'transfer' : 'mercadopago';
+      reset({ ...borrador, paymentMethod }, { keepDefaultValues: true });
+    }
+  }, [allowTransfer, reset]);
 
   useEffect(() => {
     const suscripcion = watch((valores) => {

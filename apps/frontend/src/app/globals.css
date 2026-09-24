@@ -123,6 +123,16 @@ p, a, li, span, input, textarea, select, label { font-weight: 400; }
   animation: slideInRight 0.3s ease-out;
 }
 
+@keyframes cartBadgePop {
+  0% { transform: scale(0.6); }
+  60% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.cart-badge-pop {
+  animation: cartBadgePop 0.3s ease-out;
+}
+
 .bg-waves {
   position: relative;
   overflow: hidden;

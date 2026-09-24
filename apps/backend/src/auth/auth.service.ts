@@ -1,10 +1,10 @@
 ﻿import { Injectable, UnauthorizedException, ConflictException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { EmailService } from '../email/email.service';
+import { hashPassword, verifyPassword } from '../common/security/password';
 
 @Injectable()
 export class AuthService {
@@ -18,7 +18,7 @@ export class AuthService {
     const exists = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (exists) throw new ConflictException('El email ya esta registrado');
 
-    const hashed = await bcrypt.hash(dto.password, 10);
+    const hashed = await hashPassword(dto.password);
     const user = await this.prisma.user.create({
       data: { ...dto, password: hashed },
       select: { id: true, email: true, name: true, role: true },
@@ -31,7 +31,8 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (!user) throw new UnauthorizedException('Credenciales invalidas');
 
-    const valid = await bcrypt.compare(dto.password, user.password);
+    if (!user.password) throw new UnauthorizedException('Esta cuenta usa Google para ingresar');
+    const valid = await verifyPassword(dto.password, user.password);
     if (!valid) throw new UnauthorizedException('Credenciales invalidas');
 
     const { password: _, ...userData } = user;
@@ -74,7 +75,7 @@ export class AuthService {
         }
       }
 
-      const hashed = await bcrypt.hash(newPassword, 10);
+      const hashed = await hashPassword(newPassword);
       await this.prisma.user.update({ where: { id: user.id }, data: { password: hashed } });
 
       return { success: true, message: 'Contraseña actualizada correctamente' };
@@ -88,10 +89,11 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('Usuario no encontrado');
 
-    const valid = await bcrypt.compare(currentPassword, user.password);
+    if (!user.password) throw new BadRequestException('Esta cuenta no tiene una contraseña local');
+    const valid = await verifyPassword(currentPassword, user.password);
     if (!valid) throw new UnauthorizedException('Contraseña actual incorrecta');
 
-    const hashed = await bcrypt.hash(newPassword, 10);
+    const hashed = await hashPassword(newPassword);
     await this.prisma.user.update({ where: { id: userId }, data: { password: hashed } });
 
     return { success: true, message: 'Contraseña actualizada correctamente' };

@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsArray, IsOptional, IsEmail, ValidateNested, Min, MaxLength } from 'class-validator';
+import { IsString, IsNumber, IsArray, IsOptional, IsEmail, IsIn, ValidateNested, Min, MaxLength } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -29,6 +29,7 @@ class ShippingDto {
   @IsString() @MaxLength(100) province: string;
   @IsString() @MaxLength(20) postalCode: string;
   @IsString() @MaxLength(40) phone: string;
+  @IsOptional() @IsIn(['correo_argentino']) carrier?: 'correo_argentino';
 }
 
 export class CreatePreferenceDto {

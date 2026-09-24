@@ -2,17 +2,19 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { getCategories, getBrands } from '@/lib/api';
 import { Category, Brand } from '@/types';
 import MobileNavAccordion from './MobileNavAccordion';
+import { isNavActive } from './navState';
 
 interface Props {
   links: { label: string; href: string }[];
   onNavigate: () => void;
 }
 
-const enlaceHoja = 'block py-2.5 text-sm text-[#C7C7C0] transition-colors hover:text-[#B7D31A]';
-const enlaceRaiz = 'block py-3 text-sm font-semibold uppercase tracking-wide text-[#C7C7C0] transition-colors hover:text-[#F7F6F7]';
+const enlaceHoja = 'block rounded-md px-3 py-2.5 text-sm text-[#C7C7C0] transition-colors hover:bg-white/[0.05] hover:text-[#B7D31A]';
+const enlaceRaiz = 'my-0.5 block rounded-lg px-3 py-3 text-sm font-semibold uppercase tracking-wide transition-colors hover:bg-white/[0.06] hover:text-[#F7F6F7]';
 
 /**
  * Menú de navegación en móvil.
@@ -27,6 +29,7 @@ const enlaceRaiz = 'block py-3 text-sm font-semibold uppercase tracking-wide tex
 export default function MobileNav({ links, onNavigate }: Props) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
+  const pathname = usePathname();
 
   useEffect(() => {
     Promise.all([getCategories(), getBrands()])
@@ -38,11 +41,11 @@ export default function MobileNav({ links, onNavigate }: Props) {
   }, []);
 
   return (
-    <nav className="border-t border-[#0D0F0F] bg-[#050606] lg:hidden">
+    <nav className="border-t border-[#303638] bg-[#101416] shadow-2xl lg:hidden" aria-label="Navegación móvil">
       <div className="mx-auto flex max-w-7xl flex-col px-6 py-3">
         {links.map((link) =>
           link.href === '/catalogo' ? (
-            <MobileNavAccordion key={link.href} label={link.label}>
+            <MobileNavAccordion key={link.href} label={link.label} active={isNavActive(pathname, link.href)}>
               <Link href="/catalogo" className={enlaceHoja} onClick={onNavigate}>
                 Ver todo el catálogo
               </Link>
@@ -82,13 +85,24 @@ export default function MobileNav({ links, onNavigate }: Props) {
               </Link>
             </MobileNavAccordion>
           ) : (
-            <Link key={link.href} href={link.href} className={enlaceRaiz} onClick={onNavigate}>
+            <Link
+              key={link.href}
+              href={link.href}
+              aria-current={isNavActive(pathname, link.href) ? 'page' : undefined}
+              className={enlaceRaiz + (isNavActive(pathname, link.href) ? ' bg-[#B7D31A] text-[#050606]' : ' text-[#C7C7C0]')}
+              onClick={onNavigate}
+            >
               {link.label}
             </Link>
           ),
         )}
 
-        <Link href="/cuenta" className={enlaceRaiz} onClick={onNavigate}>
+        <Link
+          href="/cuenta"
+          aria-current={isNavActive(pathname, '/cuenta') ? 'page' : undefined}
+          className={enlaceRaiz + (isNavActive(pathname, '/cuenta') ? ' bg-[#B7D31A] text-[#050606]' : ' text-[#C7C7C0]')}
+          onClick={onNavigate}
+        >
           Mi cuenta
         </Link>
       </div>

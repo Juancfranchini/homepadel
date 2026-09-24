@@ -3,17 +3,9 @@
 import { useState } from 'react';
 import { CartItem } from '@/types';
 import { createOrder, createPaymentPreference } from '@/lib/api';
-
-interface CheckoutFormData {
-  name: string;
-  email: string;
-  phone: string;
-  street: string;
-  city: string;
-  province: string;
-  postalCode: string;
-  paymentMethod: 'card' | 'mercadopago' | 'transfer';
-}
+import { buildWhatsappUrl } from '@/hooks/useSiteSettings';
+import { formatPrice } from '@/lib/utils';
+import { CheckoutFormData } from './checkoutSchema';
 
 /**
  * El backend valida con class-validator, que devuelve un array de mensajes
@@ -29,12 +21,30 @@ interface Params {
   items: CartItem[];
   couponCode: string | null;
   clearCart: () => void;
+  whatsapp?: string;
 }
 
-export function useCheckoutSubmit({ items, couponCode, clearCart }: Params) {
+function shippingCoordinationMessage(data: CheckoutFormData, items: CartItem[], couponCode: string | null): string {
+  const carrier = data.shippingMethod === 'andreani' ? 'Andreani' : 'OCA';
+  const itemLines = items.map((item) => {
+    const variant = [item.variantSize, item.variantColor, item.variantDimensions].filter(Boolean).join(' / ');
+    return `- ${item.quantity} x ${item.product.name}${variant ? ` (${variant})` : ''}`;
+  });
+  const subtotal = items.reduce((sum, item) => sum + item.product.effectivePrice * item.quantity, 0);
+  return [
+    `Hola, quiero coordinar el envío por ${carrier}.`, '', 'Detalle del pedido:', ...itemLines,
+    `Subtotal de productos: ${formatPrice(subtotal)}`,
+    ...(couponCode ? [`Cupón aplicado: ${couponCode}`] : []), '',
+    `Cliente: ${data.name}`, `Email: ${data.email}`, `Teléfono: ${data.phone}`,
+    `Entrega: ${data.street}, ${data.city}, ${data.province} (${data.postalCode})`,
+    '', 'Quedo a la espera del costo de envío y los pasos para terminar la compra.',
+  ].join('\n');
+}
+
+export function useCheckoutSubmit({ items, couponCode, clearCart, whatsapp }: Params) {
+  const [orderError, setOrderError] = useState('');
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
-  const [orderError, setOrderError] = useState('');
 
   const submitMercadoPago = async (data: CheckoutFormData) => {
     try {
@@ -61,6 +71,7 @@ export function useCheckoutSubmit({ items, couponCode, clearCart }: Params) {
           province: data.province,
           postalCode: data.postalCode,
           phone: data.phone,
+          carrier: 'correo_argentino',
         },
         couponCode: couponCode || undefined,
       });
@@ -68,49 +79,48 @@ export function useCheckoutSubmit({ items, couponCode, clearCart }: Params) {
         window.location.href = pref.init_point;
         return;
       }
-      setOrderError('No se pudo iniciar el pago con Mercado Pago. Probá de nuevo o elegí otro método.');
+      setOrderError('No se pudo iniciar el pago con Mercado Pago. Probá de nuevo.');
     } catch (err) {
-      setOrderError(mensajeDeError(err, 'Error al conectar con Mercado Pago. Probá de nuevo o elegí otro método.'));
+      setOrderError(mensajeDeError(err, 'Error al conectar con Mercado Pago. Probá de nuevo.'));
     }
   };
 
-  const submitDirectOrder = async (data: CheckoutFormData) => {
+  const submitTransfer = async (data: CheckoutFormData) => {
     try {
-      const address = data.street + ', ' + data.city + ', ' + data.province + ' (' + data.postalCode + ')';
-      // Solo lo que declara CreateOrderDto en el backend: con
-      // forbidNonWhitelisted activado, un campo de más (como un `total`
-      // calculado acá) hace que el pedido entero se rechace con 400.
-      const orderData = {
-        items: items.map((i) => ({
-          productId: i.product.id,
-          quantity: i.quantity,
-          variantId: i.variantId,
-        })),
-        address,
+      const result = await createOrder({
+        paymentMethod: 'transfer',
+        items: items.map((item) => ({ productId: item.product.id, quantity: item.quantity, variantId: item.variantId })),
+        address: data.street + ', ' + data.city + ', ' + data.province + ' (' + data.postalCode + ')',
         buyerEmail: data.email,
         buyerPhone: data.phone,
         buyerName: data.name,
         couponCode: couponCode || undefined,
-      };
-      const result = await createOrder(orderData);
+      });
       setOrderNumber(result.number);
       clearCart();
       setOrderSuccess(true);
     } catch (err) {
-      // Antes, cualquier error acá se tragaba y se mostraba "pedido
-      // confirmado" con un número inventado sin que la orden existiera.
-      setOrderError(mensajeDeError(err, 'Hubo un error al procesar tu pedido. Intentá de nuevo.'));
+      setOrderError(mensajeDeError(err, 'No pudimos registrar el pedido por transferencia. Probá de nuevo.'));
     }
   };
 
   const onSubmit = async (data: CheckoutFormData) => {
     setOrderError('');
-    if (data.paymentMethod === 'mercadopago') {
-      await submitMercadoPago(data);
+    if (data.shippingMethod !== 'correo_argentino') {
+      const url = buildWhatsappUrl(whatsapp, shippingCoordinationMessage(data, items, couponCode));
+      if (!url) {
+        setOrderError('No hay un número de WhatsApp configurado para coordinar este envío. Elegí Correo Argentino o contactanos por email.');
+        return;
+      }
+      window.location.href = url;
       return;
     }
-    await submitDirectOrder(data);
+    if (data.paymentMethod === 'transfer') {
+      await submitTransfer(data);
+      return;
+    }
+    await submitMercadoPago(data);
   };
 
-  return { onSubmit, orderSuccess, orderNumber, orderError };
+  return { onSubmit, orderError, orderSuccess, orderNumber };
 }

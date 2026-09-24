@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { Tag, ArrowRight } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
 
@@ -16,11 +15,12 @@ interface Props {
   shippingCost: number;
   freeShippingThreshold: number;
   total: number;
+  onCheckout: () => void;
 }
 
 export default function CarritoSummary({
   couponInput, onCouponInputChange, onApplyCoupon, couponLoading, couponError,
-  couponCode, discount, subtotal, shippingCost, freeShippingThreshold, total,
+  couponCode, discount, subtotal, shippingCost, freeShippingThreshold, total, onCheckout,
 }: Props) {
   return (
     <div className="lg:col-span-1">
@@ -32,8 +32,9 @@ export default function CarritoSummary({
             <div className="relative flex-1">
               <Tag size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8A8A85]" />
               <input type="text" value={couponInput} onChange={(e) => onCouponInputChange(e.target.value)}
+                aria-label="Código de cupón"
                 className="w-full pl-9 pr-3 py-2 bg-[#1A1F21] border border-[#0D0F0F] rounded-lg text-xs text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A]/50"
-                placeholder="Código de cupon" />
+                placeholder="Escribí tu código de cupón" />
             </div>
             <button onClick={onApplyCoupon} disabled={couponLoading} className="px-4 py-2 bg-[#B7D31A] text-[#050606] rounded-lg text-xs font-bold hover:bg-[#c8e81f] transition-colors disabled:opacity-60">
               {couponLoading ? 'Validando...' : 'Aplicar'}
@@ -47,17 +48,17 @@ export default function CarritoSummary({
           <div className="flex justify-between text-[#C7C7C0]"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
           {discount > 0 && <div className="flex justify-between text-green-500"><span>Descuento</span><span>-{formatPrice(discount)}</span></div>}
           <div className="flex justify-between text-[#C7C7C0]">
-            <span>Envío</span>
+            <span>Correo Argentino (estimado)</span>
             <span className={shippingCost === 0 ? 'text-green-500 font-semibold' : ''}>{shippingCost === 0 ? 'GRATIS' : formatPrice(shippingCost)}</span>
           </div>
           <div className="flex justify-between font-black text-base pt-2 border-t border-[#0D0F0F] text-[#F7F6F7]"><span>Total</span><span>{formatPrice(total)}</span></div>
         </div>
 
-        <Link href="/checkout" className="mt-5 w-full flex items-center justify-center gap-2 bg-[#B7D31A] text-[#050606] py-4 rounded-xl font-black text-sm uppercase tracking-wider hover:bg-[#c8e81f] transition-colors">
+        <button type="button" onClick={onCheckout} className="mt-5 w-full flex items-center justify-center gap-2 bg-[#B7D31A] text-[#050606] py-4 rounded-xl font-black text-sm uppercase tracking-wider hover:bg-[#c8e81f] transition-colors">
           Finalizar compra <ArrowRight size={15} />
-        </Link>
+        </button>
 
-        <p className="text-[#8A8A85] text-xs text-center mt-3">Envío gratis en compras superiores a {formatPrice(freeShippingThreshold)}</p>
+        <p className="text-[#8A8A85] text-xs text-center mt-3">Correo Argentino gratis en compras superiores a {formatPrice(freeShippingThreshold)}. Andreani y OCA se coordinan por WhatsApp.</p>
       </div>
     </div>
   );

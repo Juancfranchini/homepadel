@@ -32,8 +32,14 @@ export default function ProductoContent() {
 
   return (
     <div className="min-h-screen bg-[#050606] text-[#F7F6F7]">
-      {actions.showPaymentModal && display.paymentMethods.length > 0 && (
-        <PaymentModal onClose={() => actions.setShowPaymentModal(false)} methods={display.paymentMethods} displayPrice={display.displayPrice} transferPrice={display.transferPrice} />
+      {actions.showPaymentModal && (
+        <PaymentModal
+          onClose={() => actions.setShowPaymentModal(false)}
+          displayPrice={display.displayPrice}
+          installments={display.installments}
+          hasInstallmentsInterest={display.hasInstallmentsInterest}
+          installmentsInterest={display.installmentsInterest}
+        />
       )}
 
       <div className="border-b border-[#0D0F0F]">

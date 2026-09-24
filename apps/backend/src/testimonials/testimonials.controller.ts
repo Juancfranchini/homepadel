@@ -5,6 +5,9 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '@prisma/client';
+import { Throttle } from '@nestjs/throttler';
+import { PublicTestimonialDto } from './dto/public-testimonial.dto';
+import { CreateTestimonialDto, UpdateTestimonialDto } from './dto/testimonial.dto';
 
 @ApiTags('Testimonials')
 @Controller('testimonials')
@@ -20,10 +23,11 @@ export class TestimonialsController {
 
   @Post()
   @ApiBearerAuth() @UseGuards(JwtAuthGuard, RolesGuard) @Roles(Role.ADMIN)
-  create(@Body() dto: any) { return this.testimonialsService.create(dto); }
+  create(@Body() dto: CreateTestimonialDto) { return this.testimonialsService.create(dto); }
 
   @Post('public')
-  createPublic(@Body() dto: any) { return this.testimonialsService.createPublic(dto); }
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  createPublic(@Body() dto: PublicTestimonialDto) { return this.testimonialsService.createPublic(dto); }
 
   @Patch(':id/approve')
   @ApiBearerAuth() @UseGuards(JwtAuthGuard, RolesGuard) @Roles(Role.ADMIN)
@@ -32,7 +36,7 @@ export class TestimonialsController {
   @Patch(':id')
   @Put(':id')
   @ApiBearerAuth() @UseGuards(JwtAuthGuard, RolesGuard) @Roles(Role.ADMIN)
-  update(@Param('id') id: string, @Body() dto: any) { return this.testimonialsService.update(id, dto); }
+  update(@Param('id') id: string, @Body() dto: UpdateTestimonialDto) { return this.testimonialsService.update(id, dto); }
 
   @Delete(':id')
   @ApiBearerAuth() @UseGuards(JwtAuthGuard, RolesGuard) @Roles(Role.ADMIN)

@@ -10,7 +10,7 @@ interface Props {
 const FALLBACK = [
   { id: '1', title: 'ENVIOS A TODO EL PAIS', description: 'Recibi tu pedido a domicilio o en sucursal.', icon: 'Truck' },
   { id: '2', title: 'GARANTIA OFICIAL', description: 'Productos originales con garantia y respaldo oficial.', icon: 'Shield' },
-  { id: '3', title: '9 CUOTAS SIN INTERES', description: 'Paga tu compra en hasta 9 cuotas sin interes.', icon: 'CreditCard' },
+  { id: '3', title: 'CUOTAS CON MERCADO PAGO', description: 'Pagá con tarjeta dentro de Mercado Pago.', icon: 'CreditCard' },
   { id: '4', title: 'ATENCION PERSONALIZADA', description: 'Te asesoramos antes y despues de tu compra.', icon: 'Star' },
 ];
 

@@ -66,15 +66,15 @@ export default function TarifaEnvioPage() {
       <div className="flex items-center gap-3">
         <Link href="/configuracion" className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"><ArrowLeft className="w-4 h-4" /></Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><Banknote className="w-5 h-5 text-[#C8FF00]" />Tarifa de envío</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Lo que se muestra en el carrito y lo que realmente se cobra: es el mismo número, calculado acá.</p>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><Banknote className="w-5 h-5 text-[#C8FF00]" />Tarifa de Correo Argentino</h1>
+          <p className="text-gray-500 text-sm mt-0.5">Tarifa plana para Correo Argentino. Andreani y OCA se coordinan por WhatsApp y no usan este importe.</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4 max-w-lg">
           <div>
-            <label className={labelClass}>Costo de envío ($)</label>
+            <label className={labelClass}>Costo de Correo Argentino ($)</label>
             <input type="number" step="1" min="0" {...register('flatRate')} className={inputClass} placeholder="4500" />
             {errors.flatRate && <p className="text-red-500 text-xs mt-1">{errors.flatRate.message}</p>}
           </div>

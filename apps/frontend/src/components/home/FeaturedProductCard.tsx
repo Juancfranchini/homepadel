@@ -3,20 +3,27 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Truck } from 'lucide-react';
 import { Product } from '@/types';
 import { useCartStore } from '@/store/cartStore';
 import { formatPrice, getDiscountPercent } from '@/lib/utils';
 import FeaturedProductCardImage from './FeaturedProductCardImage';
+import { useShippingRates } from '@/hooks/useShippingRates';
+import { formatDiscountPercent, getInstallmentTerms } from '@/lib/productPricing';
 
 export default function FeaturedProductCard({ product }: { product: Product }) {
   const addItem = useCartStore((s) => s.addItem);
   const router = useRouter();
   const [wished, setWished] = useState(false);
   const [adding, setAdding] = useState(false);
+  const { freeShippingThreshold, isLoaded } = useShippingRates();
 
-  const hasDiscount = product.effectivePrice < product.price;
+  const isMadeToOrder = product.isMadeToOrder === true;
+  const hasDiscount = !isMadeToOrder && product.effectivePrice < product.price;
   const discountPct = hasDiscount ? getDiscountPercent(product.price, product.effectivePrice) : 0;
+  const displayPrice = isMadeToOrder ? product.price : product.effectivePrice;
+  const installments = isMadeToOrder ? null : getInstallmentTerms(product);
+  const freeShipping = isLoaded && !isMadeToOrder && displayPrice >= freeShippingThreshold;
 
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -53,22 +60,14 @@ export default function FeaturedProductCard({ product }: { product: Product }) {
           {product.name}
         </h3>
 
-        <div className="flex items-baseline gap-2 mt-1">
-          {hasDiscount ? (
-            <>
-              <span className="text-xl font-bold text-[#F7F6F7]">{formatPrice(product.effectivePrice)}</span>
-              <span className="text-xs text-[#8A8A85] line-through">{formatPrice(product.price)}</span>
-            </>
-          ) : (
-            <span className="text-xl font-bold text-[#F7F6F7]">{formatPrice(product.price)}</span>
-          )}
+        {hasDiscount && <p className="text-xs text-[#8A8A85] line-through mt-1 leading-none">{formatPrice(product.price)}</p>}
+        <div className="flex flex-wrap items-baseline gap-2">
+          <span className="text-2xl font-black text-[#F7F6F7] tracking-tight">{formatPrice(displayPrice)}</span>
+          {hasDiscount && <span className="text-xs font-bold text-[#B7D31A]">{formatDiscountPercent(discountPct)}% OFF</span>}
         </div>
 
-        {product.price >= 10000 && (
-          <p className="text-xs text-[#C7C7C0] font-medium">
-            Hasta 9 cuotas sin interes
-          </p>
-        )}
+        {installments && <p className="text-xs text-[#B7D31A] font-medium">{installments.count} cuotas de {formatPrice(installments.amount)} {installments.interestText}</p>}
+        {freeShipping && <p className="flex items-center gap-1 text-xs font-bold text-[#B7D31A]"><Truck size={12} />Envío gratis</p>}
 
         <button
           onClick={handleAdd}

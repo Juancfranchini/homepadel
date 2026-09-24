@@ -31,10 +31,10 @@ export default function ProductInfoColumn({ product, display, activeVariants, va
       <ProductStars rating={product.rating || 0} count={product.reviewCount || 0} />
       <ProductPrice
         productName={product.name}
-        displayPrice={display.displayPrice} transferPrice={display.transferPrice} hasDiscount={display.hasDiscount}
+        displayPrice={display.displayPrice} hasDiscount={display.hasDiscount} discountPct={display.discountPct}
         originalPrice={product.price} cuota={display.cuota} installments={display.installments}
         hasInstallmentsInterest={display.hasInstallmentsInterest} installmentsInterest={display.installmentsInterest}
-        paymentMethods={display.paymentMethods} onShowPaymentModal={() => actions.setShowPaymentModal(true)}
+        onShowPaymentModal={() => actions.setShowPaymentModal(true)}
         isMadeToOrder={product.isMadeToOrder} estimatedDays={product.estimatedDays} requiredDeposit={product.requiredDeposit}
       />
       {!product.isMadeToOrder && <StockAlert stock={display.effectiveStock} />}

@@ -8,7 +8,9 @@ import { useAuthStore } from '@/store/authStore';
 import { usePathname } from 'next/navigation';
 import BrandLogo from '@/components/ui/BrandLogo';
 import CartDrawer from '@/components/cart/CartDrawer';
+import CartAddedFeedback from '@/components/cart/CartAddedFeedback';
 import MobileNav from './MobileNav';
+import { isNavActive } from './navState';
 
 const NAV_LINKS = [
   { label: 'Inicio',                href: '/' },
@@ -25,7 +27,7 @@ export default function Header() {
   const { user } = useAuthStore();
   const [cartOpen, setCartOpen] = useState(false);
 
-  const totalItems = useCartStore((s) => s.totalItems);
+  const itemCount = useCartStore((state) => state.items.reduce((total, item) => total + item.quantity, 0));
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -33,7 +35,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="w-full sticky top-0 z-50 bg-[#050606] border-b border-[#0D0F0F]">
+      <header className="w-full sticky top-0 z-50 border-b border-[#303638] bg-[#101416]/95 shadow-[0_8px_24px_rgba(0,0,0,0.28)] backdrop-blur-xl">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-2 sm:gap-4">
           {/* En móvil: hamburguesa a la izquierda y logo centrado. El logo se
               centra con posición absoluta y no con flex, porque los bloques de
@@ -41,7 +43,7 @@ export default function Header() {
               y quedaría corrido. En escritorio vuelve al flujo normal, que al
               estar oculta la hamburguesa lo deja primero, a la izquierda. */}
           <button
-            className="lg:hidden flex-shrink-0 text-[#C7C7C0] transition-colors hover:text-[#F7F6F7]"
+            className="lg:hidden flex-shrink-0 rounded-lg border border-white/10 bg-[#1A1F21] p-2 text-[#C7C7C0] transition-colors hover:border-[#B7D31A]/50 hover:bg-[#242A2D] hover:text-[#F7F6F7]"
             onClick={() => setOpen(!open)}
             aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
             aria-expanded={open}
@@ -58,15 +60,15 @@ export default function Header() {
             <span className="hidden lg:block"><BrandLogo size="xl" priority /></span>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-1">
+          <nav className="hidden items-center gap-1 rounded-xl border border-white/10 bg-[#171B1D] p-1 shadow-inner lg:flex" aria-label="Navegación principal">
             {NAV_LINKS.map((link) => {
-              const active = pathname === link.href;
+              const active = isNavActive(pathname, link.href);
               return (
                 <Link key={link.href} href={link.href}
-                  className={'relative px-3 py-2 text-[11px] font-semibold uppercase tracking-wide transition-colors whitespace-nowrap ' +
-                    (active ? 'text-[#B7D31A]' : 'text-[#C7C7C0] hover:text-[#F7F6F7]')}>
+                  aria-current={active ? 'page' : undefined}
+                  className={'rounded-lg px-3 py-2 text-[11px] font-bold uppercase tracking-wide transition-all whitespace-nowrap ' +
+                    (active ? 'bg-[#B7D31A] text-[#050606] shadow-[0_2px_10px_rgba(183,211,26,0.2)]' : 'text-[#C7C7C0] hover:bg-white/[0.07] hover:text-[#F7F6F7]')}>
                   {link.label}
-                  {active && <span className="absolute bottom-0 left-3 right-3 h-0.5 bg-[#B7D31A] rounded-full" />}
                 </Link>
               );
             })}
@@ -85,9 +87,9 @@ export default function Header() {
             )}
             <button onClick={() => setCartOpen(true)} className="relative text-[#C7C7C0] hover:text-[#F7F6F7] transition-colors" aria-label="Carrito">
               <ShoppingCart size={20} />
-              {mounted && totalItems() > 0 && (
-                <span className="absolute -top-2 -right-2 bg-[#B7D31A] text-[#050606] text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                  {totalItems() > 9 ? '9+' : totalItems()}
+              {mounted && itemCount > 0 && (
+                <span key={itemCount} className="cart-badge-pop absolute -right-2.5 -top-2.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#E53935] px-1 text-[10px] font-black text-white shadow-[0_0_0_2px_#101416]">
+                  {itemCount > 99 ? '99+' : itemCount}
                 </span>
               )}
             </button>
@@ -98,6 +100,7 @@ export default function Header() {
       </header>
 
       <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+      <CartAddedFeedback />
     </>
   );
 }

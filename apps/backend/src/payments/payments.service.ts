@@ -7,7 +7,7 @@ import { CreatePreferenceDto, ShippingData } from './dto/create-preference.dto';
 import { enviarCompraAMeta } from './payments.meta';
 import { verificarFirma } from './payments.signature';
 import { AbandonedCartsService } from '../abandoned-carts/abandoned-carts.service';
-import * as bcrypt from 'bcrypt';
+import { hashPassword } from '../common/security/password';
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
@@ -141,7 +141,7 @@ export class PaymentsService {
         `Mercado Pago rechazó la preferencia de ${orderNumber} (HTTP ${response.status}): ${JSON.stringify(preference)}`,
       );
       throw new InternalServerErrorException(
-        'No se pudo iniciar el pago con Mercado Pago. Probá de nuevo o elegí otro método.',
+        'No se pudo iniciar el pago con Mercado Pago. Probá de nuevo.',
       );
     }
 
@@ -186,6 +186,7 @@ export class PaymentsService {
             buyerEmail: payer.email,
             buyerName: payer.name,
             buyerPhone: shipping?.phone || null,
+            shippingCarrier: shipping?.carrier || 'correo_argentino',
           }),
           items: { create: resolvedItems.map((item) => ({
             productId: item.productId,
@@ -324,8 +325,8 @@ export class PaymentsService {
     let user = email ? await this.prisma.user.findUnique({ where: { email } }) : null;
     if (!user && email) {
       // P4 - Password con bcrypt
-      const randomPassword = 'mp_' + Math.random().toString(36).slice(2) + Date.now();
-      const hashed = await bcrypt.hash(randomPassword, 10);
+      const randomPassword = crypto.randomBytes(32).toString('base64url');
+      const hashed = await hashPassword(randomPassword);
       user = await this.prisma.user.create({ data: { email, name, password: hashed, role: 'CUSTOMER' } });
     }
 

@@ -58,7 +58,7 @@ export default function TestimonialsSection({ testimonials }: Props) {
               className="inline-flex items-center gap-2 px-6 sm:px-12 py-3 sm:py-4 bg-[#B7D31A] text-[#050606] rounded-xl font-semibold text-xs sm:text-sm uppercase tracking-wider btn-primary-glow transition-all"
             >
               <MessageSquare className="w-5 h-5" />
-              Deja tu reseña
+              Dejá tu reseña
             </button>
           </div>
         )}

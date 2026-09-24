@@ -1,17 +1,20 @@
-﻿import { PrismaClient, Role, OrderStatus } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+﻿import { PrismaClient, Role } from '@prisma/client';
+import { hashPassword } from '../src/common/security/password';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log(' Iniciando seed...\n');
 
-  //  Admin 
-  const hash = await bcrypt.hash('admin123', 10);
+  //  Admin
+  const adminEmail = process.env.SEED_ADMIN_EMAIL || 'admin@homepadel.com';
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD;
+  if (!adminPassword) throw new Error('Falta SEED_ADMIN_PASSWORD para crear el usuario administrador');
+  const hash = await hashPassword(adminPassword);
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@homepadel.com' },
+    where: { email: adminEmail },
     update: {},
-    create: { email: 'admin@homepadel.com', password: hash, name: 'Admin', role: Role.ADMIN },
+    create: { email: adminEmail, password: hash, name: 'Admin', role: Role.ADMIN },
   });
   console.log(' Admin:', admin.email);
 
@@ -135,11 +138,11 @@ async function main() {
     { category: 'COMPRAS', question: 'Puedo modificar o cancelar mi pedido?', answer: 'Podes cancelar sin costo dentro de las 2 horas posteriores a la compra. Luego contactanos por WhatsApp.', order: 2 },
     { category: 'COMPRAS', question: 'Ofrecen factura A?', answer: 'Si, emitimos factura A para responsables inscriptos. Solicitarla al momento de la compra.', order: 3 },
     { category: 'ENVIOS', question: 'Cuanto tarda el envio?', answer: 'CABA y GBA: 24-72hs. Interior: 3-7 dias habiles segun la provincia.', order: 4 },
-    { category: 'ENVIOS', question: 'Cual es el costo de envio?', answer: 'Envio gratis en compras superiores a .000. Para compras menores, el costo se calcula en el checkout segun tu codigo postal.', order: 5 },
+    { category: 'ENVIOS', question: 'Cual es el costo de envio?', answer: 'Correo Argentino usa una tarifa plana que se muestra en el carrito y puede ser gratis desde el monto configurado. Andreani y OCA tienen costo a coordinar por WhatsApp.', order: 5 },
     { category: 'ENVIOS', question: 'Hacen envios al exterior?', answer: 'Por el momento solo realizamos envios dentro de Argentina.', order: 6 },
-    { category: 'PAGOS', question: 'Que metodos de pago aceptan?', answer: 'Tarjetas de credito/debito, Mercado Pago, transferencia bancaria y efectivo en sucursales de pago facil.', order: 7 },
-    { category: 'PAGOS', question: 'Ofrecen cuotas sin interes?', answer: 'Si, tenemos cuotas sin interes con tarjetas de credito seleccionadas. Consulta las promociones vigentes en el checkout.', order: 8 },
-    { category: 'PAGOS', question: 'Es seguro pagar en la web?', answer: 'Totalmente. Usamos certificado SSL y pasarelas de pago seguras. No almacenamos datos de tarjetas.', order: 9 },
+    { category: 'PAGOS', question: 'Que metodos de pago aceptan?', answer: 'Trabajamos exclusivamente con Mercado Pago Checkout Pro. Dentro de Mercado Pago podes elegir tarjeta, saldo u otros medios disponibles.', order: 7 },
+    { category: 'PAGOS', question: 'Ofrecen cuotas sin interes?', answer: 'Las cuotas disponibles para cada producto se muestran antes de comprar y se confirman al ingresar a Mercado Pago.', order: 8 },
+    { category: 'PAGOS', question: 'Es seguro pagar en la web?', answer: 'Si. El pago se completa dentro de Mercado Pago y Home Padel no almacena datos de tarjetas.', order: 9 },
     { category: 'DEVOLUCIONES', question: 'Puedo cambiar un producto?', answer: 'Si, tenes hasta 30 dias para cambios. El producto debe estar sin uso y con etiquetas originales.', order: 10 },
     { category: 'DEVOLUCIONES', question: 'Como solicito un reembolso?', answer: 'Contactanos por WhatsApp o email. Una vez recibido el producto, procesamos el reembolso en 5-10 dias habiles.', order: 11 },
     { category: 'PRODUCTOS', question: 'Los productos tienen garantia?', answer: 'Si, todos nuestros productos tienen garantia oficial del fabricante. Las paletas tienen 6 meses por defectos de fabricacion.', order: 12 },
@@ -165,7 +168,7 @@ async function main() {
     data: [
       { icon: 'Truck', title: 'Envios a todo el pais', description: 'Recibi tu pedido donde estes', order: 1 },
       { icon: 'Shield', title: 'Garantia oficial', description: 'Todos los productos con garantia', order: 2 },
-      { icon: 'CreditCard', title: 'Hasta 12 cuotas', description: 'Con tarjetas seleccionadas', order: 3 },
+      { icon: 'CreditCard', title: 'Hasta 12 cuotas', description: 'Procesadas dentro de Mercado Pago', order: 3 },
       { icon: 'Headphones', title: 'Soporte personalizado', description: 'Te asesoramos en tu compra', order: 4 },
     ],
   });

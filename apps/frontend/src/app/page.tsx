@@ -1,6 +1,7 @@
 ﻿import {
   getBestSellers,
   getFeaturedProducts,
+  getProducts,
   getCategories,
   getBrands,
   getBanners,
@@ -65,22 +66,23 @@ function sectionData<T>(raw: unknown): T | null {
   return (s.data as T) ?? null;
 }
 
+async function batch<T>(items: (() => Promise<T>)[], size = 5): Promise<PromiseSettledResult<T>[]> {
+  const results: PromiseSettledResult<T>[] = [];
+  for (let i = 0; i < items.length; i += size) {
+    const batchItems = items.slice(i, i + size);
+    const batchResults = await Promise.allSettled(batchItems.map(fn => fn()));
+    results.push(...batchResults);
+  }
+  return results;
+}
+
 async function fetchAll() {
-  // Helper para hacer llamadas en lotes y evitar saturar el pool de conexiones
-  const batch = async <T,>(items: (() => Promise<T>)[], size = 5): Promise<PromiseSettledResult<T>[]> => {
-    const results: PromiseSettledResult<T>[] = [];
-    for (let i = 0; i < items.length; i += size) {
-      const batchItems = items.slice(i, i + size);
-      const batchResults = await Promise.allSettled(batchItems.map(fn => fn()));
-      results.push(...batchResults);
-    }
-    return results;
-  };
   const [
     slidesRes,
     benefitsRes,
     bestSellersRes,
     featuredProductsRes,
+    catalogProductsRes,
     categoriesRes,
     brandsRes,
     bannersRes,
@@ -102,6 +104,7 @@ async function fetchAll() {
     () => getBenefits(),
     () => getBestSellers(),
     () => getFeaturedProducts(),
+    () => getProducts({ limit: 100, sort: 'newest' }),
     () => getCategories(),
     () => getBrands(),
     () => getBanners(),
@@ -128,6 +131,7 @@ async function fetchAll() {
     benefits: arr<Benefit>(val(benefitsRes)),
     bestSellers: arr<Product>(val(bestSellersRes)),
     featuredProducts: arr<Product>(val(featuredProductsRes)),
+    catalogProducts: arr<Product>((val(catalogProductsRes) as { items?: Product[] } | null)?.items),
     categories: arr<Category>(val(categoriesRes)),
     brands: arr<Brand>(val(brandsRes)),
     banners: arr<Banner>(val(bannersRes)),
@@ -153,6 +157,7 @@ export default async function HomePage() {
     benefits,
     bestSellers,
     featuredProducts,
+    catalogProducts,
     categories,
     brands,
     banners,
@@ -202,6 +207,7 @@ export default async function HomePage() {
       {showCategories && (
         <CategoryCards
           categories={categories}
+          products={catalogProducts}
           title={categoriesSection?.title}
           description={categoriesSection?.description}
         />

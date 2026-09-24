@@ -1,0 +1,19 @@
+import { z } from 'zod';
+
+export const loginSchema = z.object({
+  email: z.string().trim().email('Email inválido'),
+  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres').max(128, 'La contraseña es demasiado larga'),
+});
+
+export const registerSchema = z.object({
+  name: z.string().trim().min(2, 'El nombre es requerido'),
+  email: z.string().trim().email('Email inválido'),
+  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres').max(72, 'La contraseña admite hasta 72 caracteres'),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Las contraseñas no coinciden',
+  path: ['confirmPassword'],
+});
+
+export type LoginFormData = z.infer<typeof loginSchema>;
+export type RegisterFormData = z.infer<typeof registerSchema>;

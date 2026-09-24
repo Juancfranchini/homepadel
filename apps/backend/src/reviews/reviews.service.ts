@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { UpdateReviewDto } from './dto/review.dto';
 
 @Injectable()
 export class ReviewsService {
@@ -44,7 +45,7 @@ export class ReviewsService {
     return this.prisma.productReview.update({ where: { id }, data: { active: true } });
   }
 
-  async update(id: string, dto: any) {
+  async update(id: string, dto: UpdateReviewDto) {
     const review = await this.prisma.productReview.findUnique({ where: { id } });
     if (!review) throw new NotFoundException('Review no encontrada');
     return this.prisma.productReview.update({ where: { id }, data: dto });
