@@ -3,35 +3,51 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider     = "postgresql"
+  url          = env("DATABASE_URL")
   relationMode = "foreignKeys"
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String
-  phone     String?
-  address   String?
-  role      Role     @default(CUSTOMER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  orders    Order[]
-  reviews   ProductReview[]
+  id             String          @id @default(cuid())
+  email          String          @unique
+  password       String?
+  name           String
+  phone          String?
+  address        String?
+  role           Role            @default(CUSTOMER)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  orders         Order[]
+  reviews        ProductReview[]
+  authIdentities AuthIdentity[]
+}
+
+model AuthIdentity {
+  id             String   @id @default(cuid())
+  provider       String
+  providerUserId String
+  email          String
+  emailVerified  Boolean  @default(false)
+  userId         String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerUserId])
+  @@index([userId])
 }
 
 model Category {
-  id        String    @id @default(cuid())
-  name      String    @unique
-  slug      String    @unique
-  image     String?
-  order     Int       @default(0)
-  active    Boolean   @default(true)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  products  Product[]
+  id         String      @id @default(cuid())
+  name       String      @unique
+  slug       String      @unique
+  image      String?
+  order      Int         @default(0)
+  active     Boolean     @default(true)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  products   Product[]
   sizeGuides SizeGuide[]
 }
 
@@ -49,89 +65,89 @@ model Brand {
 }
 
 model Product {
-  id                String      @id @default(cuid())
-  name              String
-  slug              String      @unique
-  description       String?
-  price             Float
-  salePrice         Float?
-  discountPercentage Float?
-  installments       Int?
-  installmentsInterest Float?
-  hasInstallmentsInterest Boolean @default(false)
-  isMadeToOrder     Boolean @default(false)
-  estimatedDays     Int?
-  requiredDeposit   Float?
-  sku               String      @unique
-  stock             Int         @default(0)
-  images            String[]
-  featured          Boolean     @default(false)
-  isNew             Boolean     @default(false)
-  isOffer           Boolean     @default(false)
-  active            Boolean     @default(true)
-  categoryId        String
-  brandId           String
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-  features          Json?
-  performanceStats  Json?
-  relatedProductIds String[]
-  relatedVideos   Json?
-  compareData     Json?
-  specs           Json?
-  videoUrl          String?
-  showVideo         Boolean @default(false)
-  showPerformance   Boolean @default(false)
-  showHighlights    Boolean @default(false)
-  showCompare       Boolean @default(false)
-  showRelated       Boolean @default(false)
-  hasSize           Boolean @default(false)
-  hasColor          Boolean @default(false)
-  hasDimensions     Boolean @default(false)
-  hasWeight         Boolean @default(false)
-  shape             String?
+  id                      String           @id @default(cuid())
+  name                    String
+  slug                    String           @unique
+  description             String?
+  price                   Float
+  salePrice               Float?
+  discountPercentage      Float?
+  installments            Int?
+  installmentsInterest    Float?
+  hasInstallmentsInterest Boolean          @default(false)
+  isMadeToOrder           Boolean          @default(false)
+  estimatedDays           Int?
+  requiredDeposit         Float?
+  sku                     String           @unique
+  stock                   Int              @default(0)
+  images                  String[]
+  featured                Boolean          @default(false)
+  isNew                   Boolean          @default(false)
+  isOffer                 Boolean          @default(false)
+  active                  Boolean          @default(true)
+  categoryId              String
+  brandId                 String
+  createdAt               DateTime         @default(now())
+  updatedAt               DateTime         @updatedAt
+  features                Json?
+  performanceStats        Json?
+  relatedProductIds       String[]
+  relatedVideos           Json?
+  compareData             Json?
+  specs                   Json?
+  videoUrl                String?
+  showVideo               Boolean          @default(false)
+  showPerformance         Boolean          @default(false)
+  showHighlights          Boolean          @default(false)
+  showCompare             Boolean          @default(false)
+  showRelated             Boolean          @default(false)
+  hasSize                 Boolean          @default(false)
+  hasColor                Boolean          @default(false)
+  hasDimensions           Boolean          @default(false)
+  hasWeight               Boolean          @default(false)
+  shape                   String?
   // Hombre | Mujer | Unisex. Queda opcional: los productos que ya están
   // cargados no lo tienen, y una paleta no siempre tiene género.
-  gender            String?
-  size              String?
-  color             String?
-  dimensionLength   Float?
-  dimensionWidth    Float?
-  dimensionHeight   Float?
-  dimensionUnit     String?
-  weight            Float?
-  weightUnit        String?
-  highlights        Json?
-  highlightsTitle   String?
-  highlightsDescription String?
-  paymentMethods    Json?
-  transferPrice     Float?
-  orderItems        OrderItem[]
-  reviews           ProductReview[]
-  variants           ProductVariant[]
-  brand             Brand       @relation(fields: [brandId], references: [id])
-  category          Category    @relation(fields: [categoryId], references: [id])
+  gender                  String?
+  size                    String?
+  color                   String?
+  dimensionLength         Float?
+  dimensionWidth          Float?
+  dimensionHeight         Float?
+  dimensionUnit           String?
+  weight                  Float?
+  weightUnit              String?
+  highlights              Json?
+  highlightsTitle         String?
+  highlightsDescription   String?
+  paymentMethods          Json?
+  transferPrice           Float?
+  orderItems              OrderItem[]
+  reviews                 ProductReview[]
+  variants                ProductVariant[]
+  brand                   Brand            @relation(fields: [brandId], references: [id])
+  category                Category         @relation(fields: [categoryId], references: [id])
 }
 
 model Order {
-  id         String      @id @default(cuid())
-  number     String      @unique
-  status     OrderStatus @default(PENDING)
-  total      Float
-  subtotal   Float
-  shipping   Float       @default(0)
-  discount   Float       @default(0)
-  couponCode String?
-  userId     String?
-  notes      String?
-  address    String
+  id             String      @id @default(cuid())
+  number         String      @unique
+  status         OrderStatus @default(PENDING)
+  total          Float
+  subtotal       Float
+  shipping       Float       @default(0)
+  discount       Float       @default(0)
+  couponCode     String?
+  userId         String?
+  notes          String?
+  address        String
   trackingNumber String?
   trackingUrl    String?
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-  user       User?       @relation(fields: [userId], references: [id])
-  items      OrderItem[]
-  shipments  Shipment[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  user           User?       @relation(fields: [userId], references: [id])
+  items          OrderItem[]
+  shipments      Shipment[]
 }
 
 model Shipment {
@@ -147,16 +163,17 @@ model Shipment {
 }
 
 model OrderItem {
-  id        String  @id @default(cuid())
+  id        String          @id @default(cuid())
   orderId   String
   productId String
   variantId String?
   quantity  Int
   price     Float
-  order     Order   @relation(fields: [orderId], references: [id])
-  product   Product @relation(fields: [productId], references: [id])
+  order     Order           @relation(fields: [orderId], references: [id])
+  product   Product         @relation(fields: [productId], references: [id])
   variant   ProductVariant? @relation(fields: [variantId], references: [id])
 }
+
 model Promotion {
   id          String   @id @default(cuid())
   title       String
@@ -258,7 +275,7 @@ model SiteSection {
 }
 
 model FAQ {
-    category  String   @default("General")
+  category  String   @default("General")
   id        String   @id @default(cuid())
   question  String
   answer    String
@@ -274,8 +291,8 @@ model FAQ {
 /// pedido. Si después compra, la fila queda marcada como recuperada en vez de
 /// borrarse: así se ve cuántos se rescataron.
 model AbandonedCart {
-  id          String   @id @default(cuid())
-  email       String   @unique
+  id          String    @id @default(cuid())
+  email       String    @unique
   name        String?
   phone       String?
   /// Los ítems tal como estaban en el carrito, con su precio de ese momento.
@@ -286,40 +303,40 @@ model AbandonedCart {
   /// Cuándo terminó comprando, y con qué pedido.
   recoveredAt DateTime?
   orderNumber String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@index([recoveredAt, updatedAt])
 }
 
 model ProductVariant {
-  id        String   @id @default(cuid())
-  productId String
-  sku       String   @unique
-  size      String   @default("")
-  color     String?
-  dimensions String?
+  id              String      @id @default(cuid())
+  productId       String
+  sku             String      @unique
+  size            String      @default("")
+  color           String?
+  dimensions      String?
   dimensionLength Float?
   dimensionWidth  Float?
   dimensionHeight Float?
   dimensionUnit   String?
   weight          Float?
   weightUnit      String?
-  imageUrl  String?
-  images    String[] @default([])
-  stock     Int      @default(0)
-  active    Boolean  @default(true)
-  isDefault Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  orderItems OrderItem[]
+  imageUrl        String?
+  images          String[]    @default([])
+  stock           Int         @default(0)
+  active          Boolean     @default(true)
+  isDefault       Boolean     @default(false)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  product         Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderItems      OrderItem[]
 }
 
 model ProductReview {
-  product    Product   @relation(fields: [productId], references: [id])
-  userId     String?
-  user       User?       @relation(fields: [userId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
   id        String   @id @default(cuid())
   productId String
   name      String
@@ -333,15 +350,15 @@ model ProductReview {
 }
 
 model SizeGuide {
-  id          String   @id @default(cuid())
-  name        String
-  categoryId  String
-  content     String   @default("")
-  productIds  String[]
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  category    Category @relation(fields: [categoryId], references: [id])
+  id         String   @id @default(cuid())
+  name       String
+  categoryId String
+  content    String   @default("")
+  productIds String[]
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  category   Category @relation(fields: [categoryId], references: [id])
 }
 
 model Newsletter {
@@ -365,14 +382,14 @@ model ContactChannel {
 }
 
 model EmailTemplate {
-  id        String   @id @default(cuid())
+  id        String          @id @default(cuid())
   name      String
   subject   String
   content   String
-  type      String   @default("campaign")
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  type      String          @default("campaign")
+  active    Boolean         @default(true)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
   campaigns EmailCampaign[]
 }
 

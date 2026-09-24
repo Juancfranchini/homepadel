@@ -1,12 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import axios from 'axios';
 import Link from 'next/link';
 import { login, register as registerUser } from '@/lib/api';
 import BrandLogo from '@/components/ui/BrandLogo';
+import GoogleAuthButton from '@/components/auth/GoogleAuthButton';
+import { User } from '@/types';
 import CuentaLoginForm from './CuentaLoginForm';
 import CuentaRegisterForm from './CuentaRegisterForm';
 
@@ -26,27 +29,37 @@ type LoginFormData = z.infer<typeof loginSchema>;
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 interface Props {
-  onAuth: (user: any, token: string) => void;
+  onAuth: (user: User, token: string) => void;
+  initialError?: string;
 }
 
-export default function CuentaAuthForm({ onAuth }: Props) {
+function apiErrorMessage(error: unknown, fallback: string): string {
+  if (!axios.isAxiosError<{ message?: string }>(error)) return fallback;
+  return error.response?.data?.message || fallback;
+}
+
+export default function CuentaAuthForm({ onAuth, initialError = '' }: Props) {
   const [isRegister, setIsRegister] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [apiError, setApiError] = useState('');
+  const [apiError, setApiError] = useState(initialError);
 
   const loginForm = useForm<LoginFormData>({ resolver: zodResolver(loginSchema) });
   const registerForm = useForm<RegisterFormData>({ resolver: zodResolver(registerSchema) });
 
+  useEffect(() => {
+    if (initialError) setApiError(initialError);
+  }, [initialError]);
+
   const onLogin = async (data: LoginFormData) => {
     setApiError('');
     try { const result = await login(data); onAuth(result.user, result.token); }
-    catch (err: any) { setApiError(err?.response?.data?.message || 'Email o contraseña incorrectos'); }
+    catch (error: unknown) { setApiError(apiErrorMessage(error, 'Email o contraseña incorrectos')); }
   };
 
   const onRegister = async (data: RegisterFormData) => {
     setApiError('');
     try { const result = await registerUser({ name: data.name, email: data.email, password: data.password }); onAuth(result.user, result.token); }
-    catch (err: any) { setApiError(err?.response?.data?.message || 'No se pudo crear la cuenta.'); }
+    catch (error: unknown) { setApiError(apiErrorMessage(error, 'No se pudo crear la cuenta.')); }
   };
 
   return (
@@ -67,6 +80,13 @@ export default function CuentaAuthForm({ onAuth }: Props) {
           </div>
 
           {apiError && <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 mb-4"><p className="text-red-500 text-sm">{apiError}</p></div>}
+
+          <GoogleAuthButton />
+          <div className="my-5 flex items-center gap-3" aria-hidden="true">
+            <span className="h-px flex-1 bg-[#252A2C]" />
+            <span className="text-xs uppercase tracking-wider text-[#8A8A85]">o con email</span>
+            <span className="h-px flex-1 bg-[#252A2C]" />
+          </div>
 
           {!isRegister && (
             <CuentaLoginForm form={loginForm} onSubmit={onLogin} showPassword={showPassword} onToggleShowPassword={() => setShowPassword(!showPassword)} />

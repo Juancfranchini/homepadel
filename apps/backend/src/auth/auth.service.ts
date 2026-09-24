@@ -31,6 +31,7 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (!user) throw new UnauthorizedException('Credenciales invalidas');
 
+    if (!user.password) throw new UnauthorizedException('Esta cuenta usa Google para ingresar');
     const valid = await bcrypt.compare(dto.password, user.password);
     if (!valid) throw new UnauthorizedException('Credenciales invalidas');
 
@@ -88,6 +89,7 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('Usuario no encontrado');
 
+    if (!user.password) throw new BadRequestException('Esta cuenta no tiene una contraseña local');
     const valid = await bcrypt.compare(currentPassword, user.password);
     if (!valid) throw new UnauthorizedException('Contraseña actual incorrecta');
 
