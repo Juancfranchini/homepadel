@@ -20,20 +20,20 @@ export default function RastrearForm({ orderNumber, onOrderNumberChange, email, 
       <div className="relative">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8A8A85]" />
         <input type="text" value={orderNumber} onChange={(e) => onOrderNumberChange(e.target.value.toUpperCase())}
-          placeholder="Número de orden: HP-1234567890"
+          autoComplete="off" aria-label="Número de orden" placeholder="Escribí tu número de orden"
           className="w-full pl-12 pr-4 py-4 bg-[#0F1111] border border-[#B7D31A]/50 rounded-xl text-lg font-bold text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A] focus:shadow-[0_0_20px_rgba(183,211,26,0.1)] transition-all uppercase tracking-wider text-center" />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="relative">
           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8A8A85]" />
           <input type="email" value={email} onChange={(e) => onEmailChange(e.target.value)}
-            placeholder="Email de la compra"
+            autoComplete="email" aria-label="Email de la compra" placeholder="Escribí el email de la compra"
             className="w-full pl-10 pr-4 py-3 bg-[#0F1111] border border-[#B7D31A]/40 rounded-xl text-sm text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A]/60 transition-colors" />
         </div>
         <div className="relative">
           <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8A8A85]" />
           <input type="tel" value={phone} onChange={(e) => onPhoneChange(e.target.value)}
-            placeholder="Teléfono"
+            autoComplete="tel" aria-label="Teléfono de la compra" placeholder="Escribí el teléfono de la compra"
             className="w-full pl-10 pr-4 py-3 bg-[#0F1111] border border-[#B7D31A]/40 rounded-xl text-sm text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A]/60 transition-colors" />
         </div>
       </div>

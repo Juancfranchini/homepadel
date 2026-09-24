@@ -62,8 +62,8 @@ export default function ReviewForm({ productId, onClose }: Props) {
       </div>
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-sm font-medium text-[#F7F6F7] mb-2">Tu nombre</label>
-          <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Como te llamas?"
+          <label htmlFor="review-name" className="block text-sm font-medium text-[#F7F6F7] mb-2">Tu nombre</label>
+          <input id="review-name" type="text" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Escribí tu nombre"
             className="w-full px-4 py-3 bg-[#0A0F12] border border-[#0D0F0F] rounded-xl text-sm text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A] focus:ring-1 focus:ring-[#B7D31A]/20 transition-all" />
         </div>
         <div>
@@ -77,8 +77,8 @@ export default function ReviewForm({ productId, onClose }: Props) {
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-[#F7F6F7] mb-2">Tu comentario</label>
-          <textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={4} placeholder="Contanos tu experiencia..."
+          <label htmlFor="review-comment" className="block text-sm font-medium text-[#F7F6F7] mb-2">Tu comentario</label>
+          <textarea id="review-comment" value={comment} onChange={(e) => setComment(e.target.value)} rows={4} placeholder="Contanos tu experiencia con el producto"
             className="w-full px-4 py-3 bg-[#0A0F12] border border-[#0D0F0F] rounded-xl text-sm text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A] focus:ring-1 focus:ring-[#B7D31A]/20 transition-all resize-none" />
         </div>
         {error && <p className="text-red-400 text-xs">{error}</p>}

@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
 import { usePaymentMethods } from '@/hooks/usePaymentMethods';
@@ -22,19 +21,7 @@ import CheckoutPaymentMethodFields from './CheckoutPaymentMethodFields';
 import CheckoutOrderSummary from './CheckoutOrderSummary';
 import AuthModal from '@/components/auth/AuthModal';
 import { useCheckoutAuthGate } from './useCheckoutAuthGate';
-
-const checkoutSchema = z.object({
-  name: z.string().min(2, 'El nombre es requerido'),
-  email: z.string().email('Email invalido'),
-  phone: z.string().min(8, 'Teléfono invalido').regex(/^[0-9+\s()-]+$/, 'Teléfono invalido'),
-  street: z.string().min(5, 'La dirección es requerida'),
-  city: z.string().min(2, 'La ciudad es requerida'),
-  province: z.string().min(2, 'La provincia es requerida'),
-  postalCode: z.string().min(4, 'El código postal es requerido').max(8, 'Código postal invalido'),
-  paymentMethod: z.enum(['card', 'mercadopago', 'transfer'], { required_error: 'Selecciona un metodo de pago' }),
-});
-
-type CheckoutFormData = z.infer<typeof checkoutSchema>;
+import { checkoutSchema, CheckoutFormData } from './checkoutSchema';
 
 function CheckoutHeader() {
   return (

@@ -3,17 +3,7 @@
 import { useState } from 'react';
 import { CartItem } from '@/types';
 import { createOrder, createPaymentPreference } from '@/lib/api';
-
-interface CheckoutFormData {
-  name: string;
-  email: string;
-  phone: string;
-  street: string;
-  city: string;
-  province: string;
-  postalCode: string;
-  paymentMethod: 'card' | 'mercadopago' | 'transfer';
-}
+import { CheckoutFormData } from './checkoutSchema';
 
 /**
  * El backend valida con class-validator, que devuelve un array de mensajes

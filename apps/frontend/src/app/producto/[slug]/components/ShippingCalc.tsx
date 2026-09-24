@@ -14,7 +14,7 @@ export default function ShippingCalc() {
       </div>
       <div className="flex gap-2">
         <input type="text" value={postal} onChange={(e) => setPostal(e.target.value)}
-          placeholder="Código postal"
+          inputMode="numeric" autoComplete="postal-code" aria-label="Código postal" placeholder="Escribí tu código postal"
           className="flex-1 min-w-0 bg-[#0A0F12] border border-[#0D0F0F] rounded-lg px-2.5 sm:px-3 py-2 text-xs sm:text-sm text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A] focus:ring-1 focus:ring-[#B7D31A]/20" />
         <button className="px-3 sm:px-4 py-2 bg-[#B7D31A] text-[#050606] rounded-lg text-[10px] sm:text-xs font-semibold uppercase tracking-wide btn-primary-glow flex-shrink-0">
           Calcular

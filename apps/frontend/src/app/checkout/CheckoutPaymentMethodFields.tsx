@@ -2,22 +2,25 @@
 
 import { CreditCard } from 'lucide-react';
 import { UseFormRegister, FieldErrors } from 'react-hook-form';
+import Image from 'next/image';
 import { getImageUrl } from '@/lib/utils';
+import { CheckoutFormData } from './checkoutSchema';
+import { PaymentMethodConfig } from '@/hooks/usePaymentMethods';
 
-const PAYMENT_OPTIONS = [
+const PAYMENT_OPTIONS: { value: CheckoutFormData['paymentMethod']; label: string; desc: string; badge: string[] }[] = [
   { value: 'card', label: 'Tarjeta de credito / debito', desc: 'Visa, Mastercard, American Express', badge: ['VISA', 'MC', 'AMEX'] },
   { value: 'mercadopago', label: 'Mercado Pago', desc: 'Paga con tu cuenta o en efectivo', badge: ['MP'] },
   { value: 'transfer', label: 'Transferencia bancaria', desc: 'Te pasamos los datos para transferir', badge: [] },
 ];
 
 interface Props {
-  register: UseFormRegister<any>;
-  errors: FieldErrors<any>;
-  selectedPayment: string;
-  visa: any;
-  mastercard: any;
-  amex: any;
-  mercadopago: any;
+  register: UseFormRegister<CheckoutFormData>;
+  errors: FieldErrors<CheckoutFormData>;
+  selectedPayment: CheckoutFormData['paymentMethod'];
+  visa: PaymentMethodConfig;
+  mastercard: PaymentMethodConfig;
+  amex: PaymentMethodConfig;
+  mercadopago: PaymentMethodConfig;
 }
 
 function PaymentBadges({ pm, visa, mastercard, amex, mercadopago }: { pm: typeof PAYMENT_OPTIONS[0] } & Pick<Props, 'visa' | 'mastercard' | 'amex' | 'mercadopago'>) {
@@ -25,14 +28,14 @@ function PaymentBadges({ pm, visa, mastercard, amex, mercadopago }: { pm: typeof
   if (pm.value === 'card') {
     return (
       <div className="flex gap-1">
-        {visa?.active !== false && visa?.logo && <img src={getImageUrl(visa.logo)} alt="VISA" className="w-10 h-7 object-cover rounded" />}
-        {mastercard?.active !== false && mastercard?.logo && <img src={getImageUrl(mastercard.logo)} alt="MC" className="w-10 h-7 object-cover rounded" />}
-        {amex?.active !== false && amex?.logo && <img src={getImageUrl(amex.logo)} alt="AMEX" className="w-10 h-7 object-cover rounded" />}
+        {visa.active !== false && visa.logo && <Image src={getImageUrl(visa.logo)} alt="VISA" width={40} height={28} className="w-10 h-7 object-cover rounded" />}
+        {mastercard.active !== false && mastercard.logo && <Image src={getImageUrl(mastercard.logo)} alt="MC" width={40} height={28} className="w-10 h-7 object-cover rounded" />}
+        {amex.active !== false && amex.logo && <Image src={getImageUrl(amex.logo)} alt="AMEX" width={40} height={28} className="w-10 h-7 object-cover rounded" />}
       </div>
     );
   }
   if (pm.value === 'mercadopago') {
-    return <div className="flex gap-1">{mercadopago?.logo && <img src={getImageUrl(mercadopago.logo)} alt="MP" className="w-10 h-7 object-cover rounded" />}</div>;
+    return <div className="flex gap-1">{mercadopago.logo && <Image src={getImageUrl(mercadopago.logo)} alt="Mercado Pago" width={40} height={28} className="w-10 h-7 object-cover rounded" />}</div>;
   }
   return null;
 }

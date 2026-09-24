@@ -32,8 +32,9 @@ export default function CarritoSummary({
             <div className="relative flex-1">
               <Tag size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8A8A85]" />
               <input type="text" value={couponInput} onChange={(e) => onCouponInputChange(e.target.value)}
+                aria-label="Código de cupón"
                 className="w-full pl-9 pr-3 py-2 bg-[#1A1F21] border border-[#0D0F0F] rounded-lg text-xs text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A]/50"
-                placeholder="Código de cupon" />
+                placeholder="Escribí tu código de cupón" />
             </div>
             <button onClick={onApplyCoupon} disabled={couponLoading} className="px-4 py-2 bg-[#B7D31A] text-[#050606] rounded-lg text-xs font-bold hover:bg-[#c8e81f] transition-colors disabled:opacity-60">
               {couponLoading ? 'Validando...' : 'Aplicar'}

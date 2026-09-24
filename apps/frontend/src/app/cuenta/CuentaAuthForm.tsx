@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import axios from 'axios';
 import Link from 'next/link';
 import { login, register as registerUser } from '@/lib/api';
@@ -12,21 +11,7 @@ import GoogleAuthButton from '@/components/auth/GoogleAuthButton';
 import { User } from '@/types';
 import CuentaLoginForm from './CuentaLoginForm';
 import CuentaRegisterForm from './CuentaRegisterForm';
-
-const loginSchema = z.object({
-  email: z.string().email('Email invalido'),
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
-});
-
-const registerSchema = z.object({
-  name: z.string().min(2, 'El nombre es requerido'),
-  email: z.string().email('Email invalido'),
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, { message: 'Las contraseñas no coinciden', path: ['confirmPassword'] });
-
-type LoginFormData = z.infer<typeof loginSchema>;
-type RegisterFormData = z.infer<typeof registerSchema>;
+import { loginSchema, registerSchema, LoginFormData, RegisterFormData } from './authFormSchemas';
 
 interface Props {
   onAuth: (user: User, token: string) => void;

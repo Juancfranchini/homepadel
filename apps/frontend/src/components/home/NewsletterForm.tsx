@@ -13,7 +13,10 @@ export default function NewsletterForm({ data }: Props) {
 
   const title = data?.newsletterTitle || 'ENTERATE DE LAS NOVEDADES';
   const text = data?.newsletterText || 'Ofertas exclusivas, nuevos productos y contenido relevante sobre padel.';
-  const placeholder = data?.newsletterPlaceholder || 'Tu email';
+  const configuredPlaceholder = data?.newsletterPlaceholder?.trim();
+  const placeholder = configuredPlaceholder && configuredPlaceholder !== 'Tu email'
+    ? configuredPlaceholder
+    : 'Escribí tu email';
   const footerText = data?.newsletterFooterText || 'Sin spam. Solo contenido relevante sobre padel.';
 
   return (
@@ -42,6 +45,8 @@ export default function NewsletterForm({ data }: Props) {
           <form className="flex flex-col sm:flex-row gap-3" onSubmit={handleSubmit}>
             <input
               type="email"
+              autoComplete="email"
+              aria-label="Email para suscribirte"
               value={email}
               onChange={(e) => onEmailChange(e.target.value)}
               placeholder={placeholder}

@@ -61,8 +61,8 @@ export default function NewsletterSignupForm() {
         >
           <div className="relative flex-1">
             <input
-              type="email"
-              placeholder="Tu email"
+              type="email" autoComplete="email" aria-label="Email para suscribirte"
+              placeholder="Escribí tu email"
               {...register('email')}
               className={`w-full px-4 py-3 rounded-lg bg-white/10 border text-white placeholder-gray-500 text-sm focus:outline-none focus:border-[#B7D31A] transition-colors ${
                 errors.email ? 'border-red-500' : 'border-white/20'
