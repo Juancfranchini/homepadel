@@ -7,6 +7,7 @@ interface Props {
   label: string;
   /** Sangría del nivel: el segundo nivel se corre para que se lea la jerarquía. */
   level?: 1 | 2;
+  active?: boolean;
   children: React.ReactNode;
 }
 
@@ -17,19 +18,20 @@ interface Props {
  * pueda llegar a una categoría o una marca sin pasar por el catálogo completo,
  * que era el camino obligado hasta ahora.
  */
-export default function MobileNavAccordion({ label, level = 1, children }: Props) {
-  const [open, setOpen] = useState(false);
+export default function MobileNavAccordion({ label, level = 1, active = false, children }: Props) {
+  const [open, setOpen] = useState(active);
 
   const textoNivel = level === 1
-    ? 'text-sm font-semibold uppercase tracking-wide text-[#C7C7C0]'
-    : 'text-xs font-semibold uppercase tracking-wide text-[#8A8A85]';
+    ? 'text-sm font-semibold uppercase tracking-wide'
+    : 'text-xs font-semibold uppercase tracking-wide';
+  const color = active ? 'bg-[#B7D31A]/10 text-[#D4EE43] ring-1 ring-[#B7D31A]/30' : 'text-[#C7C7C0]';
 
   return (
-    <div className={level === 2 ? 'pl-3' : ''}>
+    <div className={level === 2 ? 'pl-3' : 'my-0.5'}>
       <button
         onClick={() => setOpen(!open)}
         aria-expanded={open}
-        className={'flex w-full items-center justify-between py-3 transition-colors hover:text-[#F7F6F7] ' + textoNivel}
+        className={'flex w-full items-center justify-between rounded-lg px-3 py-3 transition-colors hover:bg-white/[0.06] hover:text-[#F7F6F7] ' + textoNivel + ' ' + color}
       >
         {label}
         <ChevronDown
@@ -38,7 +40,7 @@ export default function MobileNavAccordion({ label, level = 1, children }: Props
         />
       </button>
 
-      {open && <div className="flex flex-col border-l border-[#0D0F0F] pl-3">{children}</div>}
+      {open && <div className="ml-3 flex flex-col border-l border-[#343A3D] pl-3">{children}</div>}
     </div>
   );
 }
