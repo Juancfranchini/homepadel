@@ -17,6 +17,14 @@ const preferredProductSlugs: Record<string, string[]> = {
   accesorios: ['overgrip-bullpadel-pack-x3'],
 };
 
+const categoryImageAssets: Record<string, string> = {
+  paletas: '/images/categories/paleta.png',
+  zapatillas: '/images/categories/zapatillas.png',
+  indumentaria: '/images/categories/indumentaria.png',
+  accesorios: '/images/categories/accesorios.png',
+  bolsos: '/images/categories/bolso.png',
+};
+
 // El accesorio cargado todavía no tiene foto en el CMS. Esta es la foto
 // oficial del mismo pack x3 de Bullpadel, no una composición genérica.
 const productImageFallbacks: Record<string, string> = {
@@ -46,11 +54,19 @@ function categoryProductImage(category: Category, products: Product[]): string |
   return null;
 }
 
+function categoryImage(category: Category, products: Product[]): string | null {
+  const localAsset = categoryImageAssets[category.slug];
+  if (localAsset) return localAsset;
+
+  const productImage = categoryProductImage(category, products);
+  return productImage ? getImageUrl(productImage) : null;
+}
+
 export default function CategoryCards({ categories, products = [], title, description }: Props) {
   if (!categories || categories.length === 0) return null;
 
   const items = categories
-    .map((category) => ({ category, image: categoryProductImage(category, products) }))
+    .map((category) => ({ category, image: categoryImage(category, products) }))
     .filter((item): item is { category: Category; image: string } => Boolean(item.image))
     .slice(0, 5);
 
@@ -70,8 +86,6 @@ export default function CategoryCards({ categories, products = [], title, descri
 
         <div className="flex md:grid md:grid-cols-5 gap-2 sm:gap-3 overflow-x-auto md:overflow-visible -mx-4 px-4 sm:-mx-6 sm:px-6 md:mx-0 md:px-0 md:justify-center">
           {items.map(({ category: cat, image }) => {
-            const imgUrl = getImageUrl(image);
-
             return (
               <Link
                 key={cat.slug}
@@ -80,8 +94,8 @@ export default function CategoryCards({ categories, products = [], title, descri
                 >
                 <div className="absolute inset-0 bg-[#050606]" />
                 <Image
-                  src={imgUrl}
-                  alt={'Producto real de la categoría ' + cat.name}
+                  src={image}
+                  alt={'Categoría ' + cat.name}
                   fill
                   sizes="(min-width: 768px) 20vw, 180px"
                   className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
