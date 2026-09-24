@@ -6,6 +6,13 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Role } from '@prisma/client';
+import { Throttle } from '@nestjs/throttler';
+import { CreateReviewDto, UpdateReviewDto } from './dto/review.dto';
+
+interface AuthenticatedUser {
+  id: string;
+  name: string;
+}
 
 @ApiTags('Reviews')
 @Controller('reviews')
@@ -20,7 +27,7 @@ export class ReviewsController {
   @Get('my')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  findMine(@CurrentUser() user: any) {
+  findMine(@CurrentUser() user: AuthenticatedUser) {
     return this.reviewsService.findByUser(user.id);
   }
 
@@ -33,9 +40,10 @@ export class ReviewsController {
   }
 
   @Post()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  create(@Body() dto: { productId: string; name: string; rating: number; comment: string }, @CurrentUser() user: any) {
+  create(@Body() dto: CreateReviewDto, @CurrentUser() user: AuthenticatedUser) {
     return this.reviewsService.create({ ...dto, name: dto.name || user.name, userId: user.id });
   }
 
@@ -51,9 +59,8 @@ export class ReviewsController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  update(@Param('id') id: string, @Body() dto: any) {
+  update(@Param('id') id: string, @Body() dto: UpdateReviewDto) {
     return this.reviewsService.update(id, dto);
-    return this.reviewsService.approve(id);
   }
 
   @Delete(':id')

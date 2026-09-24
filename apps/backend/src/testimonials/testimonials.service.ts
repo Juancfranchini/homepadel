@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { PublicTestimonialDto } from './dto/public-testimonial.dto';
+import { CreateTestimonialDto, UpdateTestimonialDto } from './dto/testimonial.dto';
 
-function normalizeDto(dto: any): any {
+function normalizeDto<T extends CreateTestimonialDto | UpdateTestimonialDto>(dto: T): Omit<T, 'isActive'> & { active?: boolean } {
   const { isActive, ...rest } = dto;
-  if (isActive !== undefined) rest.active = isActive;
-  return rest;
+  return { ...rest, ...(isActive !== undefined ? { active: isActive } : {}) };
 }
 
 @Injectable()
@@ -14,14 +15,14 @@ export class TestimonialsService {
   findAll() { return this.prisma.testimonial.findMany({ where: { active: true }, orderBy: { order: 'asc' } }); }
   findAllAdmin() { return this.prisma.testimonial.findMany({ orderBy: { order: 'asc' } }); }
 
-  create(dto: any) { return this.prisma.testimonial.create({ data: normalizeDto(dto) }); }
+  create(dto: CreateTestimonialDto) { return this.prisma.testimonial.create({ data: normalizeDto(dto) }); }
 
-  createPublic(dto: any) {
+  createPublic(dto: PublicTestimonialDto) {
     return this.prisma.testimonial.create({
       data: {
         name: dto.name,
         comment: dto.comment,
-        rating: dto.rating || 5,
+        rating: dto.rating,
         active: false,
       },
     });
@@ -33,7 +34,7 @@ export class TestimonialsService {
     return this.prisma.testimonial.update({ where: { id }, data: { active: true } });
   }
 
-  async update(id: string, dto: any) {
+  async update(id: string, dto: UpdateTestimonialDto) {
     const item = await this.prisma.testimonial.findUnique({ where: { id } });
     if (!item) throw new NotFoundException('Testimonio no encontrado');
     return this.prisma.testimonial.update({ where: { id }, data: normalizeDto(dto) });
