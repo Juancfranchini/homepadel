@@ -14,6 +14,24 @@ interface FaqItem {
   active: boolean;
 }
 
+const BANK_TRANSFER_ENABLED = process.env.NEXT_PUBLIC_ENABLE_BANK_TRANSFER === 'true';
+
+function applyPublicPaymentPolicy(faq: FaqItem): FaqItem {
+  if (faq.category.toUpperCase() !== 'PAGOS') return faq;
+  const question = faq.question.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  if (question.includes('metodo') && question.includes('pago')) {
+    const transferText = BANK_TRANSFER_ENABLED ? ' También podés solicitar una compra por transferencia y te contactaremos para completarla.' : '';
+    return { ...faq, answer: 'Trabajamos con Mercado Pago Checkout Pro. Dentro de Mercado Pago podés elegir tarjeta, saldo u otros medios disponibles.' + transferText };
+  }
+  if (question.includes('cuota')) {
+    return { ...faq, answer: 'Las cuotas disponibles se muestran antes de comprar y se confirman al ingresar a Mercado Pago.' };
+  }
+  if (question.includes('seguro')) {
+    return { ...faq, answer: 'Sí. El pago se completa dentro de Mercado Pago y Home Pádel no almacena datos de tarjetas.' };
+  }
+  return faq;
+}
+
 export default function FaqPage() {
   const [faqs, setFaqs] = useState<FaqItem[]>([]);
   const [openItems, setOpenItems] = useState<Record<string, boolean>>({});
@@ -25,7 +43,7 @@ export default function FaqPage() {
       .then(res => res.json())
       .then(data => {
         const items = Array.isArray(data) ? data : data?.data || [];
-        setFaqs(items);
+        setFaqs(items.map(applyPublicPaymentPolicy));
       })
       .catch(() => setFaqs([]))
       .finally(() => setLoading(false));

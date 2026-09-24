@@ -22,9 +22,9 @@ interface Params {
 }
 
 export function useCheckoutSubmit({ items, couponCode, clearCart }: Params) {
+  const [orderError, setOrderError] = useState('');
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
-  const [orderError, setOrderError] = useState('');
 
   const submitMercadoPago = async (data: CheckoutFormData) => {
     try {
@@ -58,49 +58,39 @@ export function useCheckoutSubmit({ items, couponCode, clearCart }: Params) {
         window.location.href = pref.init_point;
         return;
       }
-      setOrderError('No se pudo iniciar el pago con Mercado Pago. Probá de nuevo o elegí otro método.');
+      setOrderError('No se pudo iniciar el pago con Mercado Pago. Probá de nuevo.');
     } catch (err) {
-      setOrderError(mensajeDeError(err, 'Error al conectar con Mercado Pago. Probá de nuevo o elegí otro método.'));
+      setOrderError(mensajeDeError(err, 'Error al conectar con Mercado Pago. Probá de nuevo.'));
     }
   };
 
-  const submitDirectOrder = async (data: CheckoutFormData) => {
+  const submitTransfer = async (data: CheckoutFormData) => {
     try {
-      const address = data.street + ', ' + data.city + ', ' + data.province + ' (' + data.postalCode + ')';
-      // Solo lo que declara CreateOrderDto en el backend: con
-      // forbidNonWhitelisted activado, un campo de más (como un `total`
-      // calculado acá) hace que el pedido entero se rechace con 400.
-      const orderData = {
-        items: items.map((i) => ({
-          productId: i.product.id,
-          quantity: i.quantity,
-          variantId: i.variantId,
-        })),
-        address,
+      const result = await createOrder({
+        paymentMethod: 'transfer',
+        items: items.map((item) => ({ productId: item.product.id, quantity: item.quantity, variantId: item.variantId })),
+        address: data.street + ', ' + data.city + ', ' + data.province + ' (' + data.postalCode + ')',
         buyerEmail: data.email,
         buyerPhone: data.phone,
         buyerName: data.name,
         couponCode: couponCode || undefined,
-      };
-      const result = await createOrder(orderData);
+      });
       setOrderNumber(result.number);
       clearCart();
       setOrderSuccess(true);
     } catch (err) {
-      // Antes, cualquier error acá se tragaba y se mostraba "pedido
-      // confirmado" con un número inventado sin que la orden existiera.
-      setOrderError(mensajeDeError(err, 'Hubo un error al procesar tu pedido. Intentá de nuevo.'));
+      setOrderError(mensajeDeError(err, 'No pudimos registrar el pedido por transferencia. Probá de nuevo.'));
     }
   };
 
   const onSubmit = async (data: CheckoutFormData) => {
     setOrderError('');
-    if (data.paymentMethod === 'mercadopago') {
-      await submitMercadoPago(data);
+    if (data.paymentMethod === 'transfer') {
+      await submitTransfer(data);
       return;
     }
-    await submitDirectOrder(data);
+    await submitMercadoPago(data);
   };
 
-  return { onSubmit, orderSuccess, orderNumber, orderError };
+  return { onSubmit, orderError, orderSuccess, orderNumber };
 }

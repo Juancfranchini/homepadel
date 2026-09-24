@@ -165,7 +165,7 @@ export class SiteSectionsService {
       'privacidad': { title: 'Politica de Privacidad', content: '' },
       'contacto': { chip: 'ESTAMOS PARA AYUDARTE', title: 'Contactanos', description: 'Tenes dudas sobre nuestros productos, envíos o pagos? Nuestro equipo esta para ayudarte.', heroImage: '', mapUrl: '', newsletterTitle: 'ENTERATE DE LAS NOVEDADES', newsletterText: 'Suscribite y recibi ofertas exclusivas y lanzamientos.', heroActive: true, benefitsActive: true, channelsActive: true, faqActive: true, mapActive: true, newsletterActive: true },
       'talles': { title: 'Guia de Talles', content: '' },
-      'payment_methods': { mercadopago: { active: true, publicKey: '', accessToken: '' }, transferencia: { active: true, cbu: '', alias: '', titular: '', banco: '' }, tarjeta: { active: false }, correo_argentino: { active: true, usuario: '', password: '', apiKey: '', agreement: '', remitente: { nombre: '', calle: '', número: '', ciudad: '', códigoPostal: '', provincia: '', teléfono: '' } }, oca: { active: false, usuario: '', password: '' }, andreani: { active: false, usuario: '', password: '' } },
+      'payment_methods': { mercadopago: { active: true, publicKey: '', accessToken: '' }, transferencia: { active: false, cbu: '', alias: '', titular: '', banco: '' }, tarjeta: { active: false }, correo_argentino: { active: true, usuario: '', password: '', apiKey: '', agreement: '', remitente: { nombre: '', calle: '', número: '', ciudad: '', códigoPostal: '', provincia: '', teléfono: '' } }, oca: { active: false, usuario: '', password: '' }, andreani: { active: false, usuario: '', password: '' } },
       'email_settings': {
         resendApiKey: '',
         fromEmail: 'Home Padel <noreply@homepadel.com.ar>',

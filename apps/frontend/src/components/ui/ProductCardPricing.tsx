@@ -12,7 +12,7 @@ interface Props {
 }
 
 /**
- * Bloque comercial de la tarjeta: precio, cuotas y precio por transferencia.
+ * Bloque comercial de la tarjeta: precio, cuotas y envío.
  *
  * Se separó del resto de la tarjeta porque concentra las tres cifras que el
  * comprador compara, y conviene que la regla de cuál se muestra esté en un
@@ -23,12 +23,6 @@ export default function ProductCardPricing({ product, isMadeToOrder, hasDiscount
 
   const cuotas = product.installments || 6;
   const valorCuota = Math.ceil(product.effectivePrice / cuotas);
-
-  // Solo se anuncia como beneficio si realmente es más barato que pagar normal.
-  const transferencia =
-    product.transferPrice && product.transferPrice > 0 && product.transferPrice < product.effectivePrice
-      ? product.transferPrice
-      : null;
 
   // El umbral se administra desde el backoffice y el servidor recalcula el costo
   // al cobrar. Se espera a tener el valor real antes de prometer el beneficio:
@@ -51,13 +45,6 @@ export default function ProductCardPricing({ product, isMadeToOrder, hasDiscount
       {!isMadeToOrder && (
         <p className="text-[10px] font-semibold text-[#B7D31A]">
           {cuotas} x {formatPrice(valorCuota)} sin interés
-        </p>
-      )}
-
-      {!isMadeToOrder && transferencia && (
-        <p className="text-[11px] font-bold text-[#F7F6F7]">
-          {formatPrice(transferencia)}{' '}
-          <span className="font-semibold text-[#8A8A85]">por transferencia</span>
         </p>
       )}
 

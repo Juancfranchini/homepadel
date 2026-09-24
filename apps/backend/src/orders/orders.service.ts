@@ -1,5 +1,6 @@
 ﻿import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { BadRequestException } from '@nestjs/common';
 import { EmailService } from '../email/email.service';
 import { PricingService } from '../pricing/pricing.service';
 import { CouponsService } from '../coupons/coupons.service';
@@ -90,6 +91,7 @@ export class OrdersService {
   }
 
   async create(dto: CreateOrderDto, userId?: string) {
+    await this.assertTransferEnabled();
     const number = 'HP-' + Date.now();
     
     // S3 / F6 - Precios desde la base y verificación de stock. La misma lógica
@@ -128,9 +130,10 @@ export class OrdersService {
     const total = subtotal + shipping - discount;
 
     const buyerInfo = {
-      buyerEmail: dto.buyerEmail || null,
-      buyerPhone: dto.buyerPhone || null,
-      buyerName: dto.buyerName || null,
+      buyerEmail: dto.buyerEmail,
+      buyerPhone: dto.buyerPhone,
+      buyerName: dto.buyerName,
+      paymentMethod: dto.paymentMethod,
     };
 
     const order = await this.prisma.order.create({
@@ -161,19 +164,31 @@ export class OrdersService {
     // como recuperado: es lo que permite medir cuántos terminan en venta.
     this.abandonedCarts.markRecovered(dto.buyerEmail || order.user?.email, number);
 
-    const customerEmail = dto.buyerEmail || order.user?.email;
-    if (customerEmail) {
-      const itemsForEmail = order.items.map(item => ({
-        name: item.product.name,
-        quantity: item.quantity,
-        price: item.price,
-      }));
-      this.emailService.sendOrderConfirmation(customerEmail, number, buyerInfo.buyerName || order.user?.name || 'Cliente', itemsForEmail, total).catch(err =>
-        console.error('Error enviando email de confirmacion:', err.message)
-      );
-    }
+    const itemsForEmail = order.items.map(item => ({
+      name: item.product.name,
+      quantity: item.quantity,
+      price: item.price,
+    }));
+    this.emailService.sendTransferOrderNotification({
+      orderNumber: number,
+      customerName: buyerInfo.buyerName,
+      customerEmail: buyerInfo.buyerEmail,
+      customerPhone: buyerInfo.buyerPhone,
+      address: dto.address,
+      items: itemsForEmail,
+      total,
+    }).catch(err => console.error('Error enviando aviso de transferencia:', err.message));
 
     return order;
+  }
+
+  private async assertTransferEnabled(): Promise<void> {
+    const featureEnabled = process.env.ENABLE_BANK_TRANSFER === 'true';
+    const section = await this.prisma.siteSection.findUnique({ where: { key: 'payment_methods' } });
+    const data = section?.data as { transferencia?: { active?: boolean } } | null;
+    if (!featureEnabled || data?.transferencia?.active !== true) {
+      throw new BadRequestException('La transferencia bancaria no está habilitada. Usá Mercado Pago.');
+    }
   }
 
   async updateStatus(id: string, status: OrderStatus, trackingNumber?: string, trackingUrl?: string) {

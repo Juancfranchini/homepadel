@@ -11,7 +11,7 @@ import { useShippingRates } from '@/hooks/useShippingRates';
 import { validateCoupon } from '@/lib/api';
 import { useInitiateCheckout } from './useInitiateCheckout';
 import { useCheckoutSubmit } from './useCheckoutSubmit';
-import { useCheckoutDraft, limpiarBorrador } from './useCheckoutDraft';
+import { limpiarBorrador, useCheckoutDraft } from './useCheckoutDraft';
 import { useAbandonedCart } from './useAbandonedCart';
 import CheckoutEmptyCart from './CheckoutEmptyCart';
 import CheckoutSuccessScreen from './CheckoutSuccessScreen';
@@ -37,10 +37,10 @@ function CheckoutHeader() {
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart, couponCode, setCoupon, updateQuantity, removeItem } = useCartStore();
   const { user, setAuth } = useAuthStore();
-  const { mercadopago, visa, mastercard, amex } = usePaymentMethods();
+  const { mercadopago, transferencia } = usePaymentMethods();
   const { flatRate, freeShippingThreshold } = useShippingRates();
   const [discount, setDiscount] = useState(0);
-  const { onSubmit, orderSuccess, orderNumber, orderError } = useCheckoutSubmit({ items, couponCode, clearCart });
+  const { onSubmit, orderError, orderSuccess, orderNumber } = useCheckoutSubmit({ items, couponCode, clearCart });
 
   const subtotal = totalPrice();
   // Estimación para mostrar en pantalla — el servidor recalcula envío y
@@ -59,10 +59,10 @@ export default function CheckoutPage() {
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, watch, reset } = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
-    defaultValues: { name: user?.name || '', email: user?.email || '', paymentMethod: 'card' },
+    defaultValues: { name: user?.name || '', email: user?.email || '', paymentMethod: 'mercadopago' },
   });
 
-  useCheckoutDraft(watch, reset);
+  useCheckoutDraft(watch, reset, transferencia.active === true);
   useInitiateCheckout(items, subtotal);
   const checkoutAuth = useCheckoutAuthGate(user, setAuth, handleSubmit, onSubmit);
 
@@ -70,7 +70,6 @@ export default function CheckoutPage() {
   // Queda registrado el carrito de quien deja su email y no termina la compra,
   // para que la tienda pueda recuperarlo desde el backoffice.
   useAbandonedCart(items, { email: watch('email'), name: watch('name'), phone: watch('phone') }, orderSuccess);
-
   const selectedPayment = watch('paymentMethod');
 
   // Si el carrito se vacía editándolo acá, el formulario NO se desmonta: al
@@ -105,10 +104,8 @@ export default function CheckoutPage() {
                 register={register}
                 errors={errors}
                 selectedPayment={selectedPayment}
-                visa={visa}
-                mastercard={mastercard}
-                amex={amex}
                 mercadopago={mercadopago}
+                transferencia={transferencia}
               />
             </div>
 
@@ -121,6 +118,7 @@ export default function CheckoutPage() {
               total={total}
               orderError={orderError}
               isSubmitting={isSubmitting}
+              paymentMethod={selectedPayment}
               onQuantityChange={updateQuantity}
               onRemove={removeItem}
             />

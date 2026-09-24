@@ -8,14 +8,12 @@ import RegularPricing from './RegularPricing';
 interface Props {
   productName: string;
   displayPrice: number;
-  transferPrice: number;
   hasDiscount: boolean;
   originalPrice: number;
   cuota: number;
   installments: number;
   hasInstallmentsInterest: boolean;
   installmentsInterest: number;
-  paymentMethods: string[];
   onShowPaymentModal: () => void;
   isMadeToOrder?: boolean;
   estimatedDays?: number;
@@ -24,14 +22,12 @@ interface Props {
 
 export default function ProductPrice({
   productName, displayPrice,
-  transferPrice,
   hasDiscount,
   originalPrice,
   cuota,
   installments,
   hasInstallmentsInterest,
   installmentsInterest,
-  paymentMethods,
   onShowPaymentModal,
   isMadeToOrder = false,
   estimatedDays,
@@ -68,8 +64,6 @@ export default function ProductPrice({
         />
       ) : (
         <RegularPricing
-          displayPrice={displayPrice}
-          transferPrice={transferPrice}
           showInstallments={showInstallments}
           installments={installments}
           cuota={cuota}
@@ -79,13 +73,13 @@ export default function ProductPrice({
       )}
 
       {/* Ver medios de pago */}
-      {paymentMethods.length > 0 && !isMadeToOrder && (
+      {!isMadeToOrder && (
         <button
           onClick={onShowPaymentModal}
           className="flex items-center gap-1.5 text-[#C7C7C0] hover:text-[#F7F6F7] text-xs underline underline-offset-2 transition-colors w-fit"
         >
           <CreditCard size={12} />
-          Ver más detalles
+          Ver medios de pago
         </button>
       )}
     </div>

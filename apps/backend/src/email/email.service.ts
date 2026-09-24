@@ -2,6 +2,22 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Resend } from 'resend';
 
+interface TransferOrderNotification {
+  orderNumber: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  address: string;
+  items: { name: string; quantity: number; price: number }[];
+  total: number;
+}
+
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (character) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;',
+  })[character] || character);
+}
+
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
@@ -129,6 +145,24 @@ export class EmailService {
     }
 
     return this.sendEmail(to, subject, html);
+  }
+
+  async sendTransferOrderNotification(order: TransferOrderNotification) {
+    const config = await this.getConfig();
+    const adminEmail = config?.adminEmail || 'contactohomepadel@gmail.com';
+    const itemsHtml = order.items.map(item =>
+      '<tr><td style="padding:8px;border-bottom:1px solid #ddd">' + escapeHtml(item.name) + ' x' + item.quantity + '</td>' +
+      '<td style="padding:8px;border-bottom:1px solid #ddd;text-align:right">$' + (item.price * item.quantity).toFixed(2) + '</td></tr>',
+    ).join('');
+    const html = '<h1>Pedido pendiente por transferencia</h1>' +
+      '<p><strong>Pedido:</strong> ' + escapeHtml(order.orderNumber) + '</p>' +
+      '<p><strong>Cliente:</strong> ' + escapeHtml(order.customerName) + '</p>' +
+      '<p><strong>Email:</strong> ' + escapeHtml(order.customerEmail) + '</p>' +
+      '<p><strong>Teléfono:</strong> ' + escapeHtml(order.customerPhone) + '</p>' +
+      '<p><strong>Dirección:</strong> ' + escapeHtml(order.address) + '</p>' +
+      '<table style="width:100%;border-collapse:collapse">' + itemsHtml + '</table>' +
+      '<p style="text-align:right"><strong>Total: $' + order.total.toFixed(2) + '</strong></p>';
+    return this.sendEmail(adminEmail, 'Pedido ' + order.orderNumber + ' pendiente por transferencia', html);
   }
 
   async sendContactNotification(data: { name: string; email: string; phone?: string; subject?: string; message: string }) {

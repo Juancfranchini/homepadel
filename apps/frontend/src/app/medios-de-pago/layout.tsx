@@ -7,7 +7,7 @@ import type { Metadata } from 'next';
  */
 export const metadata: Metadata = {
   title: 'Medios de pago',
-  description: 'Pagá con Mercado Pago, tarjeta en cuotas sin interés o transferencia bancaria con descuento.',
+  description: 'Pagá de forma segura con Mercado Pago Checkout Pro. Los datos de tu tarjeta se procesan fuera de Home Pádel.',
   alternates: { canonical: '/medios-de-pago' },
 };
 

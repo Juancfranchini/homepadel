@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+const BANK_TRANSFER_ENABLED = process.env.NEXT_PUBLIC_ENABLE_BANK_TRANSFER === 'true';
 
 export interface PaymentMethodConfig {
   active?: boolean;
@@ -39,10 +40,12 @@ export function usePaymentMethods() {
 
   return {
     mercadopago: data?.mercadopago || { active: true },
-    transferencia: data?.transferencia || { active: true },
-    visa: data?.visa || { active: true },
-    mastercard: data?.mastercard || { active: true },
-    amex: data?.amex || { active: true },
+    // Política pública actual: las configuraciones se conservan en el CMS,
+    // pero no habilitan cobros directos desde la tienda.
+    transferencia: { ...(data?.transferencia || {}), active: BANK_TRANSFER_ENABLED && data?.transferencia?.active === true },
+    visa: { ...(data?.visa || {}), active: false },
+    mastercard: { ...(data?.mastercard || {}), active: false },
+    amex: { ...(data?.amex || {}), active: false },
     ca: data?.ca || { active: true },
     oca: data?.oca || { active: true },
     andreani: data?.andreani || { active: true },

@@ -9,7 +9,7 @@ import FooterPaymentBadges from './FooterPaymentBadges';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
 export default function Footer() {
-  const { mercadopago, visa, mastercard, amex, ca, oca, andreani } = usePaymentMethods() as any;
+  const { mercadopago, transferencia, ca, oca, andreani } = usePaymentMethods();
   const [settings, setSettings] = useState<any>({});
 
   useEffect(() => {
@@ -72,7 +72,7 @@ export default function Footer() {
           </div>
 
           <div className="col-span-1 md:col-span-2 lg:col-span-1 flex flex-col items-center md:items-start">
-            <FooterPaymentBadges mercadopago={mercadopago} visa={visa} mastercard={mastercard} amex={amex} ca={ca} oca={oca} andreani={andreani} />
+            <FooterPaymentBadges mercadopago={mercadopago} transferencia={transferencia} ca={ca} oca={oca} andreani={andreani} />
           </div>
         </div>
       </div>

@@ -34,6 +34,8 @@ export class OrdersController {
   findOne(@Param('id') id: string) { return this.ordersService.findOne(id); }
 
   @Post()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   create(@Body() dto: CreateOrderDto, @CurrentUser() user?: any) {
     return this.ordersService.create(dto, user?.id);
   }

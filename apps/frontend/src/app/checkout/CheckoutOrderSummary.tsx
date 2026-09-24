@@ -16,13 +16,14 @@ interface Props {
   total: number;
   orderError: string;
   isSubmitting: boolean;
+  paymentMethod: 'mercadopago' | 'transfer';
   onQuantityChange: (itemKey: string, quantity: number) => void;
   onRemove: (itemKey: string) => void;
 }
 
 export default function CheckoutOrderSummary({
   items, subtotal, discount, couponCode, shippingCost, total, orderError, isSubmitting,
-  onQuantityChange, onRemove,
+  paymentMethod, onQuantityChange, onRemove,
 }: Props) {
   const vacio = items.length === 0;
 
@@ -66,7 +67,7 @@ export default function CheckoutOrderSummary({
 
         <button type="submit" disabled={isSubmitting || vacio}
           className="mt-5 w-full flex items-center justify-center gap-2 bg-[#B7D31A] text-[#050606] py-4 rounded-xl font-black text-sm uppercase tracking-wider hover:bg-[#c8e81f] transition-colors disabled:opacity-70 disabled:cursor-not-allowed">
-          {isSubmitting ? 'Procesando...' : <><Lock size={15} /> Realizar pedido <ChevronRight size={15} /></>}
+          {isSubmitting ? 'Procesando...' : <><Lock size={15} /> {paymentMethod === 'transfer' ? 'Solicitar compra' : 'Ir a Mercado Pago'} <ChevronRight size={15} /></>}
         </button>
         <p className="text-[#8A8A85] text-xs text-center mt-3">Tus datos estan protegidos con encriptacion SSL</p>
       </div>

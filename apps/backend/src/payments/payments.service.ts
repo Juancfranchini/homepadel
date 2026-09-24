@@ -141,7 +141,7 @@ export class PaymentsService {
         `Mercado Pago rechazó la preferencia de ${orderNumber} (HTTP ${response.status}): ${JSON.stringify(preference)}`,
       );
       throw new InternalServerErrorException(
-        'No se pudo iniciar el pago con Mercado Pago. Probá de nuevo o elegí otro método.',
+        'No se pudo iniciar el pago con Mercado Pago. Probá de nuevo.',
       );
     }
 
