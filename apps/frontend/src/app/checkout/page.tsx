@@ -34,13 +34,13 @@ function CheckoutHeader() {
 }
 
 export default function CheckoutPage() {
-  const { items, totalPrice, clearCart, couponCode, setCoupon, updateQuantity, removeItem } = useCartStore();
+  const { items, totalPrice, clearCart, couponCode, salesLinkToken, setCoupon, updateQuantity, removeItem } = useCartStore();
   const { user, setAuth } = useAuthStore();
   const { mercadopago, transferencia } = usePaymentMethods();
   const { flatRate, freeShippingThreshold } = useShippingRates();
   const settings = useSiteSettings();
   const [discount, setDiscount] = useState(0);
-  const { onSubmit, orderError, orderSuccess, orderNumber } = useCheckoutSubmit({ items, couponCode, clearCart, whatsapp: settings.whatsapp || settings.phone });
+  const { onSubmit, orderError, orderSuccess, orderNumber } = useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart, whatsapp: settings.whatsapp || settings.phone });
 
   const subtotal = totalPrice();
   // Estimación para mostrar en pantalla — el servidor recalcula envío y

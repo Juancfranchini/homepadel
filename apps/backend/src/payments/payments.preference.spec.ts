@@ -46,15 +46,26 @@ function construirServicio() {
 
   const prisma = {
     siteSection: { findUnique: jest.fn().mockResolvedValue({ data: {} }) },
-    order: { create: jest.fn((args: any) => { ordenesCreadas.push(args.data); return Promise.resolve(args.data); }) },
+    order: {
+      create: jest.fn((args: any) => {
+        ordenesCreadas.push(args.data);
+        return Promise.resolve(args.data);
+      }),
+    },
   };
+  (prisma as any).$transaction = jest.fn((callback: (tx: unknown) => unknown) => callback(prisma));
   const pricing = {
     resolveItems: jest.fn().mockResolvedValue([ITEM_RESUELTO]),
     calculateShipping: jest.fn().mockResolvedValue(12000),
   };
   const coupons = { validate: jest.fn(), calculateDiscount: jest.fn() };
 
-  const service = new PaymentsService(prisma as any, pricing as any, coupons as any, { markRecovered: jest.fn() } as any);
+  const service = new PaymentsService(
+    prisma as any,
+    pricing as any,
+    coupons as any,
+    { markRecovered: jest.fn() } as any,
+  );
   return { service, prisma, pricing, ordenesCreadas };
 }
 
@@ -67,7 +78,11 @@ describe('PaymentsService.createPreference', () => {
   const entornoOriginal = process.env;
 
   beforeEach(() => {
-    process.env = { ...entornoOriginal, FRONTEND_URL: 'https://www.homepadel.store', BACKEND_URL: 'https://api.homepadel.store' };
+    process.env = {
+      ...entornoOriginal,
+      FRONTEND_URL: 'https://www.homepadel.store',
+      BACKEND_URL: 'https://api.homepadel.store',
+    };
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
       status: 200,
@@ -75,7 +90,9 @@ describe('PaymentsService.createPreference', () => {
     }) as any;
   });
 
-  afterEach(() => { process.env = entornoOriginal; });
+  afterEach(() => {
+    process.env = entornoOriginal;
+  });
 
   it('pide a Mercado Pago que devuelva solo al comprador con el pago aprobado', async () => {
     const { service } = construirServicio();
@@ -116,7 +133,11 @@ describe('PaymentsService.createPreference', () => {
 
   it('ignora el número de orden que mande el navegador y genera el suyo', async () => {
     const { service, ordenesCreadas } = construirServicio();
-    await service.createPreference({ ...DTO_BASE, orderNumber: 'HP-1', externalReference: 'order_1' });
+    await service.createPreference({
+      ...DTO_BASE,
+      orderNumber: 'HP-1',
+      externalReference: 'order_1',
+    });
 
     expect(ordenesCreadas[0].number).not.toBe('HP-1');
     expect(JSON.parse(ordenesCreadas[0].notes).externalReference).not.toBe('order_1');
@@ -125,10 +146,14 @@ describe('PaymentsService.createPreference', () => {
   it('falla de forma visible si Mercado Pago rechaza la preferencia', async () => {
     const { service } = construirServicio();
     (global.fetch as jest.Mock).mockResolvedValue({
-      ok: false, status: 400, json: async () => ({ message: 'invalid_items' }),
+      ok: false,
+      status: 400,
+      json: async () => ({ message: 'invalid_items' }),
     });
 
-    await expect(service.createPreference(DTO_BASE)).rejects.toBeInstanceOf(InternalServerErrorException);
+    await expect(service.createPreference(DTO_BASE)).rejects.toBeInstanceOf(
+      InternalServerErrorException,
+    );
   });
 
   it('cobra el envío que calcula el servidor, no el que diga el navegador', async () => {

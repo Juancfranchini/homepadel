@@ -3,10 +3,10 @@ import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { Role } from '@prisma/client';
+import { PermissionsGuard } from '../common/guards/permissions.guard';
+import { Permissions } from '../common/decorators/permissions.decorator';
+import { POS_PERMISSIONS } from '../common/permissions';
 
 @ApiTags('Orders')
 @Controller('orders')
@@ -15,7 +15,7 @@ export class OrdersController {
 
   @Get()
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, RolesGuard) @Roles(Role.ADMIN)
+  @UseGuards(JwtAuthGuard, PermissionsGuard) @Permissions(POS_PERMISSIONS.SELL)
   findAll() { return this.ordersService.findAll(); }
 
   @Get('my')
@@ -42,7 +42,7 @@ export class OrdersController {
 
   @Patch(':id/status')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, RolesGuard) @Roles(Role.ADMIN)
+  @UseGuards(JwtAuthGuard, PermissionsGuard) @Permissions(POS_PERMISSIONS.SELL)
   updateStatus(
     @Param('id') id: string,
     @Body('status') status: string,

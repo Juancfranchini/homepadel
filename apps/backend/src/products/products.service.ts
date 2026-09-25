@@ -171,6 +171,7 @@ export class ProductsService {
 
   async create(dto: CreateProductDto) {
     const { categoryId, brandId, variants, ...rest } = dto as any;
+    if (!rest.barcode?.trim()) rest.barcode = null;
     if (!categoryId) throw new NotFoundException('categoryId es requerido');
     if (!brandId) throw new NotFoundException('brandId es requerido');
 
@@ -211,6 +212,7 @@ export class ProductsService {
     await this.findById(id);
     const { variants, ...rest } = dto as any;
     const data: any = { ...rest };
+    if (data.barcode !== undefined && !data.barcode?.trim()) data.barcode = null;
     if (dto.name) data.slug = slugify(dto.name, { lower: true, strict: true });
 
     if (variants !== undefined) {

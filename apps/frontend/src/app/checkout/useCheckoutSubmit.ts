@@ -20,6 +20,7 @@ function mensajeDeError(err: unknown, porDefecto: string): string {
 interface Params {
   items: CartItem[];
   couponCode: string | null;
+  salesLinkToken: string | null;
   clearCart: () => void;
   whatsapp?: string;
 }
@@ -41,7 +42,7 @@ function shippingCoordinationMessage(data: CheckoutFormData, items: CartItem[], 
   ].join('\n');
 }
 
-export function useCheckoutSubmit({ items, couponCode, clearCart, whatsapp }: Params) {
+export function useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart, whatsapp }: Params) {
   const [orderError, setOrderError] = useState('');
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
@@ -74,6 +75,7 @@ export function useCheckoutSubmit({ items, couponCode, clearCart, whatsapp }: Pa
           carrier: 'correo_argentino',
         },
         couponCode: couponCode || undefined,
+        salesLinkToken: salesLinkToken || undefined,
       });
       if (pref?.init_point) {
         window.location.href = pref.init_point;
@@ -95,6 +97,7 @@ export function useCheckoutSubmit({ items, couponCode, clearCart, whatsapp }: Pa
         buyerPhone: data.phone,
         buyerName: data.name,
         couponCode: couponCode || undefined,
+        salesLinkToken: salesLinkToken || undefined,
       });
       setOrderNumber(result.number);
       clearCart();

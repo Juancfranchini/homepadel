@@ -1,4 +1,14 @@
-import { IsString, IsNumber, IsArray, IsOptional, IsEmail, IsIn, ValidateNested, Min, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsArray,
+  IsOptional,
+  IsEmail,
+  IsIn,
+  ValidateNested,
+  Min,
+  MaxLength,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -34,11 +44,14 @@ class ShippingDto {
 
 export class CreatePreferenceDto {
   @ApiProperty({ type: [PreferenceItemDto] })
-  @IsArray() @ValidateNested({ each: true }) @Type(() => PreferenceItemDto)
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PreferenceItemDto)
   items: PreferenceItemDto[];
 
   @ApiProperty({ type: PayerDto })
-  @ValidateNested() @Type(() => PayerDto)
+  @ValidateNested()
+  @Type(() => PayerDto)
   payer: PayerDto;
 
   /**
@@ -50,10 +63,14 @@ export class CreatePreferenceDto {
    * quedaba sin dirección a la que enviar.
    */
   @ApiPropertyOptional({ type: ShippingDto })
-  @IsOptional() @ValidateNested() @Type(() => ShippingDto)
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ShippingDto)
   shipping?: ShippingDto;
 
   @ApiPropertyOptional() @IsString() @IsOptional() couponCode?: string;
+
+  @ApiPropertyOptional() @IsString() @IsOptional() salesLinkToken?: string;
 
   // Se aceptan por compatibilidad con el frontend anterior y se descartan: el
   // número de orden y la referencia externa los genera el servidor. Que los

@@ -1,4 +1,10 @@
-﻿import { Injectable, UnauthorizedException, ConflictException, BadRequestException, NotFoundException } from '@nestjs/common';
+﻿import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
@@ -46,17 +52,25 @@ export class AuthService {
     const resetToken = this.jwtService.sign({ sub: user.id, type: 'reset' }, { expiresIn: '1h' });
 
     try {
-      const resetUrl = (process.env.FRONTEND_URL || 'http://localhost:3000') + '/reset-password?token=' + resetToken;
+      const resetUrl =
+        (process.env.FRONTEND_URL || 'http://localhost:3000') +
+        '/reset-password?token=' +
+        resetToken;
       await this.emailService.sendEmail(
         email,
         'Recuperar contraseña - Home Padel',
-        '<h1>Recuperar contraseña</h1><p>Hace click en el siguiente link:</p><p><a href="' + resetUrl + '">Resetear contraseña</a></p>',
+        '<h1>Recuperar contraseña</h1><p>Hace click en el siguiente link:</p><p><a href="' +
+          resetUrl +
+          '">Resetear contraseña</a></p>',
       );
     } catch (e) {
       console.error('No se pudo enviar email de reset:', e);
     }
 
-    return { success: true, message: 'Se envío un email con instrucciones para resetear la contraseña' };
+    return {
+      success: true,
+      message: 'Se envío un email con instrucciones para resetear la contraseña',
+    };
   }
 
   async resetPassword(token: string, newPassword: string) {
@@ -102,7 +116,15 @@ export class AuthService {
   async me(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, email: true, name: true, role: true, phone: true, address: true },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        permissions: true,
+        phone: true,
+        address: true,
+      },
     });
     if (!user) throw new NotFoundException('Usuario no encontrado');
     return user;
