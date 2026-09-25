@@ -21,6 +21,9 @@ const PAGE_LABELS: Record<string, string> = {
   '/faq': 'FAQ',
   '/hero': 'Hero Slider',
   '/beneficios': 'Beneficios',
+  '/punto-de-venta': 'Punto de Venta',
+  '/caja': 'Caja',
+  '/estadisticas-ventas': 'Estadísticas de ventas',
 };
 
 interface DashboardHeaderProps {

@@ -9,16 +9,29 @@ datasource db {
 }
 
 model User {
-  id             String          @id @default(cuid())
-  email          String          @unique
+  id             String              @id @default(cuid())
+  email          String              @unique
   password       String?
   name           String
   phone          String?
   address        String?
-  role           Role            @default(CUSTOMER)
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  orders         Order[]
+  role           Role                @default(CUSTOMER)
+  permissions    String[]            @default([])
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  orders         Order[]             @relation("CustomerOrders")
+  soldOrders     Order[]             @relation("SoldOrders")
+  createdOrders  Order[]             @relation("CreatedOrders")
+  updatedOrders  Order[]             @relation("UpdatedOrders")
+  payments       Payment[]
+  inventoryMoves InventoryMovement[]
+  savedCarts     SavedCart[]
+  salesLinks     SalesCheckoutLink[]
+  openedSessions CashSession[]       @relation("OpenedCashSessions")
+  closedSessions CashSession[]       @relation("ClosedCashSessions")
+  cashMovements  CashMovement[]
+  returns        SaleReturn[]
+  auditLogs      AuditLog[]
   reviews        ProductReview[]
   authIdentities AuthIdentity[]
 }
@@ -65,30 +78,31 @@ model Brand {
 }
 
 model Product {
-  id                      String           @id @default(cuid())
+  id                      String              @id @default(cuid())
   name                    String
-  slug                    String           @unique
+  slug                    String              @unique
   description             String?
   price                   Float
   salePrice               Float?
   discountPercentage      Float?
   installments            Int?
   installmentsInterest    Float?
-  hasInstallmentsInterest Boolean          @default(false)
-  isMadeToOrder           Boolean          @default(false)
+  hasInstallmentsInterest Boolean             @default(false)
+  isMadeToOrder           Boolean             @default(false)
   estimatedDays           Int?
   requiredDeposit         Float?
-  sku                     String           @unique
-  stock                   Int              @default(0)
+  sku                     String              @unique
+  barcode                 String?             @unique
+  stock                   Int                 @default(0)
   images                  String[]
-  featured                Boolean          @default(false)
-  isNew                   Boolean          @default(false)
-  isOffer                 Boolean          @default(false)
-  active                  Boolean          @default(true)
+  featured                Boolean             @default(false)
+  isNew                   Boolean             @default(false)
+  isOffer                 Boolean             @default(false)
+  active                  Boolean             @default(true)
   categoryId              String
   brandId                 String
-  createdAt               DateTime         @default(now())
-  updatedAt               DateTime         @updatedAt
+  createdAt               DateTime            @default(now())
+  updatedAt               DateTime            @updatedAt
   features                Json?
   performanceStats        Json?
   relatedProductIds       String[]
@@ -96,15 +110,15 @@ model Product {
   compareData             Json?
   specs                   Json?
   videoUrl                String?
-  showVideo               Boolean          @default(false)
-  showPerformance         Boolean          @default(false)
-  showHighlights          Boolean          @default(false)
-  showCompare             Boolean          @default(false)
-  showRelated             Boolean          @default(false)
-  hasSize                 Boolean          @default(false)
-  hasColor                Boolean          @default(false)
-  hasDimensions           Boolean          @default(false)
-  hasWeight               Boolean          @default(false)
+  showVideo               Boolean             @default(false)
+  showPerformance         Boolean             @default(false)
+  showHighlights          Boolean             @default(false)
+  showCompare             Boolean             @default(false)
+  showRelated             Boolean             @default(false)
+  hasSize                 Boolean             @default(false)
+  hasColor                Boolean             @default(false)
+  hasDimensions           Boolean             @default(false)
+  hasWeight               Boolean             @default(false)
   shape                   String?
   // Hombre | Mujer | Unisex. Queda opcional: los productos que ya están
   // cargados no lo tienen, y una paleta no siempre tiene género.
@@ -125,29 +139,59 @@ model Product {
   orderItems              OrderItem[]
   reviews                 ProductReview[]
   variants                ProductVariant[]
-  brand                   Brand            @relation(fields: [brandId], references: [id])
-  category                Category         @relation(fields: [categoryId], references: [id])
+  inventoryMovements      InventoryMovement[]
+  brand                   Brand               @relation(fields: [brandId], references: [id])
+  category                Category            @relation(fields: [categoryId], references: [id])
 }
 
 model Order {
-  id             String      @id @default(cuid())
-  number         String      @unique
-  status         OrderStatus @default(PENDING)
-  total          Float
-  subtotal       Float
-  shipping       Float       @default(0)
-  discount       Float       @default(0)
-  couponCode     String?
-  userId         String?
-  notes          String?
-  address        String
-  trackingNumber String?
-  trackingUrl    String?
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-  user           User?       @relation(fields: [userId], references: [id])
-  items          OrderItem[]
-  shipments      Shipment[]
+  id                 String              @id @default(cuid())
+  number             String              @unique
+  status             OrderStatus         @default(PENDING)
+  paymentStatus      PaymentStatus       @default(PENDING)
+  inventoryStatus    InventoryStatus     @default(NONE)
+  channel            SalesChannel        @default(ONLINE)
+  total              Float
+  subtotal           Float
+  shipping           Float               @default(0)
+  discount           Float               @default(0)
+  couponCode         String?
+  userId             String?
+  sellerId           String?
+  createdById        String?
+  updatedById        String?
+  branchId           String?
+  cashSessionId      String?
+  notes              String?
+  address            String
+  trackingNumber     String?
+  trackingUrl        String?
+  source             String?
+  soldAt             DateTime?
+  paidAt             DateTime?
+  cancelledAt        DateTime?
+  cancellationReason String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  user               User?               @relation("CustomerOrders", fields: [userId], references: [id])
+  seller             User?               @relation("SoldOrders", fields: [sellerId], references: [id])
+  createdBy          User?               @relation("CreatedOrders", fields: [createdById], references: [id])
+  updatedBy          User?               @relation("UpdatedOrders", fields: [updatedById], references: [id])
+  branch             Branch?             @relation(fields: [branchId], references: [id])
+  cashSession        CashSession?        @relation(fields: [cashSessionId], references: [id])
+  items              OrderItem[]
+  shipments          Shipment[]
+  payments           Payment[]
+  inventoryMovements InventoryMovement[]
+  cashMovements      CashMovement[]
+  returns            SaleReturn[]
+  salesLink          SalesCheckoutLink?
+  savedCart          SavedCart?
+
+  @@index([channel, soldAt])
+  @@index([branchId, soldAt])
+  @@index([sellerId, soldAt])
+  @@index([paymentStatus, createdAt])
 }
 
 model Shipment {
@@ -163,15 +207,16 @@ model Shipment {
 }
 
 model OrderItem {
-  id        String          @id @default(cuid())
-  orderId   String
-  productId String
-  variantId String?
-  quantity  Int
-  price     Float
-  order     Order           @relation(fields: [orderId], references: [id])
-  product   Product         @relation(fields: [productId], references: [id])
-  variant   ProductVariant? @relation(fields: [variantId], references: [id])
+  id          String           @id @default(cuid())
+  orderId     String
+  productId   String
+  variantId   String?
+  quantity    Int
+  price       Float
+  order       Order            @relation(fields: [orderId], references: [id])
+  product     Product          @relation(fields: [productId], references: [id])
+  variant     ProductVariant?  @relation(fields: [variantId], references: [id])
+  returnItems SaleReturnItem[]
 }
 
 model Promotion {
@@ -310,27 +355,227 @@ model AbandonedCart {
 }
 
 model ProductVariant {
-  id              String      @id @default(cuid())
-  productId       String
-  sku             String      @unique
-  size            String      @default("")
-  color           String?
-  dimensions      String?
-  dimensionLength Float?
-  dimensionWidth  Float?
-  dimensionHeight Float?
-  dimensionUnit   String?
-  weight          Float?
-  weightUnit      String?
-  imageUrl        String?
-  images          String[]    @default([])
-  stock           Int         @default(0)
-  active          Boolean     @default(true)
-  isDefault       Boolean     @default(false)
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  product         Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
-  orderItems      OrderItem[]
+  id                 String              @id @default(cuid())
+  productId          String
+  sku                String              @unique
+  barcode            String?             @unique
+  size               String              @default("")
+  color              String?
+  dimensions         String?
+  dimensionLength    Float?
+  dimensionWidth     Float?
+  dimensionHeight    Float?
+  dimensionUnit      String?
+  weight             Float?
+  weightUnit         String?
+  imageUrl           String?
+  images             String[]            @default([])
+  stock              Int                 @default(0)
+  active             Boolean             @default(true)
+  isDefault          Boolean             @default(false)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  product            Product             @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderItems         OrderItem[]
+  inventoryMovements InventoryMovement[]
+}
+
+model Branch {
+  id             String              @id @default(cuid())
+  name           String
+  code           String              @unique
+  address        String?
+  active         Boolean             @default(true)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  orders         Order[]
+  registers      CashRegister[]
+  inventoryMoves InventoryMovement[]
+  savedCarts     SavedCart[]
+  salesLinks     SalesCheckoutLink[]
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  orderId       String
+  method        PaymentMethod
+  kind          PaymentKind   @default(CHARGE)
+  status        PaymentState  @default(CONFIRMED)
+  amount        Float
+  reference     String?
+  externalId    String?       @unique
+  receivedAt    DateTime      @default(now())
+  createdById   String?
+  cashSessionId String?
+  createdAt     DateTime      @default(now())
+  order         Order         @relation(fields: [orderId], references: [id])
+  createdBy     User?         @relation(fields: [createdById], references: [id])
+  cashSession   CashSession?  @relation(fields: [cashSessionId], references: [id])
+  cashMovement  CashMovement?
+
+  @@index([orderId, status])
+  @@index([method, receivedAt])
+}
+
+model InventoryMovement {
+  id        String                @id @default(cuid())
+  productId String
+  variantId String?
+  orderId   String?
+  branchId  String?
+  userId    String?
+  type      InventoryMovementType
+  quantity  Int
+  reason    String
+  createdAt DateTime              @default(now())
+  product   Product               @relation(fields: [productId], references: [id])
+  variant   ProductVariant?       @relation(fields: [variantId], references: [id])
+  order     Order?                @relation(fields: [orderId], references: [id])
+  branch    Branch?               @relation(fields: [branchId], references: [id])
+  user      User?                 @relation(fields: [userId], references: [id])
+
+  @@index([productId, createdAt])
+  @@index([orderId])
+}
+
+model CashRegister {
+  id        String        @id @default(cuid())
+  branchId  String
+  name      String
+  code      String
+  active    Boolean       @default(true)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  branch    Branch        @relation(fields: [branchId], references: [id])
+  sessions  CashSession[]
+
+  @@unique([branchId, code])
+}
+
+model CashSession {
+  id             String            @id @default(cuid())
+  registerId     String
+  openedById     String
+  closedById     String?
+  status         CashSessionStatus @default(OPEN)
+  openingAmount  Float
+  expectedTotals Json?
+  countedTotals  Json?
+  differences    Json?
+  notes          String?
+  openedAt       DateTime          @default(now())
+  closedAt       DateTime?
+  register       CashRegister      @relation(fields: [registerId], references: [id])
+  openedBy       User              @relation("OpenedCashSessions", fields: [openedById], references: [id])
+  closedBy       User?             @relation("ClosedCashSessions", fields: [closedById], references: [id])
+  orders         Order[]
+  payments       Payment[]
+  movements      CashMovement[]
+
+  @@index([registerId, status])
+  @@index([openedAt])
+}
+
+model CashMovement {
+  id            String           @id @default(cuid())
+  cashSessionId String
+  orderId       String?
+  paymentId     String?          @unique
+  userId        String
+  type          CashMovementType
+  method        PaymentMethod?
+  amount        Float
+  note          String?
+  createdAt     DateTime         @default(now())
+  cashSession   CashSession      @relation(fields: [cashSessionId], references: [id])
+  order         Order?           @relation(fields: [orderId], references: [id])
+  payment       Payment?         @relation(fields: [paymentId], references: [id])
+  user          User             @relation(fields: [userId], references: [id])
+
+  @@index([cashSessionId, createdAt])
+}
+
+model SavedCart {
+  id               String          @id @default(cuid())
+  name             String
+  status           SavedCartStatus @default(SAVED)
+  channel          SalesChannel
+  branchId         String?
+  userId           String
+  items            Json
+  customer         Json?
+  discountType     DiscountType?
+  discountValue    Float           @default(0)
+  shipping         Float           @default(0)
+  notes            String?
+  convertedOrderId String?         @unique
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  branch           Branch?         @relation(fields: [branchId], references: [id])
+  user             User            @relation(fields: [userId], references: [id])
+  convertedOrder   Order?          @relation(fields: [convertedOrderId], references: [id])
+}
+
+model SalesCheckoutLink {
+  id        String          @id @default(cuid())
+  token     String          @unique
+  channel   SalesChannel
+  status    SalesLinkStatus @default(OPEN)
+  items     Json
+  branchId  String?
+  sellerId  String
+  customer  Json?
+  notes     String?
+  orderId   String?         @unique
+  expiresAt DateTime
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  branch    Branch?         @relation(fields: [branchId], references: [id])
+  seller    User            @relation(fields: [sellerId], references: [id])
+  order     Order?          @relation(fields: [orderId], references: [id])
+
+  @@index([status, expiresAt])
+}
+
+model SaleReturn {
+  id           String           @id @default(cuid())
+  orderId      String
+  type         SaleReturnType
+  reason       String
+  refundAmount Float            @default(0)
+  createdById  String
+  createdAt    DateTime         @default(now())
+  order        Order            @relation(fields: [orderId], references: [id])
+  createdBy    User             @relation(fields: [createdById], references: [id])
+  items        SaleReturnItem[]
+
+  @@index([orderId, createdAt])
+}
+
+model SaleReturnItem {
+  id          String     @id @default(cuid())
+  returnId    String
+  orderItemId String
+  quantity    Int
+  restock     Boolean    @default(true)
+  amount      Float
+  saleReturn  SaleReturn @relation(fields: [returnId], references: [id])
+  orderItem   OrderItem  @relation(fields: [orderItemId], references: [id])
+
+  @@index([orderItemId])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  entityType String
+  entityId   String
+  action     String
+  changes    Json?
+  createdAt  DateTime @default(now())
+  actor      User?    @relation(fields: [actorId], references: [id])
+
+  @@index([entityType, entityId, createdAt])
 }
 
 model ProductReview {
@@ -406,6 +651,7 @@ model EmailCampaign {
 
 enum Role {
   CUSTOMER
+  STAFF
   ADMIN
 }
 
@@ -415,4 +661,92 @@ enum OrderStatus {
   SHIPPED
   DELIVERED
   CANCELLED
+}
+
+enum SalesChannel {
+  ONLINE
+  LOCAL
+  WHATSAPP
+  INSTAGRAM
+  SOCIAL
+  PHONE
+}
+
+enum PaymentStatus {
+  PENDING
+  PARTIAL
+  PAID
+  PARTIALLY_REFUNDED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CASH
+  TRANSFER
+  CARD
+  DIGITAL_WALLET
+  EXTERNAL_TERMINAL
+  MERCADOPAGO
+}
+
+enum PaymentKind {
+  CHARGE
+  REFUND
+}
+
+enum PaymentState {
+  PENDING
+  CONFIRMED
+  VOIDED
+}
+
+enum InventoryStatus {
+  NONE
+  DEDUCTED
+  RESTORED
+}
+
+enum InventoryMovementType {
+  SALE
+  RETURN
+  CANCELLATION
+  ADJUSTMENT
+}
+
+enum CashSessionStatus {
+  OPEN
+  CLOSED
+}
+
+enum CashMovementType {
+  OPENING
+  SALE
+  INCOME
+  WITHDRAWAL
+  REFUND
+  CLOSING_ADJUSTMENT
+}
+
+enum SavedCartStatus {
+  SAVED
+  CONVERTED
+  CANCELLED
+}
+
+enum SalesLinkStatus {
+  OPEN
+  CHECKOUT
+  CONVERTED
+  EXPIRED
+  CANCELLED
+}
+
+enum DiscountType {
+  AMOUNT
+  PERCENTAGE
+}
+
+enum SaleReturnType {
+  RETURN
+  EXCHANGE
 }

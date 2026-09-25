@@ -37,6 +37,9 @@ import {
   X,
   ShoppingCart,
   Shapes,
+  Store,
+  Wallet,
+  BarChart3,
 } from 'lucide-react';
 
 interface NavItem {
@@ -66,6 +69,16 @@ const navGroups: NavGroup[] = [
       { label: 'Pedidos', href: '/pedidos', icon: ShoppingBag },
       { label: 'Reviews', href: '/reviews', icon: Star },
       { label: 'Clientes', href: '/clientes', icon: Users },
+    ],
+  },
+  {
+    title: 'Ventas',
+    items: [
+      { label: 'Punto de Venta', href: '/punto-de-venta', icon: Store },
+      { label: 'Caja', href: '/caja', icon: Wallet },
+      { label: 'Estadísticas', href: '/estadisticas-ventas', icon: BarChart3 },
+      { label: 'Equipo PDV', href: '/equipo-pdv', icon: Shield },
+      { label: 'Configuración PDV', href: '/configuracion-pdv', icon: Settings },
     ],
   },
   {

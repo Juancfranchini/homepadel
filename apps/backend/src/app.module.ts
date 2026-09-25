@@ -31,6 +31,8 @@ import { EmailModule } from './email/email.module';
 import { ShippingModule } from './shipping/shipping.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { TrackModule } from './track/track.module';
+import { PosModule } from './pos/pos.module';
+import { CashModule } from './cash/cash.module';
 
 @Module({
   imports: [
@@ -65,6 +67,8 @@ import { TrackModule } from './track/track.module';
     ShippingModule,
     DashboardModule,
     TrackModule,
+    PosModule,
+    CashModule,
   ],
   providers: [
     {

@@ -8,18 +8,22 @@ import { Modal } from '@/components/ui/Modal';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useToast } from '@/components/ui/Toast';
+import { OrderAftercare } from './OrderAftercare';
 
 interface OrderItem {
   id: string;
   quantity: number;
   price: number;
   product: { name: string; sku: string; images?: string[] };
+  variant?: { size: string; color?: string };
 }
 
 interface Order {
   id: string;
   number: string;
   status: string;
+  paymentStatus?: string;
+  channel?: string;
   total: number;
   subtotal: number;
   shipping: number;
@@ -33,6 +37,9 @@ interface Order {
   buyerPhone?: string;
   paymentMethod?: string;
   user?: { name: string; email: string };
+  seller?: { name: string };
+  branch?: { name: string };
+  payments?: { id: string; method: string; kind: string; amount: number }[];
   items?: OrderItem[];
 }
 
@@ -121,6 +128,7 @@ function OrdersTable({ orders, onDetail }: { orders: Order[]; onDetail: (o: Orde
               <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Items</th>
               <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
               <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
+              <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Canal</th>
               <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Fecha</th>
               <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
             </tr>
@@ -141,6 +149,7 @@ function OrdersTable({ orders, onDetail }: { orders: Order[]; onDetail: (o: Orde
                   <td className="px-3 py-3 text-center">
                     <span className={'text-xs font-medium px-2 py-1 rounded-full ' + (statusInfo?.color || 'bg-gray-100')}>{STATUS_LABELS[o.status] || o.status}</span>
                   </td>
+                  <td className="px-3 py-3 text-center text-xs font-medium text-gray-600">{o.channel || 'ONLINE'}</td>
                   <td className="px-3 py-3 text-center text-xs text-gray-500">{formatDate(o.createdAt)}</td>
                   <td className="px-3 py-3 text-center">
                     <button onClick={() => onDetail(o)} className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors" title="Ver detalle"><ArrowRight className="w-4 h-4" /></button>
@@ -193,8 +202,8 @@ function OrdersCards({ orders, onDetail }: { orders: Order[]; onDetail: (o: Orde
   );
 }
 
-function OrderDetailModal({ isOpen, order, updatingStatus, onStatusChange, onClose }: {
-  isOpen: boolean; order: Order | null; updatingStatus: boolean; onStatusChange: (status: string) => void; onClose: () => void;
+function OrderDetailModal({ isOpen, order, updatingStatus, onStatusChange, onChanged, onClose }: {
+  isOpen: boolean; order: Order | null; updatingStatus: boolean; onStatusChange: (status: string) => void; onChanged: () => void; onClose: () => void;
 }) {
   if (!isOpen || !order) return null;
   return (
@@ -243,6 +252,8 @@ function OrderDetailModal({ isOpen, order, updatingStatus, onStatusChange, onClo
             ))}
           </div>
         </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm"><div className="bg-gray-50 rounded-lg p-3"><p className="text-xs text-gray-400">Canal</p><p className="font-semibold">{order.channel || 'ONLINE'}</p></div><div className="bg-gray-50 rounded-lg p-3"><p className="text-xs text-gray-400">Cobro</p><p className="font-semibold">{order.paymentStatus || 'PENDING'}</p></div><div className="bg-gray-50 rounded-lg p-3"><p className="text-xs text-gray-400">Sucursal / vendedor</p><p className="font-semibold">{order.branch?.name || '-'} · {order.seller?.name || 'Web'}</p></div></div>
+        <OrderAftercare order={order} onChanged={onChanged} />
       </div>
     </Modal>
   );
@@ -331,7 +342,7 @@ export default function PedidosPage() {
         </div>
       )}
 
-      <OrderDetailModal isOpen={detailOpen} order={selectedOrder} updatingStatus={updatingStatus} onStatusChange={handleStatusChange} onClose={() => setDetailOpen(false)} />
+      <OrderDetailModal isOpen={detailOpen} order={selectedOrder} updatingStatus={updatingStatus} onStatusChange={handleStatusChange} onChanged={load} onClose={() => setDetailOpen(false)} />
     </div>
   );
 }

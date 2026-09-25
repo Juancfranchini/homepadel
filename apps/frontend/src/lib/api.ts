@@ -74,6 +74,9 @@ export const saveAbandonedCart = (data: Record<string, unknown>) =>
 export const confirmPayment = (orderNumber: string) =>
   api.post('/payments/confirm', { orderNumber }).then((r) => r.data);
 
+export const getSalesLink = (token: string) =>
+  api.get(`/sales-links/${encodeURIComponent(token)}`).then((r) => r.data);
+
 // Banners
 export const getBanners = () =>
   api.get('/banners').then((r) => r.data);

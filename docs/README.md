@@ -10,6 +10,7 @@
 | [componentes.md](componentes.md) | Buenas prácticas de componentes React (frontend y backoffice) |
 | [seguridad.md](seguridad.md) | Auth, guards, rate limiting, manejo de secretos, checklist antes de exponer un endpoint |
 | [deploy.md](deploy.md) | Railway (backend), Vercel (frontend/backoffice), variables por entorno |
+| [punto-de-venta.md](punto-de-venta.md) | Integración del PDV, reglas de stock/cobros/caja, permisos y verificación de aceptación |
 | [guia-maestra-setup-proyectos.md](guia-maestra-setup-proyectos.md) | Checklist genérico de bases (estructura, linters, docs, cursor rules, limpieza) — plantilla para arrancar cualquier proyecto nuevo, no específico de Home Pádel |
 
 ## Jerarquía de fuentes

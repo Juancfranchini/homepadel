@@ -1,13 +1,19 @@
-﻿import { Injectable, Logger, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+﻿import {
+  ConflictException,
+  Injectable,
+  Logger,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import * as crypto from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { PricingService, ResolvedItem } from '../pricing/pricing.service';
 import { CouponsService } from '../coupons/coupons.service';
 import { CreatePreferenceDto, ShippingData } from './dto/create-preference.dto';
-import { enviarCompraAMeta } from './payments.meta';
 import { verificarFirma } from './payments.signature';
 import { AbandonedCartsService } from '../abandoned-carts/abandoned-carts.service';
-import { hashPassword } from '../common/security/password';
+import { InventoryService } from '../inventory/inventory.service';
+import { PaymentsSettlementService } from './payments-settlement.service';
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
@@ -20,6 +26,11 @@ export class PaymentsService {
     private pricing: PricingService,
     private coupons: CouponsService,
     private abandonedCarts: AbandonedCartsService,
+    private settlement: PaymentsSettlementService = new PaymentsSettlementService(
+      prisma,
+      new InventoryService(prisma),
+      abandonedCarts,
+    ),
   ) {}
 
   /**
@@ -59,84 +70,45 @@ export class PaymentsService {
   }
 
   async createPreference(dto: CreatePreferenceDto) {
-    // Se leen las URLs antes de tocar la base: si la configuración falta,
-    // conviene fallar acá y no después de haber creado una orden huérfana.
     const frontendUrl = this.FRONTEND_URL;
     const backendUrl = this.BACKEND_URL;
     const accessToken = await this.getMPAccessToken();
-
-    // El identificador lo genera el servidor. Antes lo elegía el navegador
-    // (`'HP-' + Date.now()`), así que cualquiera podía repetir el número de
-    // una orden existente o adivinar el de otra.
     const orderNumber = 'HP-' + Date.now() + '-' + crypto.randomBytes(3).toString('hex');
     const externalReference = 'ref_' + crypto.randomBytes(12).toString('hex');
-    const { items, payer, couponCode } = dto;
+    const { payer, couponCode } = dto;
+    const { salesLink, resolvedItems, subtotal, shippingCost, discount } =
+      await this.prepareCheckout(dto);
 
-    // S3 / F6 — El precio sale de la base y se verifica el stock. Lo que haya
-    // mandado el navegador en `price` se descarta por completo.
-    const resolvedItems = await this.pricing.resolveItems(
-      (items || []).map((item) => ({
-        productId: item.productId,
-        variantId: item.variantId,
-        quantity: item.quantity,
-      })),
+    await this.createPendingOrder(
+      orderNumber,
+      externalReference,
+      resolvedItems,
+      { subtotal, shipping: shippingCost, discount, couponCode },
+      payer,
+      dto.shipping,
+      salesLink?.id,
     );
-
-    const subtotal = resolvedItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-
-    // P1 — mismo cálculo de envío que en el checkout directo (OrdersService):
-    // el monto siempre sale de `shipping_rates`, nunca del navegador.
-    const shippingCost = await this.pricing.calculateShipping(subtotal);
-
-    // P2 — mismo cupón validado y descontado en el servidor. Si es inválido,
-    // la preferencia de pago ni se crea.
-    let discount = 0;
-    if (couponCode) {
-      const coupon = await this.coupons.validate(couponCode, subtotal);
-      discount = this.coupons.calculateDiscount(coupon, subtotal);
-    }
-
-    // P3 - Orden pendiente en la tabla de órdenes, no en la de configuración.
-    // El stock se descuenta recién cuando el pago se aprueba (ver handleWebhook),
-    // para no reservar unidades por carritos que quedan abandonados. El
-    // cupón, si hay, recién se consume ahí también.
-    await this.createPendingOrder(orderNumber, externalReference, resolvedItems, {
-      subtotal, shipping: shippingCost, discount, couponCode,
-    }, payer, dto.shipping);
-
-    const preferenceItems = this.buildPreferenceItems(resolvedItems, discount, couponCode);
-
     const body = {
       external_reference: externalReference,
       notification_url: backendUrl + '/api/payments/webhook',
       payer: { name: payer.name, email: payer.email },
-      items: preferenceItems,
-      // El envío sí tiene campo propio en la API de Mercado Pago.
+      items: this.buildPreferenceItems(resolvedItems, discount, couponCode),
       shipments: { cost: shippingCost, mode: 'not_specified' },
       back_urls: {
         success: frontendUrl + '/checkout/success?order=' + orderNumber,
         failure: frontendUrl + '/checkout/error?order=' + orderNumber,
         pending: frontendUrl + '/checkout/pending?order=' + orderNumber,
       },
-      // Sin `auto_return`, Mercado Pago no devuelve al comprador: lo deja en
-      // su propia pantalla con un botón "Volver al sitio" cuyo destino
-      // depende de cómo clasifique el pago en ese instante. Con un pago
-      // acreditado eso terminaba en /checkout/error. Con auto_return, un pago
-      // aprobado vuelve solo y siempre a back_urls.success.
       auto_return: 'approved',
     };
-
     const response = await fetch('https://api.mercadopago.com/checkout/preferences', {
       method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+      headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
-
     const preference = await response.json();
-
     if (!response.ok || !preference?.init_point) {
-      // El detalle de Mercado Pago queda en el log del servidor, no se le
-      // devuelve al navegador: trae datos de la cuenta del vendedor.
+      await this.releaseFailedSalesLink(salesLink?.id, orderNumber);
       this.logger.error(
         `Mercado Pago rechazó la preferencia de ${orderNumber} (HTTP ${response.status}): ${JSON.stringify(preference)}`,
       );
@@ -144,8 +116,60 @@ export class PaymentsService {
         'No se pudo iniciar el pago con Mercado Pago. Probá de nuevo.',
       );
     }
-
     return { id: preference.id, init_point: preference.init_point, orderNumber };
+  }
+
+  private async prepareCheckout(dto: CreatePreferenceDto) {
+    const salesLink = dto.salesLinkToken
+      ? await this.prisma.salesCheckoutLink.findUnique({ where: { token: dto.salesLinkToken } })
+      : null;
+    if (dto.salesLinkToken && !salesLink) {
+      throw new NotFoundException('El enlace de venta no existe');
+    }
+    if (
+      salesLink &&
+      (salesLink.expiresAt < new Date() ||
+        !['OPEN', 'CHECKOUT'].includes(salesLink.status) ||
+        salesLink.orderId)
+    ) {
+      throw new ConflictException('Este enlace ya fue usado o venció');
+    }
+    const requestedItems = salesLink
+      ? (salesLink.items as unknown as {
+          productId: string;
+          variantId?: string;
+          quantity: number;
+        }[])
+      : dto.items;
+    const resolvedItems = await this.pricing.resolveItems(
+      (requestedItems || []).map((item) => ({
+        productId: item.productId,
+        variantId: item.variantId,
+        quantity: item.quantity,
+      })),
+    );
+    const subtotal = resolvedItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    const shippingCost = await this.pricing.calculateShipping(subtotal);
+    let discount = 0;
+    if (dto.couponCode) {
+      const coupon = await this.coupons.validate(dto.couponCode, subtotal);
+      discount = this.coupons.calculateDiscount(coupon, subtotal);
+    }
+    return { salesLink, resolvedItems, subtotal, shippingCost, discount };
+  }
+
+  private async releaseFailedSalesLink(salesLinkId: string | undefined, orderNumber: string) {
+    if (!salesLinkId) return;
+    await this.prisma.$transaction(async (tx) => {
+      const order = await tx.order.findUnique({ where: { number: orderNumber } });
+      await tx.salesCheckoutLink.update({
+        where: { id: salesLinkId },
+        data: { status: 'OPEN', orderId: null },
+      });
+      if (!order) return;
+      await tx.orderItem.deleteMany({ where: { orderId: order.id } });
+      await tx.order.delete({ where: { id: order.id } });
+    });
   }
 
   /**
@@ -164,13 +188,15 @@ export class PaymentsService {
     totals: { subtotal: number; shipping: number; discount: number; couponCode?: string },
     payer: { name: string; email: string },
     shipping?: ShippingData,
+    salesLinkId?: string,
   ) {
-    try {
-      await this.prisma.order.create({
+    await this.prisma.$transaction(async (tx) => {
+      const order = await tx.order.create({
         data: {
           number: orderNumber,
           userId: null,
           status: 'PENDING',
+          channel: salesLinkId ? 'SOCIAL' : 'ONLINE',
           total: totals.subtotal + totals.shipping - totals.discount,
           subtotal: totals.subtotal,
           shipping: totals.shipping,
@@ -188,17 +214,33 @@ export class PaymentsService {
             buyerPhone: shipping?.phone || null,
             shippingCarrier: shipping?.carrier || 'correo_argentino',
           }),
-          items: { create: resolvedItems.map((item) => ({
-            productId: item.productId,
-            variantId: item.variantId,
-            quantity: item.quantity,
-            price: item.price,
-          })) },
+          items: {
+            create: resolvedItems.map((item) => ({
+              productId: item.productId,
+              variantId: item.variantId,
+              quantity: item.quantity,
+              price: item.price,
+            })),
+          },
         },
       });
-    } catch (err) {
-      this.logger.warn(`No se pudo crear la orden pendiente ${orderNumber}: ${err}`);
-    }
+      if (salesLinkId) {
+        const link = await tx.salesCheckoutLink.findUniqueOrThrow({ where: { id: salesLinkId } });
+        await tx.order.update({
+          where: { id: order.id },
+          data: {
+            channel: link.channel,
+            branchId: link.branchId,
+            sellerId: link.sellerId,
+            createdById: link.sellerId,
+          },
+        });
+        await tx.salesCheckoutLink.update({
+          where: { id: salesLinkId },
+          data: { status: 'CHECKOUT', orderId: order.id },
+        });
+      }
+    });
   }
 
   /**
@@ -206,7 +248,11 @@ export class PaymentsService {
    * Pago no tiene un campo de descuento propio, así que se resta como una
    * línea negativa — el patrón habitual para cupones con esta API.
    */
-  private buildPreferenceItems(resolvedItems: ResolvedItem[], discount: number, couponCode?: string) {
+  private buildPreferenceItems(
+    resolvedItems: ResolvedItem[],
+    discount: number,
+    couponCode?: string,
+  ) {
     const preferenceItems = resolvedItems.map((item) => ({
       id: item.productId,
       title: item.name + (item.variantId ? ' - variante ' + item.variantId : ''),
@@ -246,7 +292,12 @@ export class PaymentsService {
     return { topic, paymentId: id ? String(id) : null };
   }
 
-  async handleWebhook(body: any, signature: string, xRequestId: string, query: Record<string, string> = {}) {
+  async handleWebhook(
+    body: any,
+    signature: string,
+    xRequestId: string,
+    query: Record<string, string> = {},
+  ) {
     const { topic, paymentId } = this.identificarAviso(body, query);
 
     // Cada salida deja constancia: un aviso descartado sin explicación era
@@ -266,10 +317,11 @@ export class PaymentsService {
     }
 
     // P2 - Idempotencia: verificar si el pago ya fue procesado
-    const existingOrder = await this.prisma.order.findFirst({
-      where: { notes: { contains: String(paymentId) } },
-    });
-    if (existingOrder) {
+    const [existingPayment, existingOrder] = await Promise.all([
+      this.prisma.payment.findUnique({ where: { externalId: String(paymentId) } }),
+      this.prisma.order.findFirst({ where: { notes: { contains: String(paymentId) } } }),
+    ]);
+    if (existingPayment?.status === 'CONFIRMED' || existingOrder) {
       this.logger.log(`Pago ya procesado, se ignora: ${paymentId}`);
       return { received: true, alreadyProcessed: true };
     }
@@ -278,11 +330,13 @@ export class PaymentsService {
       const payment = await this.consultarPago(paymentId);
 
       if (payment?.status !== 'approved') {
-        this.logger.log(`Pago ${paymentId} en estado "${payment?.status}": no se registra la venta.`);
+        this.logger.log(
+          `Pago ${paymentId} en estado "${payment?.status}": no se registra la venta.`,
+        );
         return { received: true };
       }
 
-      await this.liquidarPagoAprobado(payment);
+      await this.settlement.settle(payment, this.FRONTEND_URL);
     } catch (err) {
       this.logger.error(`Error procesando el aviso del pago ${paymentId}: ${err}`);
     }
@@ -297,73 +351,6 @@ export class PaymentsService {
       headers: { Authorization: 'Bearer ' + accessToken },
     });
     return respuesta.json();
-  }
-
-  /**
-   * Registra la venta de un pago que Mercado Pago ya dio por aprobado.
-   *
-   * Es el mismo trabajo para las dos vías por las que nos podemos enterar de
-   * un pago —el aviso de Mercado Pago y la consulta que hacemos nosotros—,
-   * así que vive en un solo lugar. Es idempotente: si el pago ya quedó
-   * registrado, no vuelve a descontar stock ni a consumir el cupón.
-   */
-  private async liquidarPagoAprobado(payment: any): Promise<'registrado' | 'ya-estaba'> {
-    const paymentId = String(payment.id);
-
-    const yaRegistrado = await this.prisma.order.findFirst({
-      where: { notes: { contains: paymentId } },
-    });
-    if (yaRegistrado) {
-      this.logger.log(`Pago ya procesado, se ignora: ${paymentId}`);
-      return 'ya-estaba';
-    }
-
-    const ref = payment.external_reference;
-    const email = payment.payer?.email || '';
-    const name = payment.payer?.first_name || 'Cliente MP';
-
-    let user = email ? await this.prisma.user.findUnique({ where: { email } }) : null;
-    if (!user && email) {
-      // P4 - Password con bcrypt
-      const randomPassword = crypto.randomBytes(32).toString('base64url');
-      const hashed = await hashPassword(randomPassword);
-      user = await this.prisma.user.create({ data: { email, name, password: hashed, role: 'CUSTOMER' } });
-    }
-
-    // La orden pendiente se creó en createPreference y trae sus ítems: hacen
-    // falta para descontar el stock ahora que el pago se confirmó. Si el pago
-    // viniera sin referencia, `contains: undefined` haría que Prisma ignore
-    // el filtro y devuelva una orden cualquiera: se daría por pagada una
-    // ajena. Por eso se exige la referencia.
-    const pendingOrder = ref
-      ? await this.prisma.order.findFirst({
-          where: { notes: { contains: ref } },
-          include: { items: { include: { product: { select: { name: true } } } } },
-        })
-      : null;
-
-    if (pendingOrder) {
-      await this.settlePaidOrder(pendingOrder, payment, user, email, name, paymentId);
-    } else {
-      this.logger.warn(
-        `Pago ${paymentId} aprobado sin orden pendiente para la referencia "${ref ?? 'ausente'}": se registra como venta suelta.`,
-      );
-      await this.createFallbackPaidOrder(payment, user, email, name);
-    }
-
-    await enviarCompraAMeta(this.prisma, {
-      payment,
-      orderNumber: pendingOrder?.number || 'HP-' + Date.now(),
-      items: pendingOrder?.items.map((item) => ({
-        productId: item.productId,
-        quantity: item.quantity,
-        price: item.price,
-      })) ?? [],
-      email,
-      frontendUrl: this.FRONTEND_URL,
-    });
-
-    return 'registrado';
   }
 
   /**
@@ -385,21 +372,26 @@ export class PaymentsService {
     if (!orden) throw new NotFoundException('No encontramos esa orden.');
     if (orden.status !== 'PENDING') return { status: orden.status, confirmada: false };
 
-    const ref = this.parseNotes(orden.notes).externalReference;
+    const ref = this.settlement.parseNotes(orden.notes).externalReference;
     if (typeof ref !== 'string' || !ref) {
-      this.logger.warn(`La orden ${orderNumber} no tiene referencia de pago: no se puede consultar.`);
+      this.logger.warn(
+        `La orden ${orderNumber} no tiene referencia de pago: no se puede consultar.`,
+      );
       return { status: orden.status, confirmada: false };
     }
 
     try {
       const accessToken = await this.getMPAccessToken();
       const respuesta = await fetch(
-        'https://api.mercadopago.com/v1/payments/search?external_reference=' + encodeURIComponent(ref),
+        'https://api.mercadopago.com/v1/payments/search?external_reference=' +
+          encodeURIComponent(ref),
         { headers: { Authorization: 'Bearer ' + accessToken }, signal: AbortSignal.timeout(8000) },
       );
 
       if (!respuesta.ok) {
-        this.logger.warn(`Mercado Pago no respondió la búsqueda de ${orderNumber} (HTTP ${respuesta.status}).`);
+        this.logger.warn(
+          `Mercado Pago no respondió la búsqueda de ${orderNumber} (HTTP ${respuesta.status}).`,
+        );
         return { status: orden.status, confirmada: false };
       }
 
@@ -407,121 +399,13 @@ export class PaymentsService {
       const aprobado = (results || []).find((p: any) => p.status === 'approved');
       if (!aprobado) return { status: orden.status, confirmada: false };
 
-      const resultado = await this.liquidarPagoAprobado(aprobado);
+      const resultado = await this.settlement.settle(aprobado, this.FRONTEND_URL);
       this.logger.log(`Orden ${orderNumber} confirmada por consulta directa (${resultado}).`);
       return { status: 'PAID', confirmada: resultado === 'registrado' };
     } catch (err) {
       this.logger.error(`Error consultando el pago de la orden ${orderNumber}: ${err}`);
       return { status: orden.status, confirmada: false };
     }
-  }
-
-  private async settlePaidOrder(
-    pendingOrder: {
-      id: string; number: string; userId: string | null; couponCode: string | null; total: number; notes: string | null;
-      items: { productId: string; variantId: string | null; quantity: number; price: number; product: { name: string } }[];
-    },
-    payment: any,
-    user: { id: string } | null,
-    email: string,
-    name: string,
-    paymentId: string,
-  ) {
-    // F6 - Recién acá se descuenta el stock: la reserva no se hace al abrir
-    // el checkout para no retener unidades por carritos abandonados.
-    await this.decrementStockForPaidOrder(pendingOrder, paymentId);
-
-    // P2 — el cupón se consume recién con el pago aprobado, no al abrir la
-    // preferencia: mismo criterio que el stock, un checkout abandonado no
-    // debe gastar el uso.
-    if (pendingOrder.couponCode) {
-      this.incrementCouponUsage(pendingOrder.couponCode);
-    }
-
-    // Los datos del comprador ya se guardaron al crear la orden pendiente:
-    // se conservan en vez de pisarlos, porque el aviso de Mercado Pago no
-    // trae el teléfono y antes se perdía al marcar la orden como pagada.
-    const datosPrevios = this.parseNotes(pendingOrder.notes);
-
-    await this.prisma.order.update({
-      where: { id: pendingOrder.id },
-      data: {
-        status: 'PAID',
-        userId: user?.id ?? pendingOrder.userId,
-        total: payment.transaction_amount || pendingOrder.total,
-        notes: JSON.stringify({
-          ...datosPrevios,
-          pendingPayment: false,
-          paymentId: payment.id,
-          paymentMethod: 'mercadopago',
-          paymentStatus: payment.status,
-          buyerEmail: datosPrevios.buyerEmail || email,
-          buyerName: datosPrevios.buyerName || name,
-        }),
-      },
-    });
-
-    // Si esta persona tenía un carrito abandonado, queda marcado como
-    // recuperado: es lo que permite medir cuántos terminan en venta.
-    this.abandonedCarts.markRecovered((datosPrevios.buyerEmail as string) || email, pendingOrder.number);
-
-    this.logger.log(`Orden ${pendingOrder.number} marcada como pagada.`);
-  }
-
-  /** `notes` guarda un JSON; si viene roto se sigue sin los datos, no se corta la venta. */
-  private parseNotes(notes: string | null): Record<string, unknown> {
-    if (!notes) return {};
-    try {
-      const parsed = JSON.parse(notes);
-      return parsed && typeof parsed === 'object' ? parsed : {};
-    } catch {
-      this.logger.warn('No se pudo leer el JSON de `notes` de una orden.');
-      return {};
-    }
-  }
-
-  /** Cubre el caso raro en que el webhook llega sin una orden PENDING previa. */
-  private async createFallbackPaidOrder(payment: any, user: { id: string } | null, email: string, name: string) {
-    const orderNumber = 'HP-' + Date.now();
-    const subtotal = payment.transaction_amount || 0;
-    await this.prisma.order.create({
-      data: {
-        number: orderNumber, userId: user?.id || null, status: 'PAID',
-        total: subtotal, subtotal, shipping: 0, discount: 0,
-        address: 'Compra via Mercado Pago',
-        notes: JSON.stringify({ paymentId: payment.id, paymentMethod: 'mercadopago', paymentStatus: payment.status, buyerEmail: email, buyerName: name }),
-      },
-    });
-  }
-
-  private async decrementStockForPaidOrder(
-    pendingOrder: { number: string; items: { productId: string; variantId: string | null; quantity: number; price: number; product: { name: string } }[] },
-    paymentId: string,
-  ) {
-    try {
-      await this.pricing.decrementStock(
-        pendingOrder.items.map((item) => ({
-          productId: item.productId,
-          variantId: item.variantId ?? undefined,
-          name: item.product.name,
-          quantity: item.quantity,
-          price: item.price,
-        })),
-      );
-    } catch (stockErr) {
-      // El pago ya se cobró: la venta se registra igual y queda el aviso
-      // para que la tienda resuelva el faltante con el comprador.
-      this.logger.error(
-        `Pago ${paymentId} aprobado pero sin stock para la orden ${pendingOrder.number}: ${stockErr}`,
-      );
-    }
-  }
-
-  private incrementCouponUsage(couponCode: string) {
-    this.prisma.coupon.updateMany({
-      where: { code: { equals: couponCode, mode: 'insensitive' } },
-      data: { usedCount: { increment: 1 } },
-    }).catch((err) => this.logger.error(`Error incrementando uso de cupón: ${err}`));
   }
 
   /**
@@ -551,7 +435,9 @@ export class PaymentsService {
         );
         return false;
       }
-      this.logger.warn('Sin MERCADOPAGO_WEBHOOK_SECRET — validación de firma omitida (solo desarrollo).');
+      this.logger.warn(
+        'Sin MERCADOPAGO_WEBHOOK_SECRET — validación de firma omitida (solo desarrollo).',
+      );
       return true;
     }
 
@@ -567,14 +453,11 @@ export class PaymentsService {
       // solo su longitud, que alcanza para detectar un pegado incompleto.
       this.logger.error(
         `Firma inválida en el aviso del pago ${paymentId}. ` +
-        `Manifiestos probados: ${resultado.manifiestosProbados.map((m) => `"${m}"`).join(' | ')}. ` +
-        `Longitud del secreto configurado: ${secret.length}.`,
+          `Manifiestos probados: ${resultado.manifiestosProbados.map((m) => `"${m}"`).join(' | ')}. ` +
+          `Longitud del secreto configurado: ${secret.length}.`,
       );
     }
 
     return resultado.valida;
   }
-
-
-
 }

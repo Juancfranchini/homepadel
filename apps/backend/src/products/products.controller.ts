@@ -18,6 +18,9 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '@prisma/client';
+import { PermissionsGuard } from '../common/guards/permissions.guard';
+import { Permissions } from '../common/decorators/permissions.decorator';
+import { POS_PERMISSIONS } from '../common/permissions';
 
 @ApiTags('Products')
 @Controller('products')
@@ -57,8 +60,8 @@ export class ProductsController {
 
   @Post()
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions(POS_PERMISSIONS.CREATE_PRODUCT)
   create(@Body() dto: CreateProductDto) {
     return this.productsService.create(dto);
   }

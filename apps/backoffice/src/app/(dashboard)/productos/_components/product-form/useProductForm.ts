@@ -38,7 +38,7 @@ function useEditingProduct(mode: 'create' | 'edit', productId: string | undefine
       const res = await api.get(`/products/${productId}`);
       const p = res.data;
       reset({
-        name: p.name, description: p.description ?? '', sku: p.sku,
+        name: p.name, description: p.description ?? '', sku: p.sku, barcode: p.barcode ?? '',
         categoryId: p.category?.id ?? p.categoryId ?? '', brandId: p.brand?.id ?? p.brandId ?? '',
         featured: p.featured ?? false, isNew: p.isNew ?? false, isOffer: p.isOffer ?? false, active: p.active ?? true,
         price: p.price ?? 0, salePrice: p.salePrice ?? undefined, transferPrice: p.transferPrice ?? undefined,

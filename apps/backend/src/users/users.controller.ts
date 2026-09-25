@@ -10,6 +10,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '@prisma/client';
+import { UpdateUserAccessDto } from './dto/update-user-access.dto';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -20,11 +21,22 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  findAll() { return this.usersService.findAll(); }
+  findAll() {
+    return this.usersService.findAll();
+  }
 
   @Get(':id')
-  findOne(@Param('id') id: string) { return this.usersService.findOne(id); }
+  findOne(@Param('id') id: string) {
+    return this.usersService.findOne(id);
+  }
+
+  @Patch(':id/access')
+  updateAccess(@Param('id') id: string, @Body() dto: UpdateUserAccessDto) {
+    return this.usersService.updateAccess(id, dto);
+  }
 
   @Delete(':id')
-  remove(@Param('id') id: string) { return this.usersService.remove(id); }
+  remove(@Param('id') id: string) {
+    return this.usersService.remove(id);
+  }
 }

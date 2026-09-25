@@ -15,7 +15,12 @@
 import { PaymentsService } from './payments.service';
 
 function service() {
-  return new PaymentsService(null as any, null as any, null as any, { markRecovered: jest.fn() } as any);
+  return new PaymentsService(
+    null as any,
+    null as any,
+    null as any,
+    { markRecovered: jest.fn() } as any,
+  );
 }
 
 /** `identificarAviso` es privado; en TypeScript eso es solo de compilación. */
@@ -25,15 +30,24 @@ function leer(body: any, query: Record<string, string> = {}) {
 
 describe('De qué avisa Mercado Pago', () => {
   it('entiende el formato Webhooks, con el detalle en el cuerpo', () => {
-    expect(leer({ type: 'payment', data: { id: '123' } })).toEqual({ topic: 'payment', paymentId: '123' });
+    expect(leer({ type: 'payment', data: { id: '123' } })).toEqual({
+      topic: 'payment',
+      paymentId: '123',
+    });
   });
 
   it('entiende el formato IPN, con topic e id en la query string', () => {
-    expect(leer({}, { topic: 'payment', id: '123' })).toEqual({ topic: 'payment', paymentId: '123' });
+    expect(leer({}, { topic: 'payment', id: '123' })).toEqual({
+      topic: 'payment',
+      paymentId: '123',
+    });
   });
 
   it('entiende la variante con `data.id` en la query string', () => {
-    expect(leer({}, { type: 'payment', 'data.id': '123' })).toEqual({ topic: 'payment', paymentId: '123' });
+    expect(leer({}, { type: 'payment', 'data.id': '123' })).toEqual({
+      topic: 'payment',
+      paymentId: '123',
+    });
   });
 
   it('acepta un identificador numérico y lo normaliza a texto', () => {
@@ -54,12 +68,16 @@ describe('De qué avisa Mercado Pago', () => {
 describe('handleWebhook — salidas tempranas', () => {
   it('ignora un aviso que no es de un pago, sin tocar la base', async () => {
     const svc = service();
-    await expect(svc.handleWebhook({ type: 'merchant_order', data: { id: '9' } }, '', '')).resolves.toEqual({ received: true });
+    await expect(
+      svc.handleWebhook({ type: 'merchant_order', data: { id: '9' } }, '', ''),
+    ).resolves.toEqual({ received: true });
   });
 
   it('ignora un aviso de pago sin identificador', async () => {
     const svc = service();
-    await expect(svc.handleWebhook({ type: 'payment' }, '', '')).resolves.toEqual({ received: true });
+    await expect(svc.handleWebhook({ type: 'payment' }, '', '')).resolves.toEqual({
+      received: true,
+    });
   });
 
   it('con un aviso IPN válido ya no sale por el camino de "no es un pago"', async () => {
@@ -68,8 +86,16 @@ describe('handleWebhook — salidas tempranas', () => {
     const original = process.env.MERCADOPAGO_WEBHOOK_SECRET;
     delete process.env.MERCADOPAGO_WEBHOOK_SECRET;
 
-    const prisma = { order: { findFirst: jest.fn().mockResolvedValue({ id: 'ya-procesada' }) } };
-    const svc = new PaymentsService(prisma as any, null as any, null as any, { markRecovered: jest.fn() } as any);
+    const prisma = {
+      payment: { findUnique: jest.fn().mockResolvedValue(null) },
+      order: { findFirst: jest.fn().mockResolvedValue({ id: 'ya-procesada' }) },
+    };
+    const svc = new PaymentsService(
+      prisma as any,
+      null as any,
+      null as any,
+      { markRecovered: jest.fn() } as any,
+    );
 
     const resultado = await svc.handleWebhook({}, '', '', { topic: 'payment', id: '123' });
 

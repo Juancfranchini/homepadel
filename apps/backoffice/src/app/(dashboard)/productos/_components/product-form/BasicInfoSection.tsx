@@ -27,6 +27,11 @@ export default function BasicInfoSection({ register, errors, categories, brands 
         </div>
 
         <div>
+          <Label>Código de barras</Label>
+          <input {...register('barcode')} className="input-field" placeholder="EAN, UPC o Code 128" />
+        </div>
+
+        <div>
           <Label required>Categoría</Label>
           <select {...register('categoryId')} className="input-field pr-10">
             <option value="">Seleccionar categoría</option>

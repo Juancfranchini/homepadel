@@ -99,6 +99,7 @@ npm run dev
 **Pedidos y pagos**
 - `orders` — creación, estados (`PENDING → PAID → SHIPPED → DELIVERED`, o `CANCELLED`)
 - `payments` — integración Mercado Pago (preferencias + webhook con verificación de firma)
+- `pos`, `inventory`, `cash` — venta local/redes, cobros, stock auditable, devoluciones, caja y estadísticas unificadas
 - `pricing` — cálculo de precios (descuentos, cuotas, interés)
 - `shipping` — cotización/gestión de envío (Correo Argentino por defecto)
 - `track` — seguimiento de pedido + Meta Conversions API
@@ -123,7 +124,7 @@ npm run dev
 
 ## Módulos del BackOffice (rutas)
 
-`banners`, `beneficios`, `categorias`, `clientes`, `configuracion`, `contacto`, `cupones`, `faq`, `hero`, `marcas`, `newsletter`, `pedidos`, `productos`, `productos-contenido`, `promociones`, `reviews`, `testimonios` — todo bajo el grupo de rutas `(dashboard)`, con `(auth)` separado para login.
+`banners`, `beneficios`, `caja`, `categorias`, `clientes`, `configuracion`, `configuracion-pdv`, `contacto`, `cupones`, `equipo-pdv`, `estadisticas-ventas`, `faq`, `hero`, `marcas`, `newsletter`, `pedidos`, `productos`, `productos-contenido`, `promociones`, `punto-de-venta`, `reviews`, `testimonios` — todo bajo el grupo de rutas `(dashboard)`, con `(auth)` separado para login.
 
 ## API — convenciones
 

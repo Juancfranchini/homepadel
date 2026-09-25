@@ -11,6 +11,7 @@ import { useCartFeedbackStore } from './cartFeedbackStore';
 interface CartStore {
   items: CartItem[];
   couponCode: string | null;
+  salesLinkToken: string | null;
   addItem: (product: Product, quantity?: number, variant?: { id: string; sku: string; size: string; color?: string | null; dimensions?: string | null; weight?: number | null; weightUnit?: string | null; imageUrl?: string | null }) => void;
   removeItem: (itemKey: string) => void;
   updateQuantity: (itemKey: string, quantity: number) => void;
@@ -18,6 +19,7 @@ interface CartStore {
   totalItems: () => number;
   totalPrice: () => number;
   setCoupon: (code: string | null) => void;
+  setSalesLinkToken: (token: string | null) => void;
 }
 
 export const useCartStore = create<CartStore>()(
@@ -25,6 +27,7 @@ export const useCartStore = create<CartStore>()(
     (set, get) => ({
       items: [],
       couponCode: null,
+      salesLinkToken: null,
 
       // Agrega un producto al carrito; si ya existe, incrementa la cantidad
       addItem: (product, quantity = 1, variant) => {
@@ -87,9 +90,10 @@ export const useCartStore = create<CartStore>()(
         }));
       },
 
-      clearCart: () => set({ items: [], couponCode: null }),
+      clearCart: () => set({ items: [], couponCode: null, salesLinkToken: null }),
 
       setCoupon: (code) => set({ couponCode: code }),
+      setSalesLinkToken: (token) => set({ salesLinkToken: token }),
 
       // Suma total de unidades en el carrito
       totalItems: () => get().items.reduce((acc, i) => acc + i.quantity, 0),

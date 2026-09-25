@@ -10,6 +10,7 @@
 
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { InventoryContext, InventoryService } from '../inventory/inventory.service';
 import { effectivePrice } from './effective-price';
 
 export interface RequestedItem {
@@ -30,7 +31,10 @@ export interface ResolvedItem {
 
 @Injectable()
 export class PricingService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private inventory: InventoryService = new InventoryService(prisma),
+  ) {}
 
   /**
    * Toma los ítems que llegaron del navegador y devuelve la versión confiable:
@@ -52,7 +56,12 @@ export class PricingService {
         const product = await this.prisma.product.findUnique({
           where: { id: item.productId },
           select: {
-            name: true, price: true, salePrice: true, stock: true, active: true, isMadeToOrder: true,
+            name: true,
+            price: true,
+            salePrice: true,
+            stock: true,
+            active: true,
+            isMadeToOrder: true,
             // Sin variante elegida solo interesan las que el comprador
             // podría haber elegido: activas y que no sean la "base". Cada
             // producto tiene una variante base persistida que no se muestra
@@ -111,29 +120,8 @@ export class PricingService {
    * dentro del propio UPDATE, así dos compras simultáneas de la última unidad
    * no pueden pasar las dos: la segunda no afecta ninguna fila y se rechaza.
    */
-  async decrementStock(items: ResolvedItem[]): Promise<void> {
-    await this.prisma.$transaction(async (tx) => {
-      for (const item of items) {
-        // Un encargo no descuenta del stock del local: lo que se vende se trae
-        // aparte. Si se intentara, el UPDATE no afectaría ninguna fila y la
-        // venta se rechazaría después de cobrada.
-        if (item.isMadeToOrder) continue;
-
-        const result = item.variantId
-        ? await tx.productVariant.updateMany({
-             where: { id: item.variantId, productId: item.productId, stock: { gte: item.quantity }, active: true },
-             data: { stock: { decrement: item.quantity } },
-           })
-        : await tx.product.updateMany({
-             where: { id: item.productId, stock: { gte: item.quantity }, active: true },
-             data: { stock: { decrement: item.quantity } },
-           });
-
-        if (result.count === 0) {
-          throw new ConflictException(`Sin stock suficiente de "${item.name}"`);
-        }
-      }
-    });
+  async decrementStock(items: ResolvedItem[], context: InventoryContext = {}): Promise<void> {
+    await this.inventory.deduct(items, context);
   }
 
   /**

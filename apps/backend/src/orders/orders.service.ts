@@ -2,11 +2,20 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { BadRequestException } from '@nestjs/common';
 import { EmailService } from '../email/email.service';
-import { PricingService } from '../pricing/pricing.service';
+import { PricingService, ResolvedItem } from '../pricing/pricing.service';
 import { CouponsService } from '../coupons/coupons.service';
 import { AbandonedCartsService } from '../abandoned-carts/abandoned-carts.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderStatus } from '@prisma/client';
+import { InventoryService } from '../inventory/inventory.service';
+
+interface SalesLinkContext {
+  id: string;
+  channel: import('@prisma/client').SalesChannel;
+  branchId: string | null;
+  sellerId: string;
+  items: unknown;
+}
 
 @Injectable()
 export class OrdersService {
@@ -16,17 +25,29 @@ export class OrdersService {
     private pricing: PricingService,
     private coupons: CouponsService,
     private abandonedCarts: AbandonedCartsService,
+    private inventory: InventoryService = new InventoryService(prisma),
   ) {}
 
   async findAll() {
     const orders = await this.prisma.order.findMany({
-      include: { items: { include: { product: true, variant: true } }, user: { select: { id: true, name: true, email: true } } },
+      include: {
+        items: { include: { product: true, variant: true } },
+        user: { select: { id: true, name: true, email: true } },
+        seller: { select: { id: true, name: true } },
+        branch: { select: { id: true, name: true } },
+        payments: { orderBy: { receivedAt: 'asc' } },
+        returns: { include: { items: true } },
+      },
       orderBy: { createdAt: 'desc' },
     });
 
-    return orders.map(order => {
+    return orders.map((order) => {
       let buyerInfo: any = {};
-      try { buyerInfo = order.notes ? JSON.parse(order.notes) : {}; } catch { console.warn('No se pudo parsear notes de la orden ' + order.number); }
+      try {
+        buyerInfo = order.notes ? JSON.parse(order.notes) : {};
+      } catch {
+        console.warn('No se pudo parsear notes de la orden ' + order.number);
+      }
       return {
         ...order,
         buyerName: buyerInfo.buyerName || order.user?.name || null,
@@ -48,7 +69,15 @@ export class OrdersService {
   async findOne(id: string) {
     const order = await this.prisma.order.findUnique({
       where: { id },
-      include: { items: { include: { product: true, variant: true } }, user: { select: { id: true, name: true, email: true } } },
+      include: {
+        items: { include: { product: true, variant: true } },
+        user: { select: { id: true, name: true, email: true } },
+        seller: { select: { id: true, name: true } },
+        branch: true,
+        payments: { orderBy: { receivedAt: 'asc' } },
+        returns: { include: { items: true } },
+        shipments: true,
+      },
     });
     if (!order) throw new NotFoundException('Pedido no encontrado');
     return order;
@@ -57,13 +86,20 @@ export class OrdersService {
   async trackByNumber(number: string, email?: string, phone?: string) {
     const order = await this.prisma.order.findUnique({
       where: { number },
-      include: { items: { include: { product: true, variant: true } }, user: { select: { id: true, name: true, email: true } } },
+      include: {
+        items: { include: { product: true, variant: true } },
+        user: { select: { id: true, name: true, email: true } },
+      },
     });
     if (!order) throw new NotFoundException('Pedido no encontrado. Verifica el número de orden.');
 
     if (email || phone) {
       let buyerInfo: any = {};
-      try { buyerInfo = order.notes ? JSON.parse(order.notes) : {}; } catch { console.warn('No se pudo parsear notes de la orden ' + order.number); }
+      try {
+        buyerInfo = order.notes ? JSON.parse(order.notes) : {};
+      } catch {
+        console.warn('No se pudo parsear notes de la orden ' + order.number);
+      }
 
       if (email) {
         const orderEmail = buyerInfo.buyerEmail?.toLowerCase();
@@ -79,7 +115,11 @@ export class OrdersService {
 
     const { userId, user, notes, ...rest } = order as any;
     let buyerInfo: any = {};
-    try { buyerInfo = notes ? JSON.parse(notes) : {}; } catch { console.warn('No se pudo parsear notes de una orden'); }
+    try {
+      buyerInfo = notes ? JSON.parse(notes) : {};
+    } catch {
+      console.warn('No se pudo parsear notes de una orden');
+    }
 
     return {
       ...rest,
@@ -93,25 +133,26 @@ export class OrdersService {
   async create(dto: CreateOrderDto, userId?: string) {
     await this.assertTransferEnabled();
     const number = 'HP-' + Date.now();
-    
+    const salesLink = await this.resolveSalesLink(dto.salesLinkToken);
+    const requestedItems = salesLink
+      ? (salesLink.items as unknown as {
+          productId: string;
+          variantId?: string;
+          quantity: number;
+        }[])
+      : dto.items;
+
     // S3 / F6 - Precios desde la base y verificación de stock. La misma lógica
     // que usa el checkout de Mercado Pago, para que ambos caminos coincidan.
     const resolvedItems = await this.pricing.resolveItems(
-      dto.items.map((item) => ({ productId: item.productId, variantId: item.variantId, quantity: item.quantity })),
+      requestedItems.map((item) => ({
+        productId: item.productId,
+        variantId: item.variantId,
+        quantity: item.quantity,
+      })),
     );
 
-    // El descuento es atómico: dos compras simultáneas de la última unidad no
-    // pueden prosperar las dos.
-    await this.pricing.decrementStock(resolvedItems);
-
-    const itemsWithRealPrices = resolvedItems.map((item) => ({
-      productId: item.productId,
-      variantId: item.variantId,
-      quantity: item.quantity,
-      price: item.price,
-    }));
-
-    const subtotal = itemsWithRealPrices.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    const subtotal = resolvedItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
     // P1 — el envío sale siempre de la tarifa configurada, nunca de lo que
     // mande el navegador.
@@ -136,50 +177,126 @@ export class OrdersService {
       paymentMethod: dto.paymentMethod,
     };
 
-    const order = await this.prisma.order.create({
-      data: {
-        number,
-        userId: userId || null,
-        address: dto.address,
-        subtotal,
-        total,
-        shipping,
-        discount,
-        couponCode: dto.couponCode,
-        notes: JSON.stringify(buyerInfo),
-        items: { create: itemsWithRealPrices },
-      },
-      include: { items: { include: { product: true, variant: true } }, user: { select: { id: true, name: true, email: true } } },
+    const order = await this.persistOnlineOrder({
+      dto,
+      userId,
+      number,
+      salesLink,
+      resolvedItems,
+      subtotal,
+      total,
+      shipping,
+      discount,
+      buyerInfo,
     });
 
     // Se consume el uso recién con la orden ya creada — si algo de arriba
     // falla, el cupón no se gasta por una compra que no se concretó.
     if (coupon) {
-      this.coupons.incrementUsage(coupon.id).catch((err) =>
-        console.error('Error incrementando uso de cupón:', err),
-      );
+      this.coupons
+        .incrementUsage(coupon.id)
+        .catch((err) => console.error('Error incrementando uso de cupón:', err));
     }
 
     // Si esta persona tenía un carrito abandonado registrado, queda marcado
     // como recuperado: es lo que permite medir cuántos terminan en venta.
     this.abandonedCarts.markRecovered(dto.buyerEmail || order.user?.email, number);
 
-    const itemsForEmail = order.items.map(item => ({
+    const itemsForEmail = order.items.map((item) => ({
       name: item.product.name,
       quantity: item.quantity,
       price: item.price,
     }));
-    this.emailService.sendTransferOrderNotification({
-      orderNumber: number,
-      customerName: buyerInfo.buyerName,
-      customerEmail: buyerInfo.buyerEmail,
-      customerPhone: buyerInfo.buyerPhone,
-      address: dto.address,
-      items: itemsForEmail,
-      total,
-    }).catch(err => console.error('Error enviando aviso de transferencia:', err.message));
+    this.emailService
+      .sendTransferOrderNotification({
+        orderNumber: number,
+        customerName: buyerInfo.buyerName,
+        customerEmail: buyerInfo.buyerEmail,
+        customerPhone: buyerInfo.buyerPhone,
+        address: dto.address,
+        items: itemsForEmail,
+        total,
+      })
+      .catch((err) => console.error('Error enviando aviso de transferencia:', err.message));
 
     return order;
+  }
+
+  private persistOnlineOrder(input: {
+    dto: CreateOrderDto;
+    userId?: string;
+    number: string;
+    salesLink: SalesLinkContext | null;
+    resolvedItems: ResolvedItem[];
+    subtotal: number;
+    total: number;
+    shipping: number;
+    discount: number;
+    buyerInfo: Record<string, string>;
+  }) {
+    return this.prisma.$transaction(async (tx) => {
+      const { dto, userId, number, salesLink, resolvedItems } = input;
+      const created = await tx.order.create({
+        data: {
+          number,
+          userId: userId || null,
+          channel: salesLink?.channel ?? 'ONLINE',
+          branchId: salesLink?.branchId,
+          sellerId: salesLink?.sellerId,
+          createdById: salesLink?.sellerId,
+          inventoryStatus: resolvedItems.some((item) => !item.isMadeToOrder) ? 'DEDUCTED' : 'NONE',
+          soldAt: new Date(),
+          address: dto.address,
+          subtotal: input.subtotal,
+          total: input.total,
+          shipping: input.shipping,
+          discount: input.discount,
+          couponCode: dto.couponCode,
+          notes: JSON.stringify(input.buyerInfo),
+          items: {
+            create: resolvedItems.map((item) => ({
+              productId: item.productId,
+              variantId: item.variantId,
+              quantity: item.quantity,
+              price: item.price,
+            })),
+          },
+        },
+      });
+      await this.inventory.deductWithClient(tx, resolvedItems, {
+        orderId: created.id,
+        branchId: salesLink?.branchId || undefined,
+        userId,
+        reason: `Pedido online ${number}`,
+      });
+      if (salesLink) {
+        await tx.salesCheckoutLink.update({
+          where: { id: salesLink.id },
+          data: { status: 'CHECKOUT', orderId: created.id },
+        });
+      }
+      return tx.order.findUniqueOrThrow({
+        where: { id: created.id },
+        include: {
+          items: { include: { product: true, variant: true } },
+          user: { select: { id: true, name: true, email: true } },
+        },
+      });
+    });
+  }
+
+  private async resolveSalesLink(token?: string): Promise<SalesLinkContext | null> {
+    if (!token) return null;
+    const link = await this.prisma.salesCheckoutLink.findUnique({ where: { token } });
+    if (!link) throw new NotFoundException('El enlace de venta no existe');
+    if (
+      link.orderId ||
+      link.expiresAt < new Date() ||
+      !['OPEN', 'CHECKOUT'].includes(link.status)
+    ) {
+      throw new BadRequestException('Este enlace ya fue usado o venció');
+    }
+    return link;
   }
 
   private async assertTransferEnabled(): Promise<void> {
@@ -187,12 +304,25 @@ export class OrdersService {
     const section = await this.prisma.siteSection.findUnique({ where: { key: 'payment_methods' } });
     const data = section?.data as { transferencia?: { active?: boolean } } | null;
     if (!featureEnabled || data?.transferencia?.active !== true) {
-      throw new BadRequestException('La transferencia bancaria no está habilitada. Usá Mercado Pago.');
+      throw new BadRequestException(
+        'La transferencia bancaria no está habilitada. Usá Mercado Pago.',
+      );
     }
   }
 
-  async updateStatus(id: string, status: OrderStatus, trackingNumber?: string, trackingUrl?: string) {
+  async updateStatus(
+    id: string,
+    status: OrderStatus,
+    trackingNumber?: string,
+    trackingUrl?: string,
+  ) {
     await this.findOne(id);
+
+    if (status === OrderStatus.CANCELLED) {
+      throw new BadRequestException(
+        'Usá la cancelación del Punto de Venta para restituir stock, cobros y caja de forma auditable',
+      );
+    }
 
     const data: any = { status };
     if (trackingNumber) data.trackingNumber = trackingNumber;
@@ -207,15 +337,25 @@ export class OrdersService {
       });
       if (order) {
         let buyerInfo: any = {};
-        try { buyerInfo = order.notes ? JSON.parse(order.notes) : {}; } catch { console.warn('No se pudo parsear notes de la orden ' + order.number); }
+        try {
+          buyerInfo = order.notes ? JSON.parse(order.notes) : {};
+        } catch {
+          console.warn('No se pudo parsear notes de la orden ' + order.number);
+        }
         const customerEmail = buyerInfo.buyerEmail || order.user?.email;
 
         if (customerEmail) {
           const tracking = trackingNumber || order.trackingNumber || 'Pendiente';
           const url = trackingUrl || order.trackingUrl || null;
-          this.emailService.sendOrderShipped(customerEmail, order.number, buyerInfo.buyerName || order.user?.name || 'Cliente', tracking, url).catch(err =>
-            console.error('Error enviando email de despacho:', err.message)
-          );
+          this.emailService
+            .sendOrderShipped(
+              customerEmail,
+              order.number,
+              buyerInfo.buyerName || order.user?.name || 'Cliente',
+              tracking,
+              url,
+            )
+            .catch((err) => console.error('Error enviando email de despacho:', err.message));
         }
       }
     }

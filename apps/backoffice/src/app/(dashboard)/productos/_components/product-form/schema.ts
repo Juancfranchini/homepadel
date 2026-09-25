@@ -16,6 +16,7 @@ export const schema = z.object({
   name: z.string().min(2, 'Nombre requerido (mí­n. 2 caracteres)'),
   description: z.string().optional(),
   sku: z.string().min(1, 'SKU requerido'),
+  barcode: z.string().optional(),
   categoryId: z.string().min(1, 'Seleccioná una categorí­a'),
   brandId: z.string().min(1, 'Seleccioná una marca'),
   featured: z.boolean().default(false),
