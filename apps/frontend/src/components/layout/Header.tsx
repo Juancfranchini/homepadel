@@ -57,7 +57,9 @@ export default function Header() {
             aria-label="Home Pádel — Inicio"
           >
             <span className="lg:hidden"><BrandLogo size="sm" priority /></span>
-            <span className="hidden lg:block"><BrandLogo size="xl" priority /></span>
+            {/* En escritorio estaba en `xl` (147×110): a 110px de alto agrandaba
+                el header entero y se veía desmedido. `md` lo deja en 93×70. */}
+            <span className="hidden lg:block"><BrandLogo size="md" priority /></span>
           </Link>
 
           <nav className="hidden items-center gap-1 rounded-xl border border-white/10 bg-[#171B1D] p-1 shadow-inner lg:flex" aria-label="Navegación principal">
