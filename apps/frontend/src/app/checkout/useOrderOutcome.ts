@@ -6,6 +6,12 @@ import { confirmPayment, trackOrder } from '@/lib/api';
 
 export type Resultado = 'cargando' | 'aprobado' | 'acreditando' | 'pendiente' | 'rechazado';
 
+/** Solo lo que hace falta para el evento Purchase — nunca se inventa un valor. */
+export interface OrdenCobrada {
+  total: number;
+  items: { productId: string }[];
+}
+
 /** Estados de la orden que significan que el dinero ya entró. */
 const ESTADOS_COBRADOS = ['PAID', 'SHIPPED', 'DELIVERED', 'COMPLETED'];
 
@@ -35,10 +41,11 @@ function segunMercadoPago(params: URLSearchParams): Resultado | null {
  * informa Mercado Pago en la URL. `porDefecto` es solo lo que se asume
  * mientras no haya ningún dato mejor.
  */
-export function useOrderOutcome(porDefecto: Resultado): { resultado: Resultado; orderNumber: string } {
+export function useOrderOutcome(porDefecto: Resultado): { resultado: Resultado; orderNumber: string; orden: OrdenCobrada | null } {
   const searchParams = useSearchParams();
   const orderNumber = searchParams.get('order') || searchParams.get('external_reference') || '';
   const [resultado, setResultado] = useState<Resultado>('cargando');
+  const [orden, setOrden] = useState<OrdenCobrada | null>(null);
 
   useEffect(() => {
     const deMercadoPago = segunMercadoPago(new URLSearchParams(searchParams.toString()));
@@ -62,14 +69,18 @@ export function useOrderOutcome(porDefecto: Resultado): { resultado: Resultado; 
         await confirmPayment(orderNumber).catch(() => {});
         if (!vigente) return;
 
-        const orden = await trackOrder(orderNumber);
+        const ordenServidor = await trackOrder(orderNumber);
         if (!vigente) return;
 
-        if (ESTADOS_COBRADOS.includes(orden?.status)) {
+        if (ESTADOS_COBRADOS.includes(ordenServidor?.status)) {
+          setOrden({
+            total: ordenServidor.total,
+            items: (ordenServidor.items || []).map((i: { productId: string }) => ({ productId: i.productId })),
+          });
           setResultado('aprobado');
           return;
         }
-        if (orden?.status === 'CANCELLED') {
+        if (ordenServidor?.status === 'CANCELLED') {
           setResultado('rechazado');
           return;
         }
@@ -91,5 +102,5 @@ export function useOrderOutcome(porDefecto: Resultado): { resultado: Resultado; 
     return () => { vigente = false; clearTimeout(temporizador); };
   }, [orderNumber, porDefecto, searchParams]);
 
-  return { resultado, orderNumber };
+  return { resultado, orderNumber, orden };
 }

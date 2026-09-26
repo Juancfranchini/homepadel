@@ -16,8 +16,18 @@ export function newEventId(): string {
   return 'evt_' + Date.now() + '_' + Math.random().toString(36).slice(2);
 }
 
-export function trackMetaEvent(eventName: string, eventData: Record<string, any> = {}, customData: Record<string, any> = {}) {
-  const eventId = newEventId();
+/**
+ * `eventId` es opcional: por default se genera uno al azar. Un evento que
+ * también se manda por CAPI desde el servidor con un id propio (como
+ * Purchase — ver `enviarCompraAMeta` en el backend) tiene que pasar acá el
+ * mismo id, para que Meta lo trate como un solo evento y no como dos.
+ */
+export function trackMetaEvent(
+  eventName: string,
+  eventData: Record<string, any> = {},
+  customData: Record<string, any> = {},
+  eventId: string = newEventId(),
+) {
 
   // Browser (Pixel)
   if (typeof window !== 'undefined' && typeof window.fbq === 'function') {

@@ -22,10 +22,6 @@ export class SiteSectionsService {
       await this.removeOldImages(dto.data);
     }
 
-    if (key === 'meta_pixel') {
-      await this.saveMetaPixelEnv(dto.data);
-    }
-
     const seccion = await this.prisma.siteSection.upsert({
       where: { key },
       update: { data: dto.data as Prisma.InputJsonValue, active: dto.active ?? true },
@@ -70,36 +66,6 @@ export class SiteSectionsService {
       }
     } catch (err) {
       this.logger.warn(`No se pudo avisar a la tienda para refrescar la portada: ${err}`);
-    }
-  }
-
-  private async saveMetaPixelEnv(data: Record<string, unknown>) {
-    try {
-      const accessToken = data.accessToken as string;
-      const testEventCode = data.testEventCode as string;
-      if (!accessToken) return;
-
-      const envPath = path.join(__dirname, '..', '..', '.env');
-      let envContent = '';
-
-      if (fs.existsSync(envPath)) {
-        envContent = fs.readFileSync(envPath, 'utf-8');
-      }
-
-      const lines = envContent.split('\n');
-      const newLines = lines.filter(line => 
-        !line.startsWith('META_ACCESS_TOKEN=') && 
-        !line.startsWith('META_TEST_EVENT_CODE=')
-      );
-
-      newLines.push('META_ACCESS_TOKEN=' + accessToken);
-      if (testEventCode) {
-        newLines.push('META_TEST_EVENT_CODE=' + testEventCode);
-      }
-
-      fs.writeFileSync(envPath, newLines.join('\n'), 'utf-8');
-    } catch (err) {
-      console.error('Error guardando Meta Pixel en .env:', err);
     }
   }
 
