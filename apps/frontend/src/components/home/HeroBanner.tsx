@@ -90,13 +90,22 @@ export default function HeroBanner({ slides }: Props) {
 
   return (
     <section
-      className="relative w-full overflow-hidden min-h-[380px] sm:min-h-[420px] md:min-h-[520px] flex items-center"
+      // Los banners que se cargan desde el backoffice miden en la práctica
+      // entre 16:9 y 2:1 (relación ancho/alto). Antes la altura era un valor
+      // fijo en píxeles y el ancho ocupaba toda la pantalla: en un monitor
+      // ancho eso arma una caja mucho más achatada que la imagen real, y
+      // `background-size: cover` termina recortando gran parte de arriba y
+      // abajo para taparla. Con la relación de aspecto fija a algo cercano a
+      // la imagen, el recorte que hace `cover` queda mínimo en vez de
+      // agresivo. `max-h` evita que en un monitor ultra ancho el banner se
+      // vuelva desmesuradamente alto.
+      className="relative w-full overflow-hidden min-h-[380px] sm:aspect-[9/5] sm:min-h-0 sm:max-h-[560px] flex items-center"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
       {bgImage ? (
         <>
-          <div className="absolute inset-0 bg-cover bg-[position:70%_center] sm:bg-center md:bg-top bg-no-repeat"
+          <div className="absolute inset-0 bg-cover bg-[position:70%_center] sm:bg-center bg-no-repeat"
             style={{ backgroundImage: 'url(' + bgImage + ')' }} />
           <div className="absolute inset-0 bg-gradient-to-r from-[#050606]/95 via-[#050606]/40 to-transparent sm:from-[#050606]/90 sm:via-[#050606]/60 sm:to-[#050606]/20 md:to-transparent" />
         </>
