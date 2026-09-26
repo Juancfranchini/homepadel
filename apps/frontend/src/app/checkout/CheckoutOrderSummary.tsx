@@ -5,13 +5,14 @@ import { ChevronRight, Lock, MessageCircle } from 'lucide-react';
 import { CartItem } from '@/types';
 import { formatPrice } from '@/lib/utils';
 import { getItemKey } from '@/store/cartStore';
+import CouponField from '@/components/cart/CouponField';
+import type { CouponState } from '@/hooks/useCoupon';
 import CheckoutSummaryItem from './CheckoutSummaryItem';
 
 interface Props {
   items: CartItem[];
   subtotal: number;
-  discount: number;
-  couponCode: string | null;
+  coupon: CouponState;
   shippingCost: number;
   total: number;
   orderError: string;
@@ -23,10 +24,11 @@ interface Props {
 }
 
 export default function CheckoutOrderSummary({
-  items, subtotal, discount, couponCode, shippingCost, total, orderError, isSubmitting,
+  items, subtotal, coupon, shippingCost, total, orderError, isSubmitting,
   paymentMethod, shippingToCoordinate, onQuantityChange, onRemove,
 }: Props) {
   const vacio = items.length === 0;
+  const { discount, couponCode } = coupon;
 
   return (
     <div className="lg:col-span-1">
@@ -56,6 +58,8 @@ export default function CheckoutOrderSummary({
             })}
           </div>
         )}
+
+        {!vacio && <CouponField coupon={coupon} />}
 
         <div className="border-t border-[#0D0F0F] pt-4 space-y-2 text-sm">
           <div className="flex justify-between text-[#C7C7C0]"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>

@@ -2,20 +2,14 @@
 
 import Link from 'next/link';
 import { ArrowRight, X } from 'lucide-react';
-import { useState, useEffect } from 'react';
 import { useCartStore } from '@/store/cartStore';
 import { useShippingRates } from '@/hooks/useShippingRates';
-import { validateCoupon } from '@/lib/api';
+import { useCoupon } from '@/hooks/useCoupon';
 import CarritoItemRow from './CarritoItemRow';
 import CarritoSummary from './CarritoSummary';
 import CarritoEmpty from './CarritoEmpty';
 import AuthModal from '@/components/auth/AuthModal';
 import { useCheckoutNavigation } from '@/components/auth/useCheckoutNavigation';
-
-function couponErrorMessage(error: unknown): string {
-  const message = (error as { response?: { data?: { message?: unknown } } })?.response?.data?.message;
-  return typeof message === 'string' ? message : 'Cupón inválido o vencido';
-}
 
 function CartTitle({ count, onClear }: { count: number; onClear: () => void }) {
   return (
@@ -27,47 +21,17 @@ function CartTitle({ count, onClear }: { count: number; onClear: () => void }) {
 }
 
 export default function CarritoPage() {
-  const { items, removeItem, updateQuantity, clearCart, totalItems, totalPrice, couponCode, setCoupon } = useCartStore();
-  const [couponInput, setCouponInput] = useState(couponCode ?? '');
-  const [discount, setDiscount] = useState(0);
-  const [couponError, setCouponError] = useState('');
-  const [couponLoading, setCouponLoading] = useState(false);
+  const { items, removeItem, updateQuantity, clearCart, totalItems, totalPrice } = useCartStore();
   const { flatRate, freeShippingThreshold } = useShippingRates();
   const checkoutNavigation = useCheckoutNavigation();
 
   const subtotal = totalPrice();
+  const coupon = useCoupon(subtotal);
   // Estimación para mostrar en pantalla — el monto que se cobra de verdad lo
   // recalcula el servidor al crear la orden (P1), esto nunca es la fuente de
   // verdad.
   const shippingCost = subtotal >= freeShippingThreshold ? 0 : flatRate;
-  const total = subtotal - discount + shippingCost;
-
-  // Si ya había un cupón aplicado (por ejemplo, volviendo del checkout), se
-  // vuelve a validar contra el subtotal actual — pudo cambiar el carrito.
-  useEffect(() => {
-    if (couponCode && subtotal > 0) {
-      validateCoupon(couponCode, subtotal)
-        .then((data) => setDiscount(data.discountAmount ?? 0))
-        .catch(() => { setCoupon(null); setDiscount(0); });
-    }
-  }, [couponCode, subtotal, setCoupon]);
-
-  const handleApplyCoupon = async () => {
-    if (!couponInput.trim()) return;
-    setCouponLoading(true);
-    setCouponError('');
-    try {
-      const data = await validateCoupon(couponInput.trim(), subtotal);
-      setCoupon(data.code);
-      setDiscount(data.discountAmount ?? 0);
-    } catch (error: unknown) {
-      setCoupon(null);
-      setDiscount(0);
-      setCouponError(couponErrorMessage(error));
-    } finally {
-      setCouponLoading(false);
-    }
-  };
+  const total = subtotal - coupon.discount + shippingCost;
 
   if (items.length === 0) {
     return <CarritoEmpty />;
@@ -90,13 +54,7 @@ export default function CarritoPage() {
           </div>
 
           <CarritoSummary
-            couponInput={couponInput}
-            onCouponInputChange={setCouponInput}
-            onApplyCoupon={handleApplyCoupon}
-            couponLoading={couponLoading}
-            couponError={couponError}
-            couponCode={couponCode}
-            discount={discount}
+            coupon={coupon}
             subtotal={subtotal}
             shippingCost={shippingCost}
             freeShippingThreshold={freeShippingThreshold}

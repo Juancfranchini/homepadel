@@ -1,16 +1,12 @@
 'use client';
 
-import { Tag, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
+import CouponField from '@/components/cart/CouponField';
+import type { CouponState } from '@/hooks/useCoupon';
 
 interface Props {
-  couponInput: string;
-  onCouponInputChange: (value: string) => void;
-  onApplyCoupon: () => void;
-  couponLoading: boolean;
-  couponError: string;
-  couponCode: string | null;
-  discount: number;
+  coupon: CouponState;
   subtotal: number;
   shippingCost: number;
   freeShippingThreshold: number;
@@ -19,30 +15,15 @@ interface Props {
 }
 
 export default function CarritoSummary({
-  couponInput, onCouponInputChange, onApplyCoupon, couponLoading, couponError,
-  couponCode, discount, subtotal, shippingCost, freeShippingThreshold, total, onCheckout,
+  coupon, subtotal, shippingCost, freeShippingThreshold, total, onCheckout,
 }: Props) {
+  const { discount } = coupon;
   return (
     <div className="lg:col-span-1">
       <div className="bg-[#0F1111] rounded-2xl border border-[#B7D31A]/20 p-6 sticky top-24">
         <h2 className="font-black text-base uppercase tracking-tight text-[#F7F6F7] mb-4">Resumen</h2>
 
-        <div className="mb-4">
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Tag size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8A8A85]" />
-              <input type="text" value={couponInput} onChange={(e) => onCouponInputChange(e.target.value)}
-                aria-label="Código de cupón"
-                className="w-full pl-9 pr-3 py-2 bg-[#1A1F21] border border-[#0D0F0F] rounded-lg text-xs text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A]/50"
-                placeholder="Escribí tu código de cupón" />
-            </div>
-            <button onClick={onApplyCoupon} disabled={couponLoading} className="px-4 py-2 bg-[#B7D31A] text-[#050606] rounded-lg text-xs font-bold hover:bg-[#c8e81f] transition-colors disabled:opacity-60">
-              {couponLoading ? 'Validando...' : 'Aplicar'}
-            </button>
-          </div>
-          {couponError && <p className="text-red-500 text-xs mt-1">{couponError}</p>}
-          {couponCode && discount > 0 && <p className="text-green-500 text-xs mt-1">Cupón &quot;{couponCode}&quot; aplicado: -{formatPrice(discount)}</p>}
-        </div>
+        <CouponField coupon={coupon} />
 
         <div className="border-t border-[#0D0F0F] pt-4 space-y-2 text-sm">
           <div className="flex justify-between text-[#C7C7C0]"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>

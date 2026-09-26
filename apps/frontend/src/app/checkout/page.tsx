@@ -9,7 +9,7 @@ import { useAuthStore } from '@/store/authStore';
 import { usePaymentMethods } from '@/hooks/usePaymentMethods';
 import { useShippingRates } from '@/hooks/useShippingRates';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
-import { validateCoupon } from '@/lib/api';
+import { useCoupon } from '@/hooks/useCoupon';
 import { useInitiateCheckout } from './useInitiateCheckout';
 import { useCheckoutSubmit } from './useCheckoutSubmit';
 import { limpiarBorrador, useCheckoutDraft } from './useCheckoutDraft';
@@ -34,27 +34,20 @@ function CheckoutHeader() {
 }
 
 export default function CheckoutPage() {
-  const { items, totalPrice, clearCart, couponCode, salesLinkToken, setCoupon, updateQuantity, removeItem } = useCartStore();
+  const { items, totalPrice, clearCart, couponCode, salesLinkToken, updateQuantity, removeItem } = useCartStore();
   const { user, setAuth } = useAuthStore();
   const { mercadopago, transferencia } = usePaymentMethods();
   const { flatRate, freeShippingThreshold } = useShippingRates();
   const settings = useSiteSettings();
-  const [discount, setDiscount] = useState(0);
   const { onSubmit, orderError, orderSuccess, orderNumber } = useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart, whatsapp: settings.whatsapp || settings.phone });
 
   const subtotal = totalPrice();
+  const coupon = useCoupon(subtotal);
+  const { discount } = coupon;
   // Estimación para mostrar en pantalla — el servidor recalcula envío y
   // descuento al crear la orden o la preferencia de pago (P1/P2); esto nunca
   // es lo que se cobra de verdad.
   const correoCost = subtotal >= freeShippingThreshold ? 0 : flatRate;
-
-  useEffect(() => {
-    if (couponCode && subtotal > 0) {
-      validateCoupon(couponCode, subtotal)
-        .then((data) => setDiscount(data.discountAmount ?? 0))
-        .catch(() => { setCoupon(null); setDiscount(0); });
-    }
-  }, [couponCode, subtotal, setCoupon]);
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, watch, reset } = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
@@ -109,8 +102,7 @@ export default function CheckoutPage() {
             <CheckoutOrderSummary
               items={items}
               subtotal={subtotal}
-              discount={discount}
-              couponCode={couponCode}
+              coupon={coupon}
               shippingCost={shippingCost}
               total={total}
               orderError={orderError}
