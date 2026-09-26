@@ -71,20 +71,5 @@ export function useCatalogProducts(filters: Filters) {
 
   useEffect(() => { loadProducts(); }, [loadProducts]);
 
-  const sizes = [...new Set(products.flatMap((p) => [
-    ...(p.hasSize && p.size ? [p.size] : []),
-    ...(p.variants?.filter((v) => p.hasSize && v.active && v.size).map((v) => v.size) || []),
-  ]))];
-  const colors = [...new Set(products.flatMap((p) => [
-    ...(p.hasColor && p.color ? [p.color] : []),
-    ...(p.variants?.filter((v) => p.hasColor && v.active && v.color).map((v) => v.color as string) || []),
-  ]))];
-  const weights = [...new Set(products.flatMap((p) => [
-    ...(p.hasWeight && p.weight != null ? [`${p.weight} ${p.weightUnit || ''}`.trim()] : []),
-    ...(p.variants?.filter((v) => p.hasWeight && v.active && v.weight != null).map((v) => `${v.weight} ${v.weightUnit || ''}`.trim()) || []),
-  ]))];
-
-  const genders = [...new Set(products.map((p) => p.gender).filter((g): g is string => !!g))];
-
-  return { products, categories, brands, loading, error, retry: loadProducts, totalPages, totalCount, sizes, colors, weights, genders };
+  return { products, categories, brands, loading, error, retry: loadProducts, totalPages, totalCount };
 }

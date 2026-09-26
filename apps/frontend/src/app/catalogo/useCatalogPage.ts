@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useCatalogFilters } from './useCatalogFilters';
 import { useCatalogProducts } from './useCatalogProducts';
+import { useCatalogFacets } from './useCatalogFacets';
 
 export function useCatalogPage() {
   const filters = useCatalogFilters();
@@ -12,9 +13,10 @@ export function useCatalogPage() {
     setParam, clearFilters, hasFilters, activeChips, pageTitle,
   } = filters;
 
-  const { products, categories, brands, loading, error, retry, totalPages, totalCount, sizes, colors, weights, genders } = useCatalogProducts({
+  const { products, categories, brands, loading, error, retry, totalPages, totalCount } = useCatalogProducts({
     currentPage, selectedCategory, selectedBrand, isOffer, searchQuery, selectedSize, selectedColor, selectedWeight, selectedShape, selectedGender, currentSort,
   });
+  const { sizes, colors, weights, genders } = useCatalogFacets({ selectedCategory, selectedBrand, isOffer, searchQuery });
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchInput, setSearchInput] = useState('');
