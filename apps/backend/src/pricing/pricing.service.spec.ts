@@ -372,6 +372,18 @@ describe('PricingService — el envío sale de la tarifa configurada, no del nav
     expect(await service.calculateShipping(1000)).toBe(9999);
     expect(await service.calculateShipping(50000)).toBe(0);
   });
+
+  it('retiro en el local es gratis aunque el subtotal no llegue al umbral', async () => {
+    const service = new PricingService(
+      fakePrismaConShippingConfig({ flatRate: 4500, freeShippingThreshold: 100000 }),
+    );
+    expect(await service.calculateShipping(1000, 'retiro_local')).toBe(0);
+  });
+
+  it('retiro en el local no depende de que exista configuración de envíos', async () => {
+    const service = new PricingService(fakePrismaConShippingConfig(undefined));
+    expect(await service.calculateShipping(1000, 'retiro_local')).toBe(0);
+  });
 });
 
 /**

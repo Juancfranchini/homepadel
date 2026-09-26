@@ -34,12 +34,14 @@ class PayerDto {
 }
 
 class ShippingDto {
-  @IsString() @MaxLength(200) street: string;
-  @IsString() @MaxLength(100) city: string;
-  @IsString() @MaxLength(100) province: string;
-  @IsString() @MaxLength(20) postalCode: string;
+  // Con retiro en el local no hace falta domicilio: opcionales a propósito,
+  // ver PaymentsService.formatAddress.
+  @IsOptional() @IsString() @MaxLength(200) street?: string;
+  @IsOptional() @IsString() @MaxLength(100) city?: string;
+  @IsOptional() @IsString() @MaxLength(100) province?: string;
+  @IsOptional() @IsString() @MaxLength(20) postalCode?: string;
   @IsString() @MaxLength(40) phone: string;
-  @IsOptional() @IsIn(['correo_argentino']) carrier?: 'correo_argentino';
+  @IsOptional() @IsIn(['correo_argentino', 'retiro_local']) carrier?: 'correo_argentino' | 'retiro_local';
 }
 
 export class CreatePreferenceDto {

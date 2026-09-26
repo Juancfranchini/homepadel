@@ -156,7 +156,7 @@ export class OrdersService {
 
     // P1 — el envío sale siempre de la tarifa configurada, nunca de lo que
     // mande el navegador.
-    const shipping = await this.pricing.calculateShipping(subtotal);
+    const shipping = await this.pricing.calculateShipping(subtotal, dto.carrier);
 
     // P2 — el cupón se valida y se cobra acá, no en el carrito. Si el código
     // no existe, está vencido, sin usos o no llega al mínimo, la orden falla
@@ -175,6 +175,7 @@ export class OrdersService {
       buyerPhone: dto.buyerPhone,
       buyerName: dto.buyerName,
       paymentMethod: dto.paymentMethod,
+      shippingCarrier: dto.carrier || 'correo_argentino',
     };
 
     const order = await this.persistOnlineOrder({

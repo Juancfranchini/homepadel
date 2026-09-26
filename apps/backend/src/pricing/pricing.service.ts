@@ -129,8 +129,13 @@ export class PricingService {
    * configurada en el backoffice (`site-sections` / `shipping_rates`).
    * El monto que mande el navegador en `shipping` se ignora siempre: si no,
    * cualquiera puede POSTear una orden con envío en cero.
+   *
+   * Retiro en el local es gratis siempre, sin importar el subtotal: no hay
+   * ningún envío que cobrar.
    */
-  async calculateShipping(subtotal: number): Promise<number> {
+  async calculateShipping(subtotal: number, carrier?: string): Promise<number> {
+    if (carrier === 'retiro_local') return 0;
+
     const section = await this.prisma.siteSection.findUnique({ where: { key: 'shipping_rates' } });
     const data = (section?.data as { flatRate?: number; freeShippingThreshold?: number }) ?? {};
     const flatRate = Number(data.flatRate ?? 4500);

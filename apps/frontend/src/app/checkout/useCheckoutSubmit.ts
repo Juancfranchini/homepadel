@@ -25,6 +25,34 @@ interface Params {
   whatsapp?: string;
 }
 
+function buildOrderItems(items: CartItem[]) {
+  return items.map((i) => ({
+    productId: i.product.id,
+    name: i.product.name,
+    quantity: i.quantity,
+    variantId: i.variantId,
+    variantSku: i.variantSku,
+    variantSize: i.variantSize,
+    variantColor: i.variantColor,
+    variantDimensions: i.variantDimensions,
+  }));
+}
+
+/** Con retiro en el local no hace falta domicilio, solo un teléfono de contacto. */
+function buildShippingPayload(data: CheckoutFormData) {
+  if (data.shippingMethod === 'retiro_local') {
+    return { phone: data.phone, carrier: 'retiro_local' as const };
+  }
+  return {
+    street: data.street,
+    city: data.city,
+    province: data.province,
+    postalCode: data.postalCode,
+    phone: data.phone,
+    carrier: 'correo_argentino' as const,
+  };
+}
+
 function shippingCoordinationMessage(data: CheckoutFormData, items: CartItem[], couponCode: string | null): string {
   const carrier = data.shippingMethod === 'andreani' ? 'Andreani' : 'OCA';
   const itemLines = items.map((item) => {
@@ -47,33 +75,16 @@ export function useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
 
+  // El domicilio y el teléfono viajan con la preferencia: el aviso de pago de
+  // Mercado Pago no los trae, así que si no se mandan acá la venta se
+  // registra sin dirección a la que enviar. El número de orden lo genera el
+  // servidor.
   const submitMercadoPago = async (data: CheckoutFormData) => {
     try {
-      const orderItems = items.map((i) => ({
-        productId: i.product.id,
-        name: i.product.name,
-        quantity: i.quantity,
-        variantId: i.variantId,
-        variantSku: i.variantSku,
-        variantSize: i.variantSize,
-        variantColor: i.variantColor,
-        variantDimensions: i.variantDimensions,
-      }));
-      // El domicilio y el teléfono viajan con la preferencia: el aviso de pago
-      // de Mercado Pago no los trae, así que si no se mandan acá la venta se
-      // registra sin dirección a la que enviar. El número de orden lo genera
-      // el servidor.
       const pref = await createPaymentPreference({
-        items: orderItems,
+        items: buildOrderItems(items),
         payer: { name: data.name, email: data.email },
-        shipping: {
-          street: data.street,
-          city: data.city,
-          province: data.province,
-          postalCode: data.postalCode,
-          phone: data.phone,
-          carrier: 'correo_argentino',
-        },
+        shipping: buildShippingPayload(data),
         couponCode: couponCode || undefined,
         salesLinkToken: salesLinkToken || undefined,
       });
@@ -89,15 +100,17 @@ export function useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart
 
   const submitTransfer = async (data: CheckoutFormData) => {
     try {
+      const esRetiro = data.shippingMethod === 'retiro_local';
       const result = await createOrder({
         paymentMethod: 'transfer',
         items: items.map((item) => ({ productId: item.product.id, quantity: item.quantity, variantId: item.variantId })),
-        address: data.street + ', ' + data.city + ', ' + data.province + ' (' + data.postalCode + ')',
+        address: esRetiro ? 'Retiro en el local' : data.street + ', ' + data.city + ', ' + data.province + ' (' + data.postalCode + ')',
         buyerEmail: data.email,
         buyerPhone: data.phone,
         buyerName: data.name,
         couponCode: couponCode || undefined,
         salesLinkToken: salesLinkToken || undefined,
+        carrier: esRetiro ? 'retiro_local' : 'correo_argentino',
       });
       setOrderNumber(result.number);
       clearCart();
@@ -109,7 +122,8 @@ export function useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart
 
   const onSubmit = async (data: CheckoutFormData) => {
     setOrderError('');
-    if (data.shippingMethod !== 'correo_argentino') {
+    const coordinaPorWhatsapp = data.shippingMethod === 'andreani' || data.shippingMethod === 'oca';
+    if (coordinaPorWhatsapp) {
       const url = buildWhatsappUrl(whatsapp, shippingCoordinationMessage(data, items, couponCode));
       if (!url) {
         setOrderError('No hay un número de WhatsApp configurado para coordinar este envío. Elegí Correo Argentino o contactanos por email.');

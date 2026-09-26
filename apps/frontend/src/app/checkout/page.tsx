@@ -64,8 +64,8 @@ export default function CheckoutPage() {
   useAbandonedCart(items, { email: watch('email'), name: watch('name'), phone: watch('phone') }, orderSuccess);
   const selectedPayment = watch('paymentMethod');
   const selectedShipping = watch('shippingMethod');
-  const shippingToCoordinate = selectedShipping !== 'correo_argentino';
-  const shippingCost = shippingToCoordinate ? 0 : correoCost;
+  const shippingToCoordinate = selectedShipping !== 'correo_argentino' && selectedShipping !== 'retiro_local';
+  const shippingCost = selectedShipping === 'correo_argentino' ? correoCost : 0;
   const total = subtotal + shippingCost - discount;
 
   // Si el carrito se vacía editándolo acá, el formulario NO se desmonta: al
@@ -97,6 +97,7 @@ export default function CheckoutPage() {
               register={register} errors={errors} selectedShipping={selectedShipping} selectedPayment={selectedPayment}
               correoCost={correoCost} shippingToCoordinate={shippingToCoordinate}
               mercadopago={mercadopago} transferencia={transferencia}
+              storeAddress={settings.address}
             />
 
             <CheckoutOrderSummary

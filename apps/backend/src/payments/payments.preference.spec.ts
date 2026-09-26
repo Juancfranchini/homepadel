@@ -131,6 +131,21 @@ describe('PaymentsService.createPreference', () => {
     expect(ordenesCreadas[0].address).toBe('Sin domicilio: pedírselo al comprador');
   });
 
+  it('retiro en el local no requiere domicilio y avisa al servicio de tarifas cuál es el transportista', async () => {
+    const { service, pricing, ordenesCreadas } = construirServicio();
+    await service.createPreference({
+      ...DTO_BASE,
+      shipping: { phone: '1140832310', carrier: 'retiro_local' },
+    });
+
+    // El monto real de "gratis" lo decide PricingService.calculateShipping
+    // (ver pricing.service.spec.ts) — acá solo importa que le llegue el dato
+    // correcto para decidirlo.
+    expect(pricing.calculateShipping).toHaveBeenCalledWith(expect.any(Number), 'retiro_local');
+    expect(ordenesCreadas[0].address).toBe('Retiro en el local');
+    expect(JSON.parse(ordenesCreadas[0].notes)).toMatchObject({ shippingCarrier: 'retiro_local' });
+  });
+
   it('ignora el número de orden que mande el navegador y genera el suyo', async () => {
     const { service, ordenesCreadas } = construirServicio();
     await service.createPreference({

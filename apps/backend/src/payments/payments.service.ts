@@ -149,7 +149,7 @@ export class PaymentsService {
       })),
     );
     const subtotal = resolvedItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    const shippingCost = await this.pricing.calculateShipping(subtotal);
+    const shippingCost = await this.pricing.calculateShipping(subtotal, dto.shipping?.carrier);
     let discount = 0;
     if (dto.couponCode) {
       const coupon = await this.coupons.validate(dto.couponCode, subtotal);
@@ -178,6 +178,8 @@ export class PaymentsService {
    */
   private formatAddress(shipping?: ShippingData): string {
     if (!shipping) return 'Sin domicilio: pedírselo al comprador';
+    if (shipping.carrier === 'retiro_local') return 'Retiro en el local';
+    if (!shipping.street) return 'Sin domicilio: pedírselo al comprador';
     return `${shipping.street}, ${shipping.city}, ${shipping.province} (${shipping.postalCode})`;
   }
 

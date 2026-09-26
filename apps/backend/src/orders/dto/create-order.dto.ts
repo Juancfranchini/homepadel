@@ -25,4 +25,8 @@ export class CreateOrderDto {
   @ApiProperty() @IsEmail() buyerEmail: string;
   @ApiProperty() @IsString() @MinLength(8) buyerPhone: string;
   @ApiProperty() @IsString() @MinLength(2) buyerName: string;
+  @ApiPropertyOptional({ enum: ['correo_argentino', 'retiro_local'] })
+  @IsOptional()
+  @IsIn(['correo_argentino', 'retiro_local'])
+  carrier?: 'correo_argentino' | 'retiro_local';
 }
