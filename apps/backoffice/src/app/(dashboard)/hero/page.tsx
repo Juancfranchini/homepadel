@@ -130,7 +130,9 @@ function SlideFormModal({ isOpen, editItem, isMobile, imageDesktop, imageMobile,
         <div className="md:flex-shrink-0 flex flex-col gap-4 md:pr-4" style={{ width: isMobile ? '100%' : 200 }}>
           <div>
             <p className={labelClass + ' mb-2'}>Desktop</p>
-            <ImageUpload value={imageDesktop} onChange={(url) => setValue('image', url, { shouldDirty: true })} placeholder="URL desktop" width={isMobile ? 140 : 200} height={80} />
+            <ImageUpload value={imageDesktop} onChange={(url) => setValue('image', url, { shouldDirty: true })} placeholder="URL desktop"
+              suggestion="Medida ideal: 1800x1000px (relación 9:5). Con otra proporción, el banner recorta los bordes para no dejar espacios vacíos."
+              width={isMobile ? 140 : 200} height={80} />
           </div>
           <div>
             <p className={labelClass + ' mb-2'}>Mobile</p>
