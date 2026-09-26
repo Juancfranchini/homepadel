@@ -12,6 +12,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { json, urlencoded } from 'express';
 import { AppModule } from './app.module';
+import { esOrigenPermitido } from './cors-origin';
 
 const logger = new Logger('CORS');
 
@@ -41,20 +42,12 @@ async function bootstrap() {
     origin: isDev
       ? true
       : (origin, callback) => {
-          // Sin origen (curl, Postman, server-side)  permitir
-          if (!origin) return callback(null, true);
+          const permitido = esOrigenPermitido(origin, {
+            frontendUrl: process.env.FRONTEND_URL,
+            backofficeUrl: process.env.BACKOFFICE_URL,
+          });
 
-          const allowed = [
-            process.env.FRONTEND_URL,
-            process.env.BACKOFFICE_URL,
-            'http://localhost:3000',
-            'http://localhost:3001',
-          ].filter(Boolean) as string[];
-
-          // Acepta cualquier subdominio de vercel.app (previews incluidas)
-          if (allowed.includes(origin) || origin.endsWith('.vercel.app')) {
-            return callback(null, true);
-          }
+          if (permitido) return callback(null, true);
 
           // callback(new Error(...)) hace que Nest devuelva 500 en vez de
           // rechazar el CORS: el navegador ve "Failed to fetch" pero el
