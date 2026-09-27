@@ -42,6 +42,8 @@ export async function generateMetadata(): Promise<Metadata> {
     creator: 'Home Padel',
     publisher: 'Home Padel',
     formatDetection: { email: false, address: false, telephone: false },
+    // Verificación de la propiedad en Google Search Console. No es secreto: Google lo lee del HTML público.
+    verification: { google: 'afdLYXFIA-0q2Sk5r1bdl3cV-3CxHPe5nrgbRVvi4jg' },
     metadataBase: new URL(siteUrl),
     alternates: { canonical: '/' },
     openGraph: {
