@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useMenuCategorias } from '@/hooks/useMenuCategorias';
+import { useMenuNavegacion, accesosPorGenero } from '@/hooks/useMenuCategorias';
 import MobileNavAccordion from './MobileNavAccordion';
 import BrandMenuItem from './BrandMenuItem';
 import { isNavActive } from './navState';
@@ -24,7 +24,7 @@ const enlaceRaiz = 'my-0.5 block rounded-lg px-3 py-3 text-sm font-semibold uppe
  * funcionando con los links fijos.
  */
 export default function MobileNav({ links, onNavigate }: Props) {
-  const categorias = useMenuCategorias();
+  const { categorias, marcas, generos } = useMenuNavegacion();
   const pathname = usePathname();
 
   const claseRaiz = (href: string) =>
@@ -48,6 +48,23 @@ export default function MobileNav({ links, onNavigate }: Props) {
             ))}
           </MobileNavAccordion>
         ))}
+
+        {accesosPorGenero(generos).map((g) => (
+          <Link key={g.href} href={g.href} className={enlaceRaiz + ' text-[#C7C7C0]'} onClick={onNavigate}>
+            {g.label}
+          </Link>
+        ))}
+
+        {marcas.length > 0 && (
+          <MobileNavAccordion label="Marcas">
+            <Link href="/catalogo" className={enlaceHoja} onClick={onNavigate}>
+              Ver todo el catálogo
+            </Link>
+            {marcas.map((marca) => (
+              <BrandMenuItem key={marca.id} marca={marca} href={'/catalogo?marca=' + marca.slug} onNavigate={onNavigate} />
+            ))}
+          </MobileNavAccordion>
+        )}
 
         <Link href="/catalogo?oferta=true" className={enlaceRaiz + ' text-[#B7D31A]'} onClick={onNavigate}>
           Ofertas

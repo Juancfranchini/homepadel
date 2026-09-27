@@ -2,22 +2,30 @@
 
 import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
-import { useMenuCategorias, CategoriaMenu } from '@/hooks/useMenuCategorias';
+import { useMenuNavegacion, accesosPorGenero, MarcaMenu } from '@/hooks/useMenuCategorias';
 import BrandMenuItem from './BrandMenuItem';
 
-const enlaceCategoria =
-  'flex items-center gap-1 whitespace-nowrap px-3 py-3 text-[11px] font-bold uppercase tracking-[0.12em] text-[#C7C7C0] transition-colors hover:text-[#B7D31A] group-hover:text-[#B7D31A] group-focus-within:text-[#B7D31A]';
+const enlace =
+  'flex items-center gap-1 whitespace-nowrap px-4 py-3 text-[11px] font-bold uppercase tracking-[0.12em] text-[#C7C7C0] transition-colors hover:text-[#B7D31A]';
+
+interface Desplegable {
+  titulo: string;
+  href: string;
+  marcas: MarcaMenu[];
+  hrefMarca: (marca: MarcaMenu) => string;
+  verTodo: string;
+}
 
 /**
- * Desplegable con las marcas de una categoría. Se abre al pasar el mouse y
- * también al navegar con teclado (focus-within). Las categorías de la mitad
- * derecha lo abren hacia la izquierda, para que no se salga de la pantalla.
+ * Desplegable con marcas y sus logos. Se abre al pasar el mouse y también al
+ * navegar con teclado (focus-within). Los de la mitad derecha de la barra se
+ * abren hacia la izquierda, para que no se salgan de la pantalla.
  */
-function CategoriaConMarcas({ categoria, alineaDerecha }: { categoria: CategoriaMenu; alineaDerecha: boolean }) {
+function MenuDesplegable({ item, alineaDerecha }: { item: Desplegable; alineaDerecha: boolean }) {
   return (
     <div className="group relative">
-      <Link href={'/catalogo?categoria=' + categoria.slug} className={enlaceCategoria}>
-        {categoria.name}
+      <Link href={item.href} className={enlace + ' group-hover:text-[#B7D31A] group-focus-within:text-[#B7D31A]'}>
+        {item.titulo}
         <ChevronDown size={12} className="transition-transform group-hover:rotate-180" />
       </Link>
       <div
@@ -28,19 +36,12 @@ function CategoriaConMarcas({ categoria, alineaDerecha }: { categoria: Categoria
       >
         <div className="w-[min(640px,90vw)] rounded-xl border border-[#B7D31A]/40 bg-[#111516] p-5 shadow-2xl shadow-black/60">
           <div className="grid grid-cols-3 gap-x-6">
-            {categoria.brands.map((marca) => (
-              <BrandMenuItem
-                key={marca.id}
-                marca={marca}
-                href={'/catalogo?categoria=' + categoria.slug + '&marca=' + marca.slug}
-              />
+            {item.marcas.map((marca) => (
+              <BrandMenuItem key={marca.id} marca={marca} href={item.hrefMarca(marca)} />
             ))}
           </div>
-          <Link
-            href={'/catalogo?categoria=' + categoria.slug}
-            className="mt-4 inline-block text-xs font-bold uppercase tracking-wide text-[#B7D31A] hover:underline"
-          >
-            Ver todo en {categoria.name} →
+          <Link href={item.href} className="mt-4 inline-block text-xs font-bold uppercase tracking-wide text-[#B7D31A] hover:underline">
+            {item.verTodo} →
           </Link>
         </div>
       </div>
@@ -48,19 +49,33 @@ function CategoriaConMarcas({ categoria, alineaDerecha }: { categoria: Categoria
   );
 }
 
+type ItemBarra = { tipo: 'desplegable'; item: Desplegable } | { tipo: 'enlace'; label: string; href: string };
+
 export default function CategoryMegaMenu() {
-  const categorias = useMenuCategorias();
-  if (categorias.length === 0) return null;
+  const { categorias, marcas, generos } = useMenuNavegacion();
+  if (categorias.length === 0 && marcas.length === 0) return null;
+
+  const items: ItemBarra[] = [
+    ...categorias.map((c): ItemBarra => ({
+      tipo: 'desplegable',
+      item: { titulo: c.name, href: '/catalogo?categoria=' + c.slug, marcas: c.brands, hrefMarca: (m) => '/catalogo?categoria=' + c.slug + '&marca=' + m.slug, verTodo: 'Ver todo en ' + c.name },
+    })),
+    ...accesosPorGenero(generos).map((g): ItemBarra => ({ tipo: 'enlace', ...g })),
+    ...(marcas.length > 0
+      ? [{ tipo: 'desplegable', item: { titulo: 'Marcas', href: '/catalogo', marcas, hrefMarca: (m: MarcaMenu) => '/catalogo?marca=' + m.slug, verTodo: 'Ver todo el catálogo' } } as ItemBarra]
+      : []),
+  ];
 
   return (
     <nav aria-label="Categorías" className="flex items-center justify-center">
-      {categorias.map((categoria, i) => (
-        <CategoriaConMarcas key={categoria.id} categoria={categoria} alineaDerecha={i > 0 && i >= categorias.length / 2} />
-      ))}
-      <Link
-        href="/catalogo?oferta=true"
-        className="whitespace-nowrap px-3 py-3 text-[11px] font-bold uppercase tracking-[0.12em] text-[#B7D31A] transition-colors hover:text-[#CAE52E]"
-      >
+      {items.map((it, i) =>
+        it.tipo === 'desplegable' ? (
+          <MenuDesplegable key={it.item.titulo} item={it.item} alineaDerecha={i > 0 && i >= items.length / 2} />
+        ) : (
+          <Link key={it.href} href={it.href} className={enlace}>{it.label}</Link>
+        ),
+      )}
+      <Link href="/catalogo?oferta=true" className={enlace + ' text-[#B7D31A] hover:text-[#CAE52E]'}>
         Ofertas
       </Link>
     </nav>

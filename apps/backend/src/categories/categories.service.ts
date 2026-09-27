@@ -49,7 +49,7 @@ export class CategoriesService {
    * categoría no aparece: llevaría a un listado vacío.
    */
   async findMenu() {
-    const [categorias, pares] = await Promise.all([
+    const [categorias, pares, generos] = await Promise.all([
       this.prisma.category.findMany({
         where: { active: true },
         orderBy: { order: 'asc' },
@@ -60,21 +60,37 @@ export class CategoriesService {
         distinct: ['categoryId', 'brandId'],
         select: { categoryId: true, brand: { select: { id: true, name: true, slug: true, logo: true, order: true } } },
       }),
+      this.prisma.product.findMany({
+        where: { active: true, gender: { not: null } },
+        distinct: ['gender'],
+        select: { gender: true },
+      }),
     ]);
 
-    const marcasPorCategoria = new Map<string, (typeof pares)[number]['brand'][]>();
+    type MarcaCruda = (typeof pares)[number]['brand'];
+    const ordenar = (marcas: MarcaCruda[]) =>
+      [...marcas]
+        .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name))
+        .map(({ id, name, slug, logo }) => ({ id, name: name.trim(), slug, logo }));
+
+    const marcasPorCategoria = new Map<string, MarcaCruda[]>();
+    const todasLasMarcas = new Map<string, MarcaCruda>();
     for (const par of pares) {
       const lista = marcasPorCategoria.get(par.categoryId) ?? [];
       lista.push(par.brand);
       marcasPorCategoria.set(par.categoryId, lista);
+      todasLasMarcas.set(par.brand.id, par.brand);
     }
 
-    return categorias.map((categoria) => ({
-      ...categoria,
-      brands: (marcasPorCategoria.get(categoria.id) ?? [])
-        .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name))
-        .map(({ id, name, slug, logo }) => ({ id, name: name.trim(), slug, logo })),
-    }));
+    return {
+      categorias: categorias.map((categoria) => ({
+        ...categoria,
+        brands: ordenar(marcasPorCategoria.get(categoria.id) ?? []),
+      })),
+      // Todas las marcas con algún producto activo, de cualquier categoría.
+      marcas: ordenar([...todasLasMarcas.values()]),
+      generos: generos.map((g) => g.gender as string),
+    };
   }
 
   async findAllAdmin() {

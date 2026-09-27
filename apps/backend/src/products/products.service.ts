@@ -54,7 +54,9 @@ export class ProductsService {
     if (brand) where.brand = { slug: brand };
     if (isOffer === 'true') where.isOffer = true;
     if (shape) where.shape = shape;
-    if (gender) where.gender = gender;
+    // Una paleta unisex le sirve a hombre y a mujer: "Hombre" sin las unisex
+    // mostraba 1 sola paleta de 37. Pedir "Unisex" sigue trayendo solo esas.
+    if (gender) where.gender = gender === 'Hombre' || gender === 'Mujer' ? { in: [gender, 'Unisex'] } : gender;
     if (level) where.level = level;
     if (size) propertyFilters.push({ OR: [{ size }, { variants: { some: { size, active: true } } }] });
     if (color) propertyFilters.push({ OR: [{ color }, { variants: { some: { color, active: true } } }] });

@@ -69,8 +69,10 @@ export function useCatalogFilters() {
   }
   if (searchQuery) activeChips.push({ label: '"' + searchQuery + '"', onRemove: () => setParam('q', null) });
 
-  const pageTitle = isOffer ? 'Ofertas' : selectedCategory
-    ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : 'Catálogo';
+  const capitalizar = (texto: string) => texto.charAt(0).toUpperCase() + texto.slice(1);
+  // Entrando desde "Hombre" o "Mujer" del menú, el título lo dice.
+  const pageTitle = isOffer ? 'Ofertas' : selectedCategory ? capitalizar(selectedCategory)
+    : selectedGender ? capitalizar(selectedGender) : 'Catálogo';
 
   return {
     currentPage, currentSort, selectedCategory, selectedBrand, isOffer, searchQuery,
