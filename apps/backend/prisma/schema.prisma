@@ -354,6 +354,26 @@ model AbandonedCart {
   @@index([recoveredAt, updatedAt])
 }
 
+/// Un paso real del embudo de marketing (vista de página, vista de producto,
+/// agregado al carrito, inicio de checkout, compra), para tener un embudo
+/// propio en el backoffice sin depender de entrar a Meta Business.
+///
+/// Sin datos personales: ni IP, ni cookies, ni email — solo qué pasó, sobre
+/// qué producto (si corresponde) y cuándo. `productName` queda guardado tal
+/// como se llamaba el producto en ese momento, para que el ranking no se
+/// rompa si después se renombra o se borra.
+model MarketingEvent {
+  id          String   @id @default(cuid())
+  eventName   String
+  productId   String?
+  productName String?
+  value       Float?
+  createdAt   DateTime @default(now())
+
+  @@index([eventName, createdAt])
+  @@index([productId])
+}
+
 model ProductVariant {
   id                 String              @id @default(cuid())
   productId          String

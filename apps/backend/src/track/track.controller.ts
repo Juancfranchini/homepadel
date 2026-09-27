@@ -15,6 +15,15 @@ function getCookie(cookies: string, name: string): string | null {
   return match ? decodeURIComponent(match[1]) : null;
 }
 
+/** Lo mínimo para el embudo propio: qué producto (si hay) y qué valor tenía el evento. */
+function extraerDatosDeMarketing(eventData?: Record<string, unknown>) {
+  const contentIds = eventData?.content_ids;
+  const productId = Array.isArray(contentIds) && typeof contentIds[0] === 'string' ? contentIds[0] : undefined;
+  const productName = typeof eventData?.content_name === 'string' ? eventData.content_name : undefined;
+  const value = typeof eventData?.value === 'number' ? eventData.value : undefined;
+  return { productId, productName, value };
+}
+
 @ApiTags('Track')
 @Controller('track')
 export class TrackController {
@@ -40,6 +49,13 @@ export class TrackController {
    */
   @Post()
   async track(@Body() body: TrackEventDto, @Req() req: Request) {
+    // El embudo propio del backoffice (Marketing) no depende de que Meta esté
+    // configurado: se guarda siempre, aunque falte el Pixel o el token.
+    const { productId, productName, value } = extraerDatosDeMarketing(body.eventData);
+    await this.prisma.marketingEvent
+      .create({ data: { eventName: body.eventName, productId, productName, value } })
+      .catch((err) => this.logger.warn(`No se pudo guardar el evento ${body.eventName} para el embudo propio: ${err}`));
+
     const seccion = await this.prisma.siteSection.findUnique({ where: { key: 'meta_pixel' } });
     const config = (seccion?.data as MetaPixelConfig) || {};
     const pixelId = body.pixelId || config.pixelId;

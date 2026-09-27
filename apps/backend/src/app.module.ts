@@ -31,6 +31,7 @@ import { EmailModule } from './email/email.module';
 import { ShippingModule } from './shipping/shipping.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { TrackModule } from './track/track.module';
+import { MarketingModule } from './marketing/marketing.module';
 import { PosModule } from './pos/pos.module';
 import { CashModule } from './cash/cash.module';
 
@@ -67,6 +68,7 @@ import { CashModule } from './cash/cash.module';
     ShippingModule,
     DashboardModule,
     TrackModule,
+    MarketingModule,
     PosModule,
     CashModule,
   ],

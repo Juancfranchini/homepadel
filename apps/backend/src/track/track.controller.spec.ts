@@ -22,6 +22,11 @@ function construirRequestFalso() {
   } as any;
 }
 
+/** El embudo propio (Marketing) guarda siempre, esté Meta configurado o no. */
+function marketingEventFalso() {
+  return { create: jest.fn().mockResolvedValue({}) };
+}
+
 const EVENTO: TrackEventDto = {
   eventName: 'AddToCart',
   eventId: 'evt-1',
@@ -41,7 +46,10 @@ describe('TrackController', () => {
   });
 
   it('no manda nada a Meta si no hay token guardado en site_sections, aunque exista la variable de entorno vieja', async () => {
-    const prisma = { siteSection: { findUnique: jest.fn().mockResolvedValue({ data: { pixelId: '123' } }) } };
+    const prisma = {
+      siteSection: { findUnique: jest.fn().mockResolvedValue({ data: { pixelId: '123' } }) },
+      marketingEvent: marketingEventFalso(),
+    };
     global.fetch = jest.fn() as any;
 
     const controller = new TrackController(prisma as any);
@@ -51,6 +59,34 @@ describe('TrackController', () => {
     expect(resultado).toEqual({ success: false, message: 'Meta Pixel no configurado' });
   });
 
+  it('guarda el evento para el embudo propio aunque Meta no esté configurado', async () => {
+    const prisma = {
+      siteSection: { findUnique: jest.fn().mockResolvedValue(null) },
+      marketingEvent: marketingEventFalso(),
+    };
+    global.fetch = jest.fn() as any;
+
+    const controller = new TrackController(prisma as any);
+    await controller.track(EVENTO, construirRequestFalso());
+
+    expect(prisma.marketingEvent.create).toHaveBeenCalledWith({
+      data: { eventName: 'AddToCart', productId: 'prod-1', productName: undefined, value: undefined },
+    });
+  });
+
+  it('no deja que un fallo al guardar el evento propio tumbe el aviso a Meta', async () => {
+    const prisma = {
+      siteSection: { findUnique: jest.fn().mockResolvedValue({ data: { pixelId: '123', accessToken: 'token' } }) },
+      marketingEvent: { create: jest.fn().mockRejectedValue(new Error('la base no responde')) },
+    };
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, status: 200 }) as any;
+
+    const controller = new TrackController(prisma as any);
+    const resultado = await controller.track(EVENTO, construirRequestFalso());
+
+    expect(resultado).toEqual({ success: true });
+  });
+
   it('usa el pixelId y el access token guardados en site_sections, no la variable de entorno', async () => {
     const prisma = {
       siteSection: {
@@ -58,6 +94,7 @@ describe('TrackController', () => {
           data: { pixelId: '1041282918808105', accessToken: 'token-de-la-base', testEventCode: 'TEST123' },
         }),
       },
+      marketingEvent: marketingEventFalso(),
     };
     global.fetch = jest.fn().mockResolvedValue({ ok: true, status: 200 }) as any;
 
@@ -85,6 +122,7 @@ describe('TrackController', () => {
       siteSection: {
         findUnique: jest.fn().mockResolvedValue({ data: { pixelId: '123', accessToken: 'token' } }),
       },
+      marketingEvent: marketingEventFalso(),
     };
     global.fetch = jest.fn().mockResolvedValue({ ok: false, status: 400, text: async () => 'token inválido' }) as any;
 

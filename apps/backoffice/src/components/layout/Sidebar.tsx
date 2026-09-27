@@ -40,6 +40,7 @@ import {
   Store,
   Wallet,
   BarChart3,
+  Activity,
 } from 'lucide-react';
 
 interface NavItem {
@@ -84,6 +85,7 @@ const navGroups: NavGroup[] = [
   {
     title: 'Marketing',
     items: [
+      { label: 'Trazabilidad', href: '/marketing', icon: Activity },
       { label: 'Promociones', href: '/promociones', icon: Percent },
       { label: 'Cupones', href: '/cupones', icon: Tag },
       { label: 'Carritos abandonados', href: '/carritos-abandonados', icon: ShoppingCart },
