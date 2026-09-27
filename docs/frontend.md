@@ -49,6 +49,19 @@ Se usan con cualquier propiedad y con opacidad: `bg-page`, `text-fg-muted`, `bor
 - Texto sobre fotos con velo negro (tarjetas de categoría, botones sobre la imagen de un producto): va claro en los dos temas, con el hex fijo, no con `fg`.
 - Al agregar un color nuevo que se vaya a repetir: sumarlo en `globals.css` (los dos temas) y en `tailwind.config.ts`, y chequear contraste en el claro.
 
+## URLs viejas de Tiendanube
+
+La tienda vivía en Tiendanube y Google todavía tiene indexadas sus URLs. `src/middleware.ts` las redirige con 308 (permanente), y **solo** corre para esas rutas (ver su `matcher`):
+
+| URL vieja | Destino |
+|---|---|
+| `/productos/<handle>/` | `/producto/<slug>` si el handle (sin el sufijo aleatorio tipo `-9l2i6`) coincide exacto con un único producto; si no, `/catalogo?q=<palabras>` |
+| `/productos/` | `/catalogo` |
+| `/<categoria>/` | `/catalogo?categoria=<categoria>` |
+| `/<categoria>/<marca>/` | `/catalogo?categoria=<categoria>&marca=<marca>` si la marca tiene productos en esa categoría; si no, sin marca |
+
+La lógica está en `lib/legacyUrls.ts` (pura, con tests en `lib/legacyUrls.test.ts` — correr con `npm test`). Si aparece otra categoría vieja de Tiendanube dando 404, sumarla en `LEGACY_CATEGORY_SLUGS` **y** en el `matcher` del middleware.
+
 ## Reglas
 
 - Todo fetch al backend pasa por `lib/api.ts`, no se instancia Axios suelto en un componente.

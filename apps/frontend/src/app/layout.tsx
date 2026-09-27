@@ -9,6 +9,15 @@ import CarritoDeCuenta from '@/components/layout/CarritoDeCuenta';
 import { getSiteUrl } from '@/lib/siteUrl';
 import { SCRIPT_TEMA } from '@/lib/tema';
 
+// Título y descripción de la portada (y de lo que se comparte en redes).
+// Llevan "pádel" con tilde y "Argentina" porque es como se busca, y solo
+// ganchos que la tienda cumple de verdad: el envío gratis por Correo Argentino
+// depende del monto que se configura en el backoffice y las cuotas cambian
+// con cada promo, así que no se escriben números que después queden viejos.
+const HOME_TITLE = 'Home Pádel — Paletas, indumentaria y accesorios de pádel en Argentina';
+const HOME_DESCRIPTION =
+  'Paletas de pádel Nox, Royal Pádel, Adidas y más. Envío gratis a todo el país en compras desde el monto mínimo y cuotas sin interés.';
+
 async function getFaviconUrl(): Promise<string> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
@@ -27,11 +36,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title: {
-      default: 'Home Padel - Equipamiento profesional de padel',
+      default: HOME_TITLE,
       template: '%s | Home Padel',
     },
-    description:
-      'Las mejores paletas, indumentaria y accesorios para padel. Nueva temporada 2026 con envíos a todo el pais.',
+    description: HOME_DESCRIPTION,
     keywords: [
       'padel',
       'paletas de padel',
@@ -54,14 +62,14 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: 'es_AR',
       url: siteUrl,
       siteName: 'Home Padel',
-      title: 'Home Padel - Equipamiento profesional de padel',
-      description: 'Las mejores paletas, indumentaria y accesorios para padel.',
+      title: HOME_TITLE,
+      description: HOME_DESCRIPTION,
       images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Home Padel' }],
     },
     twitter: {
       card: 'summary_large_image',
-      title: 'Home Padel - Equipamiento profesional de padel',
-      description: 'Las mejores paletas, indumentaria y accesorios para padel.',
+      title: HOME_TITLE,
+      description: HOME_DESCRIPTION,
       images: ['/og-image.jpg'],
     },
     robots: {
