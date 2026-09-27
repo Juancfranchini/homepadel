@@ -1,19 +1,13 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import api from '@/lib/api';
+import { marcarConfigLista, trackMetaEvent } from '@/lib/metaPixel';
 
 interface MetaPixelConfig {
-  pixelId: string;
-  events: {
-    pageView: boolean;
-    viewContent: boolean;
-    addToCart: boolean;
-    initiateCheckout: boolean;
-    purchase: boolean;
-    contact: boolean;
-  };
+  pixelId?: string;
+  events?: { pageView?: boolean };
 }
 
 declare global {
@@ -24,71 +18,62 @@ declare global {
   }
 }
 
+async function leerConfig(): Promise<MetaPixelConfig> {
+  try {
+    const res = await api.get('/site-sections/meta_pixel');
+    return res.data?.data || res.data || {};
+  } catch {
+    return {};
+  }
+}
+
+function instalarPixel(pixelId: string) {
+  // Stub oficial de Meta: se reemplaza a sí mismo al cargar fbevents.js, tiparlo no aporta nada.
+  const f: any = function (...args: unknown[]) {
+    if (f.callMethod) f.callMethod(...args);
+    else f.queue.push(args);
+  };
+  f.push = f;
+  f.loaded = true;
+  f.version = '2.0';
+  f.queue = [];
+  window.fbq = f;
+
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = 'https://connect.facebook.net/en_US/fbevents.js';
+  const primero = document.getElementsByTagName('script')[0];
+  primero.parentNode!.insertBefore(script, primero);
+
+  window.fbq.disablePushState = true;
+  window.fbq('consent', 'revoke');
+  window.fbq('init', pixelId);
+  window.fbq('consent', 'grant');
+}
+
 export default function MetaPixel() {
   const pathname = usePathname();
-  const initialized = useRef(false);
-  const lastTrackedPath = useRef<string | null>(null);
+  const instalado = useRef(false);
+  const ultimaRuta = useRef<string | null>(null);
 
   useEffect(() => {
     const init = async () => {
-      try {
-        const res = await api.get('/site-sections/meta_pixel');
-        const section = res.data?.data ? res.data : res.data;
-        const config: MetaPixelConfig = section?.data || section || {};
+      const config = await leerConfig();
 
-        if (!config.pixelId) return;
-
+      if (config.pixelId && !instalado.current) {
         window.__metaPixelId = config.pixelId;
+        instalarPixel(config.pixelId);
+        instalado.current = true;
+      }
 
-        if (!initialized.current) {
-          const f: any = function (...args: any[]) {
-            if (f.callMethod) {
-              f.callMethod(...args);
-            } else {
-              f.queue.push(args);
-            }
-          };
+      // Haya Pixel o no: los eventos que se dispararon mientras se leía la
+      // config (por ejemplo la vista del producto al entrar directo) salen ahora.
+      marcarConfigLista();
 
-          f.push = f;
-          f.loaded = true;
-          f.version = '2.0';
-          f.queue = [];
-
-          window.fbq = f;
-
-          const t = document.createElement('script');
-          t.async = true;
-          t.src = 'https://connect.facebook.net/en_US/fbevents.js';
-          const s = document.getElementsByTagName('script')[0];
-          s.parentNode!.insertBefore(t, s);
-        }
-
-        if (typeof window.fbq === 'function') {
-          if (!initialized.current) {
-            window.fbq.disablePushState = true;
-            window.fbq('consent', 'revoke');
-            window.fbq('init', config.pixelId);
-            window.fbq('consent', 'grant');
-            initialized.current = true;
-          }
-
-          if (config.events?.pageView !== false && lastTrackedPath.current !== pathname) {
-            lastTrackedPath.current = pathname;
-            const eventId = typeof crypto !== 'undefined' && crypto.randomUUID
-              ? crypto.randomUUID()
-              : 'evt_' + Date.now() + '_' + Math.random().toString(36).slice(2);
-
-            window.fbq('track', 'PageView', {}, { eventID: eventId });
-
-            api.post('/track', {
-              eventName: 'PageView',
-              eventId,
-              eventSourceUrl: window.location.href,
-              pixelId: config.pixelId,
-            }).catch(() => {});
-          }
-        }
-      } catch {}
+      if (config.events?.pageView !== false && ultimaRuta.current !== pathname) {
+        ultimaRuta.current = pathname;
+        trackMetaEvent('PageView');
+      }
     };
 
     init();

@@ -97,9 +97,11 @@ export class MarketingService {
     });
     if (grupos.length === 0) return [];
 
+    // El último nombre *conocido*: hay eventos que llegan sin nombre (los
+    // agregados al carrito anteriores a que se mandara), y no deben tapar uno bueno.
     const ids = grupos.map((g) => g.productId as string);
     const nombres = await this.prisma.marketingEvent.findMany({
-      where: { productId: { in: ids } },
+      where: { productId: { in: ids }, productName: { not: null } },
       distinct: ['productId'],
       orderBy: { createdAt: 'desc' },
       select: { productId: true, productName: true },

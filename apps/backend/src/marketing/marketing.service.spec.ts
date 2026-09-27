@@ -13,6 +13,7 @@ function construirServicio(eventos: { eventName: string; productId?: string | nu
           if (where?.createdAt?.gte && e.createdAt < where.createdAt.gte) return false;
           if (where?.eventName?.in && !where.eventName.in.includes(e.eventName)) return false;
           if (where?.productId?.in && !where.productId.in.includes(e.productId)) return false;
+          if (where?.productName?.not === null && !e.productName) return false;
           return true;
         });
         if (orderBy?.createdAt === 'desc') {
@@ -102,6 +103,18 @@ describe('MarketingService.getStats', () => {
     expect(stats.topViewed).toEqual([
       { productId: 'prod-1', productName: 'Paleta Nueva', count: 2 },
       { productId: 'prod-2', productName: 'Paletero', count: 1 },
+    ]);
+  });
+
+  it('un evento reciente sin nombre no tapa el último nombre conocido del producto', async () => {
+    const service = construirServicio([
+      { eventName: 'ViewContent', productId: 'prod-1', productName: 'Adidas - Metalbone Reserve', createdAt: new Date(HACE_1_DIA.getTime() - 1000) },
+      { eventName: 'AddToCart', productId: 'prod-1', productName: null, createdAt: HACE_1_DIA },
+    ]);
+    const stats = await service.getStats(30);
+
+    expect(stats.topAddedToCart).toEqual([
+      { productId: 'prod-1', productName: 'Adidas - Metalbone Reserve', count: 1 },
     ]);
   });
 
