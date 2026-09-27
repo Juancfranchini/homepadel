@@ -26,6 +26,12 @@ export class CategoriesController {
     return this.categoriesService.findAll();
   }
 
+  // Antes de ':id': si no, 'menu' se toma como un id.
+  @Get('menu')
+  findMenu() {
+    return this.categoriesService.findMenu();
+  }
+
   @Get('admin/all')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)

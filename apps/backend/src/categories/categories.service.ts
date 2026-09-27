@@ -43,6 +43,40 @@ export class CategoriesService {
     });
   }
 
+  /**
+   * Categorías activas con las marcas que tienen productos activos en cada
+   * una, para el menú principal de la tienda. Una marca sin productos en esa
+   * categoría no aparece: llevaría a un listado vacío.
+   */
+  async findMenu() {
+    const [categorias, pares] = await Promise.all([
+      this.prisma.category.findMany({
+        where: { active: true },
+        orderBy: { order: 'asc' },
+        select: { id: true, name: true, slug: true },
+      }),
+      this.prisma.product.findMany({
+        where: { active: true, brand: { active: true }, category: { active: true } },
+        distinct: ['categoryId', 'brandId'],
+        select: { categoryId: true, brand: { select: { id: true, name: true, slug: true, logo: true, order: true } } },
+      }),
+    ]);
+
+    const marcasPorCategoria = new Map<string, (typeof pares)[number]['brand'][]>();
+    for (const par of pares) {
+      const lista = marcasPorCategoria.get(par.categoryId) ?? [];
+      lista.push(par.brand);
+      marcasPorCategoria.set(par.categoryId, lista);
+    }
+
+    return categorias.map((categoria) => ({
+      ...categoria,
+      brands: (marcasPorCategoria.get(categoria.id) ?? [])
+        .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name))
+        .map(({ id, name, slug, logo }) => ({ id, name: name.trim(), slug, logo })),
+    }));
+  }
+
   async findAllAdmin() {
     return this.prisma.category.findMany({
       orderBy: { order: 'asc' },

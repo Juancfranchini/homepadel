@@ -144,7 +144,7 @@ export class SiteSectionsService {
       },
       // Imagen por formato de paleta, para mostrar al lado del texto en el
       // catálogo. Vacío a propósito: sin imagen cargada no se dibuja nada.
-      'formatos_paleta': { Diamante: '', Lagrima: '', Redondo: '' },
+      'formatos_paleta': { Diamante: '', Lagrima: '', Redondo: '', Hibrido: '' },
       'reviews_info': { content: 'Las opiniones son realizadas por clientes verificados que compraron el producto. El promedio se calcula en base a todas las resenas aprobadas.' },
       about: {
         title: 'Somos Home Padel',

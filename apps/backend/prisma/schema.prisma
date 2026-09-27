@@ -123,6 +123,9 @@ model Product {
   // Hombre | Mujer | Unisex. Queda opcional: los productos que ya están
   // cargados no lo tienen, y una paleta no siempre tiene género.
   gender                  String?
+  // Principiante | Intermedio | Avanzado. Uno solo por producto; opcional
+  // porque solo tiene sentido en paletas.
+  level                   String?
   size                    String?
   color                   String?
   dimensionLength         Float?

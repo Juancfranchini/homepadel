@@ -4,6 +4,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { effectivePrice } from '../pricing/effective-price';
 import { buildSearchFilter, idsPorBusquedaSinAcentos } from './products.search';
+import { precioEfectivoEnRango } from './products.price-filter';
 import slugify from 'slugify';
 
 /**
@@ -44,7 +45,7 @@ export class ProductsService {
   async findAll(query: any) {
     const pageNumber = Math.max(1, Number.parseInt(String(query.page ?? 1), 10) || 1);
     const pageSize = Math.min(100, Math.max(1, Number.parseInt(String(query.limit ?? 20), 10) || 20));
-    const { category, brand, search, minPrice, maxPrice, showAll, isOffer, size, color, weight, weightUnit, shape, gender, sort } = query;
+    const { category, brand, search, minPrice, maxPrice, showAll, isOffer, size, color, weight, weightUnit, shape, gender, level, sort } = query;
     const skip = (pageNumber - 1) * pageSize;
 
     const where: any = showAll === '1' ? {} : { active: true };
@@ -54,6 +55,7 @@ export class ProductsService {
     if (isOffer === 'true') where.isOffer = true;
     if (shape) where.shape = shape;
     if (gender) where.gender = gender;
+    if (level) where.level = level;
     if (size) propertyFilters.push({ OR: [{ size }, { variants: { some: { size, active: true } } }] });
     if (color) propertyFilters.push({ OR: [{ color }, { variants: { some: { color, active: true } } }] });
     if (weight && Number.isFinite(Number(weight))) {
@@ -85,12 +87,13 @@ export class ProductsService {
         if (searchFilter) propertyFilters.push(searchFilter);
       }
     }
+    const filtroPrecio = precioEfectivoEnRango(
+      this.prisma.product.fields.price,
+      minPrice ? Number(minPrice) : undefined,
+      maxPrice ? Number(maxPrice) : undefined,
+    );
+    if (filtroPrecio) propertyFilters.push(filtroPrecio);
     if (propertyFilters.length > 0) where.AND = propertyFilters;
-    if (minPrice || maxPrice) {
-      where.price = {};
-      if (minPrice) where.price.gte = Number(minPrice);
-      if (maxPrice) where.price.lte = Number(maxPrice);
-    }
 
     const [items, total] = await Promise.all([
       this.prisma.product.findMany({

@@ -7,8 +7,12 @@
   Min,
   Max,
   IsUrl,
+  IsIn,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+
+export const NIVELES = ['Principiante', 'Intermedio', 'Avanzado'];
 
 export class CreateProductDto {
   @ApiProperty() @IsString() name: string;
@@ -61,6 +65,12 @@ export class CreateProductDto {
   @ApiPropertyOptional() @IsString() @IsOptional() shape?: string;
   // Hombre | Mujer | Unisex
   @ApiPropertyOptional() @IsString() @IsOptional() gender?: string;
+  @ApiPropertyOptional({ enum: NIVELES })
+  // "Sin nivel" en el formulario llega como texto vacío.
+  @Transform(({ value }) => (value === '' ? null : value))
+  @IsOptional()
+  @IsIn(NIVELES)
+  level?: string | null;
   @ApiPropertyOptional() @IsNumber() @IsOptional() estimatedDays?: number;
   @ApiPropertyOptional() @IsNumber() @Min(0) @Max(100) @IsOptional() requiredDeposit?: number;
   @ApiPropertyOptional() @IsArray() @IsOptional() variants?: Record<string, any>[];
