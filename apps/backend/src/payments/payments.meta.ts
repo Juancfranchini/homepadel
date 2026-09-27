@@ -1,6 +1,6 @@
 import { Logger } from '@nestjs/common';
-import * as crypto from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
+import { userDataParaMeta } from '../common/meta-user-data';
 
 const logger = new Logger('MetaPurchase');
 
@@ -10,17 +10,16 @@ interface ItemComprado {
   price: number;
 }
 
-interface Params {
-  payment: any;
+export interface CompraParaMeta {
   orderNumber: string;
   items: ItemComprado[];
-  email: string;
+  /** Lo que efectivamente se cobró. Si falta, se suma precio × cantidad. */
+  valor?: number | null;
+  emails?: (string | null | undefined)[];
+  telefono?: string | null;
+  ip?: string | null;
+  userAgent?: string | null;
   frontendUrl: string;
-}
-
-/** Meta exige el email hasheado; nunca se manda en claro. */
-function hashEmail(email: string): string {
-  return crypto.createHash('sha256').update(email.trim().toLowerCase()).digest('hex');
 }
 
 /**
@@ -30,38 +29,33 @@ function hashEmail(email: string): string {
  * la venta ya está hecha y registrada. Por eso no propaga el error, solo lo
  * deja en el log.
  *
- * El `access_token` se armaba en un objeto que después no se usaba en ningún
- * lado, así que la llamada salía sin credencial y Meta la rechazaba sin que
- * nadie se enterara: el error se tragaba entero en el catch.
+ * El `event_id` es `purchase_<número de orden>`, el mismo que usa el
+ * navegador: Meta cuenta una sola compra aunque llegue por los dos caminos,
+ * o dos veces por el mismo.
  */
-export async function enviarCompraAMeta(prisma: PrismaService, { payment, orderNumber, items, email, frontendUrl }: Params): Promise<void> {
+export async function enviarCompraAMeta(prisma: PrismaService, compra: CompraParaMeta): Promise<void> {
   try {
     const seccion = await prisma.siteSection.findUnique({ where: { key: 'meta_pixel' } });
-    const config: any = seccion?.data || {};
+    const config = (seccion?.data as { pixelId?: string; accessToken?: string; testEventCode?: string }) || {};
     if (!config.pixelId || !config.accessToken) return;
 
-    const valor = payment.transaction_amount
-      || items.reduce((acc, item) => acc + Number(item.price) * item.quantity, 0);
+    const valor = compra.valor || compra.items.reduce((acc, item) => acc + Number(item.price) * item.quantity, 0);
 
     const payload: Record<string, unknown> = {
       access_token: config.accessToken,
       data: [{
         event_name: 'Purchase',
         event_time: Math.floor(Date.now() / 1000),
-        event_id: 'purchase_' + orderNumber,
-        event_source_url: frontendUrl + '/checkout/success?order=' + orderNumber,
+        event_id: 'purchase_' + compra.orderNumber,
+        event_source_url: compra.frontendUrl + '/checkout/success?order=' + compra.orderNumber,
         action_source: 'website',
-        user_data: {
-          em: email ? [hashEmail(email)] : undefined,
-          client_ip_address: payment.payer?.ip_address || undefined,
-          client_user_agent: payment.payer?.user_agent || undefined,
-        },
+        user_data: userDataParaMeta({ emails: compra.emails, telefono: compra.telefono, ip: compra.ip, userAgent: compra.userAgent }),
         custom_data: {
           currency: 'ARS',
           value: valor,
-          content_ids: items.map((item) => item.productId),
+          content_ids: compra.items.map((item) => item.productId),
           content_type: 'product',
-          contents: items.map((item) => ({
+          contents: compra.items.map((item) => ({
             id: item.productId,
             quantity: item.quantity,
             item_price: Number(item.price),
@@ -79,9 +73,39 @@ export async function enviarCompraAMeta(prisma: PrismaService, { payment, orderN
     });
 
     if (!respuesta.ok) {
-      logger.warn(`Meta rechazó el evento Purchase de ${orderNumber} (HTTP ${respuesta.status}): ${await respuesta.text()}`);
+      logger.warn(`Meta rechazó el evento Purchase de ${compra.orderNumber} (HTTP ${respuesta.status}): ${await respuesta.text()}`);
     }
   } catch (err) {
-    logger.error(`No se pudo informar la compra ${orderNumber} a Meta: ${err}`);
+    logger.error(`No se pudo informar la compra ${compra.orderNumber} a Meta: ${err}`);
   }
+}
+
+/**
+ * Compra por transferencia de la tienda online que pasó a pagada.
+ *
+ * Mercado Pago se informa solo al acreditarse; la transferencia la confirma
+ * alguien de la tienda a mano (en Pedidos o en el Punto de Venta), así que
+ * hasta ahora nunca llegaba a Meta. Las ventas del local o de redes cargadas
+ * en el Punto de Venta no son compras del sitio y no se informan.
+ */
+export async function informarTransferenciaPagadaAMeta(prisma: PrismaService, orderId: string): Promise<void> {
+  const order = await prisma.order.findUnique({ where: { id: orderId }, include: { items: true } });
+  if (!order || order.channel !== 'ONLINE') return;
+
+  let notas: { paymentMethod?: string; buyerEmail?: string; buyerPhone?: string } = {};
+  try {
+    notas = order.notes ? JSON.parse(order.notes) : {};
+  } catch {
+    return;
+  }
+  if (notas.paymentMethod !== 'transfer') return;
+
+  await enviarCompraAMeta(prisma, {
+    orderNumber: order.number,
+    items: order.items.map((item) => ({ productId: item.productId, quantity: item.quantity, price: item.price })),
+    valor: order.total,
+    emails: [notas.buyerEmail],
+    telefono: notas.buyerPhone,
+    frontendUrl: (process.env.FRONTEND_URL || '').replace(/\/+$/, ''),
+  });
 }

@@ -14,6 +14,7 @@ import { CreatePosSaleDto, RegisterPosPaymentDto } from './dto/pos-sale.dto';
 import { CreateBranchDto, CreateCashRegisterDto } from './dto/pos-settings.dto';
 import { calculateSaleTotal } from './pos.calculations';
 import { PosPaymentsService } from './pos-payments.service';
+import { informarTransferenciaPagadaAMeta } from '../payments/payments.meta';
 
 export interface PosActor {
   id: string;
@@ -270,7 +271,8 @@ export class PosSalesService {
   }
 
   async addPayment(orderId: string, dto: RegisterPosPaymentDto, actor: PosActor) {
-    return this.prisma.$transaction(async (tx) => {
+    let pasoAPagada = false;
+    const resultado = await this.prisma.$transaction(async (tx) => {
       const order = await tx.order.findUnique({ where: { id: orderId } });
       if (!order) throw new NotFoundException('Venta no encontrada');
       await this.assertCashSessionBranch(tx, dto.cashSessionId, order.branchId);
@@ -282,6 +284,7 @@ export class PosSalesService {
         dto.cashSessionId,
       );
       const completed = result.status === 'PAID';
+      pasoAPagada = completed && order.status !== 'PAID';
       const updated = await tx.order.update({
         where: { id: orderId },
         data: {
@@ -309,6 +312,10 @@ export class PosSalesService {
       });
       return updated;
     });
+    // Recién con el pago guardado: si Meta tarda, no retiene la transacción,
+    // y si la transacción falla, no se avisa una compra que no quedó registrada.
+    if (pasoAPagada) await informarTransferenciaPagadaAMeta(this.prisma, orderId);
+    return resultado;
   }
 
   private assertDiscountPermission(dto: CreatePosSaleDto, actor: PosActor): void {

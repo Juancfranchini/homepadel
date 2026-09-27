@@ -8,6 +8,7 @@ import { AbandonedCartsService } from '../abandoned-carts/abandoned-carts.servic
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderStatus } from '@prisma/client';
 import { InventoryService } from '../inventory/inventory.service';
+import { informarTransferenciaPagadaAMeta } from '../payments/payments.meta';
 
 interface SalesLinkContext {
   id: string;
@@ -317,7 +318,7 @@ export class OrdersService {
     trackingNumber?: string,
     trackingUrl?: string,
   ) {
-    await this.findOne(id);
+    const anterior = await this.findOne(id);
 
     if (status === OrderStatus.CANCELLED) {
       throw new BadRequestException(
@@ -330,6 +331,10 @@ export class OrdersService {
     if (trackingUrl) data.trackingUrl = trackingUrl;
 
     const updated = await this.prisma.order.update({ where: { id }, data });
+
+    if (status === OrderStatus.PAID && anterior.status !== OrderStatus.PAID) {
+      await informarTransferenciaPagadaAMeta(this.prisma, id);
+    }
 
     if (status === 'SHIPPED') {
       const order = await this.prisma.order.findUnique({

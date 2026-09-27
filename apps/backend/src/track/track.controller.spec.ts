@@ -117,6 +117,39 @@ describe('TrackController', () => {
     expect(resultado).toEqual({ success: true });
   });
 
+  it('cifra el email y el teléfono del comprador antes de mandarlos a Meta', async () => {
+    const prisma = {
+      siteSection: { findUnique: jest.fn().mockResolvedValue({ data: { pixelId: '123', accessToken: 'token' } }) },
+      marketingEvent: marketingEventFalso(),
+    };
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, status: 200 }) as any;
+
+    const controller = new TrackController(prisma as any);
+    await controller.track({ ...EVENTO, userData: { email: 'Comprador@Mail.com', phone: '11 4083-2310' } }, construirRequestFalso());
+
+    const enviado = (global.fetch as jest.Mock).mock.calls[0][1].body as string;
+    const userData = JSON.parse(enviado).data[0].user_data;
+    expect(userData.em).toHaveLength(1);
+    expect(userData.ph).toHaveLength(2);
+    expect(enviado).not.toContain('Comprador');
+    expect(enviado).not.toContain('40832310');
+    // El dato personal tampoco queda en el embudo propio.
+    expect(JSON.stringify(prisma.marketingEvent.create.mock.calls)).not.toContain('Comprador');
+  });
+
+  it('usa siempre el pixel configurado, aunque el navegador mande otro', async () => {
+    const prisma = {
+      siteSection: { findUnique: jest.fn().mockResolvedValue({ data: { pixelId: '1041282918808105', accessToken: 'token' } }) },
+      marketingEvent: marketingEventFalso(),
+    };
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, status: 200 }) as any;
+
+    const controller = new TrackController(prisma as any);
+    await controller.track({ ...EVENTO, pixelId: '999-otro-dataset' }, construirRequestFalso());
+
+    expect((global.fetch as jest.Mock).mock.calls[0][0]).toBe('https://graph.facebook.com/v21.0/1041282918808105/events');
+  });
+
   it('devuelve success:false y deja registro cuando Meta rechaza el evento, en vez de tragarse el error', async () => {
     const prisma = {
       siteSection: {

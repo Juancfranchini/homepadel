@@ -64,8 +64,11 @@ export class PaymentsSettlementService {
 
     if (order) await this.settleOrder(order, payment, user, email, name, paymentId);
     else await this.createFallback(payment, user, email, name);
+    // El email del checkout y el de la cuenta de Mercado Pago pueden ser
+    // distintos: se mandan los dos, Meta usa el que reconozca.
+    const notas = this.parseNotes(order?.notes ?? null);
+    const pagador = payment.payer as { ip_address?: string; user_agent?: string } | undefined;
     await enviarCompraAMeta(this.prisma, {
-      payment,
       orderNumber: order?.number || `HP-${Date.now()}`,
       items:
         order?.items.map((item) => ({
@@ -73,7 +76,11 @@ export class PaymentsSettlementService {
           quantity: item.quantity,
           price: item.price,
         })) ?? [],
-      email,
+      valor: payment.transaction_amount,
+      emails: [notas.buyerEmail as string | undefined, email],
+      telefono: notas.buyerPhone as string | undefined,
+      ip: pagador?.ip_address,
+      userAgent: pagador?.user_agent,
       frontendUrl,
     });
     return 'registrado';

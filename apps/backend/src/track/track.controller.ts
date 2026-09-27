@@ -3,6 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { PrismaService } from '../prisma/prisma.service';
 import { TrackEventDto } from './dto/track-event.dto';
+import { userDataParaMeta } from '../common/meta-user-data';
 
 interface MetaPixelConfig {
   pixelId?: string;
@@ -58,14 +59,17 @@ export class TrackController {
 
     const seccion = await this.prisma.siteSection.findUnique({ where: { key: 'meta_pixel' } });
     const config = (seccion?.data as MetaPixelConfig) || {};
-    const pixelId = body.pixelId || config.pixelId;
+    // Siempre el pixel configurado: aceptar el que manda el navegador dejaba
+    // usar nuestro token para mandar eventos a otro dataset.
+    const pixelId = config.pixelId;
 
     if (!pixelId || !config.accessToken) return { success: false, message: 'Meta Pixel no configurado' };
 
     const cookies = req.headers.cookie || '';
     const fbp = getCookie(cookies, '_fbp');
     const fbc = getCookie(cookies, '_fbc');
-    const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '';
+    // Detrás de proxies llega como lista ("cliente, proxy"): Meta espera una sola IP, la del cliente.
+    const clientIp = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket.remoteAddress || '';
     const clientUserAgent = req.headers['user-agent'] || '';
 
     const payload: Record<string, unknown> = {
@@ -79,8 +83,12 @@ export class TrackController {
         user_data: {
           fbp: fbp || undefined,
           fbc: fbc || undefined,
-          client_ip_address: clientIp || undefined,
-          client_user_agent: clientUserAgent || undefined,
+          ...userDataParaMeta({
+            emails: [body.userData?.email],
+            telefono: body.userData?.phone,
+            ip: clientIp,
+            userAgent: clientUserAgent,
+          }),
         },
         ...(body.eventData || {}),
         ...(body.customData ? { custom_data: body.customData } : {}),
