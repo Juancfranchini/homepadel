@@ -6,12 +6,19 @@ import api from './api';
 
 type Datos = Record<string, unknown>;
 
+/** Email y teléfono del comprador: el servidor los cifra antes de mandarlos a Meta y no los guarda. */
+export interface DatosComprador {
+  email?: string | null;
+  phone?: string | null;
+}
+
 interface EventoPendiente {
   eventName: string;
   eventData: Datos;
   customData: Datos;
   eventId: string;
   eventSourceUrl: string;
+  userData?: DatosComprador;
 }
 
 export function newEventId(): string {
@@ -42,6 +49,9 @@ function enviar(evento: EventoPendiente) {
     pixelId: window.__metaPixelId,
     eventData: evento.eventData,
     customData: evento.customData,
+    ...(evento.userData?.email || evento.userData?.phone
+      ? { userData: { email: evento.userData.email || undefined, phone: evento.userData.phone || undefined } }
+      : {}),
   }).catch(() => {});
 }
 
@@ -56,9 +66,10 @@ export function trackMetaEvent(
   eventData: Datos = {},
   customData: Datos = {},
   eventId: string = newEventId(),
+  userData?: DatosComprador,
 ) {
   if (typeof window === 'undefined') return;
-  const evento = { eventName, eventData, customData, eventId, eventSourceUrl: window.location.href };
+  const evento = { eventName, eventData, customData, eventId, eventSourceUrl: window.location.href, userData };
   if (!configLista) {
     pendientes.push(evento);
     return;

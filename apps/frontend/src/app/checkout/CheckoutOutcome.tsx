@@ -68,6 +68,7 @@ export default function CheckoutOutcome({ porDefecto }: { porDefecto: Resultado 
       { content_ids: orden.items.map((i) => i.productId), content_type: 'product', value: orden.total, currency: 'ARS' },
       {},
       'purchase_' + orderNumber,
+      { email: orden.email, phone: orden.phone },
     );
   }, [cobrado, orden, orderNumber]);
 

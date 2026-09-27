@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { CartItem } from '@/types';
-import { trackMetaEvent } from '@/lib/metaPixel';
+import { trackMetaEvent, DatosComprador } from '@/lib/metaPixel';
 
 /**
  * Avisa a Meta que alguien empezó el checkout.
@@ -14,8 +14,11 @@ import { trackMetaEvent } from '@/lib/metaPixel';
  *
  * Se manda una sola vez por visita, aunque después se edite el carrito.
  */
-export function useInitiateCheckout(items: CartItem[], subtotal: number): void {
+export function useInitiateCheckout(items: CartItem[], subtotal: number, comprador?: DatosComprador): void {
   const avisado = useRef(false);
+  // En una referencia: el evento sale una sola vez y que cambien los datos no lo vuelve a disparar.
+  const datosComprador = useRef(comprador);
+  datosComprador.current = comprador;
 
   useEffect(() => {
     if (avisado.current || items.length === 0) return;
@@ -27,6 +30,6 @@ export function useInitiateCheckout(items: CartItem[], subtotal: number): void {
       num_items: items.reduce((acc, item) => acc + item.quantity, 0),
       content_ids: items.map((item) => item.product.id),
       content_type: 'product',
-    });
+    }, {}, undefined, datosComprador.current);
   }, [items, subtotal]);
 }
