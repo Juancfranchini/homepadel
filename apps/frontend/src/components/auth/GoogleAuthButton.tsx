@@ -16,8 +16,9 @@ function GoogleMark() {
 }
 
 export default function GoogleAuthButton({ returnTo = '/cuenta' }: Props) {
-  const apiBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api').replace(/\/$/, '');
-  const href = `${apiBase}/auth/google/start?returnTo=${encodeURIComponent(returnTo)}`;
+  // Por el mismo dominio de la tienda (ver rewrites en next.config.ts): así
+  // Google muestra "homepadel.com.ar" y no la dirección técnica del backend.
+  const href = `/api/auth/google/start?returnTo=${encodeURIComponent(returnTo)}`;
 
   return (
     <a
