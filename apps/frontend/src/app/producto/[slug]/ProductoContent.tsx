@@ -2,6 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import type { Product } from '@/types';
 import { useProductoData } from './useProductoData';
 import { ProductoSkeleton, ProductoLoadError, ProductoNotFound } from './ProductoLoadingStates';
 import { useProductVariants } from './useProductVariants';
@@ -18,9 +19,14 @@ import ProductReviewsSection from './ProductReviewsSection';
 import RelatedProducts from './components/RelatedProducts';
 import TrustBottom from './components/TrustBottom';
 
-export default function ProductoContent() {
+interface Props {
+  /** El producto que ya trajo el servidor; null si la API no respondió allá. */
+  initialProduct: Product | null;
+}
+
+export default function ProductoContent({ initialProduct }: Props) {
   const params = useParams<{ slug: string }>();
-  const { product, related, loading, error, retry, hasSizeGuide } = useProductoData(params.slug);
+  const { product, related, loading, error, retry, hasSizeGuide } = useProductoData(params.slug, initialProduct);
   const variants = useProductVariants(product);
   const actions = useProductoActions(product, variants.selectedVariant, variants.activeProductVariants);
 

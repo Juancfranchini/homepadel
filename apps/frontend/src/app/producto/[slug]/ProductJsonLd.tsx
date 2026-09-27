@@ -1,5 +1,5 @@
 import { getSiteUrl } from '@/lib/siteUrl';
-import type { ProductoSeo } from './getProductoParaSeo';
+import type { Product } from '@/types';
 
 /**
  * Datos estructurados del producto para Google (schema.org/Product).
@@ -13,7 +13,7 @@ import type { ProductoSeo } from './getProductoParaSeo';
  * stock que no existe son motivo de penalización de Google, además de mentirle
  * a quien busca.
  */
-export default function ProductJsonLd({ producto, slug }: { producto: ProductoSeo; slug: string }) {
+export default function ProductJsonLd({ producto, slug }: { producto: Product; slug: string }) {
   const siteUrl = getSiteUrl();
   const precio = producto.effectivePrice ?? producto.price;
 

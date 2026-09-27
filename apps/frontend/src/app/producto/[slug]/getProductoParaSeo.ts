@@ -1,36 +1,16 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
-
-export interface ProductoSeo {
-  name: string;
-  description?: string | null;
-  sku?: string;
-  price: number;
-  effectivePrice: number;
-  stock: number;
-  isMadeToOrder?: boolean;
-  images?: string[];
-  brand?: { name: string } | null;
-  category?: { name: string } | null;
-  rating?: number;
-  reviewCount?: number;
-}
+import type { Product } from '@/types';
+import { getDesdeServidor } from '@/lib/serverApi';
 
 /**
- * Trae el producto desde el servidor para armar los metadatos y los datos
- * estructurados.
+ * Trae el producto desde el servidor. Con esto se arman los metadatos, los
+ * datos estructurados y el primer dibujo de la ficha, así el HTML que recibe
+ * un buscador ya trae nombre, precio, descripción y especificaciones.
  *
  * Si la API no responde, devuelve null y la página se dibuja igual: la parte
  * interactiva vuelve a pedir el producto desde el navegador. Se pierde el
  * título propio de esa visita, no la ficha.
  */
-export async function getProductoParaSeo(slug: string): Promise<ProductoSeo | null> {
-  try {
-    const res = await fetch(API_URL + '/products/' + encodeURIComponent(slug), {
-      next: { revalidate: 3600 },
-    });
-    if (!res.ok) return null;
-    return await res.json();
-  } catch {
-    return null;
-  }
+export async function getProductoParaSeo(slug: string): Promise<Product | null> {
+  const res = await getDesdeServidor<Product>('/products/' + encodeURIComponent(slug), 3600);
+  return res.ok ? res.data : null;
 }

@@ -8,14 +8,15 @@ import { getProductoParaSeo } from './getProductoParaSeo';
 /**
  * Ficha de producto.
  *
- * Esta parte corre en el servidor y existe solo para el buscador: arma el
- * título, la descripción y los datos estructurados con el producto real. La
+ * Esta parte corre en el servidor: arma el título, la descripción y los datos
+ * estructurados con el producto real, y le pasa ese mismo producto a
+ * ProductoContent para que el primer dibujo ya salga completo en el HTML. La
  * página era enteramente del navegador, así que Google recibía un cascarón
- * vacío —las 43 fichas compartían el mismo título y el nombre del producto no
- * aparecía ni una vez en el HTML—, y ninguna podía rankear por su propio
- * nombre.
+ * vacío —ni el precio ni la descripción aparecían en el HTML— y ninguna ficha
+ * podía rankear por su contenido.
  *
- * Todo lo interactivo sigue en el navegador, en ProductoContent.
+ * Todo lo interactivo sigue en el navegador, en ProductoContent, que además
+ * vuelve a pedir el producto para no quedarse con un precio o stock cacheado.
  */
 export const revalidate = 3600;
 
@@ -69,7 +70,9 @@ export default async function ProductoPage({ params }: Props) {
   return (
     <>
       {producto && <ProductJsonLd producto={producto} slug={slug} />}
-      <ProductoContent />
+      {/* key: al pasar de una ficha a otra (relacionados) el estado arranca de
+          cero con el producto nuevo en vez de arrastrar el anterior. */}
+      <ProductoContent key={slug} initialProduct={producto} />
     </>
   );
 }

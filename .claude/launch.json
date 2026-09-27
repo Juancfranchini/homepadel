@@ -16,6 +16,13 @@
       "port": 3000
     },
     {
+      "name": "homepadel-frontend-build",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start", "--prefix", "apps/frontend"],
+      "env": { "NEXT_PUBLIC_API_URL": "https://homepadel-production.up.railway.app/api" },
+      "port": 3000
+    },
+    {
       "name": "homepadel-backoffice",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "--prefix", "apps/backoffice"],
