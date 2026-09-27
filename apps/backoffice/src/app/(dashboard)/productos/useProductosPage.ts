@@ -46,10 +46,23 @@ export interface Product {
   weightUnit?: string;
   shape?: string;
   gender?: string;
+  level?: 'Principiante' | 'Intermedio' | 'Avanzado' | null;
   variants?: { sku: string; size: string; color?: string; dimensions?: string; dimensionLength?: number; dimensionWidth?: number; dimensionHeight?: number; dimensionUnit?: string; weight?: number; weightUnit?: string; imageUrl?: string; images?: string[]; stock: number }[];
 }
 
 export interface Brand { id: string; name: string }
+
+const sinTildes = (texto: string) => texto.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
+/**
+ * Busca por nombre, SKU (del producto o de sus variantes), marca y categoría,
+ * sin importar tildes ni mayúsculas: "royal padel" encuentra "Royal Pádel".
+ * Todas las palabras tienen que aparecer, en cualquiera de esos campos.
+ */
+export function coincideBusqueda(p: Product, busqueda: string): boolean {
+  const texto = sinTildes([p.name, p.sku, p.brand?.name, p.category?.name, ...(p.variants?.map((v) => v.sku) ?? [])].filter(Boolean).join(' '));
+  return sinTildes(busqueda).split(/\s+/).filter(Boolean).every((palabra) => texto.includes(palabra));
+}
 
 function useProductsData() {
   const { toast } = useToast();
@@ -112,6 +125,7 @@ function buildDefaultFormValues(editItem: Product | null) {
     weightUnit: editItem.weightUnit || 'kg',
     shape: editItem.shape || null,
     gender: editItem.gender || null,
+    level: editItem.level || null,
     variants: editItem.variants?.filter((variant: any) => variant.id !== `${editItem.id}-base`) || [],
   };
 }
@@ -174,7 +188,7 @@ export function useProductosPage() {
   const toggleSort = (field: string) => { setSortField(field); setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); };
 
   const filtered = products.filter((p) => {
-    if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false;
+    if (search && !coincideBusqueda(p, search)) return false;
     if (!advancedFilters) return true;
     if (advancedFilters.categoryId && p.category?.id !== advancedFilters.categoryId) return false;
     if (advancedFilters.brandId && p.brand?.id !== advancedFilters.brandId) return false;

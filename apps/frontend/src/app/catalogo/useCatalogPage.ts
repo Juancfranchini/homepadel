@@ -9,14 +9,15 @@ export function useCatalogPage() {
   const filters = useCatalogFilters();
   const {
     currentPage, currentSort, selectedCategory, selectedBrand, isOffer, searchQuery,
-    selectedSize, selectedColor, selectedWeight, selectedShape, selectedGender,
-    setParam, clearFilters, hasFilters, activeChips, pageTitle,
+    selectedSize, selectedColor, selectedWeight, selectedShape, selectedGender, selectedLevel, minPrice, maxPrice,
+    setParam, setParams, clearFilters, hasFilters, activeChips, pageTitle,
   } = filters;
 
   const { products, categories, brands, loading, error, retry, totalPages, totalCount } = useCatalogProducts({
-    currentPage, selectedCategory, selectedBrand, isOffer, searchQuery, selectedSize, selectedColor, selectedWeight, selectedShape, selectedGender, currentSort,
+    currentPage, selectedCategory, selectedBrand, isOffer, searchQuery, selectedSize, selectedColor, selectedWeight, selectedShape, selectedGender,
+    selectedLevel, minPrice, maxPrice, currentSort,
   });
-  const { sizes, colors, weights, genders } = useCatalogFacets({ selectedCategory, selectedBrand, isOffer, searchQuery });
+  const { sizes, colors, weights, genders, shapes, levels } = useCatalogFacets({ selectedCategory, selectedBrand, isOffer, searchQuery });
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchInput, setSearchInput] = useState('');
@@ -33,8 +34,11 @@ export function useCatalogPage() {
     onBrandChange: (slug: string | null) => setParam('marca', slug),
     onOfferChange: (v: boolean) => setParam('oferta', v ? 'true' : null),
     onClear: clearFilters, hasFilters,
-    sizes, colors, weights, genders,
-    selectedSize, selectedColor, selectedWeight,
+    sizes, colors, weights, genders, shapes, levels,
+    selectedSize, selectedColor, selectedWeight, selectedLevel, minPrice, maxPrice,
+    onLevelChange: (v: string | null) => setParam('nivel', v),
+    onPriceChange: (min: number | null, max: number | null) =>
+      setParams({ desde: min != null ? String(min) : null, hasta: max != null ? String(max) : null }),
     onSizeChange: (v: string | null) => setParam('talle', v),
     onColorChange: (v: string | null) => setParam('color', v),
     onWeightChange: (v: string | null) => setParam('peso', v),

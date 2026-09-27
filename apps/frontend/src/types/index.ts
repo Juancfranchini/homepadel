@@ -55,6 +55,8 @@ export interface Product {
   shape?: string | null;
   /** Hombre | Mujer | Unisex. Puede no estar cargado. */
   gender?: string | null;
+  /** Principiante | Intermedio | Avanzado. Solo en paletas, puede no estar cargado. */
+  level?: string | null;
   id: string;
   name: string;
   slug: string;

@@ -110,7 +110,8 @@ function FeaturedFilterPanel({ featured, onChange }: { featured: boolean | null;
   );
 }
 
-const SHAPES = ['Diamante', 'Lagrima', 'Redondo'];
+const SHAPES = ['Diamante', 'Lagrima', 'Redondo', 'Hibrido'];
+const ETIQUETA_SHAPE: Record<string, string> = { Lagrima: 'Lágrima', Hibrido: 'Híbrido' };
 
 function ShapeFilterPanel({ shape, onChange }: { shape: string | null; onChange: (v: string | null) => void }) {
   return (
@@ -122,7 +123,7 @@ function ShapeFilterPanel({ shape, onChange }: { shape: string | null; onChange:
       {SHAPES.map((s) => (
         <label key={s} className={radioLabelClass(shape === s)}>
           <input type="radio" name="shp" checked={shape === s} onChange={() => onChange(s)} className="sr-only" />
-          <span className="text-sm font-medium">{s}</span>
+          <span className="text-sm font-medium">{ETIQUETA_SHAPE[s] ?? s}</span>
         </label>
       ))}
     </div>

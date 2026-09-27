@@ -10,6 +10,7 @@ const FORMATOS = [
   { clave: 'Diamante', etiqueta: 'Diamante' },
   { clave: 'Lagrima', etiqueta: 'Lágrima' },
   { clave: 'Redondo', etiqueta: 'Redonda' },
+  { clave: 'Hibrido', etiqueta: 'Híbrida' },
 ];
 
 const inputClass =

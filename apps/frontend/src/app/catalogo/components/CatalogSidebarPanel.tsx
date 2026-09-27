@@ -4,14 +4,10 @@ import { Category, Brand } from '@/types';
 import { SORT_OPTIONS } from '../sortOptions';
 import CatalogCheckboxOption from './CatalogCheckboxOption';
 import CatalogAttributeSelect from './CatalogAttributeSelect';
+import CatalogPriceRange from './CatalogPriceRange';
+import { etiquetaFormato } from '../useCatalogFilters';
 
-export type ActivePanel = 'categories' | 'brands' | 'attributes' | 'sort' | null;
-
-const SHAPE_OPTIONS = [
-  { value: 'Diamante', label: 'Diamante' },
-  { value: 'Lagrima', label: 'Lágrima' },
-  { value: 'Redondo', label: 'Redondo' },
-];
+export type ActivePanel = 'categories' | 'brands' | 'attributes' | 'price' | 'sort' | null;
 
 export interface PanelProps {
   categories: Category[];
@@ -36,6 +32,14 @@ export interface PanelProps {
   /** Valores de género realmente cargados. Vacío mientras nadie los use. */
   genders: string[];
   selectedGender: string;
+  /** Formatos y niveles realmente cargados, en su orden natural. */
+  shapes: string[];
+  levels: string[];
+  selectedLevel: string;
+  minPrice: number | null;
+  maxPrice: number | null;
+  onLevelChange: (value: string | null) => void;
+  onPriceChange: (min: number | null, max: number | null) => void;
   onSizeChange: (value: string | null) => void;
   onColorChange: (value: string | null) => void;
   onWeightChange: (value: string | null) => void;
@@ -61,6 +65,7 @@ export default function CatalogSidebarPanel(props: PanelProps & { activePanel: A
   if (activePanel === 'categories') return <CategoriesSection {...props} />;
   if (activePanel === 'brands') return <BrandsSection {...props} />;
   if (activePanel === 'attributes') return <AttributesSection {...props} />;
+  if (activePanel === 'price') return <CatalogPriceRange minPrice={props.minPrice} maxPrice={props.maxPrice} onChange={props.onPriceChange} />;
   if (activePanel === 'sort') return <SortSection {...props} />;
   return null;
 }
@@ -100,15 +105,14 @@ function BrandsSection({ brands, selectedBrand, onBrandChange }: PanelProps) {
 }
 
 function AttributesSection(props: PanelProps) {
-  const { selectedCategory, selectedShape, onShapeChange, sizes, selectedSize, onSizeChange,
+  const { selectedShape, onShapeChange, sizes, selectedSize, onSizeChange,
     colors, selectedColor, onColorChange, weights, selectedWeight, onWeightChange,
-    genders, selectedGender, onGenderChange } = props;
+    genders, selectedGender, onGenderChange, shapes, levels, selectedLevel, onLevelChange } = props;
 
-  const mostrarFormato = selectedCategory === 'paletas';
-  // El género se ofrece solo si algún producto lo tiene cargado: igual que
-  // talle, color y peso, las opciones salen de los datos. Un filtro fijo de
-  // Hombre/Mujer/Unisex devolvería cero resultados hasta que se cargue.
-  const hayAlguno = mostrarFormato || genders.length > 0 || sizes.length > 0 || colors.length > 0 || weights.length > 0;
+  // Cada atributo se ofrece solo si algún producto lo tiene cargado: las
+  // opciones salen de los datos. Un filtro fijo (Hombre/Mujer, Principiante…)
+  // devolvería cero resultados hasta que se cargue.
+  const hayAlguno = shapes.length > 0 || levels.length > 0 || genders.length > 0 || sizes.length > 0 || colors.length > 0 || weights.length > 0;
 
   if (!hayAlguno) {
     return (
@@ -123,8 +127,11 @@ function AttributesSection(props: PanelProps) {
       {genders.length > 0 && (
         <CatalogAttributeSelect label="Género" value={selectedGender} options={toOptions(genders)} onChange={onGenderChange} />
       )}
-      {mostrarFormato && (
-        <CatalogAttributeSelect label="Formato" value={selectedShape} options={SHAPE_OPTIONS} onChange={onShapeChange} />
+      {shapes.length > 0 && (
+        <CatalogAttributeSelect label="Formato" value={selectedShape} options={shapes.map((s) => ({ value: s, label: etiquetaFormato(s) }))} onChange={onShapeChange} />
+      )}
+      {levels.length > 0 && (
+        <CatalogAttributeSelect label="Nivel" value={selectedLevel} options={toOptions(levels)} onChange={onLevelChange} />
       )}
       {sizes.length > 0 && (
         <CatalogAttributeSelect label="Talle" value={selectedSize} options={toOptions(sizes)} onChange={onSizeChange} />

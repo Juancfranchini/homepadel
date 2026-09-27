@@ -20,6 +20,7 @@ export const schema = z.object({
 
   shape: z.string().optional().nullable(),
   gender: z.string().optional().nullable(),
+  level: z.enum(['Principiante', 'Intermedio', 'Avanzado']).optional().nullable(),
   size: z.string().optional(),
   color: z.string().optional(),
   dimensionLength: optionalNumber,

@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { LayoutGrid, Tag, SlidersHorizontal, ArrowDownUp, Percent, Grid3x3, Rows3 } from 'lucide-react';
+import { LayoutGrid, Tag, SlidersHorizontal, ArrowDownUp, Percent, Grid3x3, Rows3, Banknote } from 'lucide-react';
 import { Category, Brand } from '@/types';
+import { formatPrice } from '@/lib/utils';
 import { sortLabel } from '../sortOptions';
+import { etiquetaFormato } from '../useCatalogFilters';
 import CatalogSidebarPanel, { ActivePanel, PanelProps } from './CatalogSidebarPanel';
 import CatalogSidebarButton from './CatalogSidebarButton';
 import CatalogSidebarSection from './CatalogSidebarSection';
@@ -21,7 +23,7 @@ export default function CatalogSidebar(props: Props) {
   const {
     viewMode, onViewModeChange, categories, brands, hasFilters, onClear,
     selectedCategory, selectedBrand, selectedShape, selectedSize, selectedColor, selectedWeight, selectedGender,
-    isOffer, onOfferChange, currentSort,
+    selectedLevel, minPrice, maxPrice, isOffer, onOfferChange, currentSort,
   } = props;
 
   // Varias secciones pueden estar abiertas a la vez. Combinar categoría y
@@ -41,7 +43,10 @@ export default function CatalogSidebar(props: Props) {
   // hace el botón y, a la vez, qué filtro está aplicado sin tener que abrirlo.
   const nombreCategoria = categories.find((c) => c.slug === selectedCategory)?.name;
   const nombreMarca = brands.find((b) => b.slug === selectedBrand)?.name.trim();
-  const atributos = [selectedGender, selectedShape, selectedSize, selectedColor, selectedWeight].filter(Boolean);
+  const atributos = [selectedGender, selectedShape && etiquetaFormato(selectedShape), selectedLevel, selectedSize, selectedColor, selectedWeight].filter(Boolean);
+  const rangoPrecio = minPrice != null || maxPrice != null
+    ? [minPrice != null ? formatPrice(minPrice) : '$0', maxPrice != null ? formatPrice(maxPrice) : 'sin tope'].join(' – ')
+    : undefined;
 
   const seccion = (clave: Seccion, icon: typeof Tag, label: string, value?: string) => (
     <CatalogSidebarSection
@@ -57,6 +62,7 @@ export default function CatalogSidebar(props: Props) {
       {seccion('categories', LayoutGrid, 'Categoría', nombreCategoria)}
       {seccion('brands', Tag, 'Marca', nombreMarca)}
       {seccion('attributes', SlidersHorizontal, 'Atributos', atributos.length > 0 ? atributos.join(' · ') : undefined)}
+      {seccion('price', Banknote, 'Precio', rangoPrecio)}
       {seccion('sort', ArrowDownUp, 'Ordenar', sortLabel(currentSort))}
 
       {/* Ofertas es un sí/no: abrir una sección para marcar una sola casilla
