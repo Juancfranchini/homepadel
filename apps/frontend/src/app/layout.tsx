@@ -3,6 +3,7 @@ import './globals.css';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import MetaPixel from '@/components/layout/MetaPixel';
+import WhatsAppFloat from '@/components/layout/WhatsAppFloat';
 import { getSiteUrl } from '@/lib/siteUrl';
 
 async function getFaviconUrl(): Promise<string> {
@@ -88,6 +89,7 @@ export default function RootLayout({
         <Header />
         <main>{children}</main>
         <Footer />
+        <WhatsAppFloat />
         <MetaPixel />
       </body>
     </html>
