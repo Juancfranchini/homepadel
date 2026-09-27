@@ -37,12 +37,12 @@ function SlideContent({ slide }: { slide: HeroSlide }) {
           </div>
         )}
 
-        <h1 className="font-extrabold leading-none uppercase mb-4 text-center lg:text-left">
+        <h2 className="font-extrabold leading-none uppercase mb-4 text-center lg:text-left">
           {whiteLines.map((line, i) => (
             <span key={i} className="text-[#F7F6F7] block text-2xl sm:text-4xl md:text-5xl xl:text-6xl whitespace-normal leading-tight">{line}</span>
           ))}
           <span className="text-[#B7D31A] block text-2xl sm:text-4xl md:text-5xl xl:text-6xl whitespace-normal leading-tight">{accentLine}</span>
-        </h1>
+        </h2>
 
         {slide.description && (
           <p className="text-[#C7C7C0] text-xs sm:text-sm md:text-base max-w-xs sm:max-w-md mb-4 sm:mb-6 leading-relaxed text-center lg:text-left mx-auto lg:mx-0">{slide.description}</p>

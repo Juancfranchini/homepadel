@@ -12,6 +12,7 @@
   getSiteSection,
 } from '@/lib/api';
 
+import HomeHeading from '@/components/home/HomeHeading';
 import HeroBanner from '@/components/home/HeroBanner';
 import BenefitsStrip from '@/components/home/BenefitsStrip';
 import PromoDestacada from '@/components/home/PromoDestacada';
@@ -192,6 +193,8 @@ export default async function HomePage() {
 
   return (
     <>
+      <HomeHeading />
+
       {heroSection !== null && heroSlides.length > 0 && (
         <HeroBanner slides={heroSlides} />
       )}

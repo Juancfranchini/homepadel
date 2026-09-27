@@ -25,6 +25,19 @@ Zustand para estado global de cliente (`authStore`, `cartStore`) — no Redux, n
 
 TailwindCSS 3. Sin sistema de tokens de diseño propio ni librería de componentes (no hay `packages/ui` — cada componente en `components/ui/` es local a esta app y no se comparte con `backoffice`).
 
+## URLs viejas de Tiendanube
+
+La tienda vivía en Tiendanube y Google todavía tiene indexadas sus URLs. `src/middleware.ts` las redirige con 308 (permanente), y **solo** corre para esas rutas (ver su `matcher`):
+
+| URL vieja | Destino |
+|---|---|
+| `/productos/<handle>/` | `/producto/<slug>` si el handle (sin el sufijo aleatorio tipo `-9l2i6`) coincide exacto con un único producto; si no, `/catalogo?q=<palabras>` |
+| `/productos/` | `/catalogo` |
+| `/<categoria>/` | `/catalogo?categoria=<categoria>` |
+| `/<categoria>/<marca>/` | `/catalogo?categoria=<categoria>&marca=<marca>` si la marca tiene productos en esa categoría; si no, sin marca |
+
+La lógica está en `lib/legacyUrls.ts` (pura, con tests en `lib/legacyUrls.test.ts` — correr con `npm test`). Si aparece otra categoría vieja de Tiendanube dando 404, sumarla en `LEGACY_CATEGORY_SLUGS` **y** en el `matcher` del middleware.
+
 ## Reglas
 
 - Todo fetch al backend pasa por `lib/api.ts`, no se instancia Axios suelto en un componente.
