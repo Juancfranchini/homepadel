@@ -1,26 +1,28 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import { useCatalogFilters } from './useCatalogFilters';
-import { useCatalogProducts } from './useCatalogProducts';
+import { useCatalogTaxonomy } from './useCatalogTaxonomy';
 import { useCatalogFacets } from './useCatalogFacets';
+import type { CatalogResult } from './getCatalogData';
 
-export function useCatalogPage() {
+/** @param result Listado que armó el servidor para la URL actual. */
+export function useCatalogPage(result: CatalogResult) {
   const filters = useCatalogFilters();
   const {
     currentPage, currentSort, selectedCategory, selectedBrand, isOffer, searchQuery,
     selectedSize, selectedColor, selectedWeight, selectedShape, selectedGender, selectedLevel, minPrice, maxPrice,
-    setParam, setParams, clearFilters, hasFilters, activeChips, pageTitle,
+    setParam, setParams, clearFilters, refresh, isPending, hasFilters, activeChips, pageTitle,
   } = filters;
 
-  const { products, categories, brands, loading, error, retry, totalPages, totalCount } = useCatalogProducts({
-    currentPage, selectedCategory, selectedBrand, isOffer, searchQuery, selectedSize, selectedColor, selectedWeight, selectedShape, selectedGender,
-    selectedLevel, minPrice, maxPrice, currentSort,
-  });
+  const { categories, brands } = useCatalogTaxonomy();
+  const { products, totalPages, totalCount, error } = result;
+  // Mientras el servidor arma el listado nuevo, el anterior ya no corresponde a los filtros elegidos.
+  const loading = isPending;
   const { sizes, colors, weights, genders, shapes, levels } = useCatalogFacets({ selectedCategory, selectedBrand, isOffer, searchQuery });
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [searchInput, setSearchInput] = useState('');
+  const [searchInput, setSearchInput] = useState(searchQuery);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => { setSearchInput(searchQuery); }, [searchQuery]);
@@ -48,7 +50,7 @@ export function useCatalogPage() {
   };
 
   return {
-    products, loading, error, retry, totalPages, totalCount, currentPage, sidebarOpen, setSidebarOpen,
+    products, loading, error, retry: refresh, totalPages, totalCount, currentPage, sidebarOpen, setSidebarOpen,
     searchInput, setSearchInput, viewMode,
     hasFilters, activeChips, pageTitle, clearFilters, handleSearch, setParam,
     sidebarProps,

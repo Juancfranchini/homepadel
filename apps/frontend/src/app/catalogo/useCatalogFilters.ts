@@ -1,16 +1,12 @@
 'use client';
 
+import { useTransition } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { formatPrice } from '@/lib/utils';
+import { parseCatalogFilters } from './catalogQuery';
 
 const ETIQUETA_FORMATO: Record<string, string> = { Lagrima: 'Lágrima', Hibrido: 'Híbrido' };
 export const etiquetaFormato = (valor: string) => ETIQUETA_FORMATO[valor] ?? valor;
-
-function precioDeParam(valor: string | null): number | null {
-  if (!valor) return null;
-  const n = Number(valor);
-  return Number.isFinite(n) && n >= 0 ? n : null;
-}
 
 function textoRangoPrecio(min: number | null, max: number | null): string {
   if (min != null && max != null) return formatPrice(min) + ' – ' + formatPrice(max);
@@ -18,24 +14,27 @@ function textoRangoPrecio(min: number | null, max: number | null): string {
   return 'hasta ' + formatPrice(max as number);
 }
 
+/**
+ * Filtros del catálogo, leídos de la URL.
+ *
+ * Cambiar un filtro cambia la URL y el servidor vuelve a armar el listado
+ * (ver page.tsx). La navegación va dentro de una transición: mientras el
+ * servidor responde, `isPending` deja mostrar el esqueleto en vez de dejar
+ * la grilla vieja como si nada hubiera pasado.
+ */
 export function useCatalogFilters() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
-  const currentPage = Number(searchParams.get('page') || '1');
-  const currentSort = searchParams.get('sort') || 'newest';
-  const selectedCategory = searchParams.get('categoria') || '';
-  const selectedBrand = searchParams.get('marca') || '';
-  const isOffer = searchParams.get('oferta') === 'true';
-  const searchQuery = searchParams.get('q') || '';
-  const selectedSize = searchParams.get('talle') || '';
-  const selectedColor = searchParams.get('color') || '';
-  const selectedWeight = searchParams.get('peso') || '';
-  const selectedShape = searchParams.get('formato') || '';
-  const selectedGender = searchParams.get('genero') || '';
-  const selectedLevel = searchParams.get('nivel') || '';
-  const minPrice = precioDeParam(searchParams.get('desde'));
-  const maxPrice = precioDeParam(searchParams.get('hasta'));
+  const filters = parseCatalogFilters((clave) => searchParams.get(clave));
+  const {
+    selectedCategory, selectedBrand, isOffer, searchQuery, selectedSize, selectedColor,
+    selectedWeight, selectedShape, selectedGender, selectedLevel, minPrice, maxPrice,
+  } = filters;
+
+  const navegar = (url: string) => startTransition(() => router.push(url));
+  const refresh = () => startTransition(() => router.refresh());
 
   // Varios a la vez en un solo cambio de URL: llamar dos veces a setParam
   // (desde y hasta) hacía que el segundo pisara al primero.
@@ -46,11 +45,11 @@ export function useCatalogFilters() {
       if (value === null || value === '') params.delete(key);
       else params.set(key, value);
     }
-    router.push('/catalogo?' + params.toString());
+    navegar('/catalogo?' + params.toString());
   };
   const setParam = (key: string, value: string | null) => setParams({ [key]: value });
 
-  const clearFilters = () => router.push('/catalogo');
+  const clearFilters = () => navegar('/catalogo');
   const hasFilters = !!selectedCategory || !!selectedBrand || isOffer || !!searchQuery || !!selectedSize || !!selectedColor
     || !!selectedWeight || !!selectedShape || !!selectedGender || !!selectedLevel || minPrice != null || maxPrice != null;
 
@@ -75,8 +74,7 @@ export function useCatalogFilters() {
     : selectedGender ? capitalizar(selectedGender) : 'Catálogo';
 
   return {
-    currentPage, currentSort, selectedCategory, selectedBrand, isOffer, searchQuery,
-    selectedSize, selectedColor, selectedWeight, selectedShape, selectedGender, selectedLevel, minPrice, maxPrice,
-    setParam, setParams, clearFilters, hasFilters, activeChips, pageTitle,
+    ...filters,
+    setParam, setParams, clearFilters, refresh, isPending, hasFilters, activeChips, pageTitle,
   };
 }

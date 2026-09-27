@@ -17,6 +17,8 @@ types/
 
 Zustand para estado global de cliente (`authStore`, `cartStore`) — no Redux, no Context API para esto. Estado de servidor (catálogo, pedidos) se pide directo con Axios contra `NEXT_PUBLIC_API_URL`, sin capa de cache tipo React Query.
 
+Excepción: las páginas que tienen que llegar completas a buscadores y vistas previas (`/catalogo`, `/producto/[slug]`) traen sus datos desde el servidor con `getDesdeServidor` (`src/lib/serverApi.ts`, `fetch` con `revalidate`) y se los pasan al componente de cliente. En el catálogo, los filtros cambian la URL y el servidor vuelve a armar el listado; la ficha arranca con el producto del servidor y lo vuelve a pedir sin caché desde el navegador.
+
 ## Formularios
 
 `react-hook-form` + `zod` (`@hookform/resolvers`) en todo formulario con input de usuario (checkout, contacto, cuenta). El schema de Zod es la validación del lado del cliente — **no reemplaza la validación del DTO en el backend**, es UX (feedback inmediato), no seguridad.

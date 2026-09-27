@@ -1,101 +1,36 @@
-'use client';
+import type { Metadata } from 'next';
+import CatalogoContent from './CatalogoContent';
+import { buildCatalogMetadata } from './catalogMetadata';
+import { leerDeObjeto, parseCatalogFilters } from './catalogQuery';
+import { getCatalogProducts, getMenuCatalogo } from './getCatalogData';
 
-import { useCallback, Suspense } from 'react';
-import { useRouter } from 'next/navigation';
-import { Filter } from 'lucide-react';
-import { Product } from '@/types';
-import { useCartStore } from '@/store/cartStore';
-import { useCatalogPage } from './useCatalogPage';
-import CatalogHeader from './components/CatalogHeader';
-import CatalogAdvisor from './components/CatalogAdvisor';
-import CatalogChips from './components/CatalogChips';
-import CatalogSidebar from './components/CatalogSidebar';
-import CatalogGrid from './components/CatalogGrid';
-import CatalogList from './components/CatalogList';
-import CatalogPagination from './components/CatalogPagination';
-import CatalogEmpty from './components/CatalogEmpty';
-import CatalogError from './components/CatalogError';
-import CatalogSkeleton from './components/CatalogSkeleton';
-import CatalogMobileSidebar from './components/CatalogMobileSidebar';
+/**
+ * Catálogo.
+ *
+ * Antes era entero del navegador: quien pedía /catalogo?categoria=paletas sin
+ * ejecutar JavaScript —Google, la vista previa de WhatsApp, el rastreador de
+ * Meta— recibía solo "Cargando catálogo..." y ningún enlace a una ficha. Ahora
+ * el servidor lee los filtros de la URL, trae la página de productos y la
+ * dibuja; filtros, orden y paginación siguen siendo interactivos y, al
+ * cambiarlos, la URL nueva vuelve a pasar por acá.
+ *
+ * Depende de la URL, así que se arma en cada pedido; las consultas a la API
+ * sí quedan en caché un rato (ver getCatalogData).
+ */
 
-export default function CatálogoPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-[#050606] flex items-center justify-center">
-        <p className="text-[#C7C7C0] text-sm">Cargando catálogo...</p>
-      </div>
-    }>
-      <CatálogoContent />
-    </Suspense>
-  );
+interface Props {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-function CatálogoContent() {
-  const router = useRouter();
-  const addItem = useCartStore((s) => s.addItem);
-  const addCatalogItem = useCallback((product: Product) => {
-    if (product.variants?.some((variant) => variant.active && !variant.isDefault) ||
-        product.hasSize || product.hasColor || product.hasDimensions || product.hasWeight) {
-      router.push('/producto/' + product.slug);
-      return;
-    }
-    addItem(product);
-  }, [addItem, router]);
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const filters = parseCatalogFilters(leerDeObjeto(await searchParams));
+  // Misma consulta que la página: Next la resuelve una sola vez por pedido.
+  const [menu, result] = await Promise.all([getMenuCatalogo(), getCatalogProducts(filters)]);
+  return buildCatalogMetadata(filters, menu, result);
+}
 
-  const {
-    products, loading, error, retry, totalPages, totalCount, currentPage, sidebarOpen, setSidebarOpen,
-    searchInput, setSearchInput, viewMode,
-    hasFilters, activeChips, pageTitle, clearFilters, handleSearch, setParam,
-    sidebarProps,
-  } = useCatalogPage();
-
-  return (
-    <div className="min-h-screen bg-waves">
-      <CatalogHeader
-        pageTitle={pageTitle}
-        loading={loading}
-        totalCount={totalCount}
-        searchInput={searchInput}
-        onSearchInputChange={setSearchInput}
-        onSearchSubmit={handleSearch}
-      />
-
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-6">
-        <CatalogAdvisor selectedCategory={sidebarProps.selectedCategory} />
-
-        <div className="flex gap-6">
-          <aside className="hidden lg:block">
-            <CatalogSidebar {...sidebarProps} />
-          </aside>
-
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-4 gap-3">
-              <button onClick={() => setSidebarOpen(true)}
-                className="lg:hidden flex items-center gap-2 bg-[#0C0C0C] border border-[#0D0F0F] rounded-lg px-4 py-2 text-sm font-medium text-[#F7F6F7] hover:border-[#8A8A85] transition-colors">
-                <Filter size={15} />Filtros
-                {hasFilters && <span className="w-5 h-5 bg-[#B7D31A] text-[#050606] rounded-full text-[10px] font-bold flex items-center justify-center">{activeChips.length}</span>}
-              </button>
-              <p className="text-sm text-[#C7C7C0] hidden sm:block">{totalCount} productos</p>
-            </div>
-
-            <CatalogChips chips={activeChips} onClearAll={clearFilters} />
-
-            {loading ? <CatalogSkeleton /> :
-              error ? <CatalogError onRetry={retry} /> :
-              products.length === 0 ? <CatalogEmpty hasFilters={hasFilters} onClear={clearFilters} /> :
-                (viewMode === 'grid' ?
-                  <CatalogGrid products={products} onAddToCart={addCatalogItem} />
-                :
-                  <CatalogList products={products} onAddToCart={addCatalogItem} />
-                )
-            }
-
-            <CatalogPagination currentPage={currentPage} totalPages={totalPages} onPageChange={(p) => setParam('page', String(p))} />
-          </div>
-        </div>
-      </div>
-
-      <CatalogMobileSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} sidebarProps={sidebarProps} />
-    </div>
-  );
+export default async function CatalogoPage({ searchParams }: Props) {
+  const filters = parseCatalogFilters(leerDeObjeto(await searchParams));
+  const result = await getCatalogProducts(filters);
+  return <CatalogoContent result={result} />;
 }
