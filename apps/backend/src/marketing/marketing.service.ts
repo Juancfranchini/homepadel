@@ -21,15 +21,45 @@ const CAMPO_POR_EVENTO: Record<EventoEmbudo, keyof Omit<ConteoDiario, 'date'>> =
   Purchase: 'purchase',
 };
 
+/**
+ * Los días se cuentan en hora argentina, no en UTC: una visita a las 22 hs
+ * del lunes en UTC ya es martes, y el gráfico la mostraba en el día que no
+ * era. Argentina no tiene horario de verano, así que el desfase es fijo.
+ */
+const ZONA_HORARIA = 'America/Argentina/Buenos_Aires';
+const DESFASE_ARGENTINA = '-03:00';
+const UN_DIA_MS = 86400000;
+
+/** Fecha YYYY-MM-DD de ese instante en Argentina. */
+export function fechaArgentina(instante: Date): string {
+  // en-CA da el formato YYYY-MM-DD directamente.
+  return new Intl.DateTimeFormat('en-CA', { timeZone: ZONA_HORARIA }).format(instante);
+}
+
+/**
+ * Los últimos `days` días en Argentina, del más viejo a hoy inclusive.
+ * Antes la serie arrancaba en "ahora menos N días" y cortaba ayer: todo lo
+ * de hoy quedaba afuera del gráfico aunque sí se sumaba en los totales, y el
+ * día que se lanzó el seguimiento el gráfico salió plano.
+ */
+export function ultimosDias(days: number, ahora: Date = new Date()): string[] {
+  const fechas: string[] = [];
+  for (let i = days - 1; i >= 0; i--) fechas.push(fechaArgentina(new Date(ahora.getTime() - i * UN_DIA_MS)));
+  return fechas;
+}
+
 @Injectable()
 export class MarketingService {
   constructor(private prisma: PrismaService) {}
 
   async getStats(days: number) {
-    const since = new Date(Date.now() - days * 86400000);
+    const fechas = ultimosDias(days);
+    // Desde las 0 hs del primer día: así los totales y el gráfico cuentan
+    // exactamente los mismos eventos.
+    const since = new Date(fechas[0] + 'T00:00:00' + DESFASE_ARGENTINA);
     const [funnel, daily, topViewed, topAddedToCart, registrandoDesde] = await Promise.all([
       this.getFunnelCounts(since),
-      this.getDailyBreakdown(since, days),
+      this.getDailyBreakdown(since, fechas),
       this.getTopProducts('ViewContent', since),
       this.getTopProducts('AddToCart', since),
       this.getPrimerEvento(),
@@ -77,21 +107,19 @@ export class MarketingService {
   }
 
   /** Un punto por día en el rango, con 0 en los días sin eventos — para que el gráfico no tenga huecos. */
-  private async getDailyBreakdown(since: Date, days: number): Promise<ConteoDiario[]> {
+  private async getDailyBreakdown(since: Date, fechas: string[]): Promise<ConteoDiario[]> {
     const eventos = await this.prisma.marketingEvent.findMany({
       where: { createdAt: { gte: since }, eventName: { in: [...EVENTOS_EMBUDO] } },
       select: { eventName: true, createdAt: true },
     });
 
     const porDia = new Map<string, ConteoDiario>();
-    for (let i = 0; i < days; i++) {
-      const fecha = new Date(since.getTime() + i * 86400000).toISOString().slice(0, 10);
+    for (const fecha of fechas) {
       porDia.set(fecha, { date: fecha, pageView: 0, viewContent: 0, addToCart: 0, initiateCheckout: 0, purchase: 0 });
     }
 
     for (const evento of eventos) {
-      const fecha = evento.createdAt.toISOString().slice(0, 10);
-      const fila = porDia.get(fecha);
+      const fila = porDia.get(fechaArgentina(evento.createdAt));
       const campo = CAMPO_POR_EVENTO[evento.eventName as EventoEmbudo];
       if (fila && campo) fila[campo] += 1;
     }

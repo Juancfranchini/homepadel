@@ -1,4 +1,4 @@
-import { MarketingService } from './marketing.service';
+import { MarketingService, fechaArgentina, ultimosDias } from './marketing.service';
 
 function construirServicio(eventos: { eventName: string; productId?: string | null; productName?: string | null; createdAt: Date }[]) {
   const prisma = {
@@ -154,5 +154,37 @@ describe('MarketingService.getStats', () => {
     expect(stats.daily.every((dia) => typeof dia.date === 'string')).toBe(true);
     const totalPageViews = stats.daily.reduce((acc, dia) => acc + dia.pageView, 0);
     expect(totalPageViews).toBe(1);
+  });
+
+  it('lo que pasó hoy aparece en el último punto del gráfico', async () => {
+    const service = construirServicio([
+      { eventName: 'PageView', createdAt: new Date() },
+      { eventName: 'PageView', createdAt: new Date() },
+      { eventName: 'ViewContent', createdAt: new Date() },
+    ]);
+    const stats = await service.getStats(30);
+
+    const hoy = stats.daily[stats.daily.length - 1];
+    expect(hoy.date).toBe(fechaArgentina(new Date()));
+    expect(hoy.pageView).toBe(2);
+    expect(hoy.viewContent).toBe(1);
+    // Totales y gráfico cuentan lo mismo.
+    expect(stats.daily.reduce((acc, dia) => acc + dia.pageView, 0)).toBe(stats.funnel.PageView);
+  });
+});
+
+describe('fechas del gráfico', () => {
+  it('cuenta el día en hora argentina, no en UTC', () => {
+    // 01:30 UTC del martes = 22:30 del lunes en Argentina.
+    expect(fechaArgentina(new Date('2026-09-29T01:30:00Z'))).toBe('2026-09-28');
+    expect(fechaArgentina(new Date('2026-09-29T03:00:00Z'))).toBe('2026-09-29');
+  });
+
+  it('los últimos N días terminan hoy, sin saltear ni repetir', () => {
+    const dias = ultimosDias(30, new Date('2026-09-27T23:47:00Z'));
+    expect(dias).toHaveLength(30);
+    expect(dias[0]).toBe('2026-08-29');
+    expect(dias[29]).toBe('2026-09-27');
+    expect(new Set(dias).size).toBe(30);
   });
 });
