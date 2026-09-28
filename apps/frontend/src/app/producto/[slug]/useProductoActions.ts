@@ -4,13 +4,14 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Product } from '@/types';
 import { useCartStore } from '@/store/cartStore';
+import { useFavorito } from '@/store/favoritosStore';
 
 export function useProductoActions(product: Product | null, selectedVariant: any, activeProductVariants: any[]) {
   const router = useRouter();
   const addItem = useCartStore((s) => s.addItem);
 
   const [quantity, setQuantity] = useState(1);
-  const [wished, setWished] = useState(false);
+  const favorito = useFavorito(product?.id);
   const [added, setAdded] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
@@ -36,7 +37,7 @@ export function useProductoActions(product: Product | null, selectedVariant: any
   };
 
   return {
-    quantity, setQuantity, wished, setWished, added,
+    quantity, setQuantity, wished: favorito.marcado, toggleWish: favorito.alternar, added,
     showPaymentModal, setShowPaymentModal,
     handleAddToCart, handleBuyNow,
   };

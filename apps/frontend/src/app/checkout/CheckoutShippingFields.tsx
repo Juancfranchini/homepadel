@@ -4,17 +4,15 @@ import { Truck, Store } from 'lucide-react';
 import { UseFormRegister, FieldErrors } from 'react-hook-form';
 import { CheckoutFormData } from './checkoutSchema';
 import { formatPrice } from '@/lib/utils';
+import { PROVINCIAS } from '@/lib/provincias';
 import CheckoutFlexFields, { SugerenciaFlex } from './CheckoutFlexFields';
 import { CheckoutFlex } from './useCheckoutFlex';
+import CheckoutDireccionesGuardadas from './CheckoutDireccionesGuardadas';
+import { DireccionGuardada } from '@/lib/api';
 
 const inputClass = 'w-full bg-field border border-chip rounded-lg px-4 py-2.5 text-sm text-fg placeholder-fg-muted focus:outline-none focus:border-[#B7D31A]/60 transition-colors';
 const errorInputClass = 'w-full bg-field border border-red-500/50 rounded-lg px-4 py-2.5 text-sm text-fg placeholder-fg-muted focus:outline-none focus:border-red-500 transition-colors';
 
-const PROVINCES = [
-  'Buenos Aires', 'CABA', 'Catamarca', 'Chaco', 'Chubut', 'Cordoba', 'Corrientes', 'Entre Rios', 'Formosa', 'Jujuy',
-  'La Pampa', 'La Rioja', 'Mendoza', 'Misiones', 'Neuquen', 'Rio Negro', 'Salta', 'San Juan', 'San Luis', 'Santa Cruz',
-  'Santa Fe', 'Santiago del Estero', 'Tierra del Fuego', 'Tucuman',
-];
 
 interface Props {
   register: UseFormRegister<CheckoutFormData>;
@@ -23,6 +21,8 @@ interface Props {
   correoCost: number;
   storeAddress?: string;
   flex: CheckoutFlex;
+  direcciones?: DireccionGuardada[];
+  onUsarDireccion?: (d: DireccionGuardada) => void;
 }
 
 const SHIPPING_OPTIONS: { value: CheckoutFormData['shippingMethod']; label: string; detail: string }[] = [
@@ -44,7 +44,7 @@ function shippingOptionDetail(option: { value: CheckoutFormData['shippingMethod'
   return option.detail;
 }
 
-export default function CheckoutShippingFields({ register, errors, selectedMethod, correoCost, storeAddress, flex }: Props) {
+export default function CheckoutShippingFields({ register, errors, selectedMethod, correoCost, storeAddress, flex, direcciones = [], onUsarDireccion = () => {} }: Props) {
   const esRetiro = selectedMethod === 'retiro_local';
   const opciones = SHIPPING_OPTIONS.filter((option) => option.value !== 'flex' || flex.info.activo);
 
@@ -71,6 +71,7 @@ export default function CheckoutShippingFields({ register, errors, selectedMetho
         )}
       </div>
 
+      {!esRetiro && <CheckoutDireccionesGuardadas direcciones={direcciones} onUsar={onUsarDireccion} />}
       {selectedMethod === 'flex' ? (
         <CheckoutFlexFields register={register} errors={errors} flex={flex} />
       ) : esRetiro ? (
@@ -102,7 +103,7 @@ export default function CheckoutShippingFields({ register, errors, selectedMetho
             <label htmlFor="checkout-province" className="block text-xs font-semibold text-fg-muted uppercase tracking-wide mb-1">Provincia *</label>
             <select id="checkout-province" {...register('province')} autoComplete="address-level1" className={errors.province ? errorInputClass : inputClass}>
               <option value="">Seleccioná una provincia</option>
-              {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+              {PROVINCIAS.map((p) => <option key={p} value={p}>{p}</option>)}
             </select>
             {errors.province && <p className="text-red-500 light:text-red-600 text-xs mt-1">{String(errors.province.message)}</p>}
           </div>

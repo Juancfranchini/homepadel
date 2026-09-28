@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Product } from '@/types';
 import { getDiscountPercent } from '@/lib/utils';
+import { useFavorito } from '@/store/favoritosStore';
 import ProductCardImage from './ProductCardImage';
 import ProductCardContent from './ProductCardContent';
 
@@ -12,7 +13,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, onAddToCart }: ProductCardProps) {
-  const [wished, setWished] = useState(false);
+  const favorito = useFavorito(product.id);
   const [adding, setAdding] = useState(false);
 
   const isMadeToOrder = product.isMadeToOrder === true;
@@ -42,8 +43,8 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
         hasDiscount={hasDiscount}
         discountPct={discountPct}
         isMadeToOrder={isMadeToOrder}
-        wished={wished}
-        onToggleWish={(e) => { e.preventDefault(); setWished(!wished); }}
+        wished={favorito.marcado}
+        onToggleWish={(e) => { e.preventDefault(); e.stopPropagation(); favorito.alternar(); }}
       />
 
       <ProductCardContent

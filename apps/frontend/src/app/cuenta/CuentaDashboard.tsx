@@ -5,7 +5,9 @@ import { Package, LogOut, Heart, MapPin, FileText, MessageSquare } from 'lucide-
 import { Order, User } from '@/types';
 import MisResenasTab from '@/components/account/MisResenasTab';
 import CuentaOrdersTab from './CuentaOrdersTab';
-import { CuentaFavoritosTab, CuentaDatosTab, CuentaDireccionesTab } from './CuentaStaticTabs';
+import { CuentaDatosTab } from './CuentaStaticTabs';
+import CuentaFavoritosTab from './CuentaFavoritosTab';
+import CuentaDireccionesTab from './CuentaDireccionesTab';
 
 type TabKey = 'pedidos' | 'resenas' | 'favoritos' | 'datos' | 'direcciones';
 

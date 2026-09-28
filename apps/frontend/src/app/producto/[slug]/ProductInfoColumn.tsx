@@ -59,7 +59,7 @@ export default function ProductInfoColumn({ product, display, activeVariants, va
         stock={display.effectiveStock} isMadeToOrder={!!product.isMadeToOrder} productName={product.name}
         quantity={actions.quantity} onQuantityChange={actions.setQuantity}
         onBuyNow={actions.handleBuyNow} onAddToCart={actions.handleAddToCart} added={actions.added}
-        wished={actions.wished} onWish={() => actions.setWished(!actions.wished)}
+        wished={actions.wished} onWish={actions.toggleWish}
       />
       {hasSizeGuide && (<Link href="/talles" className="inline-flex items-center gap-2 px-4 py-2 bg-chip border border-line rounded-lg text-brand-fg text-xs font-semibold hover:border-[#B7D31A]/50 transition-all w-fit"><Ruler size={14} />Guia de talles</Link>)}
       <ShippingCalc />

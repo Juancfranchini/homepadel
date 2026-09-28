@@ -100,3 +100,28 @@ export const getSiteSection = (key: string) =>
 // Cupones — el descuento SIEMPRE lo calcula el servidor (P2)
 export const validateCoupon = (code: string, subtotal: number) =>
   api.post('/coupons/validate', { code, subtotal }).then((r) => r.data);
+
+// Mi cuenta — favoritos y direcciones (requieren sesión)
+export interface DireccionGuardada {
+  id: string;
+  label: string | null;
+  street: string;
+  city: string;
+  province: string;
+  postalCode: string;
+  phone: string | null;
+}
+export type DireccionInput = Omit<DireccionGuardada, 'id' | 'label' | 'phone'> & { label?: string; phone?: string };
+
+export const getFavoritosIds = () => api.get<string[]>('/mi-cuenta/favoritos/ids').then((r) => r.data);
+export const getFavoritos = () => api.get('/mi-cuenta/favoritos').then((r) => r.data);
+export const agregarFavorito = (productId: string) => api.put(`/mi-cuenta/favoritos/${encodeURIComponent(productId)}`);
+export const quitarFavorito = (productId: string) => api.delete(`/mi-cuenta/favoritos/${encodeURIComponent(productId)}`);
+export const sincronizarFavoritos = (productIds: string[]) =>
+  api.post<string[]>('/mi-cuenta/favoritos/sincronizar', { productIds }).then((r) => r.data);
+
+export const getDirecciones = () => api.get<DireccionGuardada[]>('/mi-cuenta/direcciones').then((r) => r.data);
+export const crearDireccion = (data: DireccionInput) => api.post<DireccionGuardada>('/mi-cuenta/direcciones', data).then((r) => r.data);
+export const actualizarDireccion = (id: string, data: DireccionInput) =>
+  api.patch<DireccionGuardada>(`/mi-cuenta/direcciones/${encodeURIComponent(id)}`, data).then((r) => r.data);
+export const borrarDireccion = (id: string) => api.delete(`/mi-cuenta/direcciones/${encodeURIComponent(id)}`);
