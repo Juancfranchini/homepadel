@@ -27,7 +27,7 @@ export default function MediosPagoPage() {
 
       <div className="max-w-4xl mx-auto px-6 lg:px-8 py-12">
         <h1 className="text-3xl font-bold text-fg mb-2">Medios de Pago</h1>
-        <p className="text-fg-muted mb-10">{transferencia.active === true ? 'Pagá con Mercado Pago o solicitá una compra por transferencia.' : 'El pago se procesa exclusivamente en Mercado Pago Checkout Pro.'}</p>
+        <p className="text-fg-muted mb-10">{transferencia.active === true ? 'Pagá con Mercado Pago o por transferencia bancaria.' : 'El pago se procesa exclusivamente en Mercado Pago Checkout Pro.'}</p>
 
         <div className="bg-panel rounded-2xl border border-[#B7D31A]/25 p-6 mb-12">
           <div className="flex items-center gap-4 mb-5">
@@ -49,7 +49,7 @@ export default function MediosPagoPage() {
         {transferencia.active === true && (
           <div className="bg-panel rounded-2xl border border-line p-6 -mt-8 mb-12 flex items-start gap-3">
             <Landmark size={22} className="text-brand-fg mt-0.5" />
-            <div><h2 className="text-fg font-semibold">Transferencia bancaria</h2><p className="text-fg-soft text-sm mt-1">Al solicitarla, avisamos a la tienda y en minutos nos contactamos para que termines tu compra.</p></div>
+            <div><h2 className="text-fg font-semibold">Transferencia bancaria</h2><p className="text-fg-soft text-sm mt-1">Al confirmar el pedido te mostramos los datos de la cuenta para transferir y nos mandás el comprobante por WhatsApp.</p></div>
           </div>
         )}
 

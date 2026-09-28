@@ -7,6 +7,19 @@ import { buildWhatsappUrl } from '@/hooks/useSiteSettings';
 import { formatPrice } from '@/lib/utils';
 import { CheckoutFormData } from './checkoutSchema';
 
+export interface DatosTransferencia {
+  alias: string | null;
+  cbu: string | null;
+  titular: string | null;
+  banco: string | null;
+}
+
+/** Lo que devuelve el servidor al tomar un pedido por transferencia. */
+export interface PedidoTransferencia {
+  total: number;
+  datos: DatosTransferencia | null;
+}
+
 /**
  * El backend valida con class-validator, que devuelve un array de mensajes
  * cuando falla más de un campo. Mostrarlo tal cual dejaba "[object Object]".
@@ -74,6 +87,7 @@ export function useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart
   const [orderError, setOrderError] = useState('');
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
+  const [pedidoTransferencia, setPedidoTransferencia] = useState<PedidoTransferencia | null>(null);
 
   // El domicilio y el teléfono viajan con la preferencia: el aviso de pago de
   // Mercado Pago no los trae, así que si no se mandan acá la venta se
@@ -114,6 +128,7 @@ export function useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart
         city: esRetiro ? undefined : data.city,
       });
       setOrderNumber(result.number);
+      setPedidoTransferencia({ total: Number(result.total) || 0, datos: result.datosTransferencia ?? null });
       clearCart();
       setOrderSuccess(true);
     } catch (err) {
@@ -140,5 +155,5 @@ export function useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart
     await submitMercadoPago(data);
   };
 
-  return { onSubmit, orderError, orderSuccess, orderNumber };
+  return { onSubmit, orderError, orderSuccess, orderNumber, pedidoTransferencia };
 }

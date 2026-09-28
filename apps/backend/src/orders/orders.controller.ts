@@ -28,9 +28,11 @@ export class OrdersController {
     return this.ordersService.trackByNumber(number, email, phone);
   }
 
+  // Datos del comprador (nombre, email, teléfono, domicilio): solo para quien
+  // vende. Antes alcanzaba con cualquier sesión de cliente.
   @Get(':id')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard) @Permissions(POS_PERMISSIONS.SELL)
   findOne(@Param('id') id: string) { return this.ordersService.findOne(id); }
 
   @Post()

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
-const BANK_TRANSFER_ENABLED = process.env.NEXT_PUBLIC_ENABLE_BANK_TRANSFER === 'true';
 
 export interface PaymentMethodConfig {
   active?: boolean;
@@ -41,9 +40,10 @@ export function usePaymentMethods() {
 
   return {
     mercadopago: data?.mercadopago || { active: true },
-    // Política pública actual: las configuraciones se conservan en el CMS,
-    // pero no habilitan cobros directos desde la tienda.
-    transferencia: { ...(data?.transferencia || {}), active: BANK_TRANSFER_ENABLED && data?.transferencia?.active === true },
+    // El backend ya resuelve si la transferencia está disponible (variable
+    // ENABLE_BANK_TRANSFER + interruptor del backoffice) y nunca manda acá los
+    // datos de la cuenta: esos llegan solo con el pedido creado.
+    transferencia: { ...(data?.transferencia || {}), active: data?.transferencia?.active === true },
     visa: { ...(data?.visa || {}), active: false },
     mastercard: { ...(data?.mastercard || {}), active: false },
     amex: { ...(data?.amex || {}), active: false },

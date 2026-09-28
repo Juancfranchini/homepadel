@@ -38,7 +38,7 @@ export default function CheckoutPaymentMethodFields({ register, errors, selected
         <label className={'flex items-center gap-3 border rounded-xl p-4 mt-3 cursor-pointer ' + (selectedPayment === 'transfer' ? 'border-[#B7D31A] bg-[#B7D31A]/5' : 'border-chip')}>
           <input {...register('paymentMethod')} type="radio" value="transfer" className="sr-only" />
           <Landmark className="w-5 h-5 text-brand-fg flex-shrink-0" />
-          <div><p className="font-bold text-sm text-fg">Transferencia bancaria</p><p className="text-xs text-fg-soft">Te contactamos para que termines la compra.</p></div>
+          <div><p className="font-bold text-sm text-fg">Transferencia bancaria</p><p className="text-xs text-fg-soft">Al confirmar te mostramos los datos para transferir.</p></div>
         </label>
       )}
       {selectedPayment === 'mercadopago' && (

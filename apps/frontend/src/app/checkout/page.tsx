@@ -41,7 +41,7 @@ export default function CheckoutPage() {
   const { mercadopago, transferencia } = usePaymentMethods();
   const { flatRate, freeShippingThreshold } = useShippingRates();
   const settings = useSiteSettings();
-  const { onSubmit, orderError, orderSuccess, orderNumber } = useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart, whatsapp: settings.whatsapp || settings.phone });
+  const { onSubmit, orderError, orderSuccess, orderNumber, pedidoTransferencia } = useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart, whatsapp: settings.whatsapp || settings.phone });
 
   const subtotal = totalPrice();
   const coupon = useCoupon(subtotal);
@@ -88,7 +88,7 @@ export default function CheckoutPage() {
     return <CheckoutEmptyCart />;
   }
 
-  if (orderSuccess) return <CheckoutSuccessScreen orderNumber={orderNumber} />;
+  if (orderSuccess) return <CheckoutSuccessScreen orderNumber={orderNumber} pedido={pedidoTransferencia} whatsapp={settings.whatsapp || settings.phone} />;
 
   return (
     <div className="min-h-screen bg-page">
