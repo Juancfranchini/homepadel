@@ -12,6 +12,7 @@ import { informarTransferenciaPagadaAMeta } from '../payments/payments.meta';
 import { pedidoSinDatosPersonales } from './orders.public-view';
 import { esCuentaDePrueba } from '../common/test-accounts';
 import { etiquetaFlex } from '../shipping/envio-flex';
+import { exigirTransferencia } from '../payments/transferencia';
 
 interface SalesLinkContext {
   id: string;
@@ -142,7 +143,7 @@ export class OrdersService {
   }
 
   async create(dto: CreateOrderDto, userId?: string) {
-    await this.assertTransferEnabled();
+    const datosTransferencia = await exigirTransferencia(this.prisma, userId);
     const number = 'HP-' + Date.now();
     const salesLink = await this.resolveSalesLink(dto.salesLinkToken);
     const requestedItems = salesLink
@@ -232,7 +233,8 @@ export class OrdersService {
       })
       .catch((err) => console.error('Error enviando aviso de transferencia:', err.message));
 
-    return order;
+    // Los datos de la cuenta van solo a quien acaba de hacer el pedido.
+    return { ...order, datosTransferencia };
   }
 
   private persistOnlineOrder(input: {
@@ -320,17 +322,6 @@ export class OrdersService {
       throw new BadRequestException('Este enlace ya fue usado o venció');
     }
     return link;
-  }
-
-  private async assertTransferEnabled(): Promise<void> {
-    const featureEnabled = process.env.ENABLE_BANK_TRANSFER === 'true';
-    const section = await this.prisma.siteSection.findUnique({ where: { key: 'payment_methods' } });
-    const data = section?.data as { transferencia?: { active?: boolean } } | null;
-    if (!featureEnabled || data?.transferencia?.active !== true) {
-      throw new BadRequestException(
-        'La transferencia bancaria no está habilitada. Usá Mercado Pago.',
-      );
-    }
   }
 
   async updateStatus(

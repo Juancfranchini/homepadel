@@ -6,6 +6,7 @@ import { OptionalJwtAuthGuard } from '../common/guards/optional-jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { sanitizeSection } from './site-sections.sanitize';
+import { mediosDePagoPublicos } from '../payments/transferencia';
 import { Role } from '@prisma/client';
 
 @ApiTags('Site Sections')
@@ -23,7 +24,9 @@ export class SiteSectionsController {
   async findOne(@Param('key') key: SectionKey, @Req() req: any) {
     const section = await this.siteSectionsService.findOne(key);
     const isAdmin = req?.user?.role === Role.ADMIN;
-    return sanitizeSection(section as any, isAdmin);
+    const publica = sanitizeSection(section as any, isAdmin);
+    // Transferencia: si está disponible de verdad, y sin CBU/alias/titular/banco.
+    return key === 'payment_methods' && !isAdmin ? mediosDePagoPublicos(publica) : publica;
   }
 
   // Admin  upsert de una sección

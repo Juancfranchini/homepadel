@@ -33,6 +33,12 @@ Regla dura del checkout: **nada de lo que manda el navegador determina cuánto s
 - Cupones: `CouponsService.validate(code, subtotal)` valida vigencia, usos y monto mínimo; `calculateDiscount` computa el monto. El uso (`usedCount`) se consume recién cuando la venta se concreta (orden directa creada, o pago de Mercado Pago aprobado en el webhook) — no al solo aplicar el cupón, mismo criterio que el stock. Antes el frontend tenía una lista fija de códigos (`VALID_COUPONS`) con 10% hardcodeado, visible en el bundle del navegador y sin conexión real al backend — corregido.
 - `OrdersService.create` y `PaymentsService.createPreference` recalculan envío y descuento de forma idéntica — `CreateOrderDto` ya **no acepta** `shipping`/`discount` del cliente, solo un `couponCode` opcional que el servidor valida.
 
+## Transferencia bancaria
+
+- Doble llave: `ENABLE_BANK_TRANSFER=true` en el backend (Railway) **y** el switch de Transferencia prendido en el backoffice (`site-sections` / `payment_methods` → `transferencia.active`). Con cualquiera de los dos apagado, la tienda no la ofrece y `POST /orders` responde 400. La tienda no tiene variable propia: lee `transferencia.active` que calcula el backend (`src/payments/transferencia.ts`).
+- Los datos de la cuenta (alias, CBU, titular, banco) **no** salen en `GET /site-sections/payment_methods` público (`mediosDePagoPublicos`): solo los ve el admin y el comprador, en la respuesta del pedido (`datosTransferencia`), para mostrarlos en la pantalla de pedido confirmado con el botón de mandar el comprobante por WhatsApp.
+- Un cliente puede tener como mucho 2 pedidos por transferencia pendientes de pago en 72 hs (`MAX_TRANSFERENCIAS_PENDIENTES`): el pedido descuenta stock al crearse, y sin tope alguien podría dejar productos bloqueados sin pagar.
+
 ## Mi cuenta: direcciones y favoritos
 
 `src/cuenta/` (`/api/mi-cuenta`, siempre con JWT y sobre el usuario del token — no hay forma de tocar datos de otro):

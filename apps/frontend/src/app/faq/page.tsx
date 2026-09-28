@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import FaqAccordionList from './FaqAccordionList';
 import FaqContactCta from './FaqContactCta';
+import { usePaymentMethods } from '@/hooks/usePaymentMethods';
 
 interface FaqItem {
   id: string;
@@ -14,16 +15,14 @@ interface FaqItem {
   active: boolean;
 }
 
-const BANK_TRANSFER_ENABLED = process.env.NEXT_PUBLIC_ENABLE_BANK_TRANSFER === 'true';
-
-function applyPublicCheckoutPolicy(faq: FaqItem): FaqItem {
+function applyPublicCheckoutPolicy(faq: FaqItem, conTransferencia: boolean): FaqItem {
   const question = faq.question.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   if (faq.category.toUpperCase() === 'ENVIOS' && question.includes('costo')) {
-    return { ...faq, answer: 'Correo Argentino usa una tarifa plana visible en el carrito y puede ser gratis desde el monto configurado. Andreani y OCA tienen costo a coordinar por WhatsApp.' };
+    return { ...faq, answer: 'Correo Argentino usa una tarifa plana visible en el carrito y puede ser gratis desde el monto configurado. En AMBA también está el Envío Flex en moto, con precio según tu partido o localidad. Andreani y OCA tienen costo a coordinar por WhatsApp.' };
   }
   if (faq.category.toUpperCase() !== 'PAGOS') return faq;
   if (question.includes('metodo') && question.includes('pago')) {
-    const transferText = BANK_TRANSFER_ENABLED ? ' También podés solicitar una compra por transferencia y te contactaremos para completarla.' : '';
+    const transferText = conTransferencia ? ' También podés pagar por transferencia bancaria: al confirmar el pedido te mostramos los datos de la cuenta.' : '';
     return { ...faq, answer: 'Trabajamos con Mercado Pago Checkout Pro. Dentro de Mercado Pago podés elegir tarjeta, saldo u otros medios disponibles.' + transferText };
   }
   if (question.includes('cuota')) {
@@ -39,6 +38,7 @@ export default function FaqPage() {
   const [faqs, setFaqs] = useState<FaqItem[]>([]);
   const [openItems, setOpenItems] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
+  const { transferencia } = usePaymentMethods();
 
   useEffect(() => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
@@ -46,13 +46,14 @@ export default function FaqPage() {
       .then(res => res.json())
       .then(data => {
         const items = Array.isArray(data) ? data : data?.data || [];
-        setFaqs(items.map(applyPublicCheckoutPolicy));
+        setFaqs(items);
       })
       .catch(() => setFaqs([]))
       .finally(() => setLoading(false));
   }, []);
 
-  const grouped = faqs.reduce((acc: Record<string, FaqItem[]>, faq) => {
+  const conTransferencia = transferencia.active === true;
+  const grouped = faqs.map((faq) => applyPublicCheckoutPolicy(faq, conTransferencia)).reduce((acc: Record<string, FaqItem[]>, faq) => {
     const cat = faq.category || 'GENERAL';
     if (!acc[cat]) acc[cat] = [];
     acc[cat].push(faq);

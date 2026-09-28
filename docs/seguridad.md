@@ -14,6 +14,11 @@
 4. ¿Escribe algo que después se renderiza como HTML en algún lado (frontend, email, backoffice)? → sanitizar antes de guardar (ver `site-sections.sanitize.ts` como referencia) o escapar al renderizar.
 5. ¿Toca un servicio externo (Mercado Pago, Cloudinary, Resend)? → la credencial vive en variable de entorno del backend, nunca en el frontend/backoffice ni hardcodeada.
 
+## Pedidos
+
+- `GET /orders/:id` (detalle completo con datos del cliente) es solo para quien tiene permiso de venta (`POS_PERMISSIONS.SELL`). Antes alcanzaba con estar logueado, y cualquier cliente podía leer pedidos ajenos cambiando el id. El cliente ve los suyos en `GET /orders/my`; el seguimiento público (`/orders/track/:number`) no muestra datos personales sin email o teléfono del pedido.
+- Datos bancarios para transferir: solo en la respuesta del pedido de quien compra, no en la configuración pública (ver backend.md → Transferencia bancaria).
+
 ## Rate limiting
 
 `@nestjs/throttler` global, 100 req/60s por IP. Los webhooks (Mercado Pago) y algunos endpoints públicos de alto tráfico pueden necesitar límites distintos si se detecta abuso — revisar caso por caso, no bajar el límite global.
