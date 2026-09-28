@@ -9,7 +9,8 @@
 //
 // Filtros disponibles: page, limit, category (slug), brand (slug), search, minPrice, maxPrice
 
-import { Controller, Get, Post, Patch, Delete, Param, Body, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, Query, Req, UseGuards } from '@nestjs/common';
+import { OptionalJwtAuthGuard } from '../common/guards/optional-jwt-auth.guard';
 import { ApiTags, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -21,6 +22,9 @@ import { Role } from '@prisma/client';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { Permissions } from '../common/decorators/permissions.decorator';
 import { POS_PERMISSIONS } from '../common/permissions';
+
+/** Quien trabaja en la tienda (backoffice, punto de venta): ve también los productos dados de baja. */
+const esPersonal = (user?: { role?: Role }) => user?.role === Role.ADMIN || user?.role === Role.STAFF;
 
 @ApiTags('Products')
 @Controller('products')
@@ -39,8 +43,13 @@ export class ProductsController {
   @ApiQuery({ name: 'color', required: false })
   @ApiQuery({ name: 'weight', required: false })
   @ApiQuery({ name: 'weightUnit', required: false })
-  findAll(@Query() query: any) {
-    return this.productsService.findAll(query);
+  @UseGuards(OptionalJwtAuthGuard)
+  findAll(@Query() query: any, @Req() req: { user?: { role?: Role } }) {
+    // `showAll=1` (incluir los dados de baja) es solo para el personal: antes
+    // cualquiera podía listar productos inactivos, y la tienda lo usaba para
+    // los relacionados, así que uno dado de baja podía aparecer ahí.
+    const showAll = esPersonal(req.user) ? query.showAll : undefined;
+    return this.productsService.findAll({ ...query, showAll });
   }
 
   @Get('best-sellers')
@@ -53,9 +62,13 @@ export class ProductsController {
     return this.productsService.findFeatured();
   }
 
+  // Un producto dado de baja no se muestra en la tienda, ni siquiera entrando
+  // por su dirección: antes la ficha abría igual. El personal (backoffice,
+  // punto de venta) sí lo ve, para poder editarlo y reactivarlo.
   @Get(':slug')
-  findOne(@Param('slug') slug: string) {
-    return this.productsService.findBySlug(slug);
+  @UseGuards(OptionalJwtAuthGuard)
+  findOne(@Param('slug') slug: string, @Req() req: { user?: { role?: Role } }) {
+    return this.productsService.findBySlug(slug, { incluirInactivos: esPersonal(req.user) });
   }
 
   @Post()

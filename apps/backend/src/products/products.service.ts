@@ -149,9 +149,9 @@ export class ProductsService {
       .map((product) => withEffectivePrice(product));
   }
 
-  async findBySlug(slugOrId: string) {
+  async findBySlug(slugOrId: string, { incluirInactivos = false } = {}) {
     const product = await this.prisma.product.findFirst({
-      where: { OR: [{ slug: slugOrId }, { id: slugOrId }] },
+      where: { OR: [{ slug: slugOrId }, { id: slugOrId }], ...(incluirInactivos ? {} : { active: true }) },
       include: {
         category: true,
         brand: true,

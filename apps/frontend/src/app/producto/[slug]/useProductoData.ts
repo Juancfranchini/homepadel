@@ -18,7 +18,8 @@ export function useProductoData(slug: string | undefined) {
     if (!slug) return;
     setLoading(true);
     setError(false);
-    Promise.allSettled([getProduct(slug + '?t=' + Date.now()), getProducts({ showAll: 1, limit: 50 })])
+    // Los relacionados salen solo de los productos activos: uno dado de baja no se ofrece.
+    Promise.allSettled([getProduct(slug + '?t=' + Date.now()), getProducts({ limit: 50 })])
       .then(([prodRes, relRes]) => {
         const p = prodRes.status === 'fulfilled' ? (prodRes.value?.data ?? prodRes.value) : null;
         if (prodRes.status === 'rejected') {
