@@ -41,7 +41,7 @@ class ShippingDto {
   @IsOptional() @IsString() @MaxLength(100) province?: string;
   @IsOptional() @IsString() @MaxLength(20) postalCode?: string;
   @IsString() @MaxLength(40) phone: string;
-  @IsOptional() @IsIn(['correo_argentino', 'retiro_local']) carrier?: 'correo_argentino' | 'retiro_local';
+  @IsOptional() @IsIn(['correo_argentino', 'retiro_local', 'flex']) carrier?: 'correo_argentino' | 'retiro_local' | 'flex';
 }
 
 export class CreatePreferenceDto {

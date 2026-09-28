@@ -49,7 +49,7 @@ function buildShippingPayload(data: CheckoutFormData) {
     province: data.province,
     postalCode: data.postalCode,
     phone: data.phone,
-    carrier: 'correo_argentino' as const,
+    carrier: data.shippingMethod === 'flex' ? ('flex' as const) : ('correo_argentino' as const),
   };
 }
 
@@ -110,7 +110,8 @@ export function useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart
         buyerName: data.name,
         couponCode: couponCode || undefined,
         salesLinkToken: salesLinkToken || undefined,
-        carrier: esRetiro ? 'retiro_local' : 'correo_argentino',
+        carrier: esRetiro ? 'retiro_local' : data.shippingMethod === 'flex' ? 'flex' : 'correo_argentino',
+        city: esRetiro ? undefined : data.city,
       });
       setOrderNumber(result.number);
       clearCart();

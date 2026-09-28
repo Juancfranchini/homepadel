@@ -10,7 +10,7 @@ const checkoutBaseSchema = z.object({
   city: z.string().trim().optional(),
   province: z.string().optional(),
   postalCode: z.string().trim().optional(),
-  shippingMethod: z.enum(['correo_argentino', 'andreani', 'oca', 'retiro_local']),
+  shippingMethod: z.enum(['correo_argentino', 'flex', 'andreani', 'oca', 'retiro_local']),
   paymentMethod: z.enum(['mercadopago', 'transfer'], { required_error: 'Seleccioná un método de pago' }),
 });
 

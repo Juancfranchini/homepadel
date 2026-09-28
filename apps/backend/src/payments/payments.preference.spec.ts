@@ -141,9 +141,21 @@ describe('PaymentsService.createPreference', () => {
     // El monto real de "gratis" lo decide PricingService.calculateShipping
     // (ver pricing.service.spec.ts) — acá solo importa que le llegue el dato
     // correcto para decidirlo.
-    expect(pricing.calculateShipping).toHaveBeenCalledWith(expect.any(Number), 'retiro_local');
+    expect(pricing.calculateShipping).toHaveBeenCalledWith(expect.any(Number), 'retiro_local', undefined);
     expect(ordenesCreadas[0].address).toBe('Retiro en el local');
     expect(JSON.parse(ordenesCreadas[0].notes)).toMatchObject({ shippingCarrier: 'retiro_local' });
+  });
+
+  it('Envío Flex: la localidad llega al cálculo y la dirección dice el servicio y la zona', async () => {
+    const { service, pricing, ordenesCreadas } = construirServicio();
+    await service.createPreference({
+      ...DTO_BASE,
+      shipping: { street: 'Av. Presidente Perón 1234', city: 'San Miguel', province: 'Buenos Aires', postalCode: '1663', phone: '1140832310', carrier: 'flex' },
+    });
+
+    expect(pricing.calculateShipping).toHaveBeenCalledWith(expect.any(Number), 'flex', 'San Miguel');
+    expect(ordenesCreadas[0].address).toBe('Envío Flex (zona 1) — Av. Presidente Perón 1234, San Miguel, Buenos Aires (1663)');
+    expect(JSON.parse(ordenesCreadas[0].notes)).toMatchObject({ shippingCarrier: 'flex' });
   });
 
   it('ignora el número de orden que mande el navegador y genera el suyo', async () => {

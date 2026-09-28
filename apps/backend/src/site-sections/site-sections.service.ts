@@ -174,7 +174,7 @@ export class SiteSectionsService {
         logoMobile: null,
       },
       trust_bottom: { items: [], active: true },
-      shipping_rates: { flatRate: 4500, freeShippingThreshold: 100000 },
+      shipping_rates: { flatRate: 4500, freeShippingThreshold: 100000, flex: { activo: true, zona1: 4500, zona2: 7000, zona3: 9000 } },
       final_message: {
         title: 'Un mensaje para vos',
         text: 'Gracias por elegir Home Padel.',
