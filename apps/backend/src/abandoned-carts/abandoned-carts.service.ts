@@ -8,6 +8,19 @@ import { esCuentaDePrueba } from '../common/test-accounts';
 /** Un carrito más viejo que esto ya no se recupera: se deja de listar. */
 const DIAS_VIGENCIA = 30;
 
+/**
+ * Hay una fila por mail. Si esa persona ya había comprado y ahora vuelve a
+ * armar un carrito, es un abandono nuevo: antes la fila quedaba "recuperada"
+ * para siempre y el carrito nuevo nunca aparecía en la lista. El margen evita
+ * que un guardado que llegue justo después de pagar la reabra.
+ */
+const MARGEN_TRAS_COMPRA_MS = 60 * 60 * 1000;
+const REABRIR = { recoveredAt: null, orderNumber: null, contactedAt: null };
+
+function esNuevoAbandono(recoveredAt: Date | null | undefined): boolean {
+  return !!recoveredAt && Date.now() - recoveredAt.getTime() > MARGEN_TRAS_COMPRA_MS;
+}
+
 @Injectable()
 export class AbandonedCartsService {
   private readonly logger = new Logger(AbandonedCartsService.name);
@@ -62,9 +75,13 @@ export class AbandonedCartsService {
       isTest: await esCuentaDePrueba(this.prisma, [email]),
     };
 
+    const existente = await this.prisma.abandonedCart.findUnique({
+      where: { email },
+      select: { recoveredAt: true },
+    });
     await this.prisma.abandonedCart.upsert({
       where: { email },
-      update: datos,
+      update: { ...datos, ...(esNuevoAbandono(existente?.recoveredAt) ? REABRIR : {}) },
       create: { email, ...datos },
     });
 
@@ -78,16 +95,19 @@ export class AbandonedCartsService {
    * terminaron en venta, que es el número que dice si vale la pena seguir
    * contactando gente.
    */
-  async markRecovered(email: string | null | undefined, orderNumber: string): Promise<void> {
-    if (!email) return;
+  async markRecovered(emails: (string | null | undefined)[], orderNumber: string): Promise<void> {
+    // El mail del checkout y el de la cuenta pueden ser distintos, y el
+    // carrito pudo quedar guardado con cualquiera de los dos.
+    const lista = [...new Set(emails.filter((e): e is string => !!e).map((e) => e.trim().toLowerCase()))];
+    if (lista.length === 0) return;
     try {
       await this.prisma.abandonedCart.updateMany({
-        where: { email: email.trim().toLowerCase(), recoveredAt: null },
+        where: { email: { in: lista }, recoveredAt: null },
         data: { recoveredAt: new Date(), orderNumber },
       });
     } catch (err) {
       // La venta ya está hecha: que falle esto no puede romperla.
-      this.logger.warn(`No se pudo marcar el carrito recuperado de ${email}: ${err}`);
+      this.logger.warn(`No se pudo marcar el carrito recuperado del pedido ${orderNumber}: ${err}`);
     }
   }
 

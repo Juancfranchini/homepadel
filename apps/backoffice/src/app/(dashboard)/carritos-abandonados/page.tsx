@@ -67,8 +67,9 @@ export default function CarritosAbandonadosPage() {
           Carritos abandonados
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          Personas que empezaron la compra, dejaron su email y no la terminaron.
-          Contactalas por WhatsApp para recuperar la venta.
+          Clientes con sesión iniciada que agregaron productos al carrito, y personas que dejaron su email en el
+          checkout, que no terminaron la compra. Contactalas por WhatsApp para recuperar la venta. Quien agrega al
+          carrito sin cuenta y sin llegar al checkout es anónimo: no se puede saber quién es.
         </p>
       </div>
 

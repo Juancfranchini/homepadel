@@ -212,7 +212,7 @@ export class OrdersService {
 
     // Si esta persona tenía un carrito abandonado registrado, queda marcado
     // como recuperado: es lo que permite medir cuántos terminan en venta.
-    this.abandonedCarts.markRecovered(dto.buyerEmail || order.user?.email, number);
+    this.abandonedCarts.markRecovered([dto.buyerEmail, order.user?.email], number);
 
     const itemsForEmail = order.items.map((item) => ({
       name: item.product.name,

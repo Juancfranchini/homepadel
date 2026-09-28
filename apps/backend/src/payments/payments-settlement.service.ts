@@ -127,7 +127,7 @@ export class PaymentsSettlementService {
       this.logger.error(`Pago ${paymentId} aprobado sin stock para ${order.number}: ${error}`);
       await this.writeSettlement(order, payment, user, email, name, paymentId, notes, false);
     }
-    this.abandonedCarts.markRecovered((notes.buyerEmail as string) || email, order.number);
+    this.abandonedCarts.markRecovered([notes.buyerEmail as string | undefined, email, user?.email], order.number);
     this.logger.log(`Orden ${order.number} marcada como pagada.`);
   }
 
