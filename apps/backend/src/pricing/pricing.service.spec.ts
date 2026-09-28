@@ -11,7 +11,7 @@
  * verificar estas reglas, y así las pruebas corren en cualquier máquina.
  */
 
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { PricingService } from './pricing.service';
 
 // ─── Catálogo de prueba ──────────────────────────────────────────────────────
@@ -383,6 +383,39 @@ describe('PricingService — el envío sale de la tarifa configurada, no del nav
   it('retiro en el local no depende de que exista configuración de envíos', async () => {
     const service = new PricingService(fakePrismaConShippingConfig(undefined));
     expect(await service.calculateShipping(1000, 'retiro_local')).toBe(0);
+  });
+
+  it('Envío Flex cobra según la zona de la localidad, sin tarifarios configurados', async () => {
+    const service = new PricingService(fakePrismaConShippingConfig(undefined));
+    expect(await service.calculateShipping(1000, 'flex', 'San Miguel')).toBe(4500);
+    expect(await service.calculateShipping(1000, 'flex', 'Morón')).toBe(7000);
+    expect(await service.calculateShipping(1000, 'flex', 'CABA')).toBe(9000);
+  });
+
+  it('Envío Flex no tiene envío gratis: el kiosco cobra cada envío', async () => {
+    const service = new PricingService(
+      fakePrismaConShippingConfig({ flatRate: 4500, freeShippingThreshold: 100000 }),
+    );
+    expect(await service.calculateShipping(500000, 'flex', 'Tigre')).toBe(7000);
+  });
+
+  it('Envío Flex usa los precios guardados en el backoffice', async () => {
+    const service = new PricingService(
+      fakePrismaConShippingConfig({ flex: { activo: true, zona1: 5000, zona2: 8000, zona3: 10000 } }),
+    );
+    expect(await service.calculateShipping(1000, 'flex', 'jose c paz')).toBe(5000);
+    expect(await service.calculateShipping(1000, 'flex', 'Capital Federal')).toBe(10000);
+  });
+
+  it('Envío Flex rechaza una localidad fuera de zona o sin localidad', async () => {
+    const service = new PricingService(fakePrismaConShippingConfig(undefined));
+    await expect(service.calculateShipping(1000, 'flex', 'Rosario')).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.calculateShipping(1000, 'flex')).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('Envío Flex apagado desde el backoffice no se puede usar', async () => {
+    const service = new PricingService(fakePrismaConShippingConfig({ flex: { activo: false } }));
+    await expect(service.calculateShipping(1000, 'flex', 'San Miguel')).rejects.toBeInstanceOf(BadRequestException);
   });
 });
 

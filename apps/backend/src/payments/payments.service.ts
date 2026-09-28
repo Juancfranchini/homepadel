@@ -15,6 +15,7 @@ import { AbandonedCartsService } from '../abandoned-carts/abandoned-carts.servic
 import { InventoryService } from '../inventory/inventory.service';
 import { PaymentsSettlementService } from './payments-settlement.service';
 import { esCuentaDePrueba } from '../common/test-accounts';
+import { etiquetaFlex } from '../shipping/envio-flex';
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
@@ -150,7 +151,7 @@ export class PaymentsService {
       })),
     );
     const subtotal = resolvedItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    const shippingCost = await this.pricing.calculateShipping(subtotal, dto.shipping?.carrier);
+    const shippingCost = await this.pricing.calculateShipping(subtotal, dto.shipping?.carrier, dto.shipping?.city);
     let discount = 0;
     if (dto.couponCode) {
       const coupon = await this.coupons.validate(dto.couponCode, subtotal);
@@ -181,7 +182,8 @@ export class PaymentsService {
     if (!shipping) return 'Sin domicilio: pedírselo al comprador';
     if (shipping.carrier === 'retiro_local') return 'Retiro en el local';
     if (!shipping.street) return 'Sin domicilio: pedírselo al comprador';
-    return `${shipping.street}, ${shipping.city}, ${shipping.province} (${shipping.postalCode})`;
+    const domicilio = `${shipping.street}, ${shipping.city}, ${shipping.province} (${shipping.postalCode})`;
+    return shipping.carrier === 'flex' ? etiquetaFlex(shipping.city) + domicilio : domicilio;
   }
 
   private async createPendingOrder(

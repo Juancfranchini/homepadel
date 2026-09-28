@@ -11,6 +11,7 @@ import { InventoryService } from '../inventory/inventory.service';
 import { informarTransferenciaPagadaAMeta } from '../payments/payments.meta';
 import { pedidoSinDatosPersonales } from './orders.public-view';
 import { esCuentaDePrueba } from '../common/test-accounts';
+import { etiquetaFlex } from '../shipping/envio-flex';
 
 interface SalesLinkContext {
   id: string;
@@ -166,7 +167,7 @@ export class OrdersService {
 
     // P1 — el envío sale siempre de la tarifa configurada, nunca de lo que
     // mande el navegador.
-    const shipping = await this.pricing.calculateShipping(subtotal, dto.carrier);
+    const shipping = await this.pricing.calculateShipping(subtotal, dto.carrier, dto.city);
 
     // P2 — el cupón se valida y se cobra acá, no en el carrito. Si el código
     // no existe, está vencido, sin usos o no llega al mínimo, la orden falla
@@ -259,7 +260,7 @@ export class OrdersService {
           createdById: salesLink?.sellerId,
           inventoryStatus: resolvedItems.some((item) => !item.isMadeToOrder) ? 'DEDUCTED' : 'NONE',
           soldAt: new Date(),
-          address: dto.address,
+          address: dto.carrier === 'flex' ? etiquetaFlex(dto.city) + dto.address : dto.address,
           subtotal: input.subtotal,
           total: input.total,
           shipping: input.shipping,

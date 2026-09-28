@@ -1,6 +1,6 @@
 ﻿import { IsString, IsNumber, IsArray, IsOptional, ValidateNested, Min } from 'class-validator';
 import { Type } from 'class-transformer';
-import { IsEmail, IsIn, MinLength } from 'class-validator';
+import { IsEmail, IsIn, MaxLength, MinLength } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 class OrderItemDto {
@@ -25,8 +25,10 @@ export class CreateOrderDto {
   @ApiProperty() @IsEmail() buyerEmail: string;
   @ApiProperty() @IsString() @MinLength(8) buyerPhone: string;
   @ApiProperty() @IsString() @MinLength(2) buyerName: string;
-  @ApiPropertyOptional({ enum: ['correo_argentino', 'retiro_local'] })
+  @ApiPropertyOptional({ enum: ['correo_argentino', 'retiro_local', 'flex'] })
   @IsOptional()
-  @IsIn(['correo_argentino', 'retiro_local'])
-  carrier?: 'correo_argentino' | 'retiro_local';
+  @IsIn(['correo_argentino', 'retiro_local', 'flex'])
+  carrier?: 'correo_argentino' | 'retiro_local' | 'flex';
+  // Localidad de entrega: con Envío Flex define la zona y el precio.
+  @ApiPropertyOptional() @IsOptional() @IsString() @MaxLength(100) city?: string;
 }

@@ -4,6 +4,8 @@ import { Truck, Store } from 'lucide-react';
 import { UseFormRegister, FieldErrors } from 'react-hook-form';
 import { CheckoutFormData } from './checkoutSchema';
 import { formatPrice } from '@/lib/utils';
+import CheckoutFlexFields, { SugerenciaFlex } from './CheckoutFlexFields';
+import { CheckoutFlex } from './useCheckoutFlex';
 
 const inputClass = 'w-full bg-field border border-chip rounded-lg px-4 py-2.5 text-sm text-fg placeholder-fg-muted focus:outline-none focus:border-[#B7D31A]/60 transition-colors';
 const errorInputClass = 'w-full bg-field border border-red-500/50 rounded-lg px-4 py-2.5 text-sm text-fg placeholder-fg-muted focus:outline-none focus:border-red-500 transition-colors';
@@ -20,23 +22,31 @@ interface Props {
   selectedMethod: CheckoutFormData['shippingMethod'];
   correoCost: number;
   storeAddress?: string;
+  flex: CheckoutFlex;
 }
 
 const SHIPPING_OPTIONS: { value: CheckoutFormData['shippingMethod']; label: string; detail: string }[] = [
   { value: 'correo_argentino', label: 'Correo Argentino', detail: 'Opción principal' },
+  { value: 'flex', label: 'Envío Flex en moto', detail: 'AMBA · según tu localidad' },
   { value: 'retiro_local', label: 'Retiro en el local', detail: 'Sin costo' },
   { value: 'andreani', label: 'Andreani', detail: 'Costo a coordinar por WhatsApp' },
   { value: 'oca', label: 'OCA', detail: 'Costo a coordinar por WhatsApp' },
 ];
 
-function shippingOptionDetail(option: { value: CheckoutFormData['shippingMethod']; detail: string }, correoCost: number): string {
+function shippingOptionDetail(option: { value: CheckoutFormData['shippingMethod']; detail: string }, correoCost: number, flex: CheckoutFlex): string {
   if (option.value === 'correo_argentino') return correoCost === 0 ? 'Envío gratis' : formatPrice(correoCost);
+  if (option.value === 'flex') {
+    if (flex.zona) return `${formatPrice(flex.zona.precio)} · zona ${flex.zona.zona}`;
+    const desde = Math.min(...flex.info.zonas.map((z) => z.precio));
+    return Number.isFinite(desde) ? `AMBA · desde ${formatPrice(desde)}` : option.detail;
+  }
   if (option.value === 'retiro_local') return 'Sin costo';
   return option.detail;
 }
 
-export default function CheckoutShippingFields({ register, errors, selectedMethod, correoCost, storeAddress }: Props) {
+export default function CheckoutShippingFields({ register, errors, selectedMethod, correoCost, storeAddress, flex }: Props) {
   const esRetiro = selectedMethod === 'retiro_local';
+  const opciones = SHIPPING_OPTIONS.filter((option) => option.value !== 'flex' || flex.info.activo);
 
   return (
     <div className="bg-card rounded-2xl border border-[#B7D31A]/20 p-6">
@@ -48,20 +58,22 @@ export default function CheckoutShippingFields({ register, errors, selectedMetho
       <div className="mb-5">
         <p className="block text-xs font-semibold text-fg-muted uppercase tracking-wide mb-3">Cómo lo recibís</p>
         <div className="grid gap-2 sm:grid-cols-2">
-          {SHIPPING_OPTIONS.map((option) => (
+          {opciones.map((option) => (
             <label key={option.value} className={'rounded-xl border p-3 cursor-pointer transition-colors ' + (selectedMethod === option.value ? 'border-[#B7D31A] bg-[#B7D31A]/5' : 'border-chip hover:border-[#B7D31A]/30')}>
               <input {...register('shippingMethod')} type="radio" value={option.value} className="sr-only" />
               <span className="block text-sm font-bold text-fg">{option.label}</span>
-              <span className="block text-[11px] text-fg-muted mt-1">{shippingOptionDetail(option, correoCost)}</span>
+              <span className="block text-[11px] text-fg-muted mt-1">{shippingOptionDetail(option, correoCost, flex)}</span>
             </label>
           ))}
         </div>
-        {selectedMethod !== 'correo_argentino' && selectedMethod !== 'retiro_local' && (
+        {(selectedMethod === 'andreani' || selectedMethod === 'oca') && (
           <p className="text-xs text-amber-300 light:text-amber-700 mt-3">No se realizará ningún cobro: enviaremos el detalle del pedido por WhatsApp para coordinar el costo.</p>
         )}
       </div>
 
-      {esRetiro ? (
+      {selectedMethod === 'flex' ? (
+        <CheckoutFlexFields register={register} errors={errors} flex={flex} />
+      ) : esRetiro ? (
         <div className="rounded-xl border border-chip bg-field p-4 flex items-start gap-3">
           <Store size={18} className="text-brand-fg mt-0.5 flex-shrink-0" />
           <div className="text-sm text-fg-soft">
@@ -96,6 +108,7 @@ export default function CheckoutShippingFields({ register, errors, selectedMetho
           </div>
         </div>
       )}
+      {!esRetiro && <SugerenciaFlex flex={flex} />}
     </div>
   );
 }

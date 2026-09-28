@@ -4,6 +4,7 @@ import CheckoutPersonalDataFields from './CheckoutPersonalDataFields';
 import CheckoutShippingFields from './CheckoutShippingFields';
 import CheckoutPaymentMethodFields from './CheckoutPaymentMethodFields';
 import { CheckoutFormData } from './checkoutSchema';
+import { CheckoutFlex } from './useCheckoutFlex';
 
 interface Props {
   register: UseFormRegister<CheckoutFormData>;
@@ -15,13 +16,14 @@ interface Props {
   mercadopago: PaymentMethodConfig;
   transferencia: PaymentMethodConfig;
   storeAddress?: string;
+  flex: CheckoutFlex;
 }
 
 export default function CheckoutFormSections(props: Props) {
   return (
     <div className="lg:col-span-2 space-y-6">
       <CheckoutPersonalDataFields register={props.register} errors={props.errors} />
-      <CheckoutShippingFields register={props.register} errors={props.errors} selectedMethod={props.selectedShipping} correoCost={props.correoCost} storeAddress={props.storeAddress} />
+      <CheckoutShippingFields register={props.register} errors={props.errors} selectedMethod={props.selectedShipping} correoCost={props.correoCost} storeAddress={props.storeAddress} flex={props.flex} />
       {!props.shippingToCoordinate ? (
         <CheckoutPaymentMethodFields register={props.register} errors={props.errors} selectedPayment={props.selectedPayment} mercadopago={props.mercadopago} transferencia={props.transferencia} />
       ) : (

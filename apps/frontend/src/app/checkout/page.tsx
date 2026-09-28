@@ -20,6 +20,7 @@ import CheckoutFormSections from './CheckoutFormSections';
 import CheckoutOrderSummary from './CheckoutOrderSummary';
 import AuthModal from '@/components/auth/AuthModal';
 import { useCheckoutAuthGate } from './useCheckoutAuthGate';
+import { useCheckoutFlex } from './useCheckoutFlex';
 import { checkoutSchema, CheckoutFormData } from './checkoutSchema';
 
 function CheckoutHeader() {
@@ -49,7 +50,7 @@ export default function CheckoutPage() {
   // es lo que se cobra de verdad.
   const correoCost = subtotal >= freeShippingThreshold ? 0 : flatRate;
 
-  const { register, handleSubmit, formState: { errors, isSubmitting }, watch, reset } = useForm<CheckoutFormData>({
+  const { register, handleSubmit, formState: { errors, isSubmitting }, watch, reset, setValue } = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: { name: user?.name || '', email: user?.email || '', shippingMethod: 'correo_argentino', paymentMethod: 'mercadopago' },
   });
@@ -64,8 +65,9 @@ export default function CheckoutPage() {
   useAbandonedCart(items, { email: watch('email'), name: watch('name'), phone: watch('phone') }, orderSuccess);
   const selectedPayment = watch('paymentMethod');
   const selectedShipping = watch('shippingMethod');
-  const shippingToCoordinate = selectedShipping !== 'correo_argentino' && selectedShipping !== 'retiro_local';
-  const shippingCost = selectedShipping === 'correo_argentino' ? correoCost : 0;
+  const flex = useCheckoutFlex(watch, setValue);
+  const shippingToCoordinate = selectedShipping === 'andreani' || selectedShipping === 'oca';
+  const shippingCost = selectedShipping === 'correo_argentino' ? correoCost : selectedShipping === 'flex' ? flex.zona?.precio ?? 0 : 0;
   const total = subtotal + shippingCost - discount;
 
   // Si el carrito se vacía editándolo acá, el formulario NO se desmonta: al
@@ -97,7 +99,7 @@ export default function CheckoutPage() {
               register={register} errors={errors} selectedShipping={selectedShipping} selectedPayment={selectedPayment}
               correoCost={correoCost} shippingToCoordinate={shippingToCoordinate}
               mercadopago={mercadopago} transferencia={transferencia}
-              storeAddress={settings.address}
+              storeAddress={settings.address} flex={flex}
             />
 
             <CheckoutOrderSummary
@@ -110,6 +112,7 @@ export default function CheckoutPage() {
               isSubmitting={isSubmitting}
               paymentMethod={selectedPayment}
               shippingToCoordinate={shippingToCoordinate}
+              shippingPending={flex.esFlex && !flex.zona}
               onQuantityChange={updateQuantity}
               onRemove={removeItem}
             />

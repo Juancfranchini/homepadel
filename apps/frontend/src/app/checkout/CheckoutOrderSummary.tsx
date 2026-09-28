@@ -19,13 +19,15 @@ interface Props {
   isSubmitting: boolean;
   paymentMethod: 'mercadopago' | 'transfer';
   shippingToCoordinate: boolean;
+  /** Envío que depende de un dato que falta (la localidad para Flex). */
+  shippingPending?: boolean;
   onQuantityChange: (itemKey: string, quantity: number) => void;
   onRemove: (itemKey: string) => void;
 }
 
 export default function CheckoutOrderSummary({
   items, subtotal, coupon, shippingCost, total, orderError, isSubmitting,
-  paymentMethod, shippingToCoordinate, onQuantityChange, onRemove,
+  paymentMethod, shippingToCoordinate, shippingPending = false, onQuantityChange, onRemove,
 }: Props) {
   const vacio = items.length === 0;
   const { discount, couponCode } = coupon;
@@ -64,8 +66,8 @@ export default function CheckoutOrderSummary({
         <div className="border-t border-line pt-4 space-y-2 text-sm">
           <div className="flex justify-between text-fg-soft"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
           {discount > 0 && <div className="flex justify-between text-green-500 light:text-green-700"><span>Descuento{couponCode ? ' (' + couponCode + ')' : ''}</span><span>-{formatPrice(discount)}</span></div>}
-          <div className="flex justify-between text-fg-soft"><span>Envío</span><span className={shippingToCoordinate ? 'text-amber-300 light:text-amber-700 font-semibold' : shippingCost === 0 ? 'text-green-500 light:text-green-700 font-semibold' : ''}>{shippingToCoordinate ? 'A coordinar' : shippingCost === 0 ? 'GRATIS' : formatPrice(shippingCost)}</span></div>
-          <div className="flex justify-between font-black text-base pt-2 border-t border-line text-fg"><span>{shippingToCoordinate ? 'Total sin envío' : 'Total'}</span><span>{formatPrice(total)}</span></div>
+          <div className="flex justify-between text-fg-soft"><span>Envío</span><span className={shippingToCoordinate || shippingPending ? 'text-amber-300 light:text-amber-700 font-semibold' : shippingCost === 0 ? 'text-green-500 light:text-green-700 font-semibold' : ''}>{shippingToCoordinate ? 'A coordinar' : shippingPending ? 'Elegí tu localidad' : shippingCost === 0 ? 'GRATIS' : formatPrice(shippingCost)}</span></div>
+          <div className="flex justify-between font-black text-base pt-2 border-t border-line text-fg"><span>{shippingToCoordinate || shippingPending ? 'Total sin envío' : 'Total'}</span><span>{formatPrice(total)}</span></div>
         </div>
 
         {orderError && <p className="text-red-500 light:text-red-600 text-xs text-center mt-3">{orderError}</p>}

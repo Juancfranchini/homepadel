@@ -9,6 +9,7 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { useToast } from '@/components/ui/Toast';
+import FlexTarifaFields from './FlexTarifaFields';
 
 const inputClass = 'w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00]';
 const labelClass = 'block text-xs font-medium text-gray-400 uppercase tracking-wider';
@@ -16,8 +17,16 @@ const labelClass = 'block text-xs font-medium text-gray-400 uppercase tracking-w
 const schema = z.object({
   flatRate: z.coerce.number().min(0, 'Tiene que ser 0 o más'),
   freeShippingThreshold: z.coerce.number().min(0, 'Tiene que ser 0 o más'),
+  flexActivo: z.boolean(),
+  flexZona1: z.coerce.number().min(0, 'Tiene que ser 0 o más'),
+  flexZona2: z.coerce.number().min(0, 'Tiene que ser 0 o más'),
+  flexZona3: z.coerce.number().min(0, 'Tiene que ser 0 o más'),
 });
-type FormData = z.infer<typeof schema>;
+export type TarifaEnvioForm = z.infer<typeof schema>;
+type FormData = TarifaEnvioForm;
+
+// Tarifario de Kiosco Lo de Juan: lo que se usa si nunca se guardó otra cosa.
+const FLEX_POR_DEFECTO = { flexActivo: true, flexZona1: 4500, flexZona2: 7000, flexZona3: 9000 };
 
 export default function TarifaEnvioPage() {
   const { toast } = useToast();
@@ -26,7 +35,7 @@ export default function TarifaEnvioPage() {
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { flatRate: 4500, freeShippingThreshold: 100000 },
+    defaultValues: { flatRate: 4500, freeShippingThreshold: 100000, ...FLEX_POR_DEFECTO },
   });
 
   const load = useCallback(async () => {
@@ -37,6 +46,10 @@ export default function TarifaEnvioPage() {
       reset({
         flatRate: data.flatRate ?? 4500,
         freeShippingThreshold: data.freeShippingThreshold ?? 100000,
+        flexActivo: typeof data.flex?.activo === 'boolean' ? data.flex.activo : FLEX_POR_DEFECTO.flexActivo,
+        flexZona1: data.flex?.zona1 ?? FLEX_POR_DEFECTO.flexZona1,
+        flexZona2: data.flex?.zona2 ?? FLEX_POR_DEFECTO.flexZona2,
+        flexZona3: data.flex?.zona3 ?? FLEX_POR_DEFECTO.flexZona3,
       });
     } catch {
       toast('No se pudo cargar la tarifa de envío', 'error');
@@ -50,7 +63,9 @@ export default function TarifaEnvioPage() {
   const onSubmit = async (data: FormData) => {
     setSaving(true);
     try {
-      await api.put('/site-sections/shipping_rates', { data, active: true });
+      const { flexActivo, flexZona1, flexZona2, flexZona3, ...correo } = data;
+      const flex = { activo: flexActivo, zona1: flexZona1, zona2: flexZona2, zona3: flexZona3 };
+      await api.put('/site-sections/shipping_rates', { data: { ...correo, flex }, active: true });
       toast('Tarifa de envío guardada', 'success');
     } catch {
       toast('Error al guardar', 'error');
@@ -66,8 +81,8 @@ export default function TarifaEnvioPage() {
       <div className="flex items-center gap-3">
         <Link href="/configuracion" className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"><ArrowLeft className="w-4 h-4" /></Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><Banknote className="w-5 h-5 text-[#C8FF00]" />Tarifa de Correo Argentino</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Tarifa plana para Correo Argentino. Andreani y OCA se coordinan por WhatsApp y no usan este importe.</p>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><Banknote className="w-5 h-5 text-[#C8FF00]" />Tarifas de envío</h1>
+          <p className="text-gray-500 text-sm mt-0.5">Correo Argentino (tarifa plana) y Envío Flex (por zona). Andreani y OCA se coordinan por WhatsApp y no usan estos importes.</p>
         </div>
       </div>
 
@@ -85,6 +100,8 @@ export default function TarifaEnvioPage() {
             <p className="text-gray-400 text-xs mt-1">Un pedido con subtotal igual o mayor a este monto no paga envío.</p>
           </div>
         </div>
+
+        <FlexTarifaFields register={register} errors={errors} />
 
         <div className="flex justify-end max-w-lg">
           <button type="submit" disabled={saving} className="flex items-center gap-2 px-5 py-2.5 bg-[#C8FF00] text-[#0f172a] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] disabled:opacity-50 transition-colors">

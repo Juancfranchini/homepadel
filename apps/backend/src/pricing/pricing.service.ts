@@ -8,10 +8,11 @@
 // Regla de oro: del cliente se acepta QUÉ quiere comprar y CUÁNTAS unidades.
 // El precio sale siempre de la base de datos.
 
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { InventoryContext, InventoryService } from '../inventory/inventory.service';
 import { effectivePrice } from './effective-price';
+import { configFlex, zonaFlexDe } from '../shipping/envio-flex';
 
 export interface RequestedItem {
   productId: string;
@@ -132,14 +133,27 @@ export class PricingService {
    *
    * Retiro en el local es gratis siempre, sin importar el subtotal: no hay
    * ningún envío que cobrar.
+   *
+   * Envío Flex se cobra por zona según la localidad del cliente, sin envío
+   * gratis: el kiosco cobra cada envío. Si la localidad no está en ninguna
+   * zona (o Flex está apagado) el pedido no se puede crear.
    */
-  async calculateShipping(subtotal: number, carrier?: string): Promise<number> {
+  async calculateShipping(subtotal: number, carrier?: string, localidad?: string): Promise<number> {
     if (carrier === 'retiro_local') return 0;
 
     const section = await this.prisma.siteSection.findUnique({ where: { key: 'shipping_rates' } });
-    const data = (section?.data as { flatRate?: number; freeShippingThreshold?: number }) ?? {};
+    const data = (section?.data as { flatRate?: number; freeShippingThreshold?: number; flex?: unknown }) ?? {};
+    if (carrier === 'flex') return this.costoFlex(data.flex, localidad);
     const flatRate = Number(data.flatRate ?? 4500);
     const threshold = Number(data.freeShippingThreshold ?? 100000);
     return subtotal >= threshold ? 0 : flatRate;
+  }
+
+  private costoFlex(guardado: unknown, localidad?: string): number {
+    const config = configFlex(guardado);
+    if (!config.activo) throw new BadRequestException('El Envío Flex no está disponible en este momento.');
+    const zona = zonaFlexDe(localidad);
+    if (!zona) throw new BadRequestException('El Envío Flex no llega a esa localidad. Elegí otra forma de envío.');
+    return config.precios[zona];
   }
 }
