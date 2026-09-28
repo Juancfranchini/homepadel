@@ -31,7 +31,7 @@ export default function CuentaAuthForm({ onAuth, initialError = '', embedded = f
   const [apiError, setApiError] = useState(initialError);
 
   const loginForm = useForm<LoginFormData>({ resolver: zodResolver(loginSchema) });
-  const registerForm = useForm<RegisterFormData>({ resolver: zodResolver(registerSchema) });
+  const registerForm = useForm<RegisterFormData>({ resolver: zodResolver(registerSchema), defaultValues: { acceptTerms: false, acceptMarketing: true } });
 
   useEffect(() => {
     if (initialError) setApiError(initialError);
@@ -45,7 +45,7 @@ export default function CuentaAuthForm({ onAuth, initialError = '', embedded = f
 
   const onRegister = async (data: RegisterFormData) => {
     setApiError('');
-    try { const result = await registerUser({ name: data.name, email: data.email, password: data.password }); onAuth(result.user, result.token); }
+    try { const result = await registerUser({ name: data.name, email: data.email, password: data.password, acceptTerms: data.acceptTerms, acceptMarketing: data.acceptMarketing }); onAuth(result.user, result.token); }
     catch (error: unknown) { setApiError(apiErrorMessage(error, 'No se pudo crear la cuenta.')); }
   };
 

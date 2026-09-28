@@ -1,4 +1,4 @@
-﻿// Cliente Axios configurado para el backend
+// Cliente Axios configurado para el backend
 // Base URL leída de variable de entorno NEXT_PUBLIC_API_URL
 
 import axios from 'axios';
@@ -43,7 +43,7 @@ export const getBrands = () =>
 export const login = (data: { email: string; password: string }) =>
   api.post('/auth/login', data).then((r) => r.data);
 
-export const register = (data: { name: string; email: string; password: string }) =>
+export const register = (data: { name: string; email: string; password: string; acceptTerms: boolean; acceptMarketing: boolean }) =>
   api.post('/auth/register', data).then((r) => r.data);
 
 export const getMe = () =>

@@ -1,4 +1,4 @@
-﻿import {
+import {
   Injectable,
   UnauthorizedException,
   ConflictException,
@@ -26,9 +26,17 @@ export class AuthService {
 
     const hashed = await hashPassword(dto.password);
     const user = await this.prisma.user.create({
-      data: { ...dto, password: hashed },
+      data: { name: dto.name, email: dto.email, password: hashed },
       select: { id: true, email: true, name: true, role: true },
     });
+
+    if (dto.acceptMarketing) {
+      await this.prisma.newsletter.upsert({
+        where: { email: dto.email },
+        create: { email: dto.email },
+        update: { active: true },
+      });
+    }
 
     return { user, token: this.jwtService.sign({ sub: user.id, role: user.role }) };
   }

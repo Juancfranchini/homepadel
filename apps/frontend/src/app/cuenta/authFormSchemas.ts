@@ -10,6 +10,8 @@ export const registerSchema = z.object({
   email: z.string().trim().email('Email inválido'),
   password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres').max(72, 'La contraseña admite hasta 72 caracteres'),
   confirmPassword: z.string(),
+  acceptTerms: z.boolean().refine((v) => v, 'Tenés que aceptar los términos y condiciones'),
+  acceptMarketing: z.boolean(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: 'Las contraseñas no coinciden',
   path: ['confirmPassword'],

@@ -1,11 +1,13 @@
 'use client';
 
 import { SubmitHandler, UseFormReturn } from 'react-hook-form';
+import Link from 'next/link';
 import { User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { RegisterFormData } from './authFormSchemas';
 
 const inputClass = 'w-full pl-10 pr-4 py-2.5 bg-[#161818] border border-[#1A1F21] rounded-lg text-sm text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A]/60 transition-colors [-webkit-box-shadow:0_0_0_30px_#161818_inset] [-webkit-text-fill-color:#F7F6F7]';
 const errorInputClass = 'w-full pl-10 pr-4 py-2.5 bg-[#161818] border border-red-500/50 rounded-lg text-sm text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-red-500 transition-colors [-webkit-box-shadow:0_0_0_30px_#161818_inset] [-webkit-text-fill-color:#F7F6F7]';
+const checkboxClass = 'mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-[#1A1F21] bg-[#161818] accent-[#B7D31A]';
 
 interface Props {
   form: UseFormReturn<RegisterFormData>;
@@ -39,6 +41,19 @@ export default function CuentaRegisterForm({ form, onSubmit, showPassword, onTog
         <label htmlFor="register-confirm-password" className="block text-xs font-semibold text-[#8A8A85] uppercase tracking-wide mb-1">Confirmar contraseña</label>
         <div className="relative"><Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8A8A85]" /><input id="register-confirm-password" {...register('confirmPassword')} type={showPassword ? 'text' : 'password'} autoComplete="new-password" placeholder="Repetí tu contraseña" className={errors.confirmPassword ? errorInputClass : inputClass} /></div>
         {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{String(errors.confirmPassword.message)}</p>}
+      </div>
+      <div className="space-y-2.5 pt-1">
+        <div>
+          <label htmlFor="register-accept-terms" className="flex items-start gap-2.5 text-sm text-[#C9C9C4] cursor-pointer">
+            <input id="register-accept-terms" {...register('acceptTerms')} type="checkbox" className={checkboxClass} />
+            <span>Acepto los <Link href="/terminos" target="_blank" className="text-[#B7D31A] font-semibold hover:text-[#c8e81f] underline-offset-2 hover:underline">términos y condiciones</Link></span>
+          </label>
+          {errors.acceptTerms && <p className="text-red-500 text-xs mt-1">{String(errors.acceptTerms.message)}</p>}
+        </div>
+        <label htmlFor="register-accept-marketing" className="flex items-start gap-2.5 text-sm text-[#C9C9C4] cursor-pointer">
+          <input id="register-accept-marketing" {...register('acceptMarketing')} type="checkbox" className={checkboxClass} />
+          <span>Acepto recibir novedades, ofertas</span>
+        </label>
       </div>
       <button type="submit" disabled={isSubmitting} className="w-full bg-[#B7D31A] text-[#050606] py-3.5 rounded-xl font-black text-sm uppercase tracking-wider hover:bg-[#c8e81f] transition-colors disabled:opacity-70">{isSubmitting ? 'Creando cuenta...' : 'Crear cuenta'}</button>
     </form>
