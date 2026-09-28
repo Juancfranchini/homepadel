@@ -10,9 +10,6 @@ export type Resultado = 'cargando' | 'aprobado' | 'acreditando' | 'pendiente' | 
 export interface OrdenCobrada {
   total: number;
   items: { productId: string }[];
-  /** Los que cargó el comprador en el checkout: mejoran la coincidencia en Meta. */
-  email?: string | null;
-  phone?: string | null;
 }
 
 /** Estados de la orden que significan que el dinero ya entró. */
@@ -79,8 +76,6 @@ export function useOrderOutcome(porDefecto: Resultado): { resultado: Resultado; 
           setOrden({
             total: ordenServidor.total,
             items: (ordenServidor.items || []).map((i: { productId: string }) => ({ productId: i.productId })),
-            email: ordenServidor.buyerEmail,
-            phone: ordenServidor.buyerPhone,
           });
           setResultado('aprobado');
           return;

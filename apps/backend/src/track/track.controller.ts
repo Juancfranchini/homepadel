@@ -48,6 +48,29 @@ export class TrackController {
    * hacía. Ahora lee la misma configuración que ya usa el aviso de compra
    * (`PaymentsService` / `enviarCompraAMeta`), que sí funcionaba.
    */
+  /**
+   * Email y teléfono para Meta. En la compra salen de la orden, leídos acá
+   * en el servidor: así no tienen que pasar por el navegador ni exponerse en
+   * la consulta pública del pedido. En el resto de los eventos, los que
+   * mande el navegador (los de la cuenta, si hay sesión).
+   */
+  private async datosDelComprador(body: TrackEventDto): Promise<{ emails: (string | undefined)[]; telefono?: string }> {
+    if (body.eventName === 'Purchase' && body.eventId.startsWith('purchase_')) {
+      const orden = await this.prisma.order.findUnique({
+        where: { number: body.eventId.slice('purchase_'.length) },
+        select: { notes: true, user: { select: { email: true } } },
+      });
+      let notas: { buyerEmail?: string; buyerPhone?: string } = {};
+      try {
+        notas = orden?.notes ? JSON.parse(orden.notes) : {};
+      } catch {
+        notas = {};
+      }
+      return { emails: [notas.buyerEmail, orden?.user?.email], telefono: notas.buyerPhone };
+    }
+    return { emails: [body.userData?.email], telefono: body.userData?.phone };
+  }
+
   @Post()
   async track(@Body() body: TrackEventDto, @Req() req: Request) {
     // El embudo propio del backoffice (Marketing) no depende de que Meta esté
@@ -83,12 +106,7 @@ export class TrackController {
         user_data: {
           fbp: fbp || undefined,
           fbc: fbc || undefined,
-          ...userDataParaMeta({
-            emails: [body.userData?.email],
-            telefono: body.userData?.phone,
-            ip: clientIp,
-            userAgent: clientUserAgent,
-          }),
+          ...userDataParaMeta({ ...(await this.datosDelComprador(body)), ip: clientIp, userAgent: clientUserAgent }),
         },
         ...(body.eventData || {}),
         ...(body.customData ? { custom_data: body.customData } : {}),

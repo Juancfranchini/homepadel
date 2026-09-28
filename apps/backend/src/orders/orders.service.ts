@@ -9,6 +9,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderStatus } from '@prisma/client';
 import { InventoryService } from '../inventory/inventory.service';
 import { informarTransferenciaPagadaAMeta } from '../payments/payments.meta';
+import { pedidoSinDatosPersonales } from './orders.public-view';
 
 interface SalesLinkContext {
   id: string;
@@ -113,6 +114,13 @@ export class OrdersService {
         throw new NotFoundException('El teléfono no coincide con el pedido.');
       }
     }
+
+    // Sin email ni teléfono que lo confirmen, solo lo no personal: estado,
+    // montos e ítems (lo que necesita la pantalla de vuelta de Mercado Pago).
+    // Antes devolvía nombre, email, teléfono y domicilio a cualquiera con el
+    // número, y los de transferencia (HP-<hora>) y Punto de Venta
+    // (POS-<hora>) se pueden adivinar recorriendo horarios.
+    if (!email && !phone) return pedidoSinDatosPersonales(order);
 
     const { userId, user, notes, ...rest } = order as any;
     let buyerInfo: any = {};

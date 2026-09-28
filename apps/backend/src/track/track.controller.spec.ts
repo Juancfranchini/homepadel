@@ -137,6 +137,30 @@ describe('TrackController', () => {
     expect(JSON.stringify(prisma.marketingEvent.create.mock.calls)).not.toContain('Comprador');
   });
 
+  it('en la compra toma el email y el teléfono de la orden, en el servidor', async () => {
+    const prisma = {
+      siteSection: { findUnique: jest.fn().mockResolvedValue({ data: { pixelId: '123', accessToken: 'token' } }) },
+      marketingEvent: marketingEventFalso(),
+      order: {
+        findUnique: jest.fn().mockResolvedValue({
+          notes: JSON.stringify({ buyerEmail: 'Compradora@Mail.com', buyerPhone: '11 4083-2310' }),
+          user: null,
+        }),
+      },
+    };
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, status: 200 }) as any;
+
+    const controller = new TrackController(prisma as any);
+    await controller.track({ eventName: 'Purchase', eventId: 'purchase_HP-1', eventData: { value: 750000 } }, construirRequestFalso());
+
+    expect(prisma.order.findUnique).toHaveBeenCalledWith(expect.objectContaining({ where: { number: 'HP-1' } }));
+    const enviado = (global.fetch as jest.Mock).mock.calls[0][1].body as string;
+    const userData = JSON.parse(enviado).data[0].user_data;
+    expect(userData.em).toHaveLength(1);
+    expect(userData.ph).toHaveLength(2);
+    expect(enviado).not.toContain('Compradora');
+  });
+
   it('usa siempre el pixel configurado, aunque el navegador mande otro', async () => {
     const prisma = {
       siteSection: { findUnique: jest.fn().mockResolvedValue({ data: { pixelId: '1041282918808105', accessToken: 'token' } }) },
