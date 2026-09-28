@@ -21,6 +21,7 @@ import CheckoutOrderSummary from './CheckoutOrderSummary';
 import AuthModal from '@/components/auth/AuthModal';
 import { useCheckoutAuthGate } from './useCheckoutAuthGate';
 import { useCheckoutFlex } from './useCheckoutFlex';
+import { useDireccionesCheckout } from './useDireccionesCheckout';
 import { checkoutSchema, CheckoutFormData } from './checkoutSchema';
 
 function CheckoutHeader() {
@@ -66,6 +67,7 @@ export default function CheckoutPage() {
   const selectedPayment = watch('paymentMethod');
   const selectedShipping = watch('shippingMethod');
   const flex = useCheckoutFlex(watch, setValue);
+  const guardadas = useDireccionesCheckout(Boolean(user), setValue);
   const shippingToCoordinate = selectedShipping === 'andreani' || selectedShipping === 'oca';
   const shippingCost = selectedShipping === 'correo_argentino' ? correoCost : selectedShipping === 'flex' ? flex.zona?.precio ?? 0 : 0;
   const total = subtotal + shippingCost - discount;
@@ -100,6 +102,7 @@ export default function CheckoutPage() {
               correoCost={correoCost} shippingToCoordinate={shippingToCoordinate}
               mercadopago={mercadopago} transferencia={transferencia}
               storeAddress={settings.address} flex={flex}
+              direcciones={guardadas.direcciones} onUsarDireccion={(d) => guardadas.usar(d, watch('phone'))}
             />
 
             <CheckoutOrderSummary

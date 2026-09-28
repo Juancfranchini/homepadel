@@ -33,6 +33,13 @@ Regla dura del checkout: **nada de lo que manda el navegador determina cuánto s
 - Cupones: `CouponsService.validate(code, subtotal)` valida vigencia, usos y monto mínimo; `calculateDiscount` computa el monto. El uso (`usedCount`) se consume recién cuando la venta se concreta (orden directa creada, o pago de Mercado Pago aprobado en el webhook) — no al solo aplicar el cupón, mismo criterio que el stock. Antes el frontend tenía una lista fija de códigos (`VALID_COUPONS`) con 10% hardcodeado, visible en el bundle del navegador y sin conexión real al backend — corregido.
 - `OrdersService.create` y `PaymentsService.createPreference` recalculan envío y descuento de forma idéntica — `CreateOrderDto` ya **no acepta** `shipping`/`discount` del cliente, solo un `couponCode` opcional que el servidor valida.
 
+## Mi cuenta: direcciones y favoritos
+
+`src/cuenta/` (`/api/mi-cuenta`, siempre con JWT y sobre el usuario del token — no hay forma de tocar datos de otro):
+
+- Direcciones (`UserAddress`): `GET/POST /direcciones`, `PATCH/DELETE /direcciones/:id`. Máximo 3 por cliente (`MAX_DIRECCIONES`, lo controla el servidor); una dirección ajena responde 404. El checkout las ofrece para completar el domicilio con un toque.
+- Favoritos (`Favorite`, único por usuario+producto): `GET /favoritos` (productos activos con `effectivePrice`), `GET /favoritos/ids`, `PUT/DELETE /favoritos/:productId`, `POST /favoritos/sincronizar` (suma los marcados sin sesión al iniciarla). En la tienda los maneja `store/favoritosStore.ts`: sin sesión quedan en el navegador; `components/layout/FavoritosSync.tsx` los sube al iniciar sesión y los borra del navegador al cerrarla.
+
 ## Integraciones externas
 
 | Servicio | Módulo | Notas |

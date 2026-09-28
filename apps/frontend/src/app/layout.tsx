@@ -6,6 +6,7 @@ import MetaPixel from '@/components/layout/MetaPixel';
 import WhatsAppFloat from '@/components/layout/WhatsAppFloat';
 import ModoPruebaAviso from '@/components/layout/ModoPruebaAviso';
 import CarritoDeCuenta from '@/components/layout/CarritoDeCuenta';
+import FavoritosSync from '@/components/layout/FavoritosSync';
 import { getSiteUrl } from '@/lib/siteUrl';
 import { SCRIPT_TEMA } from '@/lib/tema';
 import { HOME_DESCRIPTION, HOME_TITLE, OPEN_GRAPH_BASE } from '@/lib/seoPortada';
@@ -96,6 +97,7 @@ export default function RootLayout({
         <WhatsAppFloat />
         <ModoPruebaAviso />
         <CarritoDeCuenta />
+        <FavoritosSync />
         <MetaPixel />
       </body>
     </html>

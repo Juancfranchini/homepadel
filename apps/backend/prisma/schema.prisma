@@ -34,6 +34,38 @@ model User {
   auditLogs      AuditLog[]
   reviews        ProductReview[]
   authIdentities AuthIdentity[]
+  addresses      UserAddress[]
+  favorites      Favorite[]
+}
+
+/// Direcciones de entrega que el cliente guarda en su cuenta (hasta 3, lo controla el servidor).
+model UserAddress {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label      String?
+  street     String
+  city       String
+  province   String
+  postalCode String
+  phone      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+}
+
+/// Productos que el cliente marcó con el corazón.
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+  @@index([userId])
 }
 
 model AuthIdentity {
@@ -141,6 +173,7 @@ model Product {
   transferPrice           Float?
   orderItems              OrderItem[]
   reviews                 ProductReview[]
+  favorites               Favorite[]
   variants                ProductVariant[]
   inventoryMovements      InventoryMovement[]
   brand                   Brand               @relation(fields: [brandId], references: [id])
