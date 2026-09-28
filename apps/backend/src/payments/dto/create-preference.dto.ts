@@ -8,9 +8,12 @@ import {
   ValidateNested,
   Min,
   MaxLength,
+  IsInt,
+  Max,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { MAX_BOLSAS_REGALO } from '../../orders/bolsas-regalo';
 
 class PreferenceItemDto {
   @IsString() productId: string;
@@ -73,6 +76,9 @@ export class CreatePreferenceDto {
   @ApiPropertyOptional() @IsString() @IsOptional() couponCode?: string;
 
   @ApiPropertyOptional() @IsString() @IsOptional() salesLinkToken?: string;
+
+  // Bolsas de regalo pedidas; el servidor las limita a las unidades compradas.
+  @ApiPropertyOptional() @IsOptional() @IsInt() @Min(0) @Max(MAX_BOLSAS_REGALO) bolsasRegalo?: number;
 
   // Se aceptan por compatibilidad con el frontend anterior y se descartan: el
   // número de orden y la referencia externa los genera el servidor. Que los

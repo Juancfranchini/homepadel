@@ -12,6 +12,7 @@ import { informarTransferenciaPagadaAMeta } from '../payments/payments.meta';
 import { pedidoSinDatosPersonales } from './orders.public-view';
 import { esCuentaDePrueba } from '../common/test-accounts';
 import { etiquetaFlex } from '../shipping/envio-flex';
+import { bolsasDeRegalo } from './bolsas-regalo';
 import { exigirTransferencia } from '../payments/transferencia';
 
 interface SalesLinkContext {
@@ -59,6 +60,7 @@ export class OrdersService {
         buyerEmail: buyerInfo.buyerEmail || order.user?.email || null,
         buyerPhone: buyerInfo.buyerPhone || null,
         paymentMethod: buyerInfo.paymentMethod || null,
+        bolsasRegalo: Number(buyerInfo.bolsasRegalo) || 0,
       };
     });
   }
@@ -188,6 +190,7 @@ export class OrdersService {
       buyerName: dto.buyerName,
       paymentMethod: dto.paymentMethod,
       shippingCarrier: dto.carrier || 'correo_argentino',
+      bolsasRegalo: bolsasDeRegalo(dto.bolsasRegalo, resolvedItems),
     };
 
     const order = await this.persistOnlineOrder({
@@ -247,7 +250,7 @@ export class OrdersService {
     total: number;
     shipping: number;
     discount: number;
-    buyerInfo: Record<string, string>;
+    buyerInfo: Record<string, string | number>;
     isTest: boolean;
   }) {
     return this.prisma.$transaction(async (tx) => {

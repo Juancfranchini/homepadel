@@ -6,6 +6,7 @@ import { CartItem } from '@/types';
 import { formatPrice } from '@/lib/utils';
 import { getItemKey } from '@/store/cartStore';
 import CouponField from '@/components/cart/CouponField';
+import BolsaRegaloOption from '@/components/cart/BolsaRegaloOption';
 import type { CouponState } from '@/hooks/useCoupon';
 import CheckoutSummaryItem from './CheckoutSummaryItem';
 
@@ -61,6 +62,7 @@ export default function CheckoutOrderSummary({
           </div>
         )}
 
+        {!vacio && <BolsaRegaloOption compacta />}
         {!vacio && <CouponField coupon={coupon} />}
 
         <div className="border-t border-line pt-4 space-y-2 text-sm">

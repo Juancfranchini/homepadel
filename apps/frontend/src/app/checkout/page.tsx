@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCartStore } from '@/store/cartStore';
+import { bolsasEfectivas, useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
 import { usePaymentMethods } from '@/hooks/usePaymentMethods';
 import { useShippingRates } from '@/hooks/useShippingRates';
@@ -36,12 +36,12 @@ function CheckoutHeader() {
 }
 
 export default function CheckoutPage() {
-  const { items, totalPrice, clearCart, couponCode, salesLinkToken, updateQuantity, removeItem } = useCartStore();
+  const { items, totalPrice, clearCart, couponCode, salesLinkToken, updateQuantity, removeItem, bolsasRegalo } = useCartStore();
   const { user, setAuth } = useAuthStore();
   const { mercadopago, transferencia } = usePaymentMethods();
   const { flatRate, freeShippingThreshold } = useShippingRates();
   const settings = useSiteSettings();
-  const { onSubmit, orderError, orderSuccess, orderNumber, pedidoTransferencia } = useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart, whatsapp: settings.whatsapp || settings.phone });
+  const { onSubmit, orderError, orderSuccess, orderNumber, pedidoTransferencia } = useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart, whatsapp: settings.whatsapp || settings.phone, bolsasRegalo: bolsasEfectivas(bolsasRegalo, items) });
 
   const subtotal = totalPrice();
   const coupon = useCoupon(subtotal);

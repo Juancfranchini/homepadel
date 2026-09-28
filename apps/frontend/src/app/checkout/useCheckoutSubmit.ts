@@ -36,6 +36,8 @@ interface Params {
   salesLinkToken: string | null;
   clearCart: () => void;
   whatsapp?: string;
+  /** Bolsas de regalo que van (ya limitadas a las unidades del carrito). */
+  bolsasRegalo: number;
 }
 
 function buildOrderItems(items: CartItem[]) {
@@ -66,7 +68,7 @@ function buildShippingPayload(data: CheckoutFormData) {
   };
 }
 
-function shippingCoordinationMessage(data: CheckoutFormData, items: CartItem[], couponCode: string | null): string {
+function shippingCoordinationMessage(data: CheckoutFormData, items: CartItem[], couponCode: string | null, bolsasRegalo: number): string {
   const carrier = data.shippingMethod === 'andreani' ? 'Andreani' : 'OCA';
   const itemLines = items.map((item) => {
     const variant = [item.variantSize, item.variantColor, item.variantDimensions].filter(Boolean).join(' / ');
@@ -76,14 +78,15 @@ function shippingCoordinationMessage(data: CheckoutFormData, items: CartItem[], 
   return [
     `Hola, quiero coordinar el envío por ${carrier}.`, '', 'Detalle del pedido:', ...itemLines,
     `Subtotal de productos: ${formatPrice(subtotal)}`,
-    ...(couponCode ? [`Cupón aplicado: ${couponCode}`] : []), '',
+    ...(couponCode ? [`Cupón aplicado: ${couponCode}`] : []),
+    ...(bolsasRegalo > 0 ? [`Bolsas de regalo: ${bolsasRegalo}`] : []), '',
     `Cliente: ${data.name}`, `Email: ${data.email}`, `Teléfono: ${data.phone}`,
     `Entrega: ${data.street}, ${data.city}, ${data.province} (${data.postalCode})`,
     '', 'Quedo a la espera del costo de envío y los pasos para terminar la compra.',
   ].join('\n');
 }
 
-export function useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart, whatsapp }: Params) {
+export function useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart, whatsapp, bolsasRegalo }: Params) {
   const [orderError, setOrderError] = useState('');
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
@@ -101,6 +104,7 @@ export function useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart
         shipping: buildShippingPayload(data),
         couponCode: couponCode || undefined,
         salesLinkToken: salesLinkToken || undefined,
+        bolsasRegalo: bolsasRegalo || undefined,
       });
       if (pref?.init_point) {
         window.location.href = pref.init_point;
@@ -126,6 +130,7 @@ export function useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart
         salesLinkToken: salesLinkToken || undefined,
         carrier: esRetiro ? 'retiro_local' : data.shippingMethod === 'flex' ? 'flex' : 'correo_argentino',
         city: esRetiro ? undefined : data.city,
+        bolsasRegalo: bolsasRegalo || undefined,
       });
       setOrderNumber(result.number);
       setPedidoTransferencia({ total: Number(result.total) || 0, datos: result.datosTransferencia ?? null });
@@ -140,7 +145,7 @@ export function useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart
     setOrderError('');
     const coordinaPorWhatsapp = data.shippingMethod === 'andreani' || data.shippingMethod === 'oca';
     if (coordinaPorWhatsapp) {
-      const url = buildWhatsappUrl(whatsapp, shippingCoordinationMessage(data, items, couponCode));
+      const url = buildWhatsappUrl(whatsapp, shippingCoordinationMessage(data, items, couponCode, bolsasRegalo));
       if (!url) {
         setOrderError('No hay un número de WhatsApp configurado para coordinar este envío. Elegí Correo Argentino o contactanos por email.');
         return;

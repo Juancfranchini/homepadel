@@ -1,6 +1,7 @@
 ﻿import { IsString, IsNumber, IsArray, IsOptional, ValidateNested, Min } from 'class-validator';
 import { Type } from 'class-transformer';
-import { IsEmail, IsIn, MaxLength, MinLength } from 'class-validator';
+import { IsEmail, IsIn, IsInt, Max, MaxLength, MinLength } from 'class-validator';
+import { MAX_BOLSAS_REGALO } from '../bolsas-regalo';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 class OrderItemDto {
@@ -31,4 +32,6 @@ export class CreateOrderDto {
   carrier?: 'correo_argentino' | 'retiro_local' | 'flex';
   // Localidad de entrega: con Envío Flex define la zona y el precio.
   @ApiPropertyOptional() @IsOptional() @IsString() @MaxLength(100) city?: string;
+  // Bolsas de regalo pedidas; el servidor las limita a las unidades compradas.
+  @ApiPropertyOptional() @IsOptional() @IsInt() @Min(0) @Max(MAX_BOLSAS_REGALO) bolsasRegalo?: number;
 }

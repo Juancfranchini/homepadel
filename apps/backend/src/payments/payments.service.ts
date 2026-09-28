@@ -16,6 +16,7 @@ import { InventoryService } from '../inventory/inventory.service';
 import { PaymentsSettlementService } from './payments-settlement.service';
 import { esCuentaDePrueba } from '../common/test-accounts';
 import { etiquetaFlex } from '../shipping/envio-flex';
+import { bolsasDeRegalo } from '../orders/bolsas-regalo';
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
@@ -85,7 +86,7 @@ export class PaymentsService {
       orderNumber,
       externalReference,
       resolvedItems,
-      { subtotal, shipping: shippingCost, discount, couponCode },
+      { subtotal, shipping: shippingCost, discount, couponCode, bolsasRegalo: bolsasDeRegalo(dto.bolsasRegalo, resolvedItems) },
       payer,
       dto.shipping,
       salesLink?.id,
@@ -190,7 +191,7 @@ export class PaymentsService {
     orderNumber: string,
     externalReference: string,
     resolvedItems: ResolvedItem[],
-    totals: { subtotal: number; shipping: number; discount: number; couponCode?: string },
+    totals: { subtotal: number; shipping: number; discount: number; couponCode?: string; bolsasRegalo: number },
     payer: { name: string; email: string },
     shipping?: ShippingData,
     salesLinkId?: string,
@@ -220,6 +221,7 @@ export class PaymentsService {
             buyerName: payer.name,
             buyerPhone: shipping?.phone || null,
             shippingCarrier: shipping?.carrier || 'correo_argentino',
+            bolsasRegalo: totals.bolsasRegalo,
           }),
           items: {
             create: resolvedItems.map((item) => ({

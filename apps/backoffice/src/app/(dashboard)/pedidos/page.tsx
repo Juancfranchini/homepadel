@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { ArrowRight, ChevronDown } from 'lucide-react';
+import { ArrowRight, ChevronDown, Gift } from 'lucide-react';
 import api from '@/lib/api';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { Modal } from '@/components/ui/Modal';
@@ -36,6 +36,8 @@ interface Order {
   buyerEmail?: string;
   buyerPhone?: string;
   paymentMethod?: string;
+  /** Bolsas de regalo a incluir en el paquete (sin cargo). */
+  bolsasRegalo?: number;
   user?: { name: string; email: string };
   seller?: { name: string };
   branch?: { name: string };
@@ -69,6 +71,11 @@ const STATUS_OPTIONS = ['PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
 const STATUS_LABELS: Record<string, string> = {
   PENDING: 'Pendiente', PAID: 'Pagado', SHIPPED: 'Enviado', DELIVERED: 'Entregado', CANCELLED: 'Cancelado',
 };
+
+function MarcaRegalo({ order }: { order: Order }) {
+  if (!order.bolsasRegalo) return null;
+  return <Gift size={14} className="inline ml-1.5 text-amber-600" aria-label={`Para regalo: ${order.bolsasRegalo} bolsa(s)`} />;
+}
 
 function StatusTabsGrid({ orders, statusFilter, onSelect }: { orders: Order[]; statusFilter: StatusFilter; onSelect: (v: StatusFilter) => void }) {
   return (
@@ -149,7 +156,7 @@ function OrdersTable({ orders, onDetail }: { orders: Order[]; onDetail: (o: Orde
               const statusInfo = STATUS_TABS.find((t) => t.value === o.status);
               return (
                 <tr key={o.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
-                  <td className="px-3 py-3"><code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-900 font-semibold">{o.number}</code><MarcaPrueba order={o} /></td>
+                  <td className="px-3 py-3"><code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-900 font-semibold">{o.number}</code><MarcaPrueba order={o} /><MarcaRegalo order={o} /></td>
                   <td className="px-3 py-3">
                     <p className="text-gray-900 font-medium text-sm">{o.buyerName || o.user?.name || 'Invitado'}</p>
                     <p className="text-xs text-gray-400">{o.buyerEmail || o.user?.email || '-'}</p>
@@ -186,6 +193,7 @@ function OrdersCards({ orders, onDetail }: { orders: Order[]; onDetail: (o: Orde
               <div className="flex-1 min-w-0">
                 <code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-900 font-semibold">{o.number}</code>
                 <MarcaPrueba order={o} />
+                <MarcaRegalo order={o} />
                 <p className="text-sm font-semibold text-gray-900 mt-1 truncate">{o.buyerName || o.user?.name || 'Invitado'}</p>
                 <p className="text-xs text-gray-400">{o.buyerPhone || '-'}</p>
               </div>
@@ -252,6 +260,11 @@ function OrderDetailModal({ isOpen, order, updatingStatus, onStatusChange, onCha
         </div>
         <div>
           <p className="text-sm font-semibold text-gray-700 mb-3">Productos</p>
+          {(order.bolsasRegalo ?? 0) > 0 && (
+            <p className="mb-3 flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-sm font-semibold text-amber-800">
+              <Gift size={16} /> Para regalo: incluir {order.bolsasRegalo === 1 ? '1 bolsa' : order.bolsasRegalo + ' bolsas'} Home Pádel
+            </p>
+          )}
           <div className="space-y-2">
             {(order.items || []).map((item) => (
               <div key={item.id} className="flex items-center justify-between p-3 bg-[#0f172a] rounded-lg">

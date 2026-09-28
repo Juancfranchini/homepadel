@@ -39,6 +39,10 @@ Regla dura del checkout: **nada de lo que manda el navegador determina cuánto s
 - Los datos de la cuenta (alias, CBU, titular, banco) **no** salen en `GET /site-sections/payment_methods` público (`mediosDePagoPublicos`): solo los ve el admin y el comprador, en la respuesta del pedido (`datosTransferencia`), para mostrarlos en la pantalla de pedido confirmado con el botón de mandar el comprobante por WhatsApp.
 - Un cliente puede tener como mucho 2 pedidos por transferencia pendientes de pago en 72 hs (`MAX_TRANSFERENCIAS_PENDIENTES`): el pedido descuenta stock al crearse, y sin tope alguien podría dejar productos bloqueados sin pagar.
 
+## Bolsa de regalo
+
+Opción sin cargo en el carrito y en el checkout (`components/cart/BolsaRegaloOption.tsx`, imagen en `public/images/bolsa-regalo.webp`). El navegador manda `bolsasRegalo` en `POST /orders` y en `POST /payments/create-preference`; el DTO acepta un entero de 0 a 50 y el servidor lo limita a las unidades compradas (`src/orders/bolsas-regalo.ts`). Se guarda en `notes.bolsasRegalo` y el backoffice lo muestra en Pedidos (ícono de regalo en la lista y aviso en el detalle).
+
 ## Mi cuenta: direcciones y favoritos
 
 `src/cuenta/` (`/api/mi-cuenta`, siempre con JWT y sobre el usuario del token — no hay forma de tocar datos de otro):
