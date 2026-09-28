@@ -17,6 +17,7 @@ import { PaymentsSettlementService } from './payments-settlement.service';
 import { esCuentaDePrueba } from '../common/test-accounts';
 import { etiquetaFlex } from '../shipping/envio-flex';
 import { bolsasDeRegalo } from '../orders/bolsas-regalo';
+import { ClienteMeta } from '../common/meta/meta-cliente';
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
@@ -72,7 +73,7 @@ export class PaymentsService {
     return process.env.MERCADOPAGO_ACCESS_TOKEN || mp.accessToken || '';
   }
 
-  async createPreference(dto: CreatePreferenceDto) {
+  async createPreference(dto: CreatePreferenceDto, cliente?: ClienteMeta) {
     const frontendUrl = this.FRONTEND_URL;
     const backendUrl = this.BACKEND_URL;
     const accessToken = await this.getMPAccessToken();
@@ -87,7 +88,7 @@ export class PaymentsService {
       externalReference,
       resolvedItems,
       { subtotal, shipping: shippingCost, discount, couponCode, bolsasRegalo: bolsasDeRegalo(dto.bolsasRegalo, resolvedItems) },
-      payer,
+      { ...payer, cliente },
       dto.shipping,
       salesLink?.id,
     );
@@ -192,7 +193,7 @@ export class PaymentsService {
     externalReference: string,
     resolvedItems: ResolvedItem[],
     totals: { subtotal: number; shipping: number; discount: number; couponCode?: string; bolsasRegalo: number },
-    payer: { name: string; email: string },
+    payer: { name: string; email: string; cliente?: ClienteMeta },
     shipping?: ShippingData,
     salesLinkId?: string,
   ) {
@@ -222,6 +223,8 @@ export class PaymentsService {
             buyerPhone: shipping?.phone || null,
             shippingCarrier: shipping?.carrier || 'correo_argentino',
             bolsasRegalo: totals.bolsasRegalo,
+            // Mercado Pago no manda nada del navegador: sin esto la compra llega a Meta sin datos para reconocer a quién.
+            ...(payer.cliente ? { metaCliente: payer.cliente } : {}),
           }),
           items: {
             create: resolvedItems.map((item) => ({
@@ -345,7 +348,7 @@ export class PaymentsService {
         return { received: true };
       }
 
-      await this.settlement.settle(payment, this.FRONTEND_URL);
+      await this.settlement.settle(payment);
     } catch (err) {
       this.logger.error(`Error procesando el aviso del pago ${paymentId}: ${err}`);
     }
@@ -408,7 +411,7 @@ export class PaymentsService {
       const aprobado = (results || []).find((p: any) => p.status === 'approved');
       if (!aprobado) return { status: orden.status, confirmada: false };
 
-      const resultado = await this.settlement.settle(aprobado, this.FRONTEND_URL);
+      const resultado = await this.settlement.settle(aprobado);
       this.logger.log(`Orden ${orderNumber} confirmada por consulta directa (${resultado}).`);
       return { status: 'PAID', confirmada: resultado === 'registrado' };
     } catch (err) {

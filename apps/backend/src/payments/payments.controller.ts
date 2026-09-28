@@ -1,4 +1,6 @@
-﻿import { Controller, Post, Get, Body, Query, Headers, Logger } from '@nestjs/common';
+﻿import { Controller, Post, Get, Body, Query, Headers, Logger, Req } from '@nestjs/common';
+import type { Request } from 'express';
+import { clienteDesdeRequest } from '../common/meta/meta-cliente';
 import { ApiTags } from '@nestjs/swagger';
 import { PaymentsService } from './payments.service';
 import { CreatePreferenceDto, ConfirmOrderDto } from './dto/create-preference.dto';
@@ -11,8 +13,8 @@ export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @Post('create-preference')
-  async createPreference(@Body() dto: CreatePreferenceDto) {
-    return this.paymentsService.createPreference(dto);
+  async createPreference(@Body() dto: CreatePreferenceDto, @Req() req: Request) {
+    return this.paymentsService.createPreference(dto, clienteDesdeRequest(req, dto.meta));
   }
 
   /**

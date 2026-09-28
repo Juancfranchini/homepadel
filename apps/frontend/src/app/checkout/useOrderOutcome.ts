@@ -6,14 +6,6 @@ import { confirmPayment, trackOrder } from '@/lib/api';
 
 export type Resultado = 'cargando' | 'aprobado' | 'acreditando' | 'pendiente' | 'rechazado';
 
-/** Solo lo que hace falta para el evento Purchase — nunca se inventa un valor. */
-export interface OrdenCobrada {
-  total: number;
-  items: { productId: string }[];
-  /** Compra de prueba (mail de la lista de cuentas de prueba): no se avisa a Meta. */
-  isTest: boolean;
-}
-
 /** Estados de la orden que significan que el dinero ya entró. */
 const ESTADOS_COBRADOS = ['PAID', 'SHIPPED', 'DELIVERED', 'COMPLETED'];
 
@@ -43,11 +35,10 @@ function segunMercadoPago(params: URLSearchParams): Resultado | null {
  * informa Mercado Pago en la URL. `porDefecto` es solo lo que se asume
  * mientras no haya ningún dato mejor.
  */
-export function useOrderOutcome(porDefecto: Resultado): { resultado: Resultado; orderNumber: string; orden: OrdenCobrada | null } {
+export function useOrderOutcome(porDefecto: Resultado): { resultado: Resultado; orderNumber: string } {
   const searchParams = useSearchParams();
   const orderNumber = searchParams.get('order') || searchParams.get('external_reference') || '';
   const [resultado, setResultado] = useState<Resultado>('cargando');
-  const [orden, setOrden] = useState<OrdenCobrada | null>(null);
 
   useEffect(() => {
     const deMercadoPago = segunMercadoPago(new URLSearchParams(searchParams.toString()));
@@ -75,11 +66,6 @@ export function useOrderOutcome(porDefecto: Resultado): { resultado: Resultado; 
         if (!vigente) return;
 
         if (ESTADOS_COBRADOS.includes(ordenServidor?.status)) {
-          setOrden({
-            total: ordenServidor.total,
-            items: (ordenServidor.items || []).map((i: { productId: string }) => ({ productId: i.productId })),
-            isTest: ordenServidor.isTest === true,
-          });
           setResultado('aprobado');
           return;
         }
@@ -105,5 +91,5 @@ export function useOrderOutcome(porDefecto: Resultado): { resultado: Resultado; 
     return () => { vigente = false; clearTimeout(temporizador); };
   }, [orderNumber, porDefecto, searchParams]);
 
-  return { resultado, orderNumber, orden };
+  return { resultado, orderNumber };
 }

@@ -57,7 +57,7 @@ export default function CheckoutPage() {
   });
 
   useCheckoutDraft(watch, reset, transferencia.active === true);
-  useInitiateCheckout(items, subtotal, user ? { email: user.email, phone: user.phone } : undefined);
+  useInitiateCheckout(items, user ? { email: user.email, phone: user.phone } : undefined);
   const checkoutAuth = useCheckoutAuthGate(user, setAuth, handleSubmit, onSubmit);
 
 

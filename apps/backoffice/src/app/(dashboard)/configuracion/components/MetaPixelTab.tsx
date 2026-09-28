@@ -33,10 +33,10 @@ function CredentialsFields({ form, onChange, showToken, onToggleShowToken }: {
       </div>
 
       <div>
-        <label className={labelClass}>Test Event Code (opcional - solo desarrollo)</label>
+        <label className={labelClass}>Test Event Code (opcional)</label>
         <input type="text" className={inputClass} placeholder="TEST12345" value={form.testEventCode}
           onChange={(e) => onChange({ ...form, testEventCode: e.target.value.trim() })} />
-        <p className="text-xs text-gray-400 mt-1">Solo usar en entorno de pruebas. Dejar vacio en produccion.</p>
+        <p className="text-xs text-gray-400 mt-1">Solo se usa fuera de www.homepadel.com.ar (localhost, previews): esos eventos van a &quot;Eventos de prueba&quot; de Meta. Sin código, no se mandan. En la tienda real se ignora.</p>
       </div>
     </>
   );

@@ -13,6 +13,7 @@ import { pedidoSinDatosPersonales } from './orders.public-view';
 import { esCuentaDePrueba } from '../common/test-accounts';
 import { etiquetaFlex } from '../shipping/envio-flex';
 import { bolsasDeRegalo } from './bolsas-regalo';
+import { ClienteMeta } from '../common/meta/meta-cliente';
 import { exigirTransferencia } from '../payments/transferencia';
 
 interface SalesLinkContext {
@@ -144,7 +145,7 @@ export class OrdersService {
     };
   }
 
-  async create(dto: CreateOrderDto, userId?: string) {
+  async create(dto: CreateOrderDto, userId?: string, cliente?: ClienteMeta) {
     const datosTransferencia = await exigirTransferencia(this.prisma, userId);
     const number = 'HP-' + Date.now();
     const salesLink = await this.resolveSalesLink(dto.salesLinkToken);
@@ -191,6 +192,8 @@ export class OrdersService {
       paymentMethod: dto.paymentMethod,
       shippingCarrier: dto.carrier || 'correo_argentino',
       bolsasRegalo: bolsasDeRegalo(dto.bolsasRegalo, resolvedItems),
+      // Para informar la compra a Meta cuando la tienda confirme la transferencia.
+      ...(cliente ? { metaCliente: cliente } : {}),
     };
 
     const order = await this.persistOnlineOrder({
@@ -250,7 +253,7 @@ export class OrdersService {
     total: number;
     shipping: number;
     discount: number;
-    buyerInfo: Record<string, string | number>;
+    buyerInfo: Record<string, unknown>;
     isTest: boolean;
   }) {
     return this.prisma.$transaction(async (tx) => {

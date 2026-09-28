@@ -6,6 +6,7 @@ import { hashPassword } from '../common/security/password';
 import { InventoryService } from '../inventory/inventory.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { enviarCompraAMeta } from './payments.meta';
+import { ClienteMeta } from '../common/meta/meta-cliente';
 import { esCuentaDePrueba } from '../common/test-accounts';
 
 interface ApprovedPayment {
@@ -45,7 +46,7 @@ export class PaymentsSettlementService {
     private readonly abandonedCarts: AbandonedCartsService,
   ) {}
 
-  async settle(payment: ApprovedPayment, frontendUrl: string): Promise<'registrado' | 'ya-estaba'> {
+  async settle(payment: ApprovedPayment): Promise<'registrado' | 'ya-estaba'> {
     const paymentId = String(payment.id);
     const [registeredPayment, legacyOrder] = await Promise.all([
       this.prisma.payment.findUnique({ where: { externalId: paymentId } }),
@@ -85,9 +86,10 @@ export class PaymentsSettlementService {
       valor: payment.transaction_amount,
       emails: [notas.buyerEmail as string | undefined, email],
       telefono: notas.buyerPhone as string | undefined,
+      cliente: notas.metaCliente as ClienteMeta | undefined,
       ip: pagador?.ip_address,
       userAgent: pagador?.user_agent,
-      frontendUrl,
+      userId: user?.id,
     });
     return 'registrado';
   }

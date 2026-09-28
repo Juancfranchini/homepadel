@@ -1,9 +1,14 @@
 // Helper para disparar eventos de Meta Pixel (browser + CAPI) y del embudo
 // propio del backoffice. Usa el mismo event_id para deduplicar entre
 // navegador y servidor.
+//
+// Quien decide si un evento cuenta es el servidor (/track): producción o no,
+// cuenta de prueba o no. El Pixel del navegador sale solo si el servidor
+// responde `pixel: true`, así Meta y el backoffice reciben lo mismo.
 
 import api from './api';
 import { modoPruebaActivo } from './modoPrueba';
+import { idsDeMeta } from './metaNavegador';
 
 type Datos = Record<string, unknown>;
 
@@ -37,30 +42,32 @@ export function newEventId(): string {
 let configLista = false;
 const pendientes: EventoPendiente[] = [];
 
-function enviar(evento: EventoPendiente) {
-  if (typeof window.fbq === 'function') {
-    window.fbq('track', evento.eventName, evento.eventData, { eventID: evento.eventId });
+async function enviar(evento: EventoPendiente) {
+  try {
+    const { data } = await api.post<{ pixel?: boolean }>('/track', {
+      eventName: evento.eventName,
+      eventId: evento.eventId,
+      eventSourceUrl: evento.eventSourceUrl,
+      eventData: evento.eventData,
+      customData: evento.customData,
+      ...idsDeMeta(),
+      ...(evento.userData?.email || evento.userData?.phone
+        ? { userData: { email: evento.userData.email || undefined, phone: evento.userData.phone || undefined } }
+        : {}),
+    });
+    if (data?.pixel && typeof window.fbq === 'function') {
+      window.fbq('track', evento.eventName, evento.eventData, { eventID: evento.eventId });
+    }
+  } catch {
+    // Sin servidor no se sabe si el evento cuenta: no se manda por ningún lado.
   }
-  // Va siempre al servidor, haya Pixel configurado o no: el embudo propio
-  // del backoffice no depende de Meta.
-  api.post('/track', {
-    eventName: evento.eventName,
-    eventId: evento.eventId,
-    eventSourceUrl: evento.eventSourceUrl,
-    pixelId: window.__metaPixelId,
-    eventData: evento.eventData,
-    customData: evento.customData,
-    ...(evento.userData?.email || evento.userData?.phone
-      ? { userData: { email: evento.userData.email || undefined, phone: evento.userData.phone || undefined } }
-      : {}),
-  }).catch(() => {});
 }
 
 /**
- * `eventId` es opcional: por default se genera uno al azar. Un evento que
- * también se manda por CAPI desde el servidor con un id propio (como
- * Purchase — ver `enviarCompraAMeta` en el backend) tiene que pasar acá el
- * mismo id, para que Meta lo trate como un solo evento y no como dos.
+ * `eventId` es opcional: por default se genera uno al azar, y el mismo id va
+ * al Pixel y a la API de Conversiones para que Meta cuente uno solo. La
+ * compra (Purchase) no sale de acá: la informa el servidor al confirmarse el
+ * pago.
  */
 export function trackMetaEvent(
   eventName: string,
@@ -75,11 +82,11 @@ export function trackMetaEvent(
     pendientes.push(evento);
     return;
   }
-  enviar(evento);
+  void enviar(evento);
 }
 
 /** Lo llama MetaPixel al terminar de leer la configuración (haya Pixel o no): manda lo que quedó en espera. */
 export function marcarConfigLista() {
   configLista = true;
-  pendientes.splice(0).forEach(enviar);
+  pendientes.splice(0).forEach((evento) => void enviar(evento));
 }

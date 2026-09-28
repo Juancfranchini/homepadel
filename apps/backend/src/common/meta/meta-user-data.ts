@@ -36,10 +36,15 @@ export interface DatosComprador {
   telefono?: string | null;
   ip?: string | null;
   userAgent?: string | null;
+  /** Cookies del Pixel (_fbp / _fbc). Van tal cual: Meta no las quiere cifradas. */
+  fbp?: string | null;
+  fbc?: string | null;
+  /** Id de la cuenta en la tienda; va cifrado como `external_id`. */
+  userId?: string | null;
 }
 
 /** Arma el `user_data` de Meta con los datos ya normalizados y cifrados. Omite lo que no haya. */
-export function userDataParaMeta({ emails = [], telefono, ip, userAgent }: DatosComprador): Record<string, unknown> {
+export function userDataParaMeta({ emails = [], telefono, ip, userAgent, fbp, fbc, userId }: DatosComprador): Record<string, unknown> {
   const em = [...new Set(emails.map((e) => (e ? normalizarEmail(e) : null)).filter((e): e is string => !!e))].map(sha256);
   const ph = telefono ? variantesTelefono(telefono).map(sha256) : [];
   return {
@@ -47,5 +52,8 @@ export function userDataParaMeta({ emails = [], telefono, ip, userAgent }: Datos
     ...(ph.length > 0 ? { ph } : {}),
     ...(ip ? { client_ip_address: ip } : {}),
     ...(userAgent ? { client_user_agent: userAgent } : {}),
+    ...(fbp ? { fbp } : {}),
+    ...(fbc ? { fbc } : {}),
+    ...(userId ? { external_id: [sha256(userId)] } : {}),
   };
 }

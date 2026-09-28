@@ -4,6 +4,8 @@ import { AbandonedCartsService } from './abandoned-carts.service';
 import { SaveAbandonedCartDto } from './dto/save-abandoned-cart.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { OptionalJwtAuthGuard } from '../common/guards/optional-jwt-auth.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '@prisma/client';
 
@@ -12,10 +14,11 @@ import { Role } from '@prisma/client';
 export class AbandonedCartsController {
   constructor(private readonly service: AbandonedCartsService) {}
 
-  /** Lo llama la tienda mientras alguien completa el checkout. */
+  /** Lo llama la tienda mientras alguien completa el checkout. Con sesión, el mail de la cuenta también cuenta para reconocer una prueba. */
   @Post()
-  save(@Body() dto: SaveAbandonedCartDto) {
-    return this.service.save(dto);
+  @UseGuards(OptionalJwtAuthGuard)
+  save(@Body() dto: SaveAbandonedCartDto, @CurrentUser() usuario?: { email?: string }) {
+    return this.service.save(dto, usuario?.email);
   }
 
   // Lo de acá abajo es solo para la tienda: son datos personales de gente que

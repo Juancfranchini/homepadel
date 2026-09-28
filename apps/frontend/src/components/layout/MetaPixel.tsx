@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import api from '@/lib/api';
 import { marcarConfigLista, trackMetaEvent } from '@/lib/metaPixel';
 import { modoPruebaActivo } from '@/lib/modoPrueba';
+import { capturarClicDeAnuncio, esSitioDeProduccion } from '@/lib/metaNavegador';
 
 interface MetaPixelConfig {
   pixelId?: string;
@@ -15,7 +16,6 @@ declare global {
   interface Window {
     fbq: any;
     _fbq: any;
-    __metaPixelId?: string;
   }
 }
 
@@ -59,11 +59,13 @@ export default function MetaPixel() {
 
   useEffect(() => {
     const init = async () => {
+      capturarClicDeAnuncio();
       const config = await leerConfig();
 
-      // En modo prueba ni se instala: el Pixel manda eventos por su cuenta.
-      if (config.pixelId && !instalado.current && !modoPruebaActivo()) {
-        window.__metaPixelId = config.pixelId;
+      // Solo en la tienda de producción, y nunca en modo prueba: fuera de ahí
+      // (localhost, previews, dominios viejos) los eventos van a Meta solo
+      // como prueba y desde el servidor (ver /track).
+      if (config.pixelId && !instalado.current && !modoPruebaActivo() && esSitioDeProduccion()) {
         instalarPixel(config.pixelId);
         instalado.current = true;
       }
