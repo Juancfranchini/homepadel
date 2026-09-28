@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { getSiteUrl } from '@/lib/siteUrl';
+import { OPEN_GRAPH_BASE } from '@/lib/seoPortada';
 import ProductoContent from './ProductoContent';
 import ProductJsonLd from './ProductJsonLd';
 import { getProductoParaSeo } from './getProductoParaSeo';
@@ -46,7 +47,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: descripcion.slice(0, 300),
     alternates: { canonical },
     openGraph: {
-      type: 'website',
+      ...OPEN_GRAPH_BASE,
       url: siteUrl + canonical,
       title: titulo,
       description: descripcion.slice(0, 300),

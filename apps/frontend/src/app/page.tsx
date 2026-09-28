@@ -39,6 +39,20 @@ import {
   FinalMessageData,
   SiteSection,
 } from '@/types';
+import type { Metadata } from 'next';
+import { HOME_DESCRIPTION, HOME_TITLE, OPEN_GRAPH_BASE } from '@/lib/seoPortada';
+
+/**
+ * El canonical y los datos para compartir de la portada se declaran acá y no
+ * en el layout raíz: ahí los heredaban todas las rutas, que quedaban marcadas
+ * como duplicadas de la portada y se compartían con su título y su link.
+ * `openGraph` se reemplaza entero, por eso repite lo común (OPEN_GRAPH_BASE).
+ */
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+  openGraph: { ...OPEN_GRAPH_BASE, url: '/', title: HOME_TITLE, description: HOME_DESCRIPTION },
+  twitter: { card: 'summary_large_image', title: HOME_TITLE, description: HOME_DESCRIPTION },
+};
 
 /**
  * Cada regeneración de esta página consulta trece endpoints del backend, así que

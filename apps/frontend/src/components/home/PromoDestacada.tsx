@@ -72,9 +72,11 @@ export default function PromoDestacada({ promotion }: Props) {
   return (
     <section className="section-gradient bg-page border-t border-b border-line py-10">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+        {/* En fila recién desde lg: texto, cuenta regresiva y botón no entran
+            juntos en una tablet (el botón quedaba afuera de la pantalla). */}
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
           {/* Texto */}
-          <div className="text-center md:text-left">
+          <div className="min-w-0 text-center lg:text-left">
             <span className="text-brand-fg text-xs font-black uppercase tracking-widest mb-2 block">
               OFERTA POR TIEMPO LIMITADO
             </span>
@@ -87,7 +89,7 @@ export default function PromoDestacada({ promotion }: Props) {
           </div>
 
           {/* Countdown */}
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-shrink-0 flex-col items-center gap-2">
             <p className="text-gray-500 text-xs uppercase tracking-widest">TERMINA EN:</p>
             <Countdown endDate={promotion.endDate} />
           </div>
@@ -96,7 +98,7 @@ export default function PromoDestacada({ promotion }: Props) {
           {promotion.ctaText && promotion.ctaUrl && (
             <Link
               href={promotion.ctaUrl}
-              className="inline-flex items-center gap-2 bg-[#B7D31A] text-[#050606] px-8 py-3.5 font-black text-sm uppercase tracking-wider rounded hover:bg-[#B7D31A] transition-colors whitespace-nowrap"
+              className="inline-flex flex-shrink-0 items-center gap-2 bg-[#B7D31A] text-[#050606] px-8 py-3.5 font-black text-sm uppercase tracking-wider rounded hover:bg-[#B7D31A] transition-colors whitespace-nowrap"
             >
               {promotion.ctaText}
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

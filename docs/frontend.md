@@ -62,6 +62,20 @@ La tienda vivía en Tiendanube y Google todavía tiene indexadas sus URLs. `src/
 
 La lógica está en `lib/legacyUrls.ts` (pura, con tests en `lib/legacyUrls.test.ts` — correr con `npm test`). Si aparece otra categoría vieja de Tiendanube dando 404, sumarla en `LEGACY_CATEGORY_SLUGS` **y** en el `matcher` del middleware.
 
+## SEO y datos para compartir
+
+Los metadatos de Next se **heredan** del layout raíz a todas las rutas, y el objeto `openGraph` se reemplaza entero (no se combina). Por eso el layout raíz (`app/layout.tsx`) lleva solo lo común:
+
+- **Sin `alternates.canonical`, a propósito.** Un canonical `/` ahí hacía que `/terminos`, `/privacidad`, etc. le dijeran a Google que eran duplicados de la portada. No volver a agregarlo.
+- `openGraph` con solo tipo, idioma y nombre del sitio (`OPEN_GRAPH_BASE` en `lib/seoPortada.ts`). Sin título ni URL: así cada página se comparte con su propio `<title>`.
+- La imagen para compartir la genera `app/opengraph-image.tsx` (logo sobre el fondo de la marca). La ficha de producto usa la foto del producto.
+
+Reglas al sumar una página:
+
+- **Indexable:** declarar su `alternates.canonical`. Si la página es `'use client'`, en un `layout.tsx` de su carpeta (ver `terminos/layout.tsx`).
+- **Privada** (cuenta, carrito, checkout, links de venta): `robots: { index: false, follow: false }` en su layout. `/venta` no está en el `disallow` de `robots.ts` a propósito: si Google no puede leerla, tampoco ve el noindex.
+- Si define su propio `openGraph`, empezar por `...OPEN_GRAPH_BASE` (ver la portada y la ficha de producto).
+
 ## Reglas
 
 - Todo fetch al backend pasa por `lib/api.ts`, no se instancia Axios suelto en un componente.

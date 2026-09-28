@@ -8,15 +8,7 @@ import ModoPruebaAviso from '@/components/layout/ModoPruebaAviso';
 import CarritoDeCuenta from '@/components/layout/CarritoDeCuenta';
 import { getSiteUrl } from '@/lib/siteUrl';
 import { SCRIPT_TEMA } from '@/lib/tema';
-
-// Título y descripción de la portada (y de lo que se comparte en redes).
-// Llevan "pádel" con tilde y "Argentina" porque es como se busca, y solo
-// ganchos que la tienda cumple de verdad: el envío gratis por Correo Argentino
-// depende del monto que se configura en el backoffice y las cuotas cambian
-// con cada promo, así que no se escriben números que después queden viejos.
-const HOME_TITLE = 'Home Pádel — Paletas, indumentaria y accesorios de pádel en Argentina';
-const HOME_DESCRIPTION =
-  'Paletas de pádel Nox, Royal Pádel, Adidas y más. Envío gratis a todo el país en compras desde el monto mínimo y cuotas sin interés.';
+import { HOME_DESCRIPTION, HOME_TITLE, OPEN_GRAPH_BASE } from '@/lib/seoPortada';
 
 async function getFaviconUrl(): Promise<string> {
   try {
@@ -27,7 +19,8 @@ async function getFaviconUrl(): Promise<string> {
     const isotipo = data?.data?.isotipo || data?.isotipo;
     if (isotipo) { if (isotipo.startsWith('data:') || isotipo.startsWith('http')) return isotipo; return baseUrl + isotipo; }
   } catch { }
-  return '/logo-icon.svg';
+  // Respaldo si la API no responde: un archivo que existe en public/.
+  return '/home-padel-logo.png';
 }
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -56,22 +49,15 @@ export async function generateMetadata(): Promise<Metadata> {
     // Verificación de la propiedad en Google Search Console. No es secreto: Google lo lee del HTML público.
     verification: { google: 'afdLYXFIA-0q2Sk5r1bdl3cV-3CxHPe5nrgbRVvi4jg' },
     metadataBase: new URL(siteUrl),
-    alternates: { canonical: '/' },
-    openGraph: {
-      type: 'website',
-      locale: 'es_AR',
-      url: siteUrl,
-      siteName: 'Home Padel',
-      title: HOME_TITLE,
-      description: HOME_DESCRIPTION,
-      images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Home Padel' }],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: HOME_TITLE,
-      description: HOME_DESCRIPTION,
-      images: ['/og-image.jpg'],
-    },
+    // Sin `alternates.canonical` a propósito: los metadatos se heredan, y un
+    // canonical '/' acá hacía que toda ruta que no lo pisara (/terminos,
+    // /privacidad…) le dijera a Google que era un duplicado de la portada.
+    // Cada página indexable declara el suyo; el de la portada vive en app/page.tsx.
+    // Por lo mismo, openGraph y twitter llevan solo lo común (ver seoPortada.ts).
+    // La imagen para compartir la genera app/opengraph-image.tsx: la que se
+    // declaraba acá (/og-image.jpg) no existía y los links salían sin imagen.
+    openGraph: OPEN_GRAPH_BASE,
+    twitter: { card: 'summary_large_image' },
     robots: {
       index: true,
       follow: true,
