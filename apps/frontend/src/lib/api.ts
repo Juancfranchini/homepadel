@@ -1,4 +1,4 @@
-// Cliente Axios configurado para el backend
+﻿// Cliente Axios configurado para el backend
 // Base URL leída de variable de entorno NEXT_PUBLIC_API_URL
 
 import axios from 'axios';
