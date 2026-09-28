@@ -12,7 +12,7 @@ interface Props {
 
 export default function FeaturedProductCardImage({ product, hasDiscount, discountPct, wished, onWish }: Props) {
   return (
-    <div className="relative aspect-square bg-[#050606] overflow-hidden">
+    <div className="relative aspect-square bg-page overflow-hidden">
       {product.images && product.images.length > 0 ? (
         <img
           src={getImageUrl(product.images[0])}
@@ -20,8 +20,8 @@ export default function FeaturedProductCardImage({ product, hasDiscount, discoun
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
         />
       ) : (
-        <div className="w-full h-full flex items-center justify-center bg-[#050606]">
-          <span className="text-3xl font-bold text-white/5">{product.name.slice(0, 2).toUpperCase()}</span>
+        <div className="w-full h-full flex items-center justify-center bg-page">
+          <span className="text-3xl font-bold text-fg/5">{product.name.slice(0, 2).toUpperCase()}</span>
         </div>
       )}
 

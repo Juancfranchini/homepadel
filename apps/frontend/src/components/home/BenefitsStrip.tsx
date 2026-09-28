@@ -34,19 +34,19 @@ export default function BenefitsStrip({ benefits }: Props) {
   const items = benefits && benefits.length > 0 ? benefits : FALLBACK;
 
   return (
-    <section className="bg-[#050606] border-t border-b border-[#0D0F0F] py-3 sm:py-6 md:py-8">
+    <section className="bg-page border-t border-b border-line py-3 sm:py-6 md:py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Mobile: scroll horizontal efecto marquesina */}
         <div className="md:hidden overflow-x-auto -mx-4 px-4 sm:-mx-6 sm:px-6">
           <div className="flex gap-4 min-w-max animate-scroll">
             {[...items, ...items].map((b, idx) => (
-              <div key={b.id + '-' + idx} className="flex items-center gap-3 bg-[#0A0F12] border border-[#0D0F0F] rounded-xl px-4 py-2.5 min-w-[180px] max-w-[200px]">
+              <div key={b.id + '-' + idx} className="flex items-center gap-3 bg-night border border-line rounded-xl px-4 py-2.5 min-w-[180px] max-w-[200px]">
                 <div className="flex-shrink-0">
-                  <span className="text-[#B7D31A]">{getIcon(b.icon, 22)}</span>
+                  <span className="text-brand-fg">{getIcon(b.icon, 22)}</span>
                 </div>
                 <div className="min-w-0">
-                  <h4 className="text-[#F7F6F7] font-semibold text-[10px] uppercase leading-tight">{b.title}</h4>
-                  <p className="text-[#C7C7C0] text-[10px] font-medium mt-0.5 line-clamp-2">{b.description}</p>
+                  <h4 className="text-fg font-semibold text-[10px] uppercase leading-tight">{b.title}</h4>
+                  <p className="text-fg-soft text-[10px] font-medium mt-0.5 line-clamp-2">{b.description}</p>
                 </div>
               </div>
             ))}
@@ -56,13 +56,13 @@ export default function BenefitsStrip({ benefits }: Props) {
         {/* Tablet y Desktop: 4 columnas sin efecto */}
         <div className="hidden md:grid md:grid-cols-4 gap-0">
           {items.map((b, idx) => (
-            <div key={b.id} className={'flex items-center gap-3 px-4 ' + (idx < items.length - 1 ? 'border-r border-white/15' : '')}>
+            <div key={b.id} className={'flex items-center gap-3 px-4 ' + (idx < items.length - 1 ? 'border-r border-fg/15' : '')}>
               <div className="flex-shrink-0">
-                <span className="text-[#B7D31A]">{getIcon(b.icon, 28)}</span>
+                <span className="text-brand-fg">{getIcon(b.icon, 28)}</span>
               </div>
               <div className="min-w-0">
-                <h4 className="text-[#F7F6F7] font-semibold text-[11px] uppercase leading-tight">{b.title}</h4>
-                <p className="text-[#C7C7C0] text-[10px] font-medium mt-0.5 line-clamp-2">{b.description}</p>
+                <h4 className="text-fg font-semibold text-[11px] uppercase leading-tight">{b.title}</h4>
+                <p className="text-fg-soft text-[10px] font-medium mt-0.5 line-clamp-2">{b.description}</p>
               </div>
             </div>
           ))}

@@ -10,18 +10,18 @@ interface Props {
 
 export default function CartDrawerFooter({ subtotal, onClose, onCheckout }: Props) {
   return (
-    <div className="border-t border-[#0D0F0F] px-6 py-4 space-y-3">
+    <div className="border-t border-line px-6 py-4 space-y-3">
       <div className="flex items-center justify-between">
-        <span className="text-sm text-[#C7C7C0]">Subtotal</span>
-        <span className="text-lg font-bold text-[#F7F6F7]">{formatPrice(subtotal)}</span>
+        <span className="text-sm text-fg-soft">Subtotal</span>
+        <span className="text-lg font-bold text-fg">{formatPrice(subtotal)}</span>
       </div>
-      <p className="text-[10px] text-[#8A8A85] text-right">Envío calculado en el checkout</p>
+      <p className="text-[10px] text-fg-muted text-right">Envío calculado en el checkout</p>
 
       <div className="grid grid-cols-2 gap-2">
         <Link
           href="/carrito"
           onClick={onClose}
-          className="flex items-center justify-center gap-1 px-4 py-3 rounded-lg text-sm font-semibold border border-[#B7D31A]/30 text-[#F7F6F7] hover:border-[#B7D31A]/60 hover:bg-[#0C0C0C] transition-all"
+          className="flex items-center justify-center gap-1 px-4 py-3 rounded-lg text-sm font-semibold border border-[#B7D31A]/30 text-fg hover:border-[#B7D31A]/60 hover:bg-panel transition-all"
         >
           Ver carrito
           <ArrowRight className="w-4 h-4" />

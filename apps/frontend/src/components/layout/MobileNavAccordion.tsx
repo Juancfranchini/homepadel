@@ -24,23 +24,23 @@ export default function MobileNavAccordion({ label, level = 1, active = false, c
   const textoNivel = level === 1
     ? 'text-sm font-semibold uppercase tracking-wide'
     : 'text-xs font-semibold uppercase tracking-wide';
-  const color = active ? 'bg-[#B7D31A]/10 text-[#D4EE43] ring-1 ring-[#B7D31A]/30' : 'text-[#C7C7C0]';
+  const color = active ? 'bg-[#B7D31A]/10 text-[#D4EE43] light:text-[#4B5A00] ring-1 ring-[#B7D31A]/30' : 'text-fg-soft';
 
   return (
     <div className={level === 2 ? 'pl-3' : 'my-0.5'}>
       <button
         onClick={() => setOpen(!open)}
         aria-expanded={open}
-        className={'flex w-full items-center justify-between rounded-lg px-3 py-3 transition-colors hover:bg-white/[0.06] hover:text-[#F7F6F7] ' + textoNivel + ' ' + color}
+        className={'flex w-full items-center justify-between rounded-lg px-3 py-3 transition-colors hover:bg-fg/[0.06] hover:text-fg ' + textoNivel + ' ' + color}
       >
         {label}
         <ChevronDown
           size={16}
-          className={'flex-shrink-0 transition-transform duration-200 ' + (open ? 'rotate-180 text-[#B7D31A]' : '')}
+          className={'flex-shrink-0 transition-transform duration-200 ' + (open ? 'rotate-180 text-brand-fg' : '')}
         />
       </button>
 
-      {open && <div className="ml-3 flex flex-col border-l border-[#343A3D] pl-3">{children}</div>}
+      {open && <div className="ml-3 flex flex-col border-l border-[#343A3D] light:border-[#D6D6CF] pl-3">{children}</div>}
     </div>
   );
 }

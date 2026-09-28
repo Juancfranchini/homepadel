@@ -11,32 +11,71 @@
   padding: 0;
 }
 
+/*
+ * Paleta por tema. Cada color es "R G B" para que Tailwind pueda aplicarle
+ * opacidad (bg-page/90). Los nombres están registrados en tailwind.config.ts:
+ * en los componentes se usa bg-page, text-fg, border-line, etc., nunca el hex.
+ * El tema oscuro es el de siempre; el claro se activa con data-theme="light"
+ * en <html> (lo pone el botón de luna/sol y lo recuerda el navegador).
+ * El lima de marca (#B7D31A) de botones y bordes es el mismo en los dos temas;
+ * como TEXTO en el claro no se lee (1,6:1), por eso existe brand-fg.
+ */
 :root {
-  --accent: #B7D31A;
-  --bg-base:    #050606;
-  --bg-surface: #0C0C0C;
-  --border:     rgba(255, 255, 255, 0.08);
-  --text-primary:   #FFFFFF;
-  --text-secondary: #A1A1AA;
+  color-scheme: dark;
+  --c-page: 5 6 6;          /* #050606 fondo de página */
+  --c-panel: 12 12 12;      /* #0C0C0C paneles, modales */
+  --c-card: 15 17 17;       /* #0F1111 tarjetas */
+  --c-field: 22 24 24;      /* #161818 inputs */
+  --c-chip: 26 31 33;       /* #1A1F21 chips, bordes marcados, íconos apagados */
+  --c-line: 13 15 15;       /* #0D0F0F bordes sutiles */
+  --c-night: 10 15 18;      /* #0A0F12 */
+  --c-ocean: 10 45 61;      /* #0A2D3D */
+  --c-ocean-2: 13 61 82;    /* #0D3D52 */
+  --c-olive: 36 42 5;       /* #242A05 */
+  --c-fg: 247 246 247;      /* #F7F6F7 texto principal */
+  --c-fg-soft: 199 199 192; /* #C7C7C0 texto secundario */
+  --c-fg-muted: 138 138 133;/* #8A8A85 texto apagado */
+  --c-brand-fg: 183 211 26; /* #B7D31A lima como texto */
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+  --c-page: 245 245 240;    /* #F5F5F0 */
+  --c-panel: 255 255 255;
+  --c-card: 255 255 255;
+  --c-field: 244 244 239;   /* #F4F4EF */
+  --c-chip: 230 230 223;    /* #E6E6DF */
+  --c-line: 231 231 225;    /* #E7E7E1 */
+  --c-night: 241 243 238;   /* #F1F3EE */
+  --c-ocean: 228 237 239;   /* #E4EDEF */
+  --c-ocean-2: 217 231 235; /* #D9E7EB */
+  --c-olive: 241 245 220;   /* #F1F5DC */
+  --c-fg: 21 23 26;         /* #15171A */
+  --c-fg-soft: 67 68 62;    /* #43443E */
+  --c-fg-muted: 102 103 94; /* #66675E: 5,3:1 sobre la página */
+  --c-brand-fg: 92 110 0;   /* #5C6E00: 5,5:1 sobre blanco */
 }
 
 html {
   scroll-behavior: smooth;
-  background: #050606;
+  background: rgb(var(--c-page));
 }
 
 body {
   font-family: 'Poppins', system-ui, -apple-system, sans-serif;
-  background: #050606;
+  background: rgb(var(--c-page));
   color: #FFFFFF;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+[data-theme='light'] body { color: rgb(var(--c-fg)); }
 
 ::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: #050606; }
+::-webkit-scrollbar-track { background: rgb(var(--c-page)); }
 ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #555; }
+[data-theme='light'] ::-webkit-scrollbar-thumb { background: #c8c8c0; }
+[data-theme='light'] ::-webkit-scrollbar-thumb:hover { background: #a8a8a0; }
 
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
@@ -56,6 +95,10 @@ body {
     -3px 0 10px rgba(183, 211, 26, 0.5),
     0 6px 14px rgba(183, 211, 26, 0.4);
 }
+
+/* Sobre fondo claro el resplandor lima se ve chillón: sombra suave. */
+[data-theme='light'] .btn-primary-glow { box-shadow: 0 2px 8px rgba(92, 110, 0, 0.22); }
+[data-theme='light'] .btn-primary-glow:hover { box-shadow: 0 4px 12px rgba(92, 110, 0, 0.3); }
 
 .section-gradient {
   position: relative;
@@ -156,6 +199,12 @@ p, a, li, span, input, textarea, select, label { font-weight: 400; }
   -webkit-backdrop-filter: blur(100px);
 }
 
+[data-theme='light'] .bg-waves::before {
+  background: radial-gradient(ellipse at 30% 50%, rgba(183, 211, 26, 0.10) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 30%, rgba(22, 153, 211, 0.06) 0%, transparent 50%),
+              linear-gradient(180deg, #F5F5F0 0%, #F2F5F4 25%, #F7F7F3 50%, #EEF3F2 75%, #F5F5F0 100%);
+}
+
 @keyframes waveFlow {
   0% { transform: translate(0, 0) rotate(0deg); }
   25% { transform: translate(2%, -1%) rotate(1deg); }
@@ -168,13 +217,13 @@ p, a, li, span, input, textarea, select, label { font-weight: 400; }
 /* Guia de Talles - estilos del contenido HTML */
 .size-guide-content {
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  color: #C7C7C0;
+  color: rgb(var(--c-fg-soft));
   line-height: 1.7;
   letter-spacing: 0.01em;
 }
 .size-guide-content h1, .size-guide-content h2, .size-guide-content h3, .size-guide-content h4 {
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  color: #F7F6F7;
+  color: rgb(var(--c-fg));
   font-weight: 600;
   letter-spacing: -0.02em;
 }
@@ -185,11 +234,11 @@ p, a, li, span, input, textarea, select, label { font-weight: 400; }
   font-size: 0.9375rem;
   line-height: 1.75;
   margin-bottom: 1rem;
-  color: #C7C7C0;
+  color: rgb(var(--c-fg-soft));
 }
 .size-guide-content strong {
   font-weight: 600;
-  color: #F7F6F7;
+  color: rgb(var(--c-fg));
 }
 .size-guide-content li {
   font-size: 0.9375rem;

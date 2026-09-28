@@ -73,13 +73,13 @@ export default function CategoryCards({ categories, products = [], title, descri
   if (items.length === 0) return null;
 
   return (
-    <section className="section-gradient bg-[#202427] py-6 sm:py-10 md:py-14">
+    <section className="section-gradient bg-[#202427] light:bg-[#ECECE5] py-6 sm:py-10 md:py-14">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-4 sm:mb-7">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold uppercase tracking-tight text-[#F7F6F7]">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold uppercase tracking-tight text-fg">
             {title || 'CATEGORIAS'}
           </h2>
-          <p className="text-[#C7C7C0] text-xs sm:text-sm mt-1">
+          <p className="text-fg-soft text-xs sm:text-sm mt-1">
             {description || 'Encontra lo que necesitas para tu mejor version en la cancha.'}
           </p>
         </div>
@@ -92,7 +92,7 @@ export default function CategoryCards({ categories, products = [], title, descri
                 href={'/catalogo?categoria=' + cat.slug}
                 className="group relative overflow-hidden rounded-lg sm:rounded-xl aspect-[4/3] sm:aspect-[3/4] flex flex-col items-end justify-end cursor-pointer flex-shrink-0 w-[160px] sm:w-[180px] md:w-auto"
                 >
-                <div className="absolute inset-0 bg-[#050606]" />
+                <div className="absolute inset-0 bg-page" />
                 <Image
                   src={image}
                   alt={'Categoría ' + cat.name}
@@ -103,6 +103,7 @@ export default function CategoryCards({ categories, products = [], title, descri
 
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
+                {/* Sobre la foto con velo negro: el texto va claro en los dos temas. */}
                 <div className="relative z-10 w-full p-2 sm:p-3">
                   <p className="text-[#F7F6F7] font-semibold text-xs sm:text-sm uppercase tracking-wide leading-none">
                     {cat.name.toUpperCase()}

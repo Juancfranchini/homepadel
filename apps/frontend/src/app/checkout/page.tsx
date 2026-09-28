@@ -25,10 +25,10 @@ import { checkoutSchema, CheckoutFormData } from './checkoutSchema';
 function CheckoutHeader() {
   return (
     <div className="mb-8">
-      <p className="text-xs text-[#8A8A85] mb-1">
-        <Link href="/" className="hover:text-[#F7F6F7]">Inicio</Link> / <Link href="/carrito" className="hover:text-[#F7F6F7]">Carrito</Link> / <span className="text-[#C7C7C0]">Checkout</span>
+      <p className="text-xs text-fg-muted mb-1">
+        <Link href="/" className="hover:text-fg">Inicio</Link> / <Link href="/carrito" className="hover:text-fg">Carrito</Link> / <span className="text-fg-soft">Checkout</span>
       </p>
-      <h1 className="text-2xl font-black uppercase tracking-tight text-[#F7F6F7]">Completar compra</h1>
+      <h1 className="text-2xl font-black uppercase tracking-tight text-fg">Completar compra</h1>
     </div>
   );
 }
@@ -87,7 +87,7 @@ export default function CheckoutPage() {
   if (orderSuccess) return <CheckoutSuccessScreen orderNumber={orderNumber} />;
 
   return (
-    <div className="min-h-screen bg-[#050606]">
+    <div className="min-h-screen bg-page">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
         <CheckoutHeader />
 

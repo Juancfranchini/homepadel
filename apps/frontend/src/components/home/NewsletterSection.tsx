@@ -5,7 +5,7 @@ import TrustBadgesRow from './TrustBadgesRow';
 
 export default function NewsletterSection() {
   return (
-    <section className="section-gradient bg-[#050606]">
+    <section className="section-gradient bg-page">
       {/* ── Newsletter ────────────────────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-14">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
@@ -13,7 +13,7 @@ export default function NewsletterSection() {
 
           {/* Columna derecha — imagen decorativa */}
           <div className="hidden md:flex items-center justify-end">
-            <div className="w-full max-w-sm h-64 rounded-2xl bg-gradient-to-br from-[#0C0C0C] to-[#050606] border border-[#0D0F0F] flex items-center justify-center overflow-hidden">
+            <div className="w-full max-w-sm h-64 rounded-2xl bg-gradient-to-br from-panel to-page border border-line flex items-center justify-center overflow-hidden">
               <div className="text-center opacity-20">
                 <svg width="120" height="120" viewBox="0 0 120 120" fill="none" aria-hidden="true">
                   <ellipse cx="55" cy="42" rx="30" ry="35" fill="#2a2a2a" stroke="#B7D31A" strokeWidth="3"/>

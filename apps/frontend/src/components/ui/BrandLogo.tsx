@@ -27,7 +27,8 @@ export default function BrandLogo({ size = 'md', className = '', priority = fals
       width={width}
       height={height}
       priority={priority}
-      className={`object-contain select-none ${className}`}
+      // Las letras del logo son blancas: sobre el tema claro una sombra suave las despega del fondo.
+      className={`object-contain select-none light:drop-shadow-[0_1px_1.5px_rgba(0,0,0,0.45)] ${className}`}
     />
   );
 }

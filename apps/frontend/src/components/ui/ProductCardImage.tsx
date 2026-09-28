@@ -15,7 +15,7 @@ interface Props {
 
 export default function ProductCardImage({ product, initials, hasDiscount, discountPct, isMadeToOrder, wished, onToggleWish }: Props) {
   return (
-    <Link href={'/producto/' + product.slug} className="relative aspect-square bg-[#050606] overflow-hidden block flex-none">
+    <Link href={'/producto/' + product.slug} className="relative aspect-square bg-page overflow-hidden block flex-none">
       {product.images && product.images.length > 0 ? (
         <img
           src={getImageUrl(product.images[0])}
@@ -24,7 +24,7 @@ export default function ProductCardImage({ product, initials, hasDiscount, disco
         />
       ) : (
         <div className="w-full h-full flex items-center justify-center">
-          <span className="text-4xl font-black text-white/[0.06]">{initials}</span>
+          <span className="text-4xl font-black text-fg/[0.06]">{initials}</span>
         </div>
       )}
 

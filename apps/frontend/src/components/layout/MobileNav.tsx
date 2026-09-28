@@ -12,8 +12,8 @@ interface Props {
   onNavigate: () => void;
 }
 
-const enlaceHoja = 'block rounded-md px-3 py-2.5 text-sm text-[#C7C7C0] transition-colors hover:bg-white/[0.05] hover:text-[#B7D31A]';
-const enlaceRaiz = 'my-0.5 block rounded-lg px-3 py-3 text-sm font-semibold uppercase tracking-wide transition-colors hover:bg-white/[0.06] hover:text-[#F7F6F7]';
+const enlaceHoja = 'block rounded-md px-3 py-2.5 text-sm text-fg-soft transition-colors hover:bg-fg/[0.05] hover:text-brand-fg';
+const enlaceRaiz = 'my-0.5 block rounded-lg px-3 py-3 text-sm font-semibold uppercase tracking-wide transition-colors hover:bg-fg/[0.06] hover:text-fg';
 
 /**
  * Menú de navegación en móvil, al estilo Pádel CABA: cada categoría se
@@ -28,10 +28,10 @@ export default function MobileNav({ links, onNavigate }: Props) {
   const pathname = usePathname();
 
   const claseRaiz = (href: string) =>
-    enlaceRaiz + (isNavActive(pathname, href) ? ' bg-[#B7D31A] text-[#050606]' : ' text-[#C7C7C0]');
+    enlaceRaiz + (isNavActive(pathname, href) ? ' bg-[#B7D31A] text-[#050606]' : ' text-fg-soft');
 
   return (
-    <nav className="max-h-[calc(100dvh-120px)] overflow-y-auto border-t border-[#303638] bg-[#101416] shadow-2xl lg:hidden" aria-label="Navegación móvil">
+    <nav className="max-h-[calc(100dvh-120px)] overflow-y-auto border-t border-[#303638] light:border-[#D2D2CA] bg-[#101416] light:bg-[#EFF2EC] shadow-2xl lg:hidden" aria-label="Navegación móvil">
       <div className="mx-auto flex max-w-7xl flex-col px-6 py-3">
         {categorias.map((categoria) => (
           <MobileNavAccordion key={categoria.id} label={categoria.name}>
@@ -50,7 +50,7 @@ export default function MobileNav({ links, onNavigate }: Props) {
         ))}
 
         {accesosPorGenero(generos).map((g) => (
-          <Link key={g.href} href={g.href} className={enlaceRaiz + ' text-[#C7C7C0]'} onClick={onNavigate}>
+          <Link key={g.href} href={g.href} className={enlaceRaiz + ' text-fg-soft'} onClick={onNavigate}>
             {g.label}
           </Link>
         ))}
@@ -66,11 +66,11 @@ export default function MobileNav({ links, onNavigate }: Props) {
           </MobileNavAccordion>
         )}
 
-        <Link href="/catalogo?oferta=true" className={enlaceRaiz + ' text-[#B7D31A]'} onClick={onNavigate}>
+        <Link href="/catalogo?oferta=true" className={enlaceRaiz + ' text-brand-fg'} onClick={onNavigate}>
           Ofertas
         </Link>
 
-        <div className="my-2 h-px bg-[#303638]" />
+        <div className="my-2 h-px bg-[#303638] light:bg-[#DADAD2]" />
 
         {links.map((link) => (
           <Link

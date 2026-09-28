@@ -33,10 +33,10 @@ const TEXTOS: Record<Exclude<Resultado, 'cargando'>, { titulo: string; detalle: 
 };
 
 function Icono({ resultado }: { resultado: Resultado }) {
-  if (resultado === 'cargando') return <Loader2 size={32} className="text-[#B7D31A] animate-spin" />;
-  if (resultado === 'rechazado') return <XCircle size={32} className="text-red-500" />;
-  if (resultado === 'pendiente') return <Clock size={32} className="text-amber-500" />;
-  return <CheckCircle size={32} className="text-green-500" />;
+  if (resultado === 'cargando') return <Loader2 size={32} className="text-brand-fg animate-spin" />;
+  if (resultado === 'rechazado') return <XCircle size={32} className="text-red-500 light:text-red-600" />;
+  if (resultado === 'pendiente') return <Clock size={32} className="text-amber-500 light:text-amber-700" />;
+  return <CheckCircle size={32} className="text-green-500 light:text-green-700" />;
 }
 
 /**
@@ -77,28 +77,28 @@ export default function CheckoutOutcome({ porDefecto }: { porDefecto: Resultado 
   const texto = resultado === 'cargando' ? null : TEXTOS[resultado];
 
   return (
-    <div className="min-h-screen bg-[#050606] flex items-center justify-center">
-      <div className={'max-w-md w-full mx-4 bg-[#0F1111] rounded-2xl border p-10 text-center ' + (texto?.borde ?? 'border-[#0D0F0F]')}>
-        <div className="w-16 h-16 bg-[#1A1F21] rounded-full flex items-center justify-center mx-auto mb-5">
+    <div className="min-h-screen bg-page flex items-center justify-center">
+      <div className={'max-w-md w-full mx-4 bg-card rounded-2xl border p-10 text-center ' + (texto?.borde ?? 'border-line')}>
+        <div className="w-16 h-16 bg-chip rounded-full flex items-center justify-center mx-auto mb-5">
           <Icono resultado={resultado} />
         </div>
 
-        <h1 className="text-2xl font-black text-[#F7F6F7] mb-2">{texto?.titulo ?? 'Confirmando el pago...'}</h1>
+        <h1 className="text-2xl font-black text-fg mb-2">{texto?.titulo ?? 'Confirmando el pago...'}</h1>
 
         {orderNumber && (
           <>
-            <p className="text-[#8A8A85] text-sm mb-1">Número de orden:</p>
-            <p className="text-2xl font-black text-[#B7D31A] bg-[#1A1F21] px-6 py-2 rounded-lg mb-5 inline-block">#{orderNumber}</p>
+            <p className="text-fg-muted text-sm mb-1">Número de orden:</p>
+            <p className="text-2xl font-black text-brand-fg bg-chip px-6 py-2 rounded-lg mb-5 inline-block">#{orderNumber}</p>
           </>
         )}
 
-        <p className="text-[#8A8A85] text-sm mb-8">{texto?.detalle ?? 'Estamos verificando el estado de tu pago con Mercado Pago.'}</p>
+        <p className="text-fg-muted text-sm mb-8">{texto?.detalle ?? 'Estamos verificando el estado de tu pago con Mercado Pago.'}</p>
 
         <div className="flex flex-col gap-3">
           {resultado === 'rechazado' && (
             <Link href="/checkout" className="bg-[#B7D31A] text-[#050606] py-3 rounded-xl font-bold text-sm hover:bg-[#c8e81f] transition-colors">Intentar de nuevo</Link>
           )}
-          <Link href="/" className="border border-[#0D0F0F] py-3 rounded-xl font-bold text-sm text-[#C7C7C0] hover:bg-[#0C0C0C] transition-colors">Volver al inicio</Link>
+          <Link href="/" className="border border-line py-3 rounded-xl font-bold text-sm text-fg-soft hover:bg-panel transition-colors">Volver al inicio</Link>
         </div>
       </div>
     </div>

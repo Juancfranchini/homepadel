@@ -26,7 +26,7 @@ interface Props {
 
 export default function ProductInfoColumn({ product, display, activeVariants, variants, actions, hasSizeGuide }: Props) {
   return (
-    <div className="flex flex-col gap-4 sm:gap-5 bg-[#0C0C0C] rounded-xl sm:rounded-2xl p-3 sm:p-6 border border-[#0D0F0F]">
+    <div className="flex flex-col gap-4 sm:gap-5 bg-panel rounded-xl sm:rounded-2xl p-3 sm:p-6 border border-line">
       <ProductInfo brandName={product.brand.name} brandSlug={product.brand.slug} productName={product.name} />
       <ProductStars rating={product.rating || 0} count={product.reviewCount || 0} />
       <ProductPrice
@@ -38,7 +38,7 @@ export default function ProductInfoColumn({ product, display, activeVariants, va
         isMadeToOrder={product.isMadeToOrder} estimatedDays={product.estimatedDays} requiredDeposit={product.requiredDeposit}
       />
       {!product.isMadeToOrder && <StockAlert stock={display.effectiveStock} />}
-      <div className="h-px bg-[#0D0F0F]" />
+      <div className="h-px bg-[#0D0F0F] light:bg-[#FFFFFF]" />
       <TrustBadges />
       <VariantSelector
         variants={activeVariants}
@@ -61,9 +61,9 @@ export default function ProductInfoColumn({ product, display, activeVariants, va
         onBuyNow={actions.handleBuyNow} onAddToCart={actions.handleAddToCart} added={actions.added}
         wished={actions.wished} onWish={() => actions.setWished(!actions.wished)}
       />
-      {hasSizeGuide && (<Link href="/talles" className="inline-flex items-center gap-2 px-4 py-2 bg-[#1A1F21] border border-[#0D0F0F] rounded-lg text-[#B7D31A] text-xs font-semibold hover:border-[#B7D31A]/50 transition-all w-fit"><Ruler size={14} />Guia de talles</Link>)}
+      {hasSizeGuide && (<Link href="/talles" className="inline-flex items-center gap-2 px-4 py-2 bg-chip border border-line rounded-lg text-brand-fg text-xs font-semibold hover:border-[#B7D31A]/50 transition-all w-fit"><Ruler size={14} />Guia de talles</Link>)}
       <ShippingCalc />
-      <p className="text-[10px] text-[#8A8A85]">SKU: {product.sku}</p>
+      <p className="text-[10px] text-fg-muted">SKU: {product.sku}</p>
     </div>
   );
 }

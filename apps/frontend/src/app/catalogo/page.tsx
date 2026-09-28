@@ -21,8 +21,8 @@ import CatalogMobileSidebar from './components/CatalogMobileSidebar';
 export default function CatálogoPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#050606] flex items-center justify-center">
-        <p className="text-[#C7C7C0] text-sm">Cargando catálogo...</p>
+      <div className="min-h-screen bg-page flex items-center justify-center">
+        <p className="text-fg-soft text-sm">Cargando catálogo...</p>
       </div>
     }>
       <CatálogoContent />
@@ -71,11 +71,11 @@ function CatálogoContent() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-4 gap-3">
               <button onClick={() => setSidebarOpen(true)}
-                className="lg:hidden flex items-center gap-2 bg-[#0C0C0C] border border-[#0D0F0F] rounded-lg px-4 py-2 text-sm font-medium text-[#F7F6F7] hover:border-[#8A8A85] transition-colors">
+                className="lg:hidden flex items-center gap-2 bg-panel border border-line rounded-lg px-4 py-2 text-sm font-medium text-fg hover:border-fg-muted transition-colors">
                 <Filter size={15} />Filtros
                 {hasFilters && <span className="w-5 h-5 bg-[#B7D31A] text-[#050606] rounded-full text-[10px] font-bold flex items-center justify-center">{activeChips.length}</span>}
               </button>
-              <p className="text-sm text-[#C7C7C0] hidden sm:block">{totalCount} productos</p>
+              <p className="text-sm text-fg-soft hidden sm:block">{totalCount} productos</p>
             </div>
 
             <CatalogChips chips={activeChips} onClearAll={clearFilters} />

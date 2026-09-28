@@ -34,12 +34,12 @@ export default function ProductGalleryThumbnails({ thumbnails, selectedImg, hove
             aria-label={'Ver imagen ' + (i + 1)}
             aria-current={activa}
             className={
-              'h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border-2 bg-[#0C0C0C] transition-all ' +
+              'h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border-2 bg-panel transition-all ' +
               (activa
                 ? 'border-[#B7D31A] shadow-[0_0_12px_rgba(183,211,26,0.3)]'
                 : hoveredImg === i
                 ? 'border-[#B7D31A] shadow-[0_0_8px_rgba(183,211,26,0.2)]'
-                : 'border-[#1A1F21] hover:border-[#B7D31A]/70')
+                : 'border-chip hover:border-[#B7D31A]/70')
             }
           >
             <img src={getImageUrl(img)} alt="" className="h-full w-full object-contain p-1" />

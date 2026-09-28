@@ -67,11 +67,11 @@ export default function PoliticaDevoluciónPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0C0C0C] to-[#050606] text-[#F7F6F7]">
-      <div className="border-b border-[#0D0F0F]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center gap-1.5 text-[11px] text-[#8A8A85]">
-          <Link href="/" className="hover:text-[#F7F6F7] transition-colors">Inicio</Link><span>/</span>
-          <span className="text-[#F7F6F7]">Politica de Devolución</span>
+    <div className="min-h-screen bg-gradient-to-b from-panel to-page text-fg">
+      <div className="border-b border-line">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center gap-1.5 text-[11px] text-fg-muted">
+          <Link href="/" className="hover:text-fg transition-colors">Inicio</Link><span>/</span>
+          <span className="text-fg">Politica de Devolución</span>
         </div>
       </div>
 

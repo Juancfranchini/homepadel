@@ -37,31 +37,31 @@ export default function MadeToOrderPricing({
 
   return (
     <div className="rounded-xl border border-[#B7D31A]/30 bg-[#B7D31A]/[0.07] p-4 space-y-3">
-      <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#B7D31A]">
+      <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-brand-fg">
         <PackageCheck size={15} /> Se hace a pedido
       </p>
 
-      <p className="flex items-start gap-2 text-sm text-[#C7C7C0]">
-        <CalendarClock size={15} className="mt-0.5 flex-shrink-0 text-[#8A8A85]" />
+      <p className="flex items-start gap-2 text-sm text-fg-soft">
+        <CalendarClock size={15} className="mt-0.5 flex-shrink-0 text-fg-muted" />
         <span>
           No lo tenemos en stock: lo encargamos para vos y llega{' '}
-          <span className="font-semibold text-[#F7F6F7]">{plazo}</span>.
+          <span className="font-semibold text-fg">{plazo}</span>.
         </span>
       </p>
 
       {depositAmount > 0 ? (
-        <div className="rounded-lg bg-[#050606]/40 p-3 space-y-1">
-          <p className="text-sm text-[#C7C7C0]">
+        <div className="rounded-lg bg-page/40 p-3 space-y-1">
+          <p className="text-sm text-fg-soft">
             Reservás con el {requiredDeposit}%:{' '}
-            <span className="font-bold text-[#F7F6F7]">{formatPrice(depositAmount)}</span>
+            <span className="font-bold text-fg">{formatPrice(depositAmount)}</span>
           </p>
-          <p className="text-sm text-[#C7C7C0]">
+          <p className="text-sm text-fg-soft">
             El resto, al recibirlo:{' '}
-            <span className="font-semibold text-[#F7F6F7]">{formatPrice(remainingAmount)}</span>
+            <span className="font-semibold text-fg">{formatPrice(remainingAmount)}</span>
           </p>
         </div>
       ) : (
-        <p className="text-sm text-[#C7C7C0]">Se abona el total por adelantado.</p>
+        <p className="text-sm text-fg-soft">Se abona el total por adelantado.</p>
       )}
 
       {/* El enlace solo aparece si hay número cargado: un botón que no lleva a
@@ -71,7 +71,7 @@ export default function MadeToOrderPricing({
           href={consulta}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-[#B7D31A] transition-colors hover:text-[#CAE52E]"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-brand-fg transition-colors hover:text-[#CAE52E] light:hover:text-[#4B5A00]"
         >
           <MessageCircle size={14} /> Consultá por WhatsApp cuándo llega
         </a>

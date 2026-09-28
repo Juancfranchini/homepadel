@@ -23,7 +23,7 @@ export default function FaqAccordionList({ loading, categories, grouped, isOpen,
   if (loading) {
     return (
       <div className="text-center py-12">
-        <p className="text-[#8A8A85] text-sm">Cargando...</p>
+        <p className="text-fg-muted text-sm">Cargando...</p>
       </div>
     );
   }
@@ -31,7 +31,7 @@ export default function FaqAccordionList({ loading, categories, grouped, isOpen,
   if (categories.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-[#8A8A85] text-sm">No hay preguntas disponibles.</p>
+        <p className="text-fg-muted text-sm">No hay preguntas disponibles.</p>
       </div>
     );
   }
@@ -40,7 +40,7 @@ export default function FaqAccordionList({ loading, categories, grouped, isOpen,
     <>
       {categories.map((cat) => (
         <div key={cat} className="mb-12">
-          <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-[#B7D31A] mb-5 flex items-center gap-2">
+          <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-fg mb-5 flex items-center gap-2">
             <span className="w-4 h-px bg-[#B7D31A]" />
             {cat}
           </h2>
@@ -48,23 +48,23 @@ export default function FaqAccordionList({ loading, categories, grouped, isOpen,
             {grouped[cat].map((item) => {
               const open = isOpen(item.id);
               return (
-                <div key={item.id} className="bg-[#0A2D3D] border border-[#0D0F0F] rounded-2xl overflow-hidden">
+                <div key={item.id} className="bg-ocean border border-line rounded-2xl overflow-hidden">
                   <button
                     onClick={() => onToggle(item.id)}
                     className="w-full flex items-center justify-between gap-4 px-6 py-4 text-left"
                   >
-                    <span className="text-[#F7F6F7] font-semibold text-sm">{item.question}</span>
+                    <span className="text-fg font-semibold text-sm">{item.question}</span>
                     <div className={'flex-shrink-0 transition-transform duration-300 ' + (open ? 'rotate-180' : '')}>
                       {open ? (
-                        <X size={18} className="text-[#B7D31A]" />
+                        <X size={18} className="text-brand-fg" />
                       ) : (
-                        <Plus size={18} className="text-[#B7D31A]" />
+                        <Plus size={18} className="text-brand-fg" />
                       )}
                     </div>
                   </button>
                   <div className={'overflow-hidden transition-all duration-300 ' + (open ? 'max-h-96' : 'max-h-0')}>
                     <div className="px-6 pb-5">
-                      <p className="text-[#C7C7C0] text-sm leading-relaxed">{item.answer}</p>
+                      <p className="text-fg-soft text-sm leading-relaxed">{item.answer}</p>
                     </div>
                   </div>
                 </div>

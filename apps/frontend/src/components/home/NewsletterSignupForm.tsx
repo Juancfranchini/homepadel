@@ -30,15 +30,15 @@ export default function NewsletterSignupForm() {
   return (
     <div>
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-11 h-11 rounded-full bg-[#B7D31A]/15 border border-[#B7D31A]/30 flex items-center justify-center text-[#B7D31A] flex-none">
+        <div className="w-11 h-11 rounded-full bg-[#B7D31A]/15 border border-[#B7D31A]/30 flex items-center justify-center text-brand-fg flex-none">
           <Mail size={22} />
         </div>
-        <p className="text-[#B7D31A] text-xs font-bold uppercase tracking-widest">
+        <p className="text-brand-fg text-xs font-bold uppercase tracking-widest">
           Newsletter exclusivo
         </p>
       </div>
 
-      <h2 className="text-3xl md:text-4xl font-black text-white uppercase tracking-tight leading-tight mb-2">
+      <h2 className="text-3xl md:text-4xl font-black text-fg uppercase tracking-tight leading-tight mb-2">
         10% OFF en tu<br />primera compra
       </h2>
       <p className="text-gray-400 text-sm mb-7 leading-relaxed">
@@ -46,7 +46,7 @@ export default function NewsletterSignupForm() {
       </p>
 
       {submitted ? (
-        <div className="flex items-center gap-3 text-[#B7D31A]">
+        <div className="flex items-center gap-3 text-brand-fg">
           <CheckCircle size={24} />
           <div>
             <p className="font-bold text-sm">¡Gracias por suscribirte!</p>
@@ -64,12 +64,12 @@ export default function NewsletterSignupForm() {
               type="email" autoComplete="email" aria-label="Email para suscribirte"
               placeholder="Escribí tu email"
               {...register('email')}
-              className={`w-full px-4 py-3 rounded-lg bg-white/10 border text-white placeholder-gray-500 text-sm focus:outline-none focus:border-[#B7D31A] transition-colors ${
-                errors.email ? 'border-red-500' : 'border-white/20'
+              className={`w-full px-4 py-3 rounded-lg bg-fg/10 border text-fg placeholder-gray-500 text-sm focus:outline-none focus:border-[#B7D31A] transition-colors ${
+                errors.email ? 'border-red-500' : 'border-fg/20'
               }`}
             />
             {errors.email && (
-              <p className="absolute -bottom-5 left-1 text-red-400 text-xs">
+              <p className="absolute -bottom-5 left-1 text-red-400 light:text-red-700 text-xs">
                 {errors.email.message}
               </p>
             )}

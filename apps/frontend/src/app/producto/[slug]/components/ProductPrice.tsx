@@ -48,13 +48,13 @@ export default function ProductPrice({
   return (
     <div className="space-y-3">
       {/* Precio principal */}
-      {hasDiscount && !isMadeToOrder && <p className="text-base text-[#8A8A85] line-through">{formatPrice(originalPrice)}</p>}
+      {hasDiscount && !isMadeToOrder && <p className="text-base text-fg-muted line-through">{formatPrice(originalPrice)}</p>}
       <div className="flex flex-wrap items-baseline gap-3">
-        <span className="text-4xl md:text-5xl font-black text-[#F7F6F7] tracking-tight">
+        <span className="text-4xl md:text-5xl font-black text-fg tracking-tight">
           {formatPrice(displayPrice)}
         </span>
         {hasDiscount && !isMadeToOrder && (
-          <span className="text-sm md:text-base text-[#B7D31A] font-bold">{formatDiscountPercent(discountPct)}% OFF</span>
+          <span className="text-sm md:text-base text-brand-fg font-bold">{formatDiscountPercent(discountPct)}% OFF</span>
         )}
       </div>
 
@@ -77,13 +77,13 @@ export default function ProductPrice({
         />
       )}
 
-      {hasFreeShipping && <p className="flex items-center gap-1.5 text-sm font-bold text-[#B7D31A]"><Truck size={16} />Envío gratis con Correo Argentino</p>}
+      {hasFreeShipping && <p className="flex items-center gap-1.5 text-sm font-bold text-brand-fg"><Truck size={16} />Envío gratis con Correo Argentino</p>}
 
       {/* Ver medios de pago */}
       {!isMadeToOrder && (
         <button
           onClick={onShowPaymentModal}
-          className="flex items-center gap-1.5 text-[#C7C7C0] hover:text-[#F7F6F7] text-xs underline underline-offset-2 transition-colors w-fit"
+          className="flex items-center gap-1.5 text-fg-soft hover:text-fg text-xs underline underline-offset-2 transition-colors w-fit"
         >
           <CreditCard size={12} />
           Ver medios de pago

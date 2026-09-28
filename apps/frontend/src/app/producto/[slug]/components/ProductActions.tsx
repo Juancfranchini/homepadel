@@ -35,15 +35,15 @@ export default function ProductActions({ stock, isMadeToOrder, productName, quan
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-base sm:text-sm font-semibold text-[#F7F6F7]">Cantidad:</span>
-        <div className="flex items-center bg-[#1A1F21] border border-[#0D0F0F] rounded-xl overflow-hidden flex-1 max-w-[180px]">
+        <span className="text-base sm:text-sm font-semibold text-fg">Cantidad:</span>
+        <div className="flex items-center bg-chip border border-line rounded-xl overflow-hidden flex-1 max-w-[180px]">
           <button onClick={() => onQuantityChange(Math.max(1, quantity - 1))} disabled={quantity <= 1}
-            className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center hover:bg-white/[0.04] transition-colors disabled:opacity-30">
+            className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center hover:bg-fg/[0.04] transition-colors disabled:opacity-30">
             <Minus size={15} />
           </button>
-          <span className="flex-1 text-center font-bold text-lg sm:text-base text-[#F7F6F7]">{quantity}</span>
+          <span className="flex-1 text-center font-bold text-lg sm:text-base text-fg">{quantity}</span>
           <button onClick={() => onQuantityChange(Math.min(tope, quantity + 1))} disabled={quantity >= tope}
-            className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center hover:bg-white/[0.04] transition-colors disabled:opacity-30">
+            className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center hover:bg-fg/[0.04] transition-colors disabled:opacity-30">
             <Plus size={15} />
           </button>
         </div>
@@ -58,15 +58,15 @@ export default function ProductActions({ stock, isMadeToOrder, productName, quan
         <div className="flex gap-2">
           <button onClick={onAddToCart} disabled={sinStock}
             className={'flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl border font-semibold text-sm uppercase tracking-wider transition-all duration-200 ' +
-              (sinStock ? 'border-[#0D0F0F] text-[#8A8A85] cursor-not-allowed' :
-                added ? 'border-[#B7D31A] bg-[#B7D31A]/10 text-[#B7D31A]' :
-                'border-[#8A8A85] text-[#F7F6F7] hover:border-[#B7D31A] hover:text-[#B7D31A]')}>
+              (sinStock ? 'border-line text-fg-muted cursor-not-allowed' :
+                added ? 'border-[#B7D31A] bg-[#B7D31A]/10 text-brand-fg' :
+                'border-fg-muted text-fg hover:border-[#B7D31A] hover:text-brand-fg')}>
             <ShoppingCart size={16} />
             {sinStock ? 'Sin stock' : added ? 'Agregado!' : 'AGREGAR AL CARRITO'}
           </button>
           <button onClick={onWish}
             className={'w-12 h-12 rounded-xl border flex items-center justify-center transition-all ' +
-              (wished ? 'border-[#B7D31A] bg-[#B7D31A]/10 text-[#B7D31A]' : 'border-[#8A8A85] text-[#C7C7C0] hover:border-[#B7D31A] hover:text-[#B7D31A]')}
+              (wished ? 'border-[#B7D31A] bg-[#B7D31A]/10 text-brand-fg' : 'border-fg-muted text-fg-soft hover:border-[#B7D31A] hover:text-brand-fg')}
             aria-label="Favoritos">
             <Heart size={18} fill={wished ? 'currentColor' : 'none'} />
           </button>
@@ -76,7 +76,7 @@ export default function ProductActions({ stock, isMadeToOrder, productName, quan
             que no es el de la tienda. */}
         {consulta && (
           <a href={consulta} target="_blank" rel="noopener noreferrer" onClick={() => trackMetaEvent("Contact", { content_type: "whatsapp" })}
-            className="w-full py-2.5 sm:py-3 rounded-xl border border-[#0A2D3D] bg-[#0A2D3D]/50 text-[#F7F6F7] font-medium text-xs sm:text-sm flex items-center justify-center gap-2 hover:bg-[#0A2D3D] transition-colors">
+            className="w-full py-2.5 sm:py-3 rounded-xl border border-ocean bg-ocean/50 text-fg font-medium text-xs sm:text-sm flex items-center justify-center gap-2 hover:bg-ocean transition-colors">
             <MessageCircle size={16} />Consultar por WhatsApp
           </a>
         )}

@@ -56,12 +56,12 @@ export default function SalesLinkPage() {
 
   const total = data.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   return (
-    <main className="min-h-screen bg-[#050606] px-5 py-16 text-[#F7F6F7]">
-      <section className="mx-auto max-w-2xl overflow-hidden rounded-3xl border border-white/10 bg-[#0F1111]">
-        <div className="border-b border-white/10 p-7">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#C8FF00]">Home Pádel</p>
+    <main className="min-h-screen bg-page px-5 py-16 text-fg">
+      <section className="mx-auto max-w-2xl overflow-hidden rounded-3xl border border-fg/10 bg-card">
+        <div className="border-b border-fg/10 p-7">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#C8FF00] light:text-[#4B5A00]">Home Pádel</p>
           <h1 className="mt-2 text-3xl font-black">Tu compra está lista</h1>
-          <p className="mt-2 text-sm text-[#8A8A85]">
+          <p className="mt-2 text-sm text-fg-muted">
             Revisá los productos y completá tus datos en nuestro checkout seguro.
           </p>
         </div>
@@ -69,16 +69,16 @@ export default function SalesLinkPage() {
           {data.items.map((item) => (
             <div
               key={`${item.productId}-${item.variantId || 'base'}`}
-              className="flex items-center justify-between rounded-xl bg-white/5 p-4"
+              className="flex items-center justify-between rounded-xl bg-fg/5 p-4"
             >
               <div>
                 <p className="font-semibold">{item.product.name}</p>
-                <p className="text-sm text-[#8A8A85]">{item.quantity} unidad/es</p>
+                <p className="text-sm text-fg-muted">{item.quantity} unidad/es</p>
               </div>
-              <p className="font-bold text-[#C8FF00]">{formatPrice(item.price * item.quantity)}</p>
+              <p className="font-bold text-[#C8FF00] light:text-[#4B5A00]">{formatPrice(item.price * item.quantity)}</p>
             </div>
           ))}
-          <div className="flex items-center justify-between border-t border-white/10 pt-5 text-xl font-black">
+          <div className="flex items-center justify-between border-t border-fg/10 pt-5 text-xl font-black">
             <span>Subtotal</span>
             <span>{formatPrice(total)}</span>
           </div>
@@ -96,12 +96,12 @@ export default function SalesLinkPage() {
 
 function Message({ text, loading = false }: { text: string; loading?: boolean }) {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#050606] px-5 text-[#F7F6F7]">
+    <main className="flex min-h-screen items-center justify-center bg-page px-5 text-fg">
       <div className="text-center">
         {loading ? (
-          <Loader2 className="mx-auto mb-4 h-8 w-8 animate-spin text-[#C8FF00]" />
+          <Loader2 className="mx-auto mb-4 h-8 w-8 animate-spin text-[#C8FF00] light:text-[#4B5A00]" />
         ) : (
-          <ShoppingBag className="mx-auto mb-4 h-8 w-8 text-[#C8FF00]" />
+          <ShoppingBag className="mx-auto mb-4 h-8 w-8 text-[#C8FF00] light:text-[#4B5A00]" />
         )}
         <p>{text}</p>
       </div>

@@ -12,7 +12,7 @@ export default function ContactoPage() {
   const { hero, heroImage, infoCards, benefits, channels, faqs, mapUrl, newsletterTitle, newsletterText, sections } = useContactoPageData();
 
   return (
-    <div className="min-h-screen bg-[#0C0C0C] text-[#F7F6F7]">
+    <div className="min-h-screen bg-panel text-fg">
       {sections.heroActive && <ContactoHero hero={hero} heroImage={heroImage} infoCards={infoCards} />}
 
       {sections.benefitsActive && <BenefitsStrip benefits={benefits} />}

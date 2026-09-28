@@ -36,7 +36,7 @@ export default function ProductVideoHighlightsSection({
   const dosColumnas = hayVideo && columnaDerecha;
 
   return (
-    <section className="border-t border-[#0D0F0F] py-4 sm:py-6">
+    <section className="border-t border-line py-4 sm:py-6">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className={dosColumnas ? 'grid grid-cols-1 lg:grid-cols-2 gap-10' : ''}>
           {hayVideo && <VideoSection embedUrl={embedUrl} vertical={embedVertical} />}
@@ -52,7 +52,7 @@ export default function ProductVideoHighlightsSection({
               )}
               {hayRelacionados && (
                 <div className={hayHighlights ? 'mt-auto pt-6' : ''}>
-                  <h3 className="text-lg font-semibold uppercase tracking-tight text-[#F7F6F7] mb-2">Videos Relacionados</h3>
+                  <h3 className="text-lg font-semibold uppercase tracking-tight text-fg mb-2">Videos Relacionados</h3>
                   <RelatedVideos videos={relatedVideos} />
                 </div>
               )}

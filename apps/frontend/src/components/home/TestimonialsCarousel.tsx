@@ -19,7 +19,7 @@ export default function TestimonialsCarousel({
   if (activeItems.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-[#8A8A85] text-sm">Se el primero en dejar tu reseña.</p>
+        <p className="text-fg-muted text-sm">Se el primero en dejar tu reseña.</p>
       </div>
     );
   }
@@ -30,14 +30,14 @@ export default function TestimonialsCarousel({
         <>
           <button
             onClick={onPrev}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 sm:-translate-x-2 z-10 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#B7D31A]/10 backdrop-blur-sm border border-[#B7D31A]/30 flex items-center justify-center text-[#B7D31A] hover:bg-[#B7D31A]/20 transition-all"
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 sm:-translate-x-2 z-10 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#B7D31A]/10 backdrop-blur-sm border border-[#B7D31A]/30 flex items-center justify-center text-brand-fg hover:bg-[#B7D31A]/20 transition-all"
             aria-label="Anterior"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             onClick={onNext}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1 sm:translate-x-2 z-10 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#B7D31A]/10 backdrop-blur-sm border border-[#B7D31A]/30 flex items-center justify-center text-[#B7D31A] hover:bg-[#B7D31A]/20 transition-all"
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1 sm:translate-x-2 z-10 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#B7D31A]/10 backdrop-blur-sm border border-[#B7D31A]/30 flex items-center justify-center text-brand-fg hover:bg-[#B7D31A]/20 transition-all"
             aria-label="Siguiente"
           >
             <ChevronRight className="w-5 h-5" />
@@ -59,7 +59,7 @@ export default function TestimonialsCarousel({
             <button
               key={i}
               onClick={() => onSelectGroup(i)}
-              className={'rounded-full transition-all ' + (i === currentGroup ? 'w-5 h-1.5 bg-[#B7D31A]' : 'w-1.5 h-1.5 bg-white/30')}
+              className={'rounded-full transition-all ' + (i === currentGroup ? 'w-5 h-1.5 bg-[#B7D31A]' : 'w-1.5 h-1.5 bg-fg/30')}
               aria-label={'Grupo ' + (i + 1)}
             />
           ))}
