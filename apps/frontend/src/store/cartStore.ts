@@ -12,6 +12,8 @@ interface CartStore {
   items: CartItem[];
   couponCode: string | null;
   salesLinkToken: string | null;
+  /** Bolsas de regalo pedidas (sin cargo). Las que van: ver bolsasEfectivas. */
+  bolsasRegalo: number;
   addItem: (product: Product, quantity?: number, variant?: { id: string; sku: string; size: string; color?: string | null; dimensions?: string | null; weight?: number | null; weightUnit?: string | null; imageUrl?: string | null }) => void;
   removeItem: (itemKey: string) => void;
   updateQuantity: (itemKey: string, quantity: number) => void;
@@ -20,6 +22,7 @@ interface CartStore {
   totalPrice: () => number;
   setCoupon: (code: string | null) => void;
   setSalesLinkToken: (token: string | null) => void;
+  setBolsasRegalo: (cantidad: number) => void;
 }
 
 export const useCartStore = create<CartStore>()(
@@ -28,6 +31,7 @@ export const useCartStore = create<CartStore>()(
       items: [],
       couponCode: null,
       salesLinkToken: null,
+      bolsasRegalo: 0,
 
       // Agrega un producto al carrito; si ya existe, incrementa la cantidad
       addItem: (product, quantity = 1, variant) => {
@@ -91,10 +95,11 @@ export const useCartStore = create<CartStore>()(
         }));
       },
 
-      clearCart: () => set({ items: [], couponCode: null, salesLinkToken: null }),
+      clearCart: () => set({ items: [], couponCode: null, salesLinkToken: null, bolsasRegalo: 0 }),
 
       setCoupon: (code) => set({ couponCode: code }),
       setSalesLinkToken: (token) => set({ salesLinkToken: token }),
+      setBolsasRegalo: (cantidad) => set({ bolsasRegalo: Math.max(0, Math.floor(cantidad)) }),
 
       // Suma total de unidades en el carrito
       totalItems: () => get().items.reduce((acc, i) => acc + i.quantity, 0),
@@ -110,4 +115,13 @@ export const useCartStore = create<CartStore>()(
 
 export function getItemKey(item: Pick<CartItem, 'product' | 'variantId'>): string {
   return item.product.id + '-' + (item.variantId ?? 'base');
+}
+
+/**
+ * Bolsas que van de verdad: como máximo una por unidad del carrito, así sacar
+ * un producto no deja bolsas de más. El servidor aplica el mismo tope.
+ */
+export function bolsasEfectivas(bolsasRegalo: number | undefined, items: Pick<CartItem, 'quantity'>[]): number {
+  const unidades = items.reduce((acc, i) => acc + i.quantity, 0);
+  return Math.min(bolsasRegalo ?? 0, unidades);
 }

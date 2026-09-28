@@ -8,6 +8,7 @@ import { useCoupon } from '@/hooks/useCoupon';
 import CarritoItemRow from './CarritoItemRow';
 import CarritoSummary from './CarritoSummary';
 import CarritoEmpty from './CarritoEmpty';
+import BolsaRegaloOption from '@/components/cart/BolsaRegaloOption';
 import AuthModal from '@/components/auth/AuthModal';
 import { useCheckoutNavigation } from '@/components/auth/useCheckoutNavigation';
 
@@ -47,6 +48,8 @@ export default function CarritoPage() {
             {items.map((item) => (
               <CarritoItemRow key={item.product.id + '-' + (item.variantSku || '')} item={item} onRemove={removeItem} onUpdateQuantity={updateQuantity} />
             ))}
+
+            <BolsaRegaloOption />
 
             <Link href="/catalogo" className="flex items-center gap-2 text-sm font-semibold text-fg-muted hover:text-fg transition-colors pt-2">
               <ArrowRight size={14} className="rotate-180" /> Seguir comprando
