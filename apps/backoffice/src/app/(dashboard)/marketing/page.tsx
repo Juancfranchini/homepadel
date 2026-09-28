@@ -1,18 +1,9 @@
 'use client';
 
 import { Eye, MousePointerClick, ShoppingCart, CreditCard, CheckCircle2, Info } from 'lucide-react';
-import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  Legend,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { useMarketingStats, MarketingStats, ProductoRanking } from './useMarketingStats';
+import DailyCharts from './DailyCharts';
 
 const PASOS = [
   { key: 'PageView' as const, label: 'Vistas de página', icon: Eye },
@@ -30,7 +21,14 @@ export default function MarketingPage() {
   return (
     <div className="space-y-6">
       <Header days={days} onDaysChange={setDays} />
-      {loading || !stats ? <PageLoader /> : <Contenido stats={stats} />}
+      {!stats ? (
+        <PageLoader />
+      ) : (
+        // Al cambiar de rango se queda lo anterior, atenuado, hasta que llega lo nuevo: sin parpadeo.
+        <div className={'space-y-6 transition-opacity ' + (loading ? 'opacity-50' : '')} aria-busy={loading}>
+          <Contenido stats={stats} days={days} />
+        </div>
+      )}
     </div>
   );
 }
@@ -68,18 +66,29 @@ const ZONA_ARGENTINA = 'America/Argentina/Buenos_Aires';
 /** YYYY-MM-DD en hora argentina, el mismo formato que las fechas del gráfico. */
 const diaArgentino = (fecha: Date) => new Intl.DateTimeFormat('en-CA', { timeZone: ZONA_ARGENTINA }).format(fecha);
 
-function Contenido({ stats }: { stats: MarketingStats }) {
+/** Hora HH:MM en Argentina; null si fue a primera hora (el día cuenta como completo). */
+function horaDeInicio(fecha: Date): string | null {
+  const hora = new Intl.DateTimeFormat('es-AR', { timeZone: ZONA_ARGENTINA, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(fecha);
+  return hora === '00:00' ? null : hora;
+}
+
+function Contenido({ stats, days }: { stats: MarketingStats; days: number }) {
   const desde = stats.registrandoDesde ? new Date(stats.registrandoDesde) : null;
   // Los días anteriores al primer evento no son "cero visitas": no se medía.
   // Dibujarlos en cero hace creer que hubo días muertos.
   const dias = desde ? stats.daily.filter((dia) => dia.date >= diaArgentino(desde)) : stats.daily;
+  const horaInicio = desde ? horaDeInicio(desde) : null;
+  const parciales = {
+    hoy: diaArgentino(new Date()),
+    inicio: desde && horaInicio ? { fecha: diaArgentino(desde), hora: horaInicio } : null,
+  };
 
   return (
     <>
       {desde && <AvisoDatosDesde desde={desde} />}
       <FunnelCards funnel={stats.funnel} />
       <ConversionBar conversion={stats.conversion} />
-      <DailyChart rows={dias} />
+      <DailyCharts rows={dias} parciales={parciales} diasPedidos={days} />
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
         <ProductRanking title="Productos más vistos" rows={stats.topViewed} />
         <ProductRanking title="Productos más agregados al carrito" rows={stats.topAddedToCart} />
@@ -151,30 +160,6 @@ function ConversionBar({ conversion }: { conversion: MarketingStats['conversion'
       <p className="mt-4 text-xs text-gray-400">
         De cada 100 personas que entran al sitio, {conversion.compraDePageView} terminan comprando.
       </p>
-    </section>
-  );
-}
-
-function DailyChart({ rows }: { rows: MarketingStats['daily'] }) {
-  return (
-    <section className="rounded-2xl border border-gray-200 bg-white p-5">
-      <h2 className="mb-4 font-bold text-gray-900">Evolución diaria</h2>
-      <div className="h-80">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={rows}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <XAxis dataKey="date" fontSize={11} />
-            <YAxis fontSize={11} />
-            <Tooltip />
-            <Legend />
-            <Line type="monotone" dataKey="pageView" name="Vistas de página" stroke="#94a3b8" strokeWidth={2} dot={false} />
-            <Line type="monotone" dataKey="viewContent" name="Vistas de producto" stroke="#38bdf8" strokeWidth={2} dot={false} />
-            <Line type="monotone" dataKey="addToCart" name="Al carrito" stroke="#f59e0b" strokeWidth={2} dot={false} />
-            <Line type="monotone" dataKey="initiateCheckout" name="Checkout" stroke="#8b5cf6" strokeWidth={2} dot={false} />
-            <Line type="monotone" dataKey="purchase" name="Compras" stroke="#84cc16" strokeWidth={3} dot={false} />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
     </section>
   );
 }
