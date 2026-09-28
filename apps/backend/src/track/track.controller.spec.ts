@@ -1,226 +1,193 @@
 /**
- * Todo evento que pasa por acá (PageView, ViewContent, AddToCart,
- * InitiateCheckout, Contact) nunca llegaba a Meta: leía el token de
- * `process.env.META_ACCESS_TOKEN`, una variable que nunca se configuró en
- * Railway —el backoffice guarda el token en la base, no en el entorno del
- * proceso—. Encima, `SiteSectionsService` intentaba "guardarla" escribiendo
- * un archivo `.env` en el disco, que ni siquiera actualiza `process.env` del
- * proceso que ya está corriendo. El endpoint devolvía `{success:true}` igual,
- * así que nadie se enteraba de que no se mandaba nada.
- *
- * Estas pruebas fijan que la fuente de la configuración es la base de datos
- * (`site_sections` / `meta_pixel`), la misma que ya usa el aviso de compra.
+ * Reglas de /track: el embudo del backoffice y Meta reciben exactamente los
+ * mismos eventos, y solo los de la tienda de producción cuentan de verdad.
+ * El token de Meta sale de la base (`site_sections` / `meta_pixel`), nunca
+ * del entorno: la variable vieja META_ACCESS_TOKEN nunca existió en Railway.
  */
 
+import * as crypto from 'crypto';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
 import { TrackController } from './track.controller';
 import { TrackEventDto } from './dto/track-event.dto';
 
-function construirRequestFalso() {
+const sha256 = (v: string) => crypto.createHash('sha256').update(v).digest('hex');
+const PRODUCCION = 'https://www.homepadel.com.ar';
+
+function request(origin = PRODUCCION) {
   return {
-    headers: { cookie: '_fbp=fb.1.111;_fbc=fb.1.222', 'user-agent': 'jest' },
+    headers: { origin, 'user-agent': 'jest', 'x-forwarded-for': '200.1.2.3, 10.0.0.1' },
     socket: { remoteAddress: '127.0.0.1' },
-  } as any;
+  } as never;
 }
 
-/** El embudo propio (Marketing) guarda siempre, esté Meta configurado o no. */
-function marketingEventFalso() {
-  return { create: jest.fn().mockResolvedValue({}) };
+function construir(meta: Record<string, unknown> | null = { pixelId: '1041282918808105', accessToken: 'token' }, pruebas: string[] = []) {
+  const prisma = {
+    siteSection: {
+      findUnique: jest.fn(async ({ where }: { where: { key: string } }) =>
+        where.key === 'cuentas_prueba' ? { data: { emails: pruebas } } : meta ? { data: meta } : null,
+      ),
+    },
+    marketingEvent: { create: jest.fn().mockResolvedValue({}) },
+    user: { findUnique: jest.fn().mockResolvedValue({ id: 'user-1', email: 'Cuenta@Ejemplo.com', phone: '1140832310' }) },
+  };
+  global.fetch = jest.fn().mockResolvedValue({ ok: true, status: 200 }) as never;
+  return { prisma, controller: new TrackController(prisma as never) };
 }
 
 const EVENTO: TrackEventDto = {
   eventName: 'AddToCart',
   eventId: 'evt-1',
-  eventSourceUrl: 'https://homepadel.store/producto/paleta',
-  eventData: { content_ids: ['prod-1'] },
+  eventSourceUrl: PRODUCCION + '/producto/paleta',
+  eventData: { content_ids: ['prod-1'], value: 1000, currency: 'ARS' },
+  fbp: 'fb.1.1700000000000.123456789',
+  fbc: 'fb.1.1700000000000.AbCdEf',
 };
 
+/** El envío a Meta no se espera (no demora al navegador): se deja correr antes de mirar. */
+const esperarEnvio = () => new Promise((resolve) => setImmediate(resolve));
+const cuerpo = () => JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
+
 describe('TrackController', () => {
-  const entornoOriginal = process.env;
-
+  const entorno = process.env;
   beforeEach(() => {
-    process.env = { ...entornoOriginal, META_ACCESS_TOKEN: 'esto-ya-no-deberia-usarse' };
+    process.env = { ...entorno, META_ACCESS_TOKEN: 'esto-no-se-usa' };
   });
-
   afterEach(() => {
-    process.env = entornoOriginal;
+    process.env = entorno;
   });
 
-  it('no manda nada a Meta si no hay token guardado en site_sections, aunque exista la variable de entorno vieja', async () => {
-    const prisma = {
-      siteSection: { findUnique: jest.fn().mockResolvedValue({ data: { pixelId: '123' } }) },
-      marketingEvent: marketingEventFalso(),
-    };
-    global.fetch = jest.fn() as any;
+  it('desde producción suma al embudo, sale a Meta y le dice al navegador que mande el Pixel', async () => {
+    const { prisma, controller } = construir();
+    const resultado = await controller.track(EVENTO, request());
+    await esperarEnvio();
 
-    const controller = new TrackController(prisma as any);
-    const resultado = await controller.track(EVENTO, construirRequestFalso());
-
-    expect(global.fetch).not.toHaveBeenCalled();
-    expect(resultado).toEqual({ success: false, message: 'Meta Pixel no configurado' });
-  });
-
-  it('guarda el evento para el embudo propio aunque Meta no esté configurado', async () => {
-    const prisma = {
-      siteSection: { findUnique: jest.fn().mockResolvedValue(null) },
-      marketingEvent: marketingEventFalso(),
-    };
-    global.fetch = jest.fn() as any;
-
-    const controller = new TrackController(prisma as any);
-    await controller.track(EVENTO, construirRequestFalso());
-
+    expect(resultado).toEqual({ registrado: true, pixel: true });
     expect(prisma.marketingEvent.create).toHaveBeenCalledWith({
-      data: { eventName: 'AddToCart', productId: 'prod-1', productName: undefined, value: undefined },
+      data: { eventName: 'AddToCart', productId: 'prod-1', productName: undefined, value: 1000 },
+    });
+    const evento = cuerpo().data[0];
+    expect(evento).toMatchObject({ event_name: 'AddToCart', event_id: 'evt-1', action_source: 'website' });
+    expect(cuerpo().test_event_code).toBeUndefined();
+  });
+
+  it('valor, productos y moneda van en custom_data, no sueltos en el evento', async () => {
+    const { controller } = construir();
+    await controller.track(EVENTO, request());
+    await esperarEnvio();
+
+    const evento = cuerpo().data[0];
+    expect(evento.custom_data).toEqual({ content_ids: ['prod-1'], value: 1000, currency: 'ARS' });
+    expect(evento.value).toBeUndefined();
+  });
+
+  it('manda IP, navegador y las cookies del Pixel que lee el navegador', async () => {
+    const { controller } = construir();
+    await controller.track(EVENTO, request());
+    await esperarEnvio();
+
+    expect(cuerpo().data[0].user_data).toMatchObject({
+      client_ip_address: '200.1.2.3',
+      client_user_agent: 'jest',
+      fbp: EVENTO.fbp,
+      fbc: EVENTO.fbc,
     });
   });
 
-  it('no deja que un fallo al guardar el evento propio tumbe el aviso a Meta', async () => {
-    const prisma = {
-      siteSection: { findUnique: jest.fn().mockResolvedValue({ data: { pixelId: '123', accessToken: 'token' } }) },
-      marketingEvent: { create: jest.fn().mockRejectedValue(new Error('la base no responde')) },
-    };
-    global.fetch = jest.fn().mockResolvedValue({ ok: true, status: 200 }) as any;
-
-    const controller = new TrackController(prisma as any);
-    const resultado = await controller.track(EVENTO, construirRequestFalso());
-
-    expect(resultado).toEqual({ success: true });
-  });
-
-  it('usa el pixelId y el access token guardados en site_sections, no la variable de entorno', async () => {
-    const prisma = {
-      siteSection: {
-        findUnique: jest.fn().mockResolvedValue({
-          data: { pixelId: '1041282918808105', accessToken: 'token-de-la-base', testEventCode: 'TEST123' },
-        }),
-      },
-      marketingEvent: marketingEventFalso(),
-    };
-    global.fetch = jest.fn().mockResolvedValue({ ok: true, status: 200 }) as any;
-
-    const controller = new TrackController(prisma as any);
-    const resultado = await controller.track(EVENTO, construirRequestFalso());
-
-    expect(global.fetch).toHaveBeenCalledWith(
-      'https://graph.facebook.com/v21.0/1041282918808105/events',
-      expect.objectContaining({ method: 'POST' }),
-    );
-    const cuerpo = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
-    expect(cuerpo.access_token).toBe('token-de-la-base');
-    expect(cuerpo.test_event_code).toBe('TEST123');
-    expect(cuerpo.data[0]).toMatchObject({
-      event_name: 'AddToCart',
-      event_id: 'evt-1',
-      content_ids: ['prod-1'],
-      user_data: expect.objectContaining({ fbp: 'fb.1.111', fbc: 'fb.1.222' }),
-    });
-    expect(resultado).toEqual({ success: true });
-  });
-
-  it('cifra el email y el teléfono del comprador antes de mandarlos a Meta', async () => {
-    const prisma = {
-      siteSection: { findUnique: jest.fn().mockResolvedValue({ data: { pixelId: '123', accessToken: 'token' } }) },
-      marketingEvent: marketingEventFalso(),
-    };
-    global.fetch = jest.fn().mockResolvedValue({ ok: true, status: 200 }) as any;
-
-    const controller = new TrackController(prisma as any);
-    await controller.track({ ...EVENTO, userData: { email: 'Comprador@Mail.com', phone: '11 4083-2310' } }, construirRequestFalso());
+  it('con sesión agrega email, teléfono e id de la cuenta, cifrados', async () => {
+    const { controller } = construir();
+    await controller.track(EVENTO, request(), { id: 'user-1' });
+    await esperarEnvio();
 
     const enviado = (global.fetch as jest.Mock).mock.calls[0][1].body as string;
-    const userData = JSON.parse(enviado).data[0].user_data;
-    expect(userData.em).toHaveLength(1);
+    const userData = cuerpo().data[0].user_data;
+    expect(userData.em).toEqual([sha256('cuenta@ejemplo.com')]);
     expect(userData.ph).toHaveLength(2);
-    expect(enviado).not.toContain('Comprador');
+    expect(userData.external_id).toEqual([sha256('user-1')]);
+    expect(enviado).not.toContain('Ejemplo');
     expect(enviado).not.toContain('40832310');
-    // El dato personal tampoco queda en el embudo propio.
-    expect(JSON.stringify(prisma.marketingEvent.create.mock.calls)).not.toContain('Comprador');
   });
 
-  it('en la compra toma el email y el teléfono de la orden, en el servidor', async () => {
-    const prisma = {
-      siteSection: { findUnique: jest.fn().mockResolvedValue({ data: { pixelId: '123', accessToken: 'token' } }) },
-      marketingEvent: marketingEventFalso(),
-      order: {
-        findUnique: jest.fn().mockResolvedValue({
-          notes: JSON.stringify({ buyerEmail: 'Compradora@Mail.com', buyerPhone: '11 4083-2310' }),
-          user: null,
-        }),
-      },
-    };
-    global.fetch = jest.fn().mockResolvedValue({ ok: true, status: 200 }) as any;
+  it('desde localhost no suma al embudo ni sale a Meta si no hay código de prueba', async () => {
+    const { prisma, controller } = construir();
+    const resultado = await controller.track(EVENTO, request('http://localhost:3000'));
+    await esperarEnvio();
 
-    const controller = new TrackController(prisma as any);
-    await controller.track({ eventName: 'Purchase', eventId: 'purchase_HP-1', eventData: { value: 750000 } }, construirRequestFalso());
-
-    expect(prisma.order.findUnique).toHaveBeenCalledWith(expect.objectContaining({ where: { number: 'HP-1' } }));
-    const enviado = (global.fetch as jest.Mock).mock.calls[0][1].body as string;
-    const userData = JSON.parse(enviado).data[0].user_data;
-    expect(userData.em).toHaveLength(1);
-    expect(userData.ph).toHaveLength(2);
-    expect(enviado).not.toContain('Compradora');
-  });
-
-  it('lo que hace una cuenta de prueba no se guarda en el embudo ni llega a Meta', async () => {
-    const prisma = {
-      siteSection: {
-        findUnique: jest.fn(async ({ where }: { where: { key: string } }) =>
-          where.key === 'cuentas_prueba'
-            ? { data: { emails: ['dueno@homepadel.com.ar'] } }
-            : { data: { pixelId: '123', accessToken: 'token' } },
-        ),
-      },
-      marketingEvent: marketingEventFalso(),
-    };
-    global.fetch = jest.fn() as any;
-
-    const controller = new TrackController(prisma as any);
-    await controller.track({ ...EVENTO, eventName: 'InitiateCheckout', userData: { email: 'Dueno@HomePadel.com.ar' } }, construirRequestFalso());
-
+    expect(resultado).toEqual({ registrado: false, pixel: false });
     expect(prisma.marketingEvent.create).not.toHaveBeenCalled();
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
-  it('una compra marcada como de prueba no llega a Meta ni al embudo', async () => {
-    const prisma = {
-      siteSection: { findUnique: jest.fn().mockResolvedValue({ data: { pixelId: '123', accessToken: 'token' } }) },
-      marketingEvent: marketingEventFalso(),
-      order: { findUnique: jest.fn().mockResolvedValue({ notes: null, isTest: true, user: null }) },
-    };
-    global.fetch = jest.fn() as any;
+  it('fuera de producción, con código de prueba, va a Eventos de prueba y el navegador no manda el Pixel', async () => {
+    const { prisma, controller } = construir({ pixelId: '1041282918808105', accessToken: 'token', testEventCode: 'TEST123' });
+    const resultado = await controller.track(EVENTO, request('https://homepadel.store'));
+    await esperarEnvio();
 
-    const controller = new TrackController(prisma as any);
-    await controller.track({ eventName: 'Purchase', eventId: 'purchase_HP-1', eventData: { value: 500 } }, construirRequestFalso());
+    expect(resultado).toEqual({ registrado: false, pixel: false });
+    expect(prisma.marketingEvent.create).not.toHaveBeenCalled();
+    expect(cuerpo().test_event_code).toBe('TEST123');
+  });
 
+  it('en producción ignora el código de prueba del backoffice: si no, los eventos reales no cuentan', async () => {
+    const { controller } = construir({ pixelId: '1041282918808105', accessToken: 'token', testEventCode: 'TEST123' });
+    await controller.track(EVENTO, request());
+    await esperarEnvio();
+    expect(cuerpo().test_event_code).toBeUndefined();
+  });
+
+  it('META_EVENTS_ENABLED=false corta Meta y el Pixel, pero el embudo sigue contando', async () => {
+    process.env = { ...entorno, META_EVENTS_ENABLED: 'false' };
+    const { prisma, controller } = construir();
+    const resultado = await controller.track(EVENTO, request());
+    await esperarEnvio();
+
+    expect(resultado).toEqual({ registrado: true, pixel: false });
+    expect(prisma.marketingEvent.create).toHaveBeenCalled();
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('sin token guardado no sale a Meta (aunque exista la variable de entorno vieja), pero cuenta en el embudo', async () => {
+    const { prisma, controller } = construir({ pixelId: '123' });
+    const resultado = await controller.track(EVENTO, request());
+    await esperarEnvio();
+
+    expect(resultado).toEqual({ registrado: true, pixel: false });
+    expect(prisma.marketingEvent.create).toHaveBeenCalled();
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('lo que hace una cuenta de prueba no cuenta en ningún lado, ni por el Pixel', async () => {
+    const { prisma, controller } = construir(undefined, ['cuenta@ejemplo.com']);
+    const resultado = await controller.track(EVENTO, request(), { id: 'user-1' });
+    await esperarEnvio();
+
+    expect(resultado).toEqual({ registrado: false, pixel: false });
     expect(prisma.marketingEvent.create).not.toHaveBeenCalled();
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
   it('usa siempre el pixel configurado, aunque el navegador mande otro', async () => {
-    const prisma = {
-      siteSection: { findUnique: jest.fn().mockResolvedValue({ data: { pixelId: '1041282918808105', accessToken: 'token' } }) },
-      marketingEvent: marketingEventFalso(),
-    };
-    global.fetch = jest.fn().mockResolvedValue({ ok: true, status: 200 }) as any;
-
-    const controller = new TrackController(prisma as any);
-    await controller.track({ ...EVENTO, pixelId: '999-otro-dataset' }, construirRequestFalso());
-
-    expect((global.fetch as jest.Mock).mock.calls[0][0]).toBe('https://graph.facebook.com/v21.0/1041282918808105/events');
+    const { controller } = construir();
+    await controller.track({ ...EVENTO, pixelId: '999' }, request());
+    await esperarEnvio();
+    expect((global.fetch as jest.Mock).mock.calls[0][0]).toContain('/1041282918808105/events');
   });
 
-  it('devuelve success:false y deja registro cuando Meta rechaza el evento, en vez de tragarse el error', async () => {
-    const prisma = {
-      siteSection: {
-        findUnique: jest.fn().mockResolvedValue({ data: { pixelId: '123', accessToken: 'token' } }),
-      },
-      marketingEvent: marketingEventFalso(),
-    };
-    global.fetch = jest.fn().mockResolvedValue({ ok: false, status: 400, text: async () => 'token inválido' }) as any;
+  it('si falla guardar el evento propio, igual sale a Meta', async () => {
+    const { prisma, controller } = construir();
+    prisma.marketingEvent.create.mockRejectedValue(new Error('base caída'));
+    await controller.track(EVENTO, request());
+    await esperarEnvio();
+    expect(global.fetch).toHaveBeenCalled();
+  });
 
-    const controller = new TrackController(prisma as any);
-    const resultado = await controller.track(EVENTO, construirRequestFalso());
+  it('el navegador no puede mandar un Purchase: la compra la informa solo el servidor', async () => {
+    const errores = await validate(plainToInstance(TrackEventDto, { ...EVENTO, eventName: 'Purchase' }));
+    expect(errores.map((e) => e.property)).toContain('eventName');
+  });
 
-    expect(resultado).toEqual({ success: false });
+  it('rechaza cookies del Pixel con otro formato', async () => {
+    const errores = await validate(plainToInstance(TrackEventDto, { ...EVENTO, fbp: '<script>' }));
+    expect(errores.map((e) => e.property)).toContain('fbp');
   });
 });

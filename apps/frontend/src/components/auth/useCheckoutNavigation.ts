@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
+import { useCartStore } from '@/store/cartStore';
+import { avisarInicioDeCheckout } from '@/lib/inicioCheckout';
 import { User } from '@/types';
 
 export function useCheckoutNavigation(beforeNavigate?: () => void) {
@@ -16,6 +18,8 @@ export function useCheckoutNavigation(beforeNavigate?: () => void) {
   };
 
   const handleCheckout = () => {
+    // Antes de pedir el login: quien se va en esa pantalla también empezó a comprar.
+    avisarInicioDeCheckout(useCartStore.getState().items, user ? { email: user.email, phone: user.phone } : undefined);
     if (user) goToCheckout();
     else setAuthOpen(true);
   };

@@ -52,6 +52,13 @@ describe('AbandonedCartsService.save', () => {
     await service.save(CARRITO);
     expect(prisma.abandonedCart.upsert.mock.calls[0][0].create).toMatchObject({ isTest: true });
   });
+
+  it('una cuenta de prueba con sesión que escribe otro mail en el checkout también queda marcada', async () => {
+    const { prisma, service } = construir();
+    prisma.siteSection.findUnique.mockResolvedValue({ data: { emails: ['prueba@homepadel.com.ar'] } });
+    await service.save(CARRITO, 'Prueba@HomePadel.com.ar');
+    expect(prisma.abandonedCart.upsert.mock.calls[0][0].create).toMatchObject({ isTest: true });
+  });
 });
 
 describe('AbandonedCartsService.markRecovered', () => {

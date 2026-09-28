@@ -43,6 +43,17 @@ Regla dura del checkout: **nada de lo que manda el navegador determina cuánto s
 
 Opción sin cargo en el carrito y en el checkout (`components/cart/BolsaRegaloOption.tsx`, imagen en `public/images/bolsa-regalo.webp`). El navegador manda `bolsasRegalo` en `POST /orders` y en `POST /payments/create-preference`; el DTO acepta un entero de 0 a 50 y el servidor lo limita a las unidades compradas (`src/orders/bolsas-regalo.ts`). Se guarda en `notes.bolsasRegalo` y el backoffice lo muestra en Pedidos (ícono de regalo en la lista y aviso en el detalle).
 
+## Meta: Pixel y API de Conversiones
+
+Un evento se cuenta igual en el embudo del backoffice (Marketing) y en Meta. El que decide es el servidor:
+
+- **Eventos del navegador** (PageView, ViewContent, AddToCart, InitiateCheckout, Contact): la tienda los manda a `POST /track` (`src/track/`). El servidor responde `{ registrado, pixel }`, y el Pixel del navegador sale solo con `pixel: true`, con el mismo `event_id` que la API de Conversiones para que Meta cuente uno solo.
+- **Solo producción cuenta** (`src/common/meta/meta-destino.ts`): el origen del request (header `Origin`) tiene que ser `https://www.homepadel.com.ar` (`META_PRODUCTION_HOSTS`). Si no lo es (localhost, previews, homepadel.store), el evento no suma en el backoffice y a Meta va a "Eventos de prueba" si hay código (`META_TEST_EVENT_CODE` o el del backoffice); sin código no sale. En producción el código de prueba se ignora. `META_EVENTS_ENABLED=false` corta todo envío a Meta. En la tienda, el Pixel se instala solo en esos dominios (`NEXT_PUBLIC_META_PIXEL_HOSTS`).
+- **Datos para reconocer a la persona:** email y teléfono (de la sesión o del checkout) cifrados con SHA-256, `external_id` (id de cuenta, cifrado), IP, user agent y las cookies `_fbp`/`_fbc`. Como el API vive en otro dominio, esas cookies las lee el navegador y las manda en el cuerpo. Si alguien llega de un anuncio (`fbclid`), el `_fbc` se arma en ese momento.
+- **Purchase sale solo del servidor**, cuando el pago se confirma: el aviso de Mercado Pago (o la consulta de la tienda al volver, que pregunta a Mercado Pago), o la transferencia marcada como pagada. Ver `src/payments/payments.meta.ts`. El pedido guarda al crearse `notes.metaCliente` (origen, IP, user agent, fbp, fbc), porque el aviso de Mercado Pago no trae nada del navegador. `/track` ya no acepta Purchase.
+- **InitiateCheckout** sale al tocar "Finalizar compra", antes de pedir el login, o al entrar directo a `/checkout`. Una vez por carrito en la visita (`lib/inicioCheckout.ts` en la tienda).
+- **Pruebas:** lo que hace una cuenta de prueba (mail de la sesión o del checkout, lista en Configuración → Meta Pixel) no cuenta en ningún lado. Las órdenes y los carritos quedan con `isTest`, fuera de las estadísticas. El modo prueba del navegador (`?modo_prueba=1`) no manda nada.
+
 ## Mi cuenta: direcciones y favoritos
 
 `src/cuenta/` (`/api/mi-cuenta`, siempre con JWT y sobre el usuario del token — no hay forma de tocar datos de otro):
@@ -57,7 +68,7 @@ Opción sin cargo en el carrito y en el checkout (`components/cart/BolsaRegaloOp
 | Mercado Pago | `payments` | Crea preferencias de pago; webhook (`POST /api/payments/webhook`) verifica firma con `MERCADOPAGO_WEBHOOK_SECRET` antes de marcar una orden como pagada |
 | Cloudinary | `uploads` | Sube imágenes de producto/contenido; en dev sin `CLOUDINARY_URL` cae a disco local (`UPLOADS_DIR`), que no persiste entre deploys en Railway |
 | Resend | `email` | Plantillas y campañas de email |
-| Meta Conversions API | `track` | Opcional (`META_ACCESS_TOKEN`), tracking de conversiones server-side |
+| Meta Conversions API | `track`, `payments` | Pixel ID y token en el backoffice (`site_sections` / `meta_pixel`). Ver "Meta: Pixel y API de Conversiones" |
 
 ## Deuda conocida (no corregir sin plan — ver CLAUDE.md)
 

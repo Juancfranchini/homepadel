@@ -1,26 +1,19 @@
-import { Body, Controller, Logger, Post, Req } from '@nestjs/common';
+import { Body, Controller, Logger, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { PrismaService } from '../prisma/prisma.service';
 import { TrackEventDto } from './dto/track-event.dto';
-import { userDataParaMeta } from '../common/meta-user-data';
+import { OptionalJwtAuthGuard } from '../common/guards/optional-jwt-auth.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { userDataParaMeta } from '../common/meta/meta-user-data';
+import { clienteDesdeRequest } from '../common/meta/meta-cliente';
+import { destinoMeta, enviarEventoAMeta, esOrigenDeProduccion, leerConfigMeta } from '../common/meta/meta-destino';
 import { esCuentaDePrueba } from '../common/test-accounts';
 
-interface DatosDelComprador {
-  emails: (string | undefined)[];
-  telefono?: string;
-  esPrueba: boolean;
-}
-
-interface MetaPixelConfig {
-  pixelId?: string;
-  accessToken?: string;
-  testEventCode?: string;
-}
-
-function getCookie(cookies: string, name: string): string | null {
-  const match = cookies.match(new RegExp('(?:^|;\\s*)' + name + '=([^;]*)'));
-  return match ? decodeURIComponent(match[1]) : null;
+/** Qué pasó con el evento. `pixel`: si el navegador tiene que mandarlo también por el Pixel (mismo event_id). */
+export interface ResultadoTrack {
+  registrado: boolean;
+  pixel: boolean;
 }
 
 /** Lo mínimo para el embudo propio: qué producto (si hay) y qué valor tenía el evento. */
@@ -40,113 +33,63 @@ export class TrackController {
   constructor(private prisma: PrismaService) {}
 
   /**
-   * Reenvía el evento a la API de Conversiones de Meta.
+   * Un evento del navegador: se cuenta en el embudo del backoffice y se
+   * manda a la API de Conversiones de Meta, con las mismas reglas para los
+   * dos, así los números se pueden comparar.
    *
-   * El access token vivía en `process.env.META_ACCESS_TOKEN`, una variable
-   * que nunca existió en Railway: el backoffice guarda el token en la base
-   * (`site_sections` / `meta_pixel`), no en el entorno del proceso. Encima,
-   * `SiteSectionsService.saveMetaPixelEnv` intentaba escribir un archivo
-   * `.env` en el disco del servidor al guardar la configuración —algo que ni
-   * siquiera actualiza `process.env` del proceso que ya está corriendo, y que
-   * en Railway se pierde en el próximo deploy—. Resultado: cada evento que
-   * pasaba por acá (PageView, ViewContent, AddToCart, InitiateCheckout,
-   * Contact) nunca llegaba a Meta por este camino, sin ningún error visible
-   * -devolvía {success:true} igual-, porque sin credencial la llamada ni se
-   * hacía. Ahora lee la misma configuración que ya usa el aviso de compra
-   * (`PaymentsService` / `enviarCompraAMeta`), que sí funcionaba.
-   */
-  /**
-   * Email y teléfono para Meta. En la compra salen de la orden, leídos acá
-   * en el servidor: así no tienen que pasar por el navegador ni exponerse en
-   * la consulta pública del pedido. En el resto de los eventos, los que
-   * mande el navegador (los de la cuenta, si hay sesión).
+   * - Cuentas de prueba (el mail de la sesión o el del checkout): no se
+   *   registra ni sale a Meta.
+   * - Fuera de producción (localhost, previews, dominios viejos): no suma
+   *   en el backoffice y a Meta va solo como evento de prueba, si hay código
+   *   (ver meta-destino.ts).
    *
-   * `esPrueba`: la compra está marcada como de prueba, o el mail es de una
-   * cuenta de prueba (ver common/test-accounts.ts).
+   * El navegador manda el evento por el Pixel solo si esto responde
+   * `pixel: true`: así el Pixel y el servidor informan exactamente lo mismo.
+   * El token vive en la base (`site_sections` / `meta_pixel`), no en el entorno.
    */
-  private async datosDelComprador(body: TrackEventDto): Promise<DatosDelComprador> {
-    if (body.eventName === 'Purchase' && body.eventId.startsWith('purchase_')) {
-      const orden = await this.prisma.order.findUnique({
-        where: { number: body.eventId.slice('purchase_'.length) },
-        select: { notes: true, isTest: true, user: { select: { email: true } } },
-      });
-      let notas: { buyerEmail?: string; buyerPhone?: string } = {};
-      try {
-        notas = orden?.notes ? JSON.parse(orden.notes) : {};
-      } catch {
-        notas = {};
-      }
-      const emails = [notas.buyerEmail, orden?.user?.email];
-      const esPrueba = !!orden?.isTest || (await esCuentaDePrueba(this.prisma, emails));
-      return { emails, telefono: notas.buyerPhone, esPrueba };
-    }
-    const emails = [body.userData?.email];
-    return { emails, telefono: body.userData?.phone, esPrueba: await esCuentaDePrueba(this.prisma, emails) };
-  }
-
   @Post()
-  async track(@Body() body: TrackEventDto, @Req() req: Request) {
-    // Lo que hace una cuenta de prueba no se registra en ningún lado: ni en
-    // el embudo propio ni en Meta.
-    const { esPrueba, ...comprador } = await this.datosDelComprador(body);
-    if (esPrueba) return { success: false, message: 'Evento de prueba: no se registra' };
+  @UseGuards(OptionalJwtAuthGuard)
+  async track(@Body() body: TrackEventDto, @Req() req: Request, @CurrentUser() usuario?: { id: string }): Promise<ResultadoTrack> {
+    const cuenta = usuario
+      ? await this.prisma.user.findUnique({ where: { id: usuario.id }, select: { id: true, email: true, phone: true } })
+      : null;
+    const emails = [body.userData?.email, cuenta?.email];
+    if (await esCuentaDePrueba(this.prisma, emails)) return { registrado: false, pixel: false };
 
-    // El embudo propio del backoffice (Marketing) no depende de que Meta esté
-    // configurado: se guarda siempre, aunque falte el Pixel o el token.
-    const { productId, productName, value } = extraerDatosDeMarketing(body.eventData);
-    await this.prisma.marketingEvent
-      .create({ data: { eventName: body.eventName, productId, productName, value } })
-      .catch((err) => this.logger.warn(`No se pudo guardar el evento ${body.eventName} para el embudo propio: ${err}`));
+    const cliente = clienteDesdeRequest(req, body);
+    const produccion = esOrigenDeProduccion(cliente.origen);
 
-    const seccion = await this.prisma.siteSection.findUnique({ where: { key: 'meta_pixel' } });
-    const config = (seccion?.data as MetaPixelConfig) || {};
-    // Siempre el pixel configurado: aceptar el que manda el navegador dejaba
-    // usar nuestro token para mandar eventos a otro dataset.
-    const pixelId = config.pixelId;
-
-    if (!pixelId || !config.accessToken) return { success: false, message: 'Meta Pixel no configurado' };
-
-    const cookies = req.headers.cookie || '';
-    const fbp = getCookie(cookies, '_fbp');
-    const fbc = getCookie(cookies, '_fbc');
-    // Detrás de proxies llega como lista ("cliente, proxy"): Meta espera una sola IP, la del cliente.
-    const clientIp = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket.remoteAddress || '';
-    const clientUserAgent = req.headers['user-agent'] || '';
-
-    const payload: Record<string, unknown> = {
-      access_token: config.accessToken,
-      data: [{
-        event_name: body.eventName,
-        event_time: Math.floor(Date.now() / 1000),
-        event_id: body.eventId,
-        event_source_url: body.eventSourceUrl,
-        action_source: 'website',
-        user_data: {
-          fbp: fbp || undefined,
-          fbc: fbc || undefined,
-          ...userDataParaMeta({ ...comprador, ip: clientIp, userAgent: clientUserAgent }),
-        },
-        ...(body.eventData || {}),
-        ...(body.customData ? { custom_data: body.customData } : {}),
-      }],
-    };
-
-    if (config.testEventCode) payload.test_event_code = config.testEventCode;
-
-    try {
-      const respuesta = await fetch('https://graph.facebook.com/v21.0/' + pixelId + '/events', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      if (!respuesta.ok) {
-        this.logger.warn(`Meta rechazó el evento ${body.eventName} (HTTP ${respuesta.status}): ${await respuesta.text()}`);
-        return { success: false };
-      }
-      return { success: true };
-    } catch (err) {
-      this.logger.error(`No se pudo mandar el evento ${body.eventName} a Meta: ${err}`);
-      return { success: false };
+    if (produccion) {
+      const { productId, productName, value } = extraerDatosDeMarketing(body.eventData);
+      await this.prisma.marketingEvent
+        .create({ data: { eventName: body.eventName, productId, productName, value } })
+        .catch((err) => this.logger.warn(`No se pudo guardar el evento ${body.eventName} para el embudo propio: ${err}`));
     }
+
+    const destino = destinoMeta(await leerConfigMeta(this.prisma), produccion);
+    if (!destino) return { registrado: produccion, pixel: false };
+
+    // Valor, productos y moneda van dentro de custom_data: antes iban sueltos
+    // en el evento y Meta los ignoraba.
+    const customData = { ...(body.eventData || {}), ...(body.customData || {}) };
+    // Sin esperar la respuesta de Meta: el navegador no tiene por qué demorarse.
+    void enviarEventoAMeta(destino, {
+      event_name: body.eventName,
+      event_time: Math.floor(Date.now() / 1000),
+      event_id: body.eventId,
+      event_source_url: body.eventSourceUrl,
+      action_source: 'website',
+      user_data: userDataParaMeta({
+        emails,
+        telefono: body.userData?.phone || cuenta?.phone,
+        ip: cliente.ip,
+        userAgent: cliente.userAgent,
+        fbp: cliente.fbp,
+        fbc: cliente.fbc,
+        userId: cuenta?.id,
+      }),
+      ...(Object.keys(customData).length > 0 ? { custom_data: customData } : {}),
+    });
+    return { registrado: produccion, pixel: produccion };
   }
 }

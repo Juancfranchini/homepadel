@@ -14,6 +14,7 @@ import {
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { MAX_BOLSAS_REGALO } from '../../orders/bolsas-regalo';
+import { MetaNavegadorDto } from '../../common/meta/meta-cliente';
 
 class PreferenceItemDto {
   @IsString() productId: string;
@@ -79,6 +80,9 @@ export class CreatePreferenceDto {
 
   // Bolsas de regalo pedidas; el servidor las limita a las unidades compradas.
   @ApiPropertyOptional() @IsOptional() @IsInt() @Min(0) @Max(MAX_BOLSAS_REGALO) bolsasRegalo?: number;
+
+  // Cookies del Pixel del navegador, para informar la compra a Meta cuando Mercado Pago confirme el pago.
+  @ApiPropertyOptional() @IsOptional() @ValidateNested() @Type(() => MetaNavegadorDto) meta?: MetaNavegadorDto;
 
   // Se aceptan por compatibilidad con el frontend anterior y se descartan: el
   // número de orden y la referencia externa los genera el servidor. Que los

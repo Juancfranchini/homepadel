@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { CheckCircle, Clock, Loader2, XCircle } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
-import { trackMetaEvent } from '@/lib/metaPixel';
 import { limpiarBorrador } from './useCheckoutDraft';
 import { Resultado, useOrderOutcome } from './useOrderOutcome';
 
@@ -44,10 +43,9 @@ function Icono({ resultado }: { resultado: Resultado }) {
  * la usan: el texto sale del estado real de la orden, no de la ruta.
  */
 export default function CheckoutOutcome({ porDefecto }: { porDefecto: Resultado }) {
-  const { resultado, orderNumber, orden } = useOrderOutcome(porDefecto);
+  const { resultado, orderNumber } = useOrderOutcome(porDefecto);
   const clearCart = useCartStore((s) => s.clearCart);
   const cobrado = resultado === 'aprobado' || resultado === 'acreditando';
-  const purchaseAvisado = useRef(false);
 
   // El carrito nunca se vaciaba al pagar con Mercado Pago: quien volvía se
   // encontraba con todo adentro y podía terminar pagando dos veces.
@@ -55,24 +53,9 @@ export default function CheckoutOutcome({ porDefecto }: { porDefecto: Resultado 
     if (cobrado) { clearCart(); limpiarBorrador(); }
   }, [cobrado, clearCart]);
 
-  // El mismo id que usa el servidor (PaymentsService / enviarCompraAMeta):
-  // Meta lo trata como un solo evento en vez de dos, aunque llegue por dos
-  // caminos. Antes esto solo se avisaba desde el servidor: el pixel del
-  // navegador nunca reportaba la compra, y esa señal es la que más pesa para
-  // la calidad de la medición.
-  useEffect(() => {
-    if (!cobrado || !orden || purchaseAvisado.current) return;
-    purchaseAvisado.current = true;
-    // Una compra de prueba no se informa: el servidor tampoco la manda.
-    if (orden.isTest) return;
-    trackMetaEvent(
-      'Purchase',
-      { content_ids: orden.items.map((i) => i.productId), content_type: 'product', value: orden.total, currency: 'ARS' },
-      {},
-      // El email y el teléfono del comprador los agrega el servidor desde la orden.
-      'purchase_' + orderNumber,
-    );
-  }, [cobrado, orden, orderNumber]);
+  // La compra no se informa a Meta desde acá: la manda el servidor cuando
+  // Mercado Pago confirma el pago (payments.meta.ts). Esta página se puede
+  // recargar, cerrar antes de tiempo o no abrirse nunca.
 
   const texto = resultado === 'cargando' ? null : TEXTOS[resultado];
 

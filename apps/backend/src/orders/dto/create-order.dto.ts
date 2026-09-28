@@ -2,6 +2,7 @@
 import { Type } from 'class-transformer';
 import { IsEmail, IsIn, IsInt, Max, MaxLength, MinLength } from 'class-validator';
 import { MAX_BOLSAS_REGALO } from '../bolsas-regalo';
+import { MetaNavegadorDto } from '../../common/meta/meta-cliente';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 class OrderItemDto {
@@ -34,4 +35,6 @@ export class CreateOrderDto {
   @ApiPropertyOptional() @IsOptional() @IsString() @MaxLength(100) city?: string;
   // Bolsas de regalo pedidas; el servidor las limita a las unidades compradas.
   @ApiPropertyOptional() @IsOptional() @IsInt() @Min(0) @Max(MAX_BOLSAS_REGALO) bolsasRegalo?: number;
+  // Cookies del Pixel del navegador, para informar la compra a Meta cuando se pague.
+  @ApiPropertyOptional() @IsOptional() @ValidateNested() @Type(() => MetaNavegadorDto) meta?: MetaNavegadorDto;
 }

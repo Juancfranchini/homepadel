@@ -1,6 +1,8 @@
 import { Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { userDataParaMeta } from '../common/meta-user-data';
+import { userDataParaMeta } from '../common/meta/meta-user-data';
+import { ClienteMeta } from '../common/meta/meta-cliente';
+import { destinoMeta, enviarEventoAMeta, esOrigenDeProduccion, hostsDeProduccion, leerConfigMeta } from '../common/meta/meta-destino';
 import { esCuentaDePrueba } from '../common/test-accounts';
 
 const logger = new Logger('MetaPurchase');
@@ -18,9 +20,12 @@ export interface CompraParaMeta {
   valor?: number | null;
   emails?: (string | null | undefined)[];
   telefono?: string | null;
+  /** Navegador de quien compró, guardado con el pedido (`notes.metaCliente`). */
+  cliente?: ClienteMeta | null;
+  /** IP y navegador que informe Mercado Pago, si el pedido no los tiene. */
   ip?: string | null;
   userAgent?: string | null;
-  frontendUrl: string;
+  userId?: string | null;
 }
 
 /**
@@ -35,64 +40,75 @@ async function esCompraDePrueba(prisma: PrismaService, compra: CompraParaMeta): 
 }
 
 /**
- * Informa la compra a la API de Conversiones de Meta.
+ * Sitio desde el que se hizo el pedido. Los pedidos anteriores a que se
+ * guardara (o la compra de Mercado Pago sin pedido encontrado) se toman como
+ * de producción: son ventas reales de la tienda.
+ */
+function origenDeLaCompra(cliente?: ClienteMeta | null): string {
+  return cliente?.origen || 'https://' + hostsDeProduccion()[0];
+}
+
+/**
+ * Registra una compra confirmada: la suma al embudo del backoffice y la
+ * informa a la API de Conversiones de Meta. Es el único lugar desde donde
+ * sale el Purchase: el navegador ya no lo manda (la página de gracias se
+ * puede recargar, cerrar antes de tiempo o no abrirse nunca).
+ *
+ * Mismas reglas que el resto de los eventos (ver track.controller.ts): una
+ * compra de prueba no se cuenta ni se informa, y una hecha fuera de
+ * producción no suma en el backoffice y a Meta va solo como prueba.
  *
  * Vive fuera de PaymentsService porque no es parte del cobro: si esto falla,
- * la venta ya está hecha y registrada. Por eso no propaga el error, solo lo
- * deja en el log.
+ * la venta ya está hecha y registrada. Por eso no propaga el error.
  *
- * El `event_id` es `purchase_<número de orden>`, el mismo que usa el
- * navegador: Meta cuenta una sola compra aunque llegue por los dos caminos,
- * o dos veces por el mismo.
+ * El `event_id` es `purchase_<número de orden>`: si llega dos veces (aviso de
+ * Mercado Pago y consulta de la tienda a la vez), Meta cuenta una sola.
  */
 export async function enviarCompraAMeta(prisma: PrismaService, compra: CompraParaMeta): Promise<void> {
   try {
     if (await esCompraDePrueba(prisma, compra)) {
-      logger.log(`Compra de prueba ${compra.orderNumber}: no se informa a Meta.`);
+      logger.log(`Compra de prueba ${compra.orderNumber}: no se cuenta ni se informa a Meta.`);
       return;
     }
-    const seccion = await prisma.siteSection.findUnique({ where: { key: 'meta_pixel' } });
-    const config = (seccion?.data as { pixelId?: string; accessToken?: string; testEventCode?: string }) || {};
-    if (!config.pixelId || !config.accessToken) return;
-
     const valor = compra.valor || compra.items.reduce((acc, item) => acc + Number(item.price) * item.quantity, 0);
+    const origen = origenDeLaCompra(compra.cliente);
+    const produccion = esOrigenDeProduccion(origen);
 
-    const payload: Record<string, unknown> = {
-      access_token: config.accessToken,
-      data: [{
-        event_name: 'Purchase',
-        event_time: Math.floor(Date.now() / 1000),
-        event_id: 'purchase_' + compra.orderNumber,
-        event_source_url: compra.frontendUrl + '/checkout/success?order=' + compra.orderNumber,
-        action_source: 'website',
-        user_data: userDataParaMeta({ emails: compra.emails, telefono: compra.telefono, ip: compra.ip, userAgent: compra.userAgent }),
-        custom_data: {
-          currency: 'ARS',
-          value: valor,
-          content_ids: compra.items.map((item) => item.productId),
-          content_type: 'product',
-          contents: compra.items.map((item) => ({
-            id: item.productId,
-            quantity: item.quantity,
-            item_price: Number(item.price),
-          })),
-        },
-      }],
-    };
-
-    if (config.testEventCode) payload.test_event_code = config.testEventCode;
-
-    const respuesta = await fetch('https://graph.facebook.com/v21.0/' + config.pixelId + '/events', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-
-    if (!respuesta.ok) {
-      logger.warn(`Meta rechazó el evento Purchase de ${compra.orderNumber} (HTTP ${respuesta.status}): ${await respuesta.text()}`);
+    if (produccion) {
+      await prisma.marketingEvent
+        .create({ data: { eventName: 'Purchase', value: valor } })
+        .catch((err) => logger.warn(`No se pudo sumar la compra ${compra.orderNumber} al embudo propio: ${err}`));
     }
+
+    const destino = destinoMeta(await leerConfigMeta(prisma), produccion);
+    if (!destino) return;
+
+    await enviarEventoAMeta(destino, {
+      event_name: 'Purchase',
+      event_time: Math.floor(Date.now() / 1000),
+      event_id: 'purchase_' + compra.orderNumber,
+      event_source_url: origen + '/checkout/success?order=' + compra.orderNumber,
+      action_source: 'website',
+      user_data: userDataParaMeta({
+        emails: compra.emails,
+        telefono: compra.telefono,
+        ip: compra.cliente?.ip || compra.ip,
+        userAgent: compra.cliente?.userAgent || compra.userAgent,
+        fbp: compra.cliente?.fbp,
+        fbc: compra.cliente?.fbc,
+        userId: compra.userId,
+      }),
+      custom_data: {
+        currency: 'ARS',
+        value: valor,
+        content_ids: compra.items.map((item) => item.productId),
+        content_type: 'product',
+        num_items: compra.items.reduce((acc, item) => acc + item.quantity, 0),
+        contents: compra.items.map((item) => ({ id: item.productId, quantity: item.quantity, item_price: Number(item.price) })),
+      },
+    });
   } catch (err) {
-    logger.error(`No se pudo informar la compra ${compra.orderNumber} a Meta: ${err}`);
+    logger.error(`No se pudo registrar la compra ${compra.orderNumber}: ${err}`);
   }
 }
 
@@ -108,7 +124,7 @@ export async function informarTransferenciaPagadaAMeta(prisma: PrismaService, or
   const order = await prisma.order.findUnique({ where: { id: orderId }, include: { items: true } });
   if (!order || order.channel !== 'ONLINE') return;
 
-  let notas: { paymentMethod?: string; buyerEmail?: string; buyerPhone?: string } = {};
+  let notas: { paymentMethod?: string; buyerEmail?: string; buyerPhone?: string; metaCliente?: ClienteMeta } = {};
   try {
     notas = order.notes ? JSON.parse(order.notes) : {};
   } catch {
@@ -122,6 +138,7 @@ export async function informarTransferenciaPagadaAMeta(prisma: PrismaService, or
     valor: order.total,
     emails: [notas.buyerEmail],
     telefono: notas.buyerPhone,
-    frontendUrl: (process.env.FRONTEND_URL || '').replace(/\/+$/, ''),
+    cliente: notas.metaCliente,
+    userId: order.userId,
   });
 }

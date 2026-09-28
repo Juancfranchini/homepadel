@@ -5,6 +5,7 @@ import { CartItem } from '@/types';
 import { createOrder, createPaymentPreference } from '@/lib/api';
 import { buildWhatsappUrl } from '@/hooks/useSiteSettings';
 import { formatPrice } from '@/lib/utils';
+import { idsDeMeta } from '@/lib/metaNavegador';
 import { CheckoutFormData } from './checkoutSchema';
 
 export interface DatosTransferencia {
@@ -28,6 +29,26 @@ function mensajeDeError(err: unknown, porDefecto: string): string {
   const detalle = (err as { response?: { data?: { message?: unknown } } })?.response?.data?.message;
   if (Array.isArray(detalle)) return detalle.join('. ');
   return typeof detalle === 'string' ? detalle : porDefecto;
+}
+
+/**
+ * Manda el pedido con las cookies del Pixel (`meta`), que el servidor guarda
+ * para informar la compra a Meta cuando se confirme el pago.
+ *
+ * `meta` es un campo nuevo: un backend todavía sin actualizar lo rechaza
+ * ("property meta should not exist"). Durante ese rato del despliegue se
+ * reintenta sin él, para no frenar ninguna compra por esto.
+ */
+async function conCookiesDelPixel<T>(enviar: (extra: { meta?: { fbp?: string; fbc?: string } }) => Promise<T>): Promise<T> {
+  const meta = idsDeMeta();
+  if (!meta.fbp && !meta.fbc) return enviar({});
+  try {
+    return await enviar({ meta });
+  } catch (err) {
+    const detalle = JSON.stringify((err as { response?: { data?: unknown } })?.response?.data ?? '');
+    if (detalle.includes('property meta should not exist')) return enviar({});
+    throw err;
+  }
 }
 
 interface Params {
@@ -98,14 +119,15 @@ export function useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart
   // servidor.
   const submitMercadoPago = async (data: CheckoutFormData) => {
     try {
-      const pref = await createPaymentPreference({
+      const pref = await conCookiesDelPixel((extra) => createPaymentPreference({
+        ...extra,
         items: buildOrderItems(items),
         payer: { name: data.name, email: data.email },
         shipping: buildShippingPayload(data),
         couponCode: couponCode || undefined,
         salesLinkToken: salesLinkToken || undefined,
         bolsasRegalo: bolsasRegalo || undefined,
-      });
+      }));
       if (pref?.init_point) {
         window.location.href = pref.init_point;
         return;
@@ -119,7 +141,8 @@ export function useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart
   const submitTransfer = async (data: CheckoutFormData) => {
     try {
       const esRetiro = data.shippingMethod === 'retiro_local';
-      const result = await createOrder({
+      const result = await conCookiesDelPixel((extra) => createOrder({
+        ...extra,
         paymentMethod: 'transfer',
         items: items.map((item) => ({ productId: item.product.id, quantity: item.quantity, variantId: item.variantId })),
         address: esRetiro ? 'Retiro en el local' : data.street + ', ' + data.city + ', ' + data.province + ' (' + data.postalCode + ')',
@@ -131,7 +154,7 @@ export function useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart
         carrier: esRetiro ? 'retiro_local' : data.shippingMethod === 'flex' ? 'flex' : 'correo_argentino',
         city: esRetiro ? undefined : data.city,
         bolsasRegalo: bolsasRegalo || undefined,
-      });
+      }));
       setOrderNumber(result.number);
       setPedidoTransferencia({ total: Number(result.total) || 0, datos: result.datosTransferencia ?? null });
       clearCart();

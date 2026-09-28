@@ -1,15 +1,10 @@
 import { IsIn, IsObject, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
+import { MetaNavegadorDto } from '../../common/meta/meta-cliente';
 
-const EVENTOS_PERMITIDOS = [
-  'PageView',
-  'ViewContent',
-  'AddToCart',
-  'InitiateCheckout',
-  'AddPaymentInfo',
-  'Purchase',
-  'Contact',
-];
+// Sin Purchase: la compra la informa solo el servidor cuando el pago se
+// confirma (ver payments.meta.ts). Desde acá cualquiera podía inventar una.
+const EVENTOS_PERMITIDOS = ['PageView', 'ViewContent', 'AddToCart', 'InitiateCheckout', 'AddPaymentInfo', 'Contact'];
 
 /**
  * Datos del comprador para mejorar la coincidencia en Meta. Llegan en claro
@@ -29,7 +24,8 @@ export class TrackUserDataDto {
   phone?: string;
 }
 
-export class TrackEventDto {
+/** `fbp` y `fbc` (heredados): las cookies del Pixel leídas por el navegador. */
+export class TrackEventDto extends MetaNavegadorDto {
   @IsIn(EVENTOS_PERMITIDOS)
   eventName: string;
 

@@ -39,7 +39,7 @@ export class AbandonedCartsService {
    * salieran de lo que manda el navegador, cualquiera podría llenar la lista
    * del backoffice con productos y montos inventados.
    */
-  async save(dto: SaveAbandonedCartDto) {
+  async save(dto: SaveAbandonedCartDto, emailDeCuenta?: string) {
     const email = dto.email.trim().toLowerCase();
 
     let resolvedItems;
@@ -72,7 +72,8 @@ export class AbandonedCartsService {
       phone: dto.phone?.trim() || null,
       items: items as unknown as Prisma.InputJsonValue,
       total,
-      isTest: await esCuentaDePrueba(this.prisma, [email]),
+      // Una cuenta de prueba que escribe otro mail en el checkout sigue siendo una prueba.
+      isTest: await esCuentaDePrueba(this.prisma, [email, emailDeCuenta]),
     };
 
     const existente = await this.prisma.abandonedCart.findUnique({
