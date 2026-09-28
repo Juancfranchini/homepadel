@@ -9,7 +9,7 @@ export default function VideoSection({ embedUrl, vertical }: Props) {
 
   return (
     <div className="flex flex-col h-full">
-      <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-tight text-[#F7F6F7] mb-4">
+      <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-tight text-fg mb-4">
         VIDEO DEL PRODUCTO
       </h2>
 
@@ -18,7 +18,7 @@ export default function VideoSection({ embedUrl, vertical }: Props) {
           ancho para que no ocupe media pantalla de alto. */}
       <div
         className={
-          'flex-1 overflow-hidden rounded-2xl border border-[#0D0F0F] ' +
+          'flex-1 overflow-hidden rounded-2xl border border-line ' +
           (vertical ? 'aspect-[9/16] w-full max-w-[22rem]' : 'aspect-video')
         }
       >

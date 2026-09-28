@@ -58,13 +58,13 @@ function BarraRendimiento({ stat, visible }: { stat: PerformanceStat; visible: b
   return (
     <div>
       <div className="flex items-baseline justify-between mb-2 gap-2">
-        <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-[#F7F6F7]">
-          {Icono && <Icono size={13} className="flex-shrink-0 text-[#B7D31A]" />}
+        <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-fg">
+          {Icono && <Icono size={13} className="flex-shrink-0 text-brand-fg" />}
           {stat.label}
         </p>
         <div className="flex items-baseline gap-2">
-          <span className="text-[10px] uppercase tracking-wide text-[#8A8A85]">{nivel(valor)}</span>
-          <span className="text-[#B7D31A] font-bold text-sm tabular-nums w-9 text-right">{valor}</span>
+          <span className="text-[10px] uppercase tracking-wide text-fg-muted">{nivel(valor)}</span>
+          <span className="text-brand-fg font-bold text-sm tabular-nums w-9 text-right">{valor}</span>
         </div>
       </div>
 
@@ -74,7 +74,7 @@ function BarraRendimiento({ stat, visible }: { stat: PerformanceStat; visible: b
             key={i}
             className={
               'h-2.5 flex-1 rounded-[3px] transition-colors duration-300 ' +
-              (visible && i < llenos ? 'bg-[#B7D31A]' : 'bg-[#0D0F0F]')
+              (visible && i < llenos ? 'bg-[#B7D31A]' : 'bg-[#0D0F0F] light:bg-[#FFFFFF]')
             }
             // Se encienden uno detrás de otro, como si se fueran cargando.
             style={{ transitionDelay: i * 45 + 'ms' }}
@@ -109,9 +109,9 @@ export default function PerformanceSection({ stats, specs }: Props) {
   if (!hasStats && displaySpecs.length === 0) return null;
 
   return (
-    <section ref={contenedor} className="border-t border-[#0D0F0F] py-10 bg-[#242A05]">
+    <section ref={contenedor} className="border-t border-line py-10 bg-olive">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-tight text-[#F7F6F7] mb-6">RENDIMIENTO</h2>
+        <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-tight text-fg mb-6">RENDIMIENTO</h2>
 
         {hasStats && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-5 mb-9">
@@ -121,10 +121,10 @@ export default function PerformanceSection({ stats, specs }: Props) {
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {displaySpecs.map((s) => (
-            <div key={s.title} className="bg-[#1A1F21] border border-[#0D0F0F] rounded-2xl p-5 text-center flex flex-col items-center gap-2 transition-colors hover:border-[#B7D31A]/40">
-              <div className="text-[#B7D31A]">{createElement(specIcon(s.icon), { size: 28 })}</div>
-              <p className="text-[#F7F6F7] font-semibold text-sm">{s.title}</p>
-              <p className="text-[#C7C7C0] text-xs leading-relaxed">{s.value}</p>
+            <div key={s.title} className="bg-chip border border-line rounded-2xl p-5 text-center flex flex-col items-center gap-2 transition-colors hover:border-[#B7D31A]/40">
+              <div className="text-brand-fg">{createElement(specIcon(s.icon), { size: 28 })}</div>
+              <p className="text-fg font-semibold text-sm">{s.title}</p>
+              <p className="text-fg-soft text-xs leading-relaxed">{s.value}</p>
             </div>
           ))}
         </div>

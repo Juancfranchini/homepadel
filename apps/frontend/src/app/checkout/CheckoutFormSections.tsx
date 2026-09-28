@@ -25,7 +25,7 @@ export default function CheckoutFormSections(props: Props) {
       {!props.shippingToCoordinate ? (
         <CheckoutPaymentMethodFields register={props.register} errors={props.errors} selectedPayment={props.selectedPayment} mercadopago={props.mercadopago} transferencia={props.transferencia} />
       ) : (
-        <div className="bg-[#0F1111] rounded-2xl border border-amber-400/20 p-6 text-sm text-[#C7C7C0]">
+        <div className="bg-card rounded-2xl border border-amber-400/20 p-6 text-sm text-fg-soft">
           El pago queda en pausa hasta conocer el costo del transportista. Al continuar, abriremos WhatsApp con el pedido y los datos de entrega ya preparados.
         </div>
       )}

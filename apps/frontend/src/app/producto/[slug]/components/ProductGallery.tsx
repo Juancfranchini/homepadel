@@ -51,7 +51,7 @@ export default function ProductGallery({ images, productName, hasDiscount, disco
       <div className="flex flex-col gap-3 self-start">
         {/* Imagen principal - click para abrir lightbox */}
         <div
-          className="aspect-square max-h-[36rem] bg-[#0C0C0C] rounded-2xl border border-[#0D0F0F] overflow-hidden relative cursor-zoom-in"
+          className="aspect-square max-h-[36rem] bg-panel rounded-2xl border border-line overflow-hidden relative cursor-zoom-in"
           onClick={() => thumbnails.length > 0 && openLightbox(currentImageIndex)}
         >
           {images.length > 0 ? (
@@ -62,7 +62,7 @@ export default function ProductGallery({ images, productName, hasDiscount, disco
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center gap-3">
-              <span className="text-6xl font-bold text-white/[0.06]">
+              <span className="text-6xl font-bold text-fg/[0.06]">
                 {productName.split(' ').slice(0, 2).map((w) => w[0]).join('')}
               </span>
             </div>

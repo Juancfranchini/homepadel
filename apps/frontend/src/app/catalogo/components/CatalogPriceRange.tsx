@@ -8,7 +8,7 @@ interface Props {
   onChange: (min: number | null, max: number | null) => void;
 }
 
-const input = 'w-full rounded-lg border border-[#1A1F21] bg-[#161818] px-3 py-2 text-sm text-[#F7F6F7] placeholder-[#8A8A85] focus:border-[#B7D31A]/60 focus:outline-none';
+const input = 'w-full rounded-lg border border-chip bg-field px-3 py-2 text-sm text-fg placeholder-fg-muted focus:border-[#B7D31A]/60 focus:outline-none';
 
 const aNumero = (texto: string): number | null => {
   const limpio = texto.replace(/\D/g, '');
@@ -41,11 +41,11 @@ export default function CatalogPriceRange({ minPrice, maxPrice, onChange }: Prop
   return (
     <form onSubmit={aplicar} className="space-y-2">
       <div className="grid grid-cols-2 gap-2">
-        <label className="text-[11px] text-[#8A8A85]">
+        <label className="text-[11px] text-fg-muted">
           Desde
           <input value={desde} onChange={(e) => setDesde(e.target.value)} inputMode="numeric" placeholder="$ mín." className={input + ' mt-1'} aria-label="Precio mínimo" />
         </label>
-        <label className="text-[11px] text-[#8A8A85]">
+        <label className="text-[11px] text-fg-muted">
           Hasta
           <input value={hasta} onChange={(e) => setHasta(e.target.value)} inputMode="numeric" placeholder="$ máx." className={input + ' mt-1'} aria-label="Precio máximo" />
         </label>
@@ -55,7 +55,7 @@ export default function CatalogPriceRange({ minPrice, maxPrice, onChange }: Prop
           Aplicar
         </button>
         {hayFiltro && (
-          <button type="button" onClick={() => onChange(null, null)} className="rounded-lg border border-white/10 px-3 py-2 text-xs text-[#C7C7C0] transition-colors hover:text-[#F7F6F7]">
+          <button type="button" onClick={() => onChange(null, null)} className="rounded-lg border border-fg/10 px-3 py-2 text-xs text-fg-soft transition-colors hover:text-fg">
             Quitar
           </button>
         )}

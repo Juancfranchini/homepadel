@@ -35,7 +35,7 @@ export default function TrustBottom() {
   }, []);
 
   return (
-    <section className="py-4 sm:py-6 md:py-8 bg-[#050606]">
+    <section className="py-4 sm:py-6 md:py-8 bg-page">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Mobile: scroll horizontal marquesina */}
         <div className="md:hidden overflow-x-auto -mx-3 px-3">
@@ -43,11 +43,11 @@ export default function TrustBottom() {
             {[...items, ...items].map((t, i) => {
               const IconComp = ICON_MAP[t.icon] || Shield;
               return (
-                <div key={i} className="flex items-center gap-2.5 bg-[#0A0F12] border border-[#0D0F0F] rounded-lg px-3 py-2 min-w-[160px] max-w-[180px]">
-                  <span className="text-[#B7D31A] flex-shrink-0">{createElement(IconComp, { size: 20 })}</span>
+                <div key={i} className="flex items-center gap-2.5 bg-night border border-line rounded-lg px-3 py-2 min-w-[160px] max-w-[180px]">
+                  <span className="text-brand-fg flex-shrink-0">{createElement(IconComp, { size: 20 })}</span>
                   <div className="min-w-0">
-                    <p className="text-[#F7F6F7] font-semibold text-[9px] uppercase tracking-wide leading-tight">{t.title}</p>
-                    <p className="text-[#C7C7C0] text-[9px] leading-tight mt-0.5 line-clamp-2">{t.subtitle}</p>
+                    <p className="text-fg font-semibold text-[9px] uppercase tracking-wide leading-tight">{t.title}</p>
+                    <p className="text-fg-soft text-[9px] leading-tight mt-0.5 line-clamp-2">{t.subtitle}</p>
                   </div>
                 </div>
               );
@@ -61,10 +61,10 @@ export default function TrustBottom() {
             const IconComp = ICON_MAP[t.icon] || Shield;
             return (
               <div key={i} className="flex items-center gap-3 px-3 py-2">
-                <span className="text-[#B7D31A] flex-shrink-0">{createElement(IconComp, { size: 24 })}</span>
+                <span className="text-brand-fg flex-shrink-0">{createElement(IconComp, { size: 24 })}</span>
                 <div className="min-w-0">
-                  <p className="text-[#F7F6F7] font-semibold text-[10px] sm:text-[11px] uppercase tracking-wide leading-tight">{t.title}</p>
-                  <p className="text-[#C7C7C0] text-[9px] sm:text-[10px] leading-tight mt-0.5 line-clamp-2">{t.subtitle}</p>
+                  <p className="text-fg font-semibold text-[10px] sm:text-[11px] uppercase tracking-wide leading-tight">{t.title}</p>
+                  <p className="text-fg-soft text-[9px] sm:text-[10px] leading-tight mt-0.5 line-clamp-2">{t.subtitle}</p>
                 </div>
               </div>
             );

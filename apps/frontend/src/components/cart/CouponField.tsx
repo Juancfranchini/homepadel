@@ -20,7 +20,7 @@ export default function CouponField({ coupon }: { coupon: CouponState }) {
     <div className="mb-4">
       <div className="flex gap-2">
         <div className="relative flex-1">
-          <Tag size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8A8A85]" />
+          <Tag size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-fg-muted" />
           <input
             type="text"
             value={input}
@@ -28,12 +28,12 @@ export default function CouponField({ coupon }: { coupon: CouponState }) {
             onKeyDown={onKeyDown}
             disabled={aplicado}
             aria-label="Código de cupón"
-            className="w-full pl-9 pr-3 py-2 bg-[#1A1F21] border border-[#0D0F0F] rounded-lg text-xs text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A]/50 disabled:opacity-60"
+            className="w-full pl-9 pr-3 py-2 bg-chip border border-line rounded-lg text-xs text-fg placeholder-fg-muted focus:outline-none focus:border-[#B7D31A]/50 disabled:opacity-60"
             placeholder="Escribí tu código de cupón"
           />
         </div>
         {aplicado ? (
-          <button type="button" onClick={remove} className="px-4 py-2 border border-[#B7D31A]/30 text-[#F7F6F7] rounded-lg text-xs font-bold hover:border-[#B7D31A]/60 transition-colors">
+          <button type="button" onClick={remove} className="px-4 py-2 border border-[#B7D31A]/30 text-fg rounded-lg text-xs font-bold hover:border-[#B7D31A]/60 transition-colors">
             Quitar
           </button>
         ) : (
@@ -42,8 +42,8 @@ export default function CouponField({ coupon }: { coupon: CouponState }) {
           </button>
         )}
       </div>
-      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
-      {aplicado && <p className="text-green-500 text-xs mt-1">Cupón &quot;{couponCode}&quot; aplicado: -{formatPrice(discount)}</p>}
+      {error && <p className="text-red-500 light:text-red-600 text-xs mt-1">{error}</p>}
+      {aplicado && <p className="text-green-500 light:text-green-700 text-xs mt-1">Cupón &quot;{couponCode}&quot; aplicado: -{formatPrice(discount)}</p>}
     </div>
   );
 }

@@ -15,18 +15,18 @@ export default function RegularPricing({ showInstallments, installments, cuota, 
   return (
     <>
       {showInstallments ? (
-        <div className="flex items-center gap-1.5 text-[#C7C7C0] text-sm">
-          <span className="text-[#F7F6F7] font-semibold">
+        <div className="flex items-center gap-1.5 text-fg-soft text-sm">
+          <span className="text-fg font-semibold">
             {installments} cuotas {interestLabel}
           </span>
           <span>de {formatPrice(cuota)}</span>
           {interestPercent > 0 && (
-            <span className="text-xs text-[#8A8A85]">(interes del {interestPercent}%)</span>
+            <span className="text-xs text-fg-muted">(interes del {interestPercent}%)</span>
           )}
         </div>
       ) : (
-        <div className="flex items-center gap-1.5 text-[#C7C7C0] text-sm">
-          <CreditCard size={14} className="text-[#8A8A85]" />
+        <div className="flex items-center gap-1.5 text-fg-soft text-sm">
+          <CreditCard size={14} className="text-fg-muted" />
           <span>Pagá de forma segura dentro de Mercado Pago</span>
         </div>
       )}

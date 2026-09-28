@@ -31,7 +31,8 @@ function StarRating({ value }: { value: number }) {
       {Array.from({ length: 5 }).map((_, i) => (
         <Star key={i} size={14}
           fill={i < fullStars ? '#B7D31A' : (hasHalf && i === fullStars ? '#B7D31A' : 'none')}
-          stroke={i < fullStars ? '#B7D31A' : (hasHalf && i === fullStars ? '#B7D31A' : '#8A8A85')}
+          stroke={i < fullStars ? '#B7D31A' : (hasHalf && i === fullStars ? '#B7D31A' : 'currentColor')}
+          className="text-fg-muted"
         />
       ))}
     </div>
@@ -57,23 +58,23 @@ export default function CompareModels({ data }: Props) {
   if (validFields.length === 0) return null;
 
   return (
-    <section className="border-t border-[#0D0F0F] py-10">
+    <section className="border-t border-line py-10">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-tight text-[#F7F6F7] mb-6">
+        <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-tight text-fg mb-6">
           COMPARA CON OTROS MODELOS
         </h2>
 
         <div className="overflow-x-auto border border-[#B7D31A]/30 rounded-xl">
-          <table className="w-full min-w-[600px] bg-[#0C0C0C]">
+          <table className="w-full min-w-[600px] bg-panel">
             <thead>
               <tr className="border-b border-[#B7D31A]/30">
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#8A8A85] border-r border-[#B7D31A]/30">
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-fg-muted border-r border-[#B7D31A]/30">
                   Caracteristicas
                 </th>
                 {validProducts.map((prod, i) => (
                   <th key={i}
                     className={'px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider transition-colors border-x border-[#B7D31A]/30 ' +
-                      (hoveredCol === i ? 'text-[#B7D31A] bg-[#242A05]' : 'text-[#F7F6F7]')}
+                      (hoveredCol === i ? 'text-brand-fg bg-olive' : 'text-fg')}
                     onMouseEnter={() => setHoveredCol(i)}
                     onMouseLeave={() => setHoveredCol(null)}>
                     {prod.name}
@@ -86,19 +87,19 @@ export default function CompareModels({ data }: Props) {
                 const originalIndex = data.fields.indexOf(field);
                 return (
                   <tr key={fi} className="border-b border-[#B7D31A]/30">
-                    <td className="px-4 py-3 text-left text-[#C7C7C0] text-xs font-medium border-r border-[#B7D31A]/30">{field.label}</td>
+                    <td className="px-4 py-3 text-left text-fg-soft text-xs font-medium border-r border-[#B7D31A]/30">{field.label}</td>
                     {validProducts.map((prod, pi) => {
                       const val = prod.values[originalIndex];
                       return (
                         <td key={pi}
                           className={'px-4 py-3 text-center transition-colors border-x border-[#B7D31A]/30 ' +
-                            (hoveredCol === pi ? 'bg-[#242A05]' : '')}
+                            (hoveredCol === pi ? 'bg-olive' : '')}
                           onMouseEnter={() => setHoveredCol(pi)}
                           onMouseLeave={() => setHoveredCol(null)}>
                           {field.type === 'stars' ? (
                             <StarRating value={typeof val === 'number' ? val : 0} />
                           ) : (
-                            <span className="text-sm text-[#C7C7C0]">{typeof val === 'string' ? val : '-'}</span>
+                            <span className="text-sm text-fg-soft">{typeof val === 'string' ? val : '-'}</span>
                           )}
                         </td>
                       );

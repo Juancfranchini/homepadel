@@ -22,13 +22,13 @@ export default function BrandsSection({ brands }: Props) {
   const items = brands && brands.length > 0 ? brands : FALLBACK;
 
   return (
-    <section className="bg-[#050606] border-t border-[#0D0F0F] py-6 sm:py-8 md:py-12 overflow-hidden">
+    <section className="bg-page border-t border-line py-6 sm:py-8 md:py-12 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-4 sm:mb-6 md:mb-8">
-          <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold uppercase text-[#F7F6F7] mb-1.5 sm:mb-2">
+          <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold uppercase text-fg mb-1.5 sm:mb-2">
             MARCAS QUE TRABAJAMOS
           </h2>
-          <p className="text-[#C7C7C0] text-xs sm:text-sm">Las mejores marcas del mundo del padel.</p>
+          <p className="text-fg-soft text-xs sm:text-sm">Las mejores marcas del mundo del padel.</p>
         </div>
       </div>
 
@@ -52,7 +52,7 @@ export default function BrandsSection({ brands }: Props) {
                     style={{ maxWidth: '90px' }}
                   />
                 ) : (
-                  <span className="text-[#8A8A85] text-sm sm:text-lg md:text-xl font-bold uppercase tracking-wider opacity-60 hover:opacity-100 hover:text-[#F7F6F7] transition-all duration-300">
+                  <span className="text-fg-muted text-sm sm:text-lg md:text-xl font-bold uppercase tracking-wider opacity-60 hover:opacity-100 hover:text-fg transition-all duration-300">
                     {brand.name}
                   </span>
                 )}

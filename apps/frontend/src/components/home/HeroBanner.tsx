@@ -30,22 +30,22 @@ function SlideContent({ slide }: { slide: HeroSlide }) {
       <div className="w-full max-w-xs sm:max-w-md lg:max-w-none mx-auto lg:mx-0">
         {slide.subtitle && (
           <div className="flex items-center justify-center lg:justify-start gap-2 mb-3 sm:mb-4">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <path d="M2 8l5-5 7 7" stroke="#B7D31A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true" className="text-brand-fg">
+              <path d="M2 8l5-5 7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            <span className="text-[#B7D31A] text-xs font-bold uppercase tracking-[0.25em]">{slide.subtitle}</span>
+            <span className="text-brand-fg text-xs font-bold uppercase tracking-[0.25em]">{slide.subtitle}</span>
           </div>
         )}
 
         <h1 className="font-extrabold leading-none uppercase mb-4 text-center lg:text-left">
           {whiteLines.map((line, i) => (
-            <span key={i} className="text-[#F7F6F7] block text-2xl sm:text-4xl md:text-5xl xl:text-6xl whitespace-normal leading-tight">{line}</span>
+            <span key={i} className="text-fg block text-2xl sm:text-4xl md:text-5xl xl:text-6xl whitespace-normal leading-tight">{line}</span>
           ))}
-          <span className="text-[#B7D31A] block text-2xl sm:text-4xl md:text-5xl xl:text-6xl whitespace-normal leading-tight">{accentLine}</span>
+          <span className="text-brand-fg block text-2xl sm:text-4xl md:text-5xl xl:text-6xl whitespace-normal leading-tight">{accentLine}</span>
         </h1>
 
         {slide.description && (
-          <p className="text-[#C7C7C0] text-xs sm:text-sm md:text-base max-w-xs sm:max-w-md mb-4 sm:mb-6 leading-relaxed text-center lg:text-left mx-auto lg:mx-0">{slide.description}</p>
+          <p className="text-fg-soft text-xs sm:text-sm md:text-base max-w-xs sm:max-w-md mb-4 sm:mb-6 leading-relaxed text-center lg:text-left mx-auto lg:mx-0">{slide.description}</p>
         )}
 
         <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 justify-center lg:justify-start">
@@ -60,7 +60,7 @@ function SlideContent({ slide }: { slide: HeroSlide }) {
           )}
           {slide.ctaSecondary && (
             <Link href={slide.ctaSecondaryUrl || '/catalogo'}
-              className="inline-flex items-center gap-2 bg-transparent text-[#F7F6F7] border-2 border-white/30 px-5 sm:px-7 py-3 sm:py-3.5 font-extrabold text-xs sm:text-sm uppercase tracking-wider rounded-lg hover:border-white transition-colors duration-200 w-full sm:w-auto justify-center max-w-xs mx-auto lg:mx-0">
+              className="inline-flex items-center gap-2 bg-transparent text-fg border-2 border-fg/30 px-5 sm:px-7 py-3 sm:py-3.5 font-extrabold text-xs sm:text-sm uppercase tracking-wider rounded-lg hover:border-white transition-colors duration-200 w-full sm:w-auto justify-center max-w-xs mx-auto lg:mx-0">
               {slide.ctaSecondary}
             </Link>
           )}
@@ -107,26 +107,26 @@ export default function HeroBanner({ slides }: Props) {
         <>
           <div className="absolute inset-0 bg-cover bg-[position:70%_center] sm:bg-center bg-no-repeat"
             style={{ backgroundImage: 'url(' + bgImage + ')' }} />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#050606]/95 via-[#050606]/40 to-transparent sm:from-[#050606]/90 sm:via-[#050606]/60 sm:to-[#050606]/20 md:to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-page/95 via-page/40 to-transparent sm:from-page/90 sm:via-page/60 sm:to-page/20 md:to-transparent" />
         </>
       ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-[#050606] via-[#061E29] to-[#030F14]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-page via-[#061E29] light:via-[#EAF1F2] to-[#030F14] light:to-[#F2F5F4]" />
       )}
 
       <SlideContent slide={slide} />
 
       {isMulti && (
         <>
-          <button onClick={prev} className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 flex items-center justify-center text-[#F7F6F7] hover:bg-white/20" aria-label="Anterior">
+          <button onClick={prev} className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-fg/10 flex items-center justify-center text-fg hover:bg-fg/20" aria-label="Anterior">
             <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2"><path d="M13 4l-6 6 6 6"/></svg>
           </button>
-          <button onClick={next} className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 flex items-center justify-center text-[#F7F6F7] hover:bg-white/20" aria-label="Siguiente">
+          <button onClick={next} className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-fg/10 flex items-center justify-center text-fg hover:bg-fg/20" aria-label="Siguiente">
             <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2"><path d="M7 4l6 6-6 6"/></svg>
           </button>
           <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex gap-2">
             {displaySlides.map((_, i) => (
               <button key={i} onClick={() => setCurrent(i)}
-                className={'rounded-full transition-all ' + (i === current ? 'w-5 h-1.5 bg-[#B7D31A]' : 'w-1.5 h-1.5 bg-white/30')}
+                className={'rounded-full transition-all ' + (i === current ? 'w-5 h-1.5 bg-[#B7D31A]' : 'w-1.5 h-1.5 bg-fg/30')}
                 aria-label={'Slide ' + (i + 1)} />
             ))}
           </div>

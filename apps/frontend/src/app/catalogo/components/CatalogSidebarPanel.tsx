@@ -117,7 +117,7 @@ function AttributesSection(props: PanelProps) {
   if (!hayAlguno) {
     return (
       <div>
-        <p className="text-xs text-[#8A8A85]">No hay atributos para filtrar en esta selección.</p>
+        <p className="text-xs text-fg-muted">No hay atributos para filtrar en esta selección.</p>
       </div>
     );
   }
@@ -157,8 +157,8 @@ function SortSection({ currentSort, onSortChange }: PanelProps) {
             className={
               'w-full rounded-lg px-3 py-2 text-left text-sm transition-colors ' +
               (currentSort === opt.value
-                ? 'bg-[#B7D31A]/5 text-[#B7D31A]'
-                : 'text-[#C7C7C0] hover:bg-white/[0.04] hover:text-[#F7F6F7]')
+                ? 'bg-[#B7D31A]/5 text-brand-fg'
+                : 'text-fg-soft hover:bg-fg/[0.04] hover:text-fg')
             }
           >
             {opt.label}

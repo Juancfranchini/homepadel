@@ -35,10 +35,10 @@ export default function CatalogAdvisor({ selectedCategory }: Props) {
     <div className="mb-5 rounded-2xl border border-[#B7D31A]/25 bg-gradient-to-r from-[#B7D31A]/[0.07] to-transparent px-4 py-4 sm:px-6 sm:py-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
         <div className="flex flex-col gap-1">
-          <p className="text-sm sm:text-base font-bold text-[#F7F6F7]">
+          <p className="text-sm sm:text-base font-bold text-fg">
             ¿No sabés qué paleta elegir?
           </p>
-          <p className="text-xs sm:text-sm text-[#C7C7C0] max-w-xl">
+          <p className="text-xs sm:text-sm text-fg-soft max-w-xl">
             Te asesoramos según tu nivel, tu tipo de juego y tu presupuesto.
           </p>
         </div>

@@ -17,14 +17,14 @@ export default function ProductDescription({ description }: Props) {
   const parrafos = texto.split(/\n{2,}|\r\n{2,}/).filter((p) => p.trim());
 
   return (
-    <section className="border-t border-[#0D0F0F]">
+    <section className="border-t border-line">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <h2 className="text-lg sm:text-xl font-bold uppercase tracking-tight text-[#F7F6F7] mb-4">
+        <h2 className="text-lg sm:text-xl font-bold uppercase tracking-tight text-fg mb-4">
           Descripción
         </h2>
         <div className="max-w-3xl flex flex-col gap-3">
           {parrafos.map((parrafo, i) => (
-            <p key={i} className="text-sm sm:text-base text-[#C7C7C0] leading-relaxed whitespace-pre-line">
+            <p key={i} className="text-sm sm:text-base text-fg-soft leading-relaxed whitespace-pre-line">
               {parrafo.trim()}
             </p>
           ))}

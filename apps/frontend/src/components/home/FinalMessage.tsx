@@ -17,18 +17,18 @@ export default function FinalMessage({ data }: Props) {
   const footerText = data?.footerText ?? 'Productos originales. Envíos a todo el pais.';
 
   return (
-    <section className="section-gradient bg-[#050606] py-20 md:py-24">
+    <section className="section-gradient bg-page py-20 md:py-24">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-12">
-          <div className="bg-[#0C0C0C] border border-[#0D0F0F] rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-10 flex flex-col justify-between h-full">
+          <div className="bg-panel border border-line rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-10 flex flex-col justify-between h-full">
             <div className="flex flex-col gap-3 sm:gap-5">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#B7D31A]/10 border border-[#B7D31A]/20 flex items-center justify-center flex-shrink-0">
-                  <Package className="w-5 h-5 sm:w-6 sm:h-6 text-[#B7D31A]" />
+                  <Package className="w-5 h-5 sm:w-6 sm:h-6 text-brand-fg" />
                 </div>
-                <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold uppercase tracking-tight text-[#F7F6F7] leading-tight">{title}</h2>
+                <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold uppercase tracking-tight text-fg leading-tight">{title}</h2>
               </div>
-              {text && <p className="text-[#C7C7C0] text-xs sm:text-sm leading-relaxed">{text}</p>}
+              {text && <p className="text-fg-soft text-xs sm:text-sm leading-relaxed">{text}</p>}
             </div>
             <div className="flex flex-col gap-3 sm:gap-4 mt-3 sm:mt-6">
               <div className="w-8 sm:w-10 h-0.5 bg-[#B7D31A] rounded-full" />
@@ -39,12 +39,12 @@ export default function FinalMessage({ data }: Props) {
                   </Link>
                 )}
                 {data?.secondaryButtonText && data?.secondaryButtonUrl && (
-                  <Link href={data.secondaryButtonUrl} className="bg-[#0A2D3D] text-[#F7F6F7] px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#0D3D52] transition-colors w-full sm:w-auto">
+                  <Link href={data.secondaryButtonUrl} className="bg-ocean text-fg px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-ocean-2 transition-colors w-full sm:w-auto">
                     {data.secondaryButtonText}
                   </Link>
                 )}
               </div>
-              {footerText && <p className="text-[#8A8A85] text-[10px]">{footerText}</p>}
+              {footerText && <p className="text-fg-muted text-[10px]">{footerText}</p>}
             </div>
           </div>
           <NewsletterForm data={data} />

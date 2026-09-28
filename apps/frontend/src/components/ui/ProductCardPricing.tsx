@@ -33,27 +33,27 @@ export default function ProductCardPricing({ product, isMadeToOrder, hasDiscount
   return (
     <>
       <div className="mt-auto pt-1">
-        {hasDiscount && !isMadeToOrder && <p className="text-xs text-[#8A8A85] line-through leading-none mb-1">{formatPrice(product.price)}</p>}
+        {hasDiscount && !isMadeToOrder && <p className="text-xs text-fg-muted line-through leading-none mb-1">{formatPrice(product.price)}</p>}
         <div className="flex flex-wrap items-baseline gap-2">
         {hasDiscount && !isMadeToOrder ? (
           <>
-            <span className="text-2xl font-black text-white tracking-tight">{formatPrice(product.effectivePrice)}</span>
-            <span className="text-xs font-bold text-[#B7D31A]">{formatDiscountPercent(discountPct)}% OFF</span>
+            <span className="text-2xl font-black text-fg tracking-tight">{formatPrice(product.effectivePrice)}</span>
+            <span className="text-xs font-bold text-brand-fg">{formatDiscountPercent(discountPct)}% OFF</span>
           </>
         ) : (
-          <span className="text-2xl font-black text-white tracking-tight">{formatPrice(product.price)}</span>
+          <span className="text-2xl font-black text-fg tracking-tight">{formatPrice(product.price)}</span>
         )}
         </div>
       </div>
 
       {!isMadeToOrder && installments && (
-        <p className="text-[10px] font-semibold text-[#B7D31A]">
+        <p className="text-[10px] font-semibold text-brand-fg">
           {installments.count} cuotas de {formatPrice(installments.amount)} {installments.interestText}
         </p>
       )}
 
       {envioGratis && (
-        <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-[#B7D31A]">
+        <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-brand-fg">
           <Truck size={11} />
           Envío gratis
         </p>

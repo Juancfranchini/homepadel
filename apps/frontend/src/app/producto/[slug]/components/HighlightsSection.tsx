@@ -18,12 +18,12 @@ interface Props {
 export default function HighlightsSection({ highlights, highlightsTitle, highlightsDescription }: Props) {
   return (
     <div className="flex flex-col h-full">
-      <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-tight text-[#F7F6F7] mb-3">
+      <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-tight text-fg mb-3">
         {highlightsTitle || 'POR QUE ELEGIR ESTE PRODUCTO'}
       </h2>
 
       {highlightsDescription && (
-        <p className="text-[#C7C7C0] text-sm leading-relaxed mb-4">{highlightsDescription}</p>
+        <p className="text-fg-soft text-sm leading-relaxed mb-4">{highlightsDescription}</p>
       )}
 
       {highlights.length > 0 && (
@@ -33,7 +33,7 @@ export default function HighlightsSection({ highlights, highlightsTitle, highlig
               <span className="w-5 h-5 rounded-full bg-[#B7D31A] border border-[#B7D31A] flex items-center justify-center flex-none mt-0.5">
                 <Check size={10} className="text-[#050606]" />
               </span>
-              <span className="text-[#C7C7C0] text-sm leading-relaxed">{text}</span>
+              <span className="text-fg-soft text-sm leading-relaxed">{text}</span>
             </li>
           ))}
         </ul>

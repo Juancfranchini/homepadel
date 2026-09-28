@@ -50,29 +50,29 @@ export default function CuentaAuthForm({ onAuth, initialError = '', embedded = f
   };
 
   return (
-    <div className={embedded ? 'w-full' : 'min-h-screen bg-[#050606] flex items-center justify-center py-12'}>
+    <div className={embedded ? 'w-full' : 'min-h-screen bg-page flex items-center justify-center py-12'}>
       <div className={embedded ? 'w-full' : 'w-full max-w-md mx-4'}>
-        <div className="flex rounded-xl overflow-hidden border border-[#1A1F21] mb-6">
-          <button onClick={() => { setIsRegister(false); setApiError(''); }} className={'flex-1 py-3 text-sm font-bold transition-colors ' + (!isRegister ? 'bg-[#B7D31A] text-[#050606]' : 'bg-transparent text-[#8A8A85] hover:text-[#F7F6F7]')}>Iniciar sesión</button>
-          <button onClick={() => { setIsRegister(true); setApiError(''); }} className={'flex-1 py-3 text-sm font-bold transition-colors ' + (isRegister ? 'bg-[#B7D31A] text-[#050606]' : 'bg-transparent text-[#8A8A85] hover:text-[#F7F6F7]')}>Crear cuenta</button>
+        <div className="flex rounded-xl overflow-hidden border border-chip mb-6">
+          <button onClick={() => { setIsRegister(false); setApiError(''); }} className={'flex-1 py-3 text-sm font-bold transition-colors ' + (!isRegister ? 'bg-[#B7D31A] text-[#050606]' : 'bg-transparent text-fg-muted hover:text-fg')}>Iniciar sesión</button>
+          <button onClick={() => { setIsRegister(true); setApiError(''); }} className={'flex-1 py-3 text-sm font-bold transition-colors ' + (isRegister ? 'bg-[#B7D31A] text-[#050606]' : 'bg-transparent text-fg-muted hover:text-fg')}>Crear cuenta</button>
         </div>
 
-        <div className={'bg-[#0F1111] rounded-2xl border border-[#B7D31A]/20 ' + (embedded ? 'p-6 sm:p-8' : 'p-8')}>
+        <div className={'bg-card rounded-2xl border border-[#B7D31A]/20 ' + (embedded ? 'p-6 sm:p-8' : 'p-8')}>
           <div className="text-center mb-6">
             <Link href="/" aria-label="Home Padel" className="inline-block">
               <BrandLogo size="lg" />
             </Link>
-            <h1 className="text-xl font-black mt-4 text-[#F7F6F7]">{isRegister ? 'Crear cuenta' : 'Bienvenido de vuelta'}</h1>
-            <p className="text-[#8A8A85] text-sm mt-1">{isRegister ? 'Completa tus datos para registrarte' : 'Ingresa para acceder a tu cuenta'}</p>
+            <h1 className="text-xl font-black mt-4 text-fg">{isRegister ? 'Crear cuenta' : 'Bienvenido de vuelta'}</h1>
+            <p className="text-fg-muted text-sm mt-1">{isRegister ? 'Completa tus datos para registrarte' : 'Ingresa para acceder a tu cuenta'}</p>
           </div>
 
-          {apiError && <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 mb-4"><p className="text-red-500 text-sm">{apiError}</p></div>}
+          {apiError && <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 mb-4"><p className="text-red-500 light:text-red-600 text-sm">{apiError}</p></div>}
 
           <GoogleAuthButton returnTo={returnTo} />
           <div className="my-5 flex items-center gap-3" aria-hidden="true">
-            <span className="h-px flex-1 bg-[#252A2C]" />
-            <span className="text-xs uppercase tracking-wider text-[#8A8A85]">o con email</span>
-            <span className="h-px flex-1 bg-[#252A2C]" />
+            <span className="h-px flex-1 bg-[#252A2C] light:bg-[#E4E4DD]" />
+            <span className="text-xs uppercase tracking-wider text-fg-muted">o con email</span>
+            <span className="h-px flex-1 bg-[#252A2C] light:bg-[#E4E4DD]" />
           </div>
 
           {!isRegister && (
@@ -83,10 +83,10 @@ export default function CuentaAuthForm({ onAuth, initialError = '', embedded = f
             <CuentaRegisterForm form={registerForm} onSubmit={onRegister} showPassword={showPassword} onToggleShowPassword={() => setShowPassword(!showPassword)} />
           )}
 
-          <div className="mt-5 pt-5 border-t border-[#0D0F0F] text-center">
-            <p className="text-sm text-[#8A8A85]">
+          <div className="mt-5 pt-5 border-t border-line text-center">
+            <p className="text-sm text-fg-muted">
               {isRegister ? 'Ya tenes cuenta? ' : 'No tenes cuenta? '}
-              <button onClick={() => { setIsRegister(!isRegister); setApiError(''); }} className="text-[#B7D31A] font-bold hover:text-[#c8e81f] transition-colors">{isRegister ? 'Inicia sesión' : 'Registrate gratis'}</button>
+              <button onClick={() => { setIsRegister(!isRegister); setApiError(''); }} className="text-brand-fg font-bold hover:text-[#c8e81f] light:hover:text-[#4B5A00] transition-colors">{isRegister ? 'Inicia sesión' : 'Registrate gratis'}</button>
             </p>
           </div>
         </div>

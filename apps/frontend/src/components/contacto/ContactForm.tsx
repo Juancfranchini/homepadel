@@ -31,16 +31,16 @@ export default function ContactForm() {
   if (sent) {
     return (
       <div className="flex flex-col items-center justify-center text-center py-12 gap-4">
-        <div className="w-16 h-16 rounded-full bg-[#B7D31A]/10 border border-[#B7D31A]/30 flex items-center justify-center"><Check size={28} className="text-[#B7D31A]" /></div>
-        <h3 className="text-[#F7F6F7] font-semibold text-xl">Mensaje enviado!</h3>
-        <p className="text-[#C7C7C0] text-sm max-w-xs">Gracias por contactarnos. Te respondemos en menos de 24 hs habiles.</p>
-        <button onClick={() => { setSent(false); setForm({ name: '', email: '', phone: '', subject: '', message: '' }); }} className="mt-2 text-[#B7D31A] text-sm font-semibold hover:opacity-80">Enviar otro mensaje</button>
+        <div className="w-16 h-16 rounded-full bg-[#B7D31A]/10 border border-[#B7D31A]/30 flex items-center justify-center"><Check size={28} className="text-brand-fg" /></div>
+        <h3 className="text-fg font-semibold text-xl">Mensaje enviado!</h3>
+        <p className="text-fg-soft text-sm max-w-xs">Gracias por contactarnos. Te respondemos en menos de 24 hs habiles.</p>
+        <button onClick={() => { setSent(false); setForm({ name: '', email: '', phone: '', subject: '', message: '' }); }} className="mt-2 text-brand-fg text-sm font-semibold hover:opacity-80">Enviar otro mensaje</button>
       </div>
     );
   }
 
-  const inputClass = "w-full bg-[#0A0F12] border border-[#0D0F0F] rounded-xl px-4 py-3 text-sm text-[#F7F6F7] placeholder-[#8A8A85] focus:outline-none focus:border-[#B7D31A] focus:ring-1 focus:ring-[#B7D31A]/20 transition-all";
-  const labelClass = "block text-xs font-medium text-[#C7C7C0] mb-1.5";
+  const inputClass = "w-full bg-night border border-line rounded-xl px-4 py-3 text-sm text-fg placeholder-fg-muted focus:outline-none focus:border-[#B7D31A] focus:ring-1 focus:ring-[#B7D31A]/20 transition-all";
+  const labelClass = "block text-xs font-medium text-fg-soft mb-1.5";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -73,12 +73,12 @@ export default function ContactForm() {
         <label htmlFor="contact-message" className={labelClass}>Tu mensaje</label>
         <textarea id="contact-message" rows={5} placeholder="Escribí tu mensaje" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} className={inputClass + " resize-none"} />
       </div>
-      {error && <p className="text-red-400 text-xs">{error}</p>}
+      {error && <p className="text-red-400 light:text-red-700 text-xs">{error}</p>}
       <button type="submit" disabled={sending} className="w-full py-3.5 rounded-xl bg-[#B7D31A] text-[#050606] font-semibold text-sm uppercase tracking-wider btn-primary-glow flex items-center justify-center gap-2 disabled:opacity-60">
         <Send size={15} />{sending ? 'Enviando...' : 'ENVIAR MENSAJE'}
       </button>
-      <p className="text-center text-[#8A8A85] text-[10px] flex items-center justify-center gap-1">
-        <Shield size={10} className="text-[#B7D31A]" />Tus datos estan protegidos.
+      <p className="text-center text-fg-muted text-[10px] flex items-center justify-center gap-1">
+        <Shield size={10} className="text-brand-fg" />Tus datos estan protegidos.
       </p>
     </form>
   );

@@ -55,7 +55,7 @@ export default function VariantSelector({ variants, selectedColor, selectedSize,
     <div className="flex flex-col gap-3">
       {hasColor && colors.length > 0 && (
         <div>
-          <p className="text-xs sm:text-sm font-semibold text-[#F7F6F7] mb-2">
+          <p className="text-xs sm:text-sm font-semibold text-fg mb-2">
             Color: {selectedColor || 'Seleccionar'}
           </p>
           <div className="flex flex-wrap gap-2">
@@ -72,7 +72,7 @@ export default function VariantSelector({ variants, selectedColor, selectedSize,
                 className={'px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wide border transition-all ' +
                   (selectedColor === color
                     ? 'bg-[#B7D31A] text-[#050606] border-[#B7D31A]'
-                    : 'bg-[#1A1F21] text-[#C7C7C0] border-[#0D0F0F] hover:border-[#8A8A85]')}
+                    : 'bg-chip text-fg-soft border-line hover:border-fg-muted')}
               >
                 {color}
               </button>
@@ -94,7 +94,7 @@ export default function VariantSelector({ variants, selectedColor, selectedSize,
       )}
 
       {(selectedColor || selectedSize || selectedDimensions || selectedWeight) && (
-        <p className="text-[10px] text-[#8A8A85]">
+        <p className="text-[10px] text-fg-muted">
           Stock disponible: {
             variants.find(v =>
               (!hasColor || v.color === selectedColor) &&

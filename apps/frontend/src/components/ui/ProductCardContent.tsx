@@ -16,19 +16,19 @@ export default function ProductCardContent({ product, isMadeToOrder, hasDiscount
   return (
     <div className="flex flex-col flex-1 p-4 gap-2">
       {product.brand && (
-        <p className="text-[10px] text-[#A1A1AA] font-semibold uppercase tracking-widest truncate">
+        <p className="text-[10px] text-[#A1A1AA] light:text-[#5F6068] font-semibold uppercase tracking-widest truncate">
           {product.brand.name}
         </p>
       )}
 
       <Link href={'/producto/' + product.slug}>
-        <h3 className="font-bold text-sm text-white leading-snug line-clamp-2 hover:text-[#B7D31A] transition-colors">
+        <h3 className="font-bold text-sm text-fg leading-snug line-clamp-2 hover:text-brand-fg transition-colors">
           {product.name}
         </h3>
       </Link>
 
       {product.shape && (
-        <p className="flex items-center gap-1.5 text-[13px] text-[#A1A1AA]">
+        <p className="flex items-center gap-1.5 text-[13px] text-[#A1A1AA] light:text-[#5F6068]">
           <ShapeImage shape={product.shape} />
           Formato: {product.shape}
         </p>
@@ -37,13 +37,13 @@ export default function ProductCardContent({ product, isMadeToOrder, hasDiscount
       <ProductCardPricing product={product} isMadeToOrder={isMadeToOrder} hasDiscount={hasDiscount} />
 
       {!isMadeToOrder && product.stock > 0 && product.stock <= 5 && (
-        <p className="text-[10px] text-orange-400 font-semibold">Solo quedan {product.stock}!</p>
+        <p className="text-[10px] text-orange-400 light:text-orange-700 font-semibold">Solo quedan {product.stock}!</p>
       )}
 
       {/* `&&` con un número imprime el número cuando vale 0: con
           `estimatedDays` en 0 la tarjeta mostraba un "0" suelto. */}
       {isMadeToOrder && (
-        <p className="text-[10px] font-semibold text-[#B7D31A]">
+        <p className="text-[10px] font-semibold text-brand-fg">
           {product.estimatedDays && product.estimatedDays > 0
             ? `Se encarga: llega en unos ${product.estimatedDays} días`
             : 'Se encarga: llega entre 7 y 14 días'}
@@ -55,7 +55,7 @@ export default function ProductCardContent({ product, isMadeToOrder, hasDiscount
         disabled={(!isMadeToOrder && product.stock === 0) || adding}
         className={'mt-1.5 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-xs font-black uppercase tracking-wide transition-all duration-200 ' +
           ((!isMadeToOrder && product.stock === 0)
-            ? 'bg-white/[0.04] text-white/20 cursor-not-allowed'
+            ? 'bg-fg/[0.04] text-fg/20 cursor-not-allowed'
             : adding
             ? 'bg-[#B7D31A] text-[#050606] btn-primary-glow scale-95 px-6 py-2.5 rounded-lg font-semibold text-xs uppercase tracking-wider'
             : 'bg-[#B7D31A] text-[#050606] btn-primary-glow hover:bg-[#CAE52E] active:scale-95')}

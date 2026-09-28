@@ -49,31 +49,31 @@ export default function ProductReviews({ productId }: Props) {
     <div className="relative flex flex-col h-full">
       <div className="grid grid-cols-3 gap-3 flex-1">
         {visibleReviews.map((review) => (
-          <div key={review.id} className="bg-[#0C0C0C] rounded-xl border border-[#0D0F0F] p-4 flex flex-col">
+          <div key={review.id} className="bg-panel rounded-xl border border-line p-4 flex flex-col">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-full bg-[#1A1F21] flex items-center justify-center flex-shrink-0 overflow-hidden">
+              <div className="w-10 h-10 rounded-full bg-chip flex items-center justify-center flex-shrink-0 overflow-hidden">
                 {review.photo ? (
                   <img src={review.photo} alt="" className="w-full h-full object-cover" />
                 ) : (
-                  <User className="w-5 h-5 text-[#8A8A85]" />
+                  <User className="w-5 h-5 text-fg-muted" />
                 )}
               </div>
               <div className="min-w-0">
-                <span className="font-semibold text-sm text-[#F7F6F7]">{review.name}</span>
+                <span className="font-semibold text-sm text-fg">{review.name}</span>
                 <div className="flex gap-0.5 mt-0.5">
                   {[1,2,3,4,5].map((s) => (
-                    <Star key={s} className={'w-3.5 h-3.5 ' + (s <= review.rating ? 'text-[#B7D31A] fill-[#B7D31A]' : 'text-[#1A1F21]')} />
+                    <Star key={s} className={'w-3.5 h-3.5 ' + (s <= review.rating ? 'text-brand-fg fill-[#B7D31A]' : 'text-chip')} />
                   ))}
                 </div>
               </div>
             </div>
-            <p className="text-sm text-[#C7C7C0] leading-relaxed flex-1 line-clamp-3 mb-3">{review.comment}</p>
+            <p className="text-sm text-fg-soft leading-relaxed flex-1 line-clamp-3 mb-3">{review.comment}</p>
             <div className="flex items-center justify-between">
-              <span className="text-[10px] text-[#8A8A85]">
+              <span className="text-[10px] text-fg-muted">
                 {new Date(review.createdAt).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' }).replace('.', '') + ', ' + new Date(review.createdAt).getFullYear()}
               </span>
               {review.verified && (
-                <span className="text-[10px] text-green-500 bg-green-500/10 px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                <span className="text-[10px] text-green-500 light:text-green-700 bg-green-500/10 px-2 py-0.5 rounded-full flex items-center gap-0.5">
                   <CheckCircle className="w-2.5 h-2.5" />Verificado
                 </span>
               )}
@@ -85,18 +85,18 @@ export default function ProductReviews({ productId }: Props) {
       {totalPages > 1 && (
         <div className="absolute bottom-1 left-0 right-0 flex items-center justify-center gap-3 z-10">
           <button onClick={prev} disabled={currentIndex === 0}
-            className="w-7 h-7 rounded-full bg-[#1A1F21]/90 border border-[#0D0F0F] flex items-center justify-center hover:border-[#B7D31A]/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
-            <ChevronLeft size={14} className="text-[#8A8A85]" />
+            className="w-7 h-7 rounded-full bg-chip/90 border border-line flex items-center justify-center hover:border-[#B7D31A]/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+            <ChevronLeft size={14} className="text-fg-muted" />
           </button>
           <div className="flex gap-1.5">
             {Array.from({ length: totalPages }).map((_, i) => (
               <button key={i} onClick={() => setCurrentIndex(i)}
-                className={'rounded-full transition-all ' + (i === currentIndex ? 'w-5 h-1.5 bg-[#B7D31A]' : 'w-1.5 h-1.5 bg-white/30 hover:bg-white/50')} />
+                className={'rounded-full transition-all ' + (i === currentIndex ? 'w-5 h-1.5 bg-[#B7D31A]' : 'w-1.5 h-1.5 bg-fg/30 hover:bg-fg/50')} />
             ))}
           </div>
           <button onClick={next} disabled={currentIndex === totalPages - 1}
-            className="w-7 h-7 rounded-full bg-[#1A1F21]/90 border border-[#0D0F0F] flex items-center justify-center hover:border-[#B7D31A]/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
-            <ChevronRight size={14} className="text-[#8A8A85]" />
+            className="w-7 h-7 rounded-full bg-chip/90 border border-line flex items-center justify-center hover:border-[#B7D31A]/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+            <ChevronRight size={14} className="text-fg-muted" />
           </button>
         </div>
       )}

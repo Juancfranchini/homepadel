@@ -11,6 +11,7 @@ import CartAddedFeedback from '@/components/cart/CartAddedFeedback';
 import MobileNav from './MobileNav';
 import HeaderSearch from './HeaderSearch';
 import CategoryMegaMenu from './CategoryMegaMenu';
+import ThemeToggle from './ThemeToggle';
 
 // Arriba quedan el buscador y las categorías; estos links informativos van en
 // el pie de página y al final del menú del celular.
@@ -26,9 +27,10 @@ const LINKS_INFO = [
 function AccionesUsuario({ onCart, itemCount, mounted }: { onCart: () => void; itemCount: number; mounted: boolean }) {
   const { user } = useAuthStore();
   return (
-    <div className="flex flex-shrink-0 items-center gap-3 sm:gap-4">
+    <div className="flex flex-shrink-0 items-center gap-2 sm:gap-3">
+      <ThemeToggle />
       {user ? (
-        <Link href="/cuenta" className="hidden items-center gap-2 rounded-full border border-[#B7D31A]/30 px-3 py-1.5 text-[#C7C7C0] transition-colors hover:text-[#F7F6F7] sm:flex" aria-label="Mi cuenta">
+        <Link href="/cuenta" className="hidden items-center gap-2 rounded-full border border-[#B7D31A]/30 px-3 py-1.5 text-fg-soft transition-colors hover:text-fg sm:flex" aria-label="Mi cuenta">
           <User size={18} />
           <span className="max-w-[120px] truncate text-xs font-semibold">{user.name}</span>
         </Link>
@@ -37,10 +39,10 @@ function AccionesUsuario({ onCart, itemCount, mounted }: { onCart: () => void; i
           Login
         </Link>
       )}
-      <button onClick={onCart} className="relative text-[#C7C7C0] transition-colors hover:text-[#F7F6F7]" aria-label="Carrito">
+      <button onClick={onCart} className="relative text-fg-soft transition-colors hover:text-fg" aria-label="Carrito">
         <ShoppingCart size={20} />
         {mounted && itemCount > 0 && (
-          <span key={itemCount} className="cart-badge-pop absolute -right-2.5 -top-2.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#E53935] px-1 text-[10px] font-black text-white shadow-[0_0_0_2px_#101416]">
+          <span key={itemCount} className="cart-badge-pop absolute -right-2.5 -top-2.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#E53935] px-1 text-[10px] font-black text-white shadow-[0_0_0_2px_#101416] light:shadow-[0_0_0_2px_#EFF2EC]">
             {itemCount > 99 ? '99+' : itemCount}
           </span>
         )}
@@ -58,12 +60,12 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-[#303638] bg-[#101416]/95 shadow-[0_8px_24px_rgba(0,0,0,0.28)] backdrop-blur-xl">
+      <header className="sticky top-0 z-50 w-full border-b border-[#303638] light:border-[#D2D2CA] bg-[#101416]/95 light:bg-[#EFF2EC]/95 shadow-[0_8px_24px_rgba(0,0,0,0.28)] light:shadow-[0_6px_18px_rgba(0,0,0,0.06)] backdrop-blur-xl">
         <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-2.5 sm:gap-4 sm:px-6 lg:gap-8 lg:px-8">
           {/* En móvil: hamburguesa a la izquierda y logo centrado con posición
               absoluta —los costados no miden lo mismo y con flex quedaría corrido—. */}
           <button
-            className="flex-shrink-0 rounded-lg border border-white/10 bg-[#1A1F21] p-2 text-[#C7C7C0] transition-colors hover:border-[#B7D31A]/50 hover:bg-[#242A2D] hover:text-[#F7F6F7] lg:hidden"
+            className="flex-shrink-0 rounded-lg border border-fg/10 bg-chip p-2 text-fg-soft transition-colors hover:border-[#B7D31A]/50 hover:bg-[#242A2D] light:hover:bg-[#E4E4DD] hover:text-fg lg:hidden"
             onClick={() => setOpen(!open)}
             aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
             aria-expanded={open}
@@ -87,7 +89,7 @@ export default function Header() {
           <HeaderSearch onSearch={() => setOpen(false)} />
         </div>
 
-        <div className="hidden border-t border-white/[0.06] lg:block">
+        <div className="hidden border-t border-fg/[0.06] lg:block">
           <CategoryMegaMenu />
         </div>
 

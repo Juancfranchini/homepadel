@@ -32,15 +32,15 @@ export default function CheckoutOrderSummary({
 
   return (
     <div className="lg:col-span-1">
-      <div className="bg-[#0F1111] rounded-2xl border border-[#B7D31A]/20 p-6 sticky top-24">
+      <div className="bg-card rounded-2xl border border-[#B7D31A]/20 p-6 sticky top-24">
         <div className="flex items-baseline justify-between mb-4">
-          <h2 className="font-black text-base uppercase tracking-tight text-[#F7F6F7]">Tu pedido</h2>
-          <Link href="/catalogo" className="text-xs text-[#B7D31A] hover:underline">Agregar más</Link>
+          <h2 className="font-black text-base uppercase tracking-tight text-fg">Tu pedido</h2>
+          <Link href="/catalogo" className="text-xs text-brand-fg hover:underline">Agregar más</Link>
         </div>
 
         {vacio ? (
-          <p className="text-sm text-[#8A8A85] mb-4">
-            Tu pedido quedó vacío. <Link href="/catalogo" className="text-[#B7D31A] hover:underline">Elegí algún producto</Link> para
+          <p className="text-sm text-fg-muted mb-4">
+            Tu pedido quedó vacío. <Link href="/catalogo" className="text-brand-fg hover:underline">Elegí algún producto</Link> para
             seguir — los datos que ya cargaste se mantienen.
           </p>
         ) : (
@@ -61,20 +61,20 @@ export default function CheckoutOrderSummary({
 
         {!vacio && <CouponField coupon={coupon} />}
 
-        <div className="border-t border-[#0D0F0F] pt-4 space-y-2 text-sm">
-          <div className="flex justify-between text-[#C7C7C0]"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
-          {discount > 0 && <div className="flex justify-between text-green-500"><span>Descuento{couponCode ? ' (' + couponCode + ')' : ''}</span><span>-{formatPrice(discount)}</span></div>}
-          <div className="flex justify-between text-[#C7C7C0]"><span>Envío</span><span className={shippingToCoordinate ? 'text-amber-300 font-semibold' : shippingCost === 0 ? 'text-green-500 font-semibold' : ''}>{shippingToCoordinate ? 'A coordinar' : shippingCost === 0 ? 'GRATIS' : formatPrice(shippingCost)}</span></div>
-          <div className="flex justify-between font-black text-base pt-2 border-t border-[#0D0F0F] text-[#F7F6F7]"><span>{shippingToCoordinate ? 'Total sin envío' : 'Total'}</span><span>{formatPrice(total)}</span></div>
+        <div className="border-t border-line pt-4 space-y-2 text-sm">
+          <div className="flex justify-between text-fg-soft"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
+          {discount > 0 && <div className="flex justify-between text-green-500 light:text-green-700"><span>Descuento{couponCode ? ' (' + couponCode + ')' : ''}</span><span>-{formatPrice(discount)}</span></div>}
+          <div className="flex justify-between text-fg-soft"><span>Envío</span><span className={shippingToCoordinate ? 'text-amber-300 light:text-amber-700 font-semibold' : shippingCost === 0 ? 'text-green-500 light:text-green-700 font-semibold' : ''}>{shippingToCoordinate ? 'A coordinar' : shippingCost === 0 ? 'GRATIS' : formatPrice(shippingCost)}</span></div>
+          <div className="flex justify-between font-black text-base pt-2 border-t border-line text-fg"><span>{shippingToCoordinate ? 'Total sin envío' : 'Total'}</span><span>{formatPrice(total)}</span></div>
         </div>
 
-        {orderError && <p className="text-red-500 text-xs text-center mt-3">{orderError}</p>}
+        {orderError && <p className="text-red-500 light:text-red-600 text-xs text-center mt-3">{orderError}</p>}
 
         <button type="submit" disabled={isSubmitting || vacio}
           className="mt-5 w-full flex items-center justify-center gap-2 bg-[#B7D31A] text-[#050606] py-4 rounded-xl font-black text-sm uppercase tracking-wider hover:bg-[#c8e81f] transition-colors disabled:opacity-70 disabled:cursor-not-allowed">
           {isSubmitting ? 'Procesando...' : shippingToCoordinate ? <><MessageCircle size={15} /> Coordinar por WhatsApp <ChevronRight size={15} /></> : <><Lock size={15} /> {paymentMethod === 'transfer' ? 'Solicitar compra' : 'Ir a Mercado Pago'} <ChevronRight size={15} /></>}
         </button>
-        <p className="text-[#8A8A85] text-xs text-center mt-3">Tus datos estan protegidos con encriptacion SSL</p>
+        <p className="text-fg-muted text-xs text-center mt-3">Tus datos estan protegidos con encriptacion SSL</p>
       </div>
     </div>
   );

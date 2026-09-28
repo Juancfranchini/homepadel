@@ -47,34 +47,34 @@ export default function FeaturedProductCard({ product }: { product: Product }) {
   return (
     <Link
       href={'/producto/' + product.slug}
-      className="group bg-[#0C0C0C] rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:shadow-[#B7D31A]/10 border border-[#B7D31A]/20 hover:border-[#B7D31A]/60 flex flex-col"
+      className="group bg-panel rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:shadow-[#B7D31A]/10 border border-[#B7D31A]/20 hover:border-[#B7D31A]/60 flex flex-col"
     >
       <FeaturedProductCardImage product={product} hasDiscount={hasDiscount} discountPct={discountPct} wished={wished} onWish={handleWish} />
 
       <div className="p-3 sm:p-4 md:p-5 flex flex-col gap-1.5 sm:gap-2 flex-1">
         {product.brand && (
-          <p className="text-xs text-[#8A8A85] font-semibold uppercase tracking-wider">{product.brand.name}</p>
+          <p className="text-xs text-fg-muted font-semibold uppercase tracking-wider">{product.brand.name}</p>
         )}
 
-        <h3 className="font-semibold text-sm text-[#F7F6F7] leading-snug line-clamp-2 uppercase">
+        <h3 className="font-semibold text-sm text-fg leading-snug line-clamp-2 uppercase">
           {product.name}
         </h3>
 
-        {hasDiscount && <p className="text-xs text-[#8A8A85] line-through mt-1 leading-none">{formatPrice(product.price)}</p>}
+        {hasDiscount && <p className="text-xs text-fg-muted line-through mt-1 leading-none">{formatPrice(product.price)}</p>}
         <div className="flex flex-wrap items-baseline gap-2">
-          <span className="text-2xl font-black text-[#F7F6F7] tracking-tight">{formatPrice(displayPrice)}</span>
-          {hasDiscount && <span className="text-xs font-bold text-[#B7D31A]">{formatDiscountPercent(discountPct)}% OFF</span>}
+          <span className="text-2xl font-black text-fg tracking-tight">{formatPrice(displayPrice)}</span>
+          {hasDiscount && <span className="text-xs font-bold text-brand-fg">{formatDiscountPercent(discountPct)}% OFF</span>}
         </div>
 
-        {installments && <p className="text-xs text-[#B7D31A] font-medium">{installments.count} cuotas de {formatPrice(installments.amount)} {installments.interestText}</p>}
-        {freeShipping && <p className="flex items-center gap-1 text-xs font-bold text-[#B7D31A]"><Truck size={12} />Envío gratis</p>}
+        {installments && <p className="text-xs text-brand-fg font-medium">{installments.count} cuotas de {formatPrice(installments.amount)} {installments.interestText}</p>}
+        {freeShipping && <p className="flex items-center gap-1 text-xs font-bold text-brand-fg"><Truck size={12} />Envío gratis</p>}
 
         <button
           onClick={handleAdd}
           disabled={product.stock === 0 || adding}
           className={'mt-auto w-full flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-semibold uppercase tracking-wide transition-all duration-200 ' +
             (product.stock === 0
-              ? 'bg-white/5 text-[#8A8A85] cursor-not-allowed'
+              ? 'bg-fg/5 text-fg-muted cursor-not-allowed'
               : adding
               ? 'bg-[#B7D31A] text-[#050606] scale-95'
               : 'bg-[#B7D31A] text-[#050606] hover:bg-[#CAE52E] btn-primary-glow')}

@@ -14,8 +14,8 @@ import { useCheckoutNavigation } from '@/components/auth/useCheckoutNavigation';
 function CartTitle({ count, onClear }: { count: number; onClear: () => void }) {
   return (
     <div className="flex items-center justify-between mb-8">
-      <h1 className="text-2xl font-black uppercase tracking-tight text-[#F7F6F7]">Mi carrito ({count} {count === 1 ? 'producto' : 'productos'})</h1>
-      <button onClick={onClear} className="text-sm text-red-500 hover:text-red-400 transition-colors flex items-center gap-1"><X size={14} /> Vaciar carrito</button>
+      <h1 className="text-2xl font-black uppercase tracking-tight text-fg">Mi carrito ({count} {count === 1 ? 'producto' : 'productos'})</h1>
+      <button onClick={onClear} className="text-sm text-red-500 light:text-red-600 hover:text-red-400 light:hover:text-red-700 transition-colors flex items-center gap-1"><X size={14} /> Vaciar carrito</button>
     </div>
   );
 }
@@ -38,7 +38,7 @@ export default function CarritoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050606]">
+    <div className="min-h-screen bg-page">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
         <CartTitle count={totalItems()} onClear={clearCart} />
 
@@ -48,7 +48,7 @@ export default function CarritoPage() {
               <CarritoItemRow key={item.product.id + '-' + (item.variantSku || '')} item={item} onRemove={removeItem} onUpdateQuantity={updateQuantity} />
             ))}
 
-            <Link href="/catalogo" className="flex items-center gap-2 text-sm font-semibold text-[#8A8A85] hover:text-[#F7F6F7] transition-colors pt-2">
+            <Link href="/catalogo" className="flex items-center gap-2 text-sm font-semibold text-fg-muted hover:text-fg transition-colors pt-2">
               <ArrowRight size={14} className="rotate-180" /> Seguir comprando
             </Link>
           </div>

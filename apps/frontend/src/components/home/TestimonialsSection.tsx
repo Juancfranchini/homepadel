@@ -31,13 +31,13 @@ export default function TestimonialsSection({ testimonials }: Props) {
   const prevGroup = () => setCurrentGroup((prev) => (prev - 1 + totalGroups) % totalGroups);
 
   return (
-    <section className="bg-[#242A05] border-t border-[#0D0F0F] py-8 sm:py-12 md:py-16">
+    <section className="bg-olive border-t border-line py-8 sm:py-12 md:py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-6 sm:mb-10">
-          <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold uppercase text-[#F7F6F7] mb-2">
+          <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold uppercase text-fg mb-2">
             LO QUE DICEN NUESTROS CLIENTES
           </h2>
-          <p className="text-[#C7C7C0] text-xs sm:text-sm">La experiencia de nuestra comunidad nos respalda.</p>
+          <p className="text-fg-soft text-xs sm:text-sm">La experiencia de nuestra comunidad nos respalda.</p>
         </div>
 
         <TestimonialsCarousel

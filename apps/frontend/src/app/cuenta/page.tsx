@@ -26,7 +26,7 @@ export default function CuentaPage() {
   }, [authenticated]);
 
   if (googleAuth.busy) {
-    return <div className="min-h-screen bg-[#050606] flex items-center justify-center text-[#F7F6F7]">Completando inicio de sesión…</div>;
+    return <div className="min-h-screen bg-page flex items-center justify-center text-fg">Completando inicio de sesión…</div>;
   }
 
   if (authenticated && user) {

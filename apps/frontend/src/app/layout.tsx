@@ -7,6 +7,7 @@ import WhatsAppFloat from '@/components/layout/WhatsAppFloat';
 import ModoPruebaAviso from '@/components/layout/ModoPruebaAviso';
 import CarritoDeCuenta from '@/components/layout/CarritoDeCuenta';
 import { getSiteUrl } from '@/lib/siteUrl';
+import { SCRIPT_TEMA } from '@/lib/tema';
 
 async function getFaviconUrl(): Promise<string> {
   try {
@@ -88,7 +89,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es">
+    // El tema (oscuro por defecto) lo cambia ThemeToggle; el script lo aplica antes
+    // de pintar para que quien eligió el claro no vea un destello oscuro al entrar.
+    <html lang="es" data-theme="dark" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: SCRIPT_TEMA }} />
+      </head>
       <body>
         <Header />
         <main>{children}</main>

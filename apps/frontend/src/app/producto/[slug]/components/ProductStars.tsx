@@ -29,7 +29,7 @@ export default function ProductStars({ rating, count }: Props) {
     if (type === 'half') {
       return (
         <div className="relative w-[16px] h-[16px]">
-          <Star size={16} fill="none" stroke="#8A8A85" className="absolute inset-0" />
+          <Star size={16} fill="none" stroke="currentColor" className="absolute inset-0 text-fg-muted" />
           <div className="absolute inset-0 overflow-hidden" style={{ width: '50%' }}>
             <Star size={16} fill="#B7D31A" stroke="#B7D31A" />
           </div>
@@ -40,7 +40,7 @@ export default function ProductStars({ rating, count }: Props) {
     if (type === 'quarter') {
       return (
         <div className="relative w-[16px] h-[16px]">
-          <Star size={16} fill="none" stroke="#8A8A85" className="absolute inset-0" />
+          <Star size={16} fill="none" stroke="currentColor" className="absolute inset-0 text-fg-muted" />
           <div className="absolute inset-0 overflow-hidden" style={{ width: '25%' }}>
             <Star size={16} fill="#B7D31A" stroke="#B7D31A" />
           </div>
@@ -48,7 +48,7 @@ export default function ProductStars({ rating, count }: Props) {
       );
     }
     
-    return <Star size={16} fill="none" stroke="#8A8A85" />;
+    return <Star size={16} fill="none" stroke="currentColor" className="text-fg-muted" />;
   };
 
   return (
@@ -59,12 +59,12 @@ export default function ProductStars({ rating, count }: Props) {
         ))}
       </div>
       
-      <span className="text-sm font-bold text-[#B7D31A]">
+      <span className="text-sm font-bold text-brand-fg">
         {roundedRating.toFixed(1)}
       </span>
       
       {count !== undefined && count > 0 && (
-        <span className="text-xs text-[#8A8A85]">({count} valoraciones)</span>
+        <span className="text-xs text-fg-muted">({count} valoraciones)</span>
       )}
     </div>
   );

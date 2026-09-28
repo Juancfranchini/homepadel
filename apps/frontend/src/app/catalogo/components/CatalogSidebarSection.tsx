@@ -29,7 +29,7 @@ export default function CatalogSidebarSection({ icon, label, value, open, onTogg
         active={open} expanded={open} onClick={onToggle}
       />
       {open && (
-        <div className="animate-fade-in mb-1 ml-3.5 border-l border-[#1A1F21] pb-1 pl-3 pt-1">
+        <div className="animate-fade-in mb-1 ml-3.5 border-l border-chip pb-1 pl-3 pt-1">
           {children}
         </div>
       )}

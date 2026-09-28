@@ -8,7 +8,7 @@ import { useMenuCategorias } from '@/hooks/useMenuCategorias';
 import BrandLogo from '@/components/ui/BrandLogo';
 import FooterPaymentBadges from './FooterPaymentBadges';
 
-const titulo = 'mb-2.5 text-[11px] font-semibold uppercase tracking-widest text-[#F7F6F7] sm:mb-4 sm:text-sm';
+const titulo = 'mb-2.5 text-[11px] font-semibold uppercase tracking-widest text-fg sm:mb-4 sm:text-sm';
 
 const AYUDA = [
   { label: 'Preguntas frecuentes', href: '/faq' },
@@ -40,7 +40,7 @@ function FooterMarca() {
       <div className="flex gap-2.5">
         {REDES.map(({ icon: Icon, href, label }) => (
           <a key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-[#B7D31A] hover:text-[#050606]">
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-fg/10 transition-colors hover:bg-[#B7D31A] hover:text-[#050606]">
             <Icon size={14} />
           </a>
         ))}
@@ -56,7 +56,7 @@ function FooterLinks({ title, links }: { title: string; links: { label: string; 
       <ul className="space-y-1.5 sm:space-y-2">
         {links.map((link) => (
           <li key={link.href}>
-            <Link href={link.href} className="text-[13px] transition-colors hover:text-[#B7D31A] sm:text-sm">{link.label}</Link>
+            <Link href={link.href} className="text-[13px] transition-colors hover:text-brand-fg sm:text-sm">{link.label}</Link>
           </li>
         ))}
       </ul>
@@ -67,7 +67,7 @@ function FooterLinks({ title, links }: { title: string; links: { label: string; 
 function ItemContacto({ icon: Icon, children }: { icon: typeof Mail; children: React.ReactNode }) {
   return (
     <li className="flex items-center gap-2.5">
-      <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-[#242A05]"><Icon size={13} className="text-[#B7D31A]" /></span>
+      <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-olive"><Icon size={13} className="text-brand-fg" /></span>
       <span className="text-[13px] sm:text-sm">{children}</span>
     </li>
   );
@@ -80,8 +80,8 @@ function FooterContacto() {
     <div className="col-span-2 md:col-span-1">
       <h3 className={titulo}>Contacto</h3>
       <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 md:grid-cols-1 md:gap-3">
-        {contactEmail && <ItemContacto icon={Mail}><a href={'mailto:' + contactEmail} className="break-all hover:text-[#B7D31A]">{contactEmail}</a></ItemContacto>}
-        {phone && <ItemContacto icon={Phone}><a href={'tel:' + phone} className="hover:text-[#B7D31A]">{phone}</a></ItemContacto>}
+        {contactEmail && <ItemContacto icon={Mail}><a href={'mailto:' + contactEmail} className="break-all hover:text-brand-fg">{contactEmail}</a></ItemContacto>}
+        {phone && <ItemContacto icon={Phone}><a href={'tel:' + phone} className="hover:text-brand-fg">{phone}</a></ItemContacto>}
         {address && <ItemContacto icon={MapPin}>{address}</ItemContacto>}
         <ItemContacto icon={Clock}>Lunes a Viernes · 9 a 18 hs</ItemContacto>
       </ul>
@@ -98,7 +98,7 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="border-t border-[#0D0F0F] bg-[#141A1D] text-[#C7C7C0]">
+    <footer className="border-t border-line bg-[#141A1D] light:bg-[#EAEEE8] text-fg-soft">
       <div className="mx-auto max-w-7xl px-5 py-7 sm:px-6 sm:py-12 lg:px-8 lg:py-16">
         <div className="grid grid-cols-2 gap-x-6 gap-y-7 md:grid-cols-3 lg:grid-cols-5 lg:gap-x-4">
           <FooterMarca />
@@ -111,12 +111,12 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-white/10">
+      <div className="border-t border-fg/10">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-5 py-3.5 sm:flex-row sm:px-6 lg:px-8">
-          <p className="text-center text-[11px] text-[#8A8A85] sm:text-left sm:text-xs">&copy; 2026 Home Padel - Todos los derechos reservados.</p>
+          <p className="text-center text-[11px] text-fg-muted sm:text-left sm:text-xs">&copy; 2026 Home Padel - Todos los derechos reservados.</p>
           <div className="flex gap-4">
-            <Link href="/terminos" className="text-[11px] text-[#8A8A85] transition-colors hover:text-[#C7C7C0] sm:text-xs">Términos y condiciones</Link>
-            <Link href="/privacidad" className="text-[11px] text-[#8A8A85] transition-colors hover:text-[#C7C7C0] sm:text-xs">Política de privacidad</Link>
+            <Link href="/terminos" className="text-[11px] text-fg-muted transition-colors hover:text-fg-soft sm:text-xs">Términos y condiciones</Link>
+            <Link href="/privacidad" className="text-[11px] text-fg-muted transition-colors hover:text-fg-soft sm:text-xs">Política de privacidad</Link>
           </div>
         </div>
       </div>

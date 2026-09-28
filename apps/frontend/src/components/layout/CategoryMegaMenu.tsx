@@ -6,7 +6,7 @@ import { useMenuNavegacion, accesosPorGenero, MarcaMenu } from '@/hooks/useMenuC
 import BrandMenuItem from './BrandMenuItem';
 
 const enlace =
-  'flex items-center gap-1 whitespace-nowrap px-4 py-3 text-[11px] font-bold uppercase tracking-[0.12em] text-[#C7C7C0] transition-colors hover:text-[#B7D31A]';
+  'flex items-center gap-1 whitespace-nowrap px-4 py-3 text-[11px] font-bold uppercase tracking-[0.12em] text-fg-soft transition-colors hover:text-brand-fg';
 
 interface Desplegable {
   titulo: string;
@@ -24,7 +24,7 @@ interface Desplegable {
 function MenuDesplegable({ item, alineaDerecha }: { item: Desplegable; alineaDerecha: boolean }) {
   return (
     <div className="group relative">
-      <Link href={item.href} className={enlace + ' group-hover:text-[#B7D31A] group-focus-within:text-[#B7D31A]'}>
+      <Link href={item.href} className={enlace + ' group-hover:text-brand-fg group-focus-within:text-brand-fg'}>
         {item.titulo}
         <ChevronDown size={12} className="transition-transform group-hover:rotate-180" />
       </Link>
@@ -34,13 +34,13 @@ function MenuDesplegable({ item, alineaDerecha }: { item: Desplegable; alineaDer
           (alineaDerecha ? 'right-0' : 'left-0')
         }
       >
-        <div className="w-[min(640px,90vw)] rounded-xl border border-[#B7D31A]/40 bg-[#111516] p-5 shadow-2xl shadow-black/60">
+        <div className="w-[min(640px,90vw)] rounded-xl border border-[#B7D31A]/40 bg-[#111516] light:bg-[#EFF2EC] p-5 shadow-2xl shadow-black/60 light:shadow-black/15">
           <div className="grid grid-cols-3 gap-x-6">
             {item.marcas.map((marca) => (
               <BrandMenuItem key={marca.id} marca={marca} href={item.hrefMarca(marca)} />
             ))}
           </div>
-          <Link href={item.href} className="mt-4 inline-block text-xs font-bold uppercase tracking-wide text-[#B7D31A] hover:underline">
+          <Link href={item.href} className="mt-4 inline-block text-xs font-bold uppercase tracking-wide text-brand-fg hover:underline">
             {item.verTodo} →
           </Link>
         </div>
@@ -75,7 +75,7 @@ export default function CategoryMegaMenu() {
           <Link key={it.href} href={it.href} className={enlace}>{it.label}</Link>
         ),
       )}
-      <Link href="/catalogo?oferta=true" className={enlace + ' text-[#B7D31A] hover:text-[#CAE52E]'}>
+      <Link href="/catalogo?oferta=true" className={enlace + ' text-brand-fg hover:text-[#CAE52E] light:hover:text-[#4B5A00]'}>
         Ofertas
       </Link>
     </nav>

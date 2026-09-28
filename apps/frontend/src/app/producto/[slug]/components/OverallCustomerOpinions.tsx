@@ -61,18 +61,18 @@ export default function OverallCustomerOpinions({ productId }: Props) {
   if (!stats) return null;
 
   return (
-    <div className="bg-[#0C0C0C] rounded-xl border border-[#0D0F0F] p-5 h-full flex flex-col relative">
-      <h3 className="text-sm font-semibold text-[#F7F6F7] mb-4">Opiniones de los clientes</h3>
+    <div className="bg-panel rounded-xl border border-line p-5 h-full flex flex-col relative">
+      <h3 className="text-sm font-semibold text-fg mb-4">Opiniones de los clientes</h3>
 
       {/* Fila 2 columnas: promedio + estrellas/cantidad/label */}
       <div className="flex items-center gap-5 mb-4">
         <div className="flex-shrink-0">
-          <p className="text-7xl font-black text-[#F7F6F7] leading-none text-center">{stats.average}</p>
+          <p className="text-7xl font-black text-fg leading-none text-center">{stats.average}</p>
         </div>
         <div className="flex flex-col justify-center">
           <AverageStarRow average={stats.average} />
-          <p className="text-sm font-medium text-[#F7F6F7]">{stats.total} opiniones</p>
-          <p className="text-xs font-semibold text-[#B7D31A]">{stats.label}</p>
+          <p className="text-sm font-medium text-fg">{stats.total} opiniones</p>
+          <p className="text-xs font-semibold text-brand-fg">{stats.label}</p>
         </div>
       </div>
 
@@ -80,18 +80,18 @@ export default function OverallCustomerOpinions({ productId }: Props) {
       <div className="space-y-1.5 flex-1">
         {stats.distribution.map((d) => (
           <div key={d.stars} className="flex items-center gap-2 text-xs">
-            <span className="w-4 text-[#C7C7C0]">{d.stars}</span>
-            <Star className="w-3 h-3 text-[#B7D31A] fill-[#B7D31A] flex-shrink-0" />
-            <div className="flex-1 h-2 bg-[#1A1F21] rounded-full overflow-hidden">
+            <span className="w-4 text-fg-soft">{d.stars}</span>
+            <Star className="w-3 h-3 text-brand-fg fill-[#B7D31A] flex-shrink-0" />
+            <div className="flex-1 h-2 bg-chip rounded-full overflow-hidden">
               <div className="h-full bg-[#B7D31A] rounded-full" style={{ width: d.percentage + '%' }} />
             </div>
-            <span className="w-8 text-right text-[#8A8A85]">{d.percentage}%</span>
+            <span className="w-8 text-right text-fg-muted">{d.percentage}%</span>
           </div>
         ))}
       </div>
 
       {/* Footer - tirado al final */}
-      <button onClick={() => { setRefreshKey(k => k + 1); setShowInfo(true); }} className="mt-auto pt-3 flex items-center gap-1.5 text-xs text-[#B7D31A] hover:text-[#c8e81f] transition-colors w-fit ml-auto">
+      <button onClick={() => { setRefreshKey(k => k + 1); setShowInfo(true); }} className="mt-auto pt-3 flex items-center gap-1.5 text-xs text-brand-fg hover:text-[#c8e81f] light:hover:text-[#4B5A00] transition-colors w-fit ml-auto">
         <HelpCircle size={12} />
         {infoTitle}
       </button>

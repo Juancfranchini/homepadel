@@ -41,7 +41,7 @@ export default function AuthModal({ isOpen, returnTo, onClose, onAuthenticated }
           ref={closeButton}
           type="button"
           onClick={onClose}
-          className="absolute right-3 top-3 z-10 rounded-full p-2 text-[#8A8A85] transition-colors hover:bg-white/5 hover:text-white focus:outline-none focus:ring-2 focus:ring-[#B7D31A]"
+          className="absolute right-3 top-3 z-10 rounded-full p-2 text-fg-muted transition-colors hover:bg-fg/5 hover:text-fg focus:outline-none focus:ring-2 focus:ring-[#B7D31A]"
           aria-label="Cerrar"
         >
           <X size={18} />

@@ -72,7 +72,7 @@ export default function CatalogSidebar(props: Props) {
         active={isOffer} onClick={() => onOfferChange(!isOffer)} pressed={isOffer}
       />
 
-      <div className="my-2 h-px w-full bg-[#0D0F0F]" />
+      <div className="my-2 h-px w-full bg-[#0D0F0F] light:bg-[#FFFFFF]" />
 
       <CatalogSidebarButton
         icon={viewMode === 'grid' ? Rows3 : Grid3x3}
@@ -83,7 +83,7 @@ export default function CatalogSidebar(props: Props) {
       {/* Antes vivía dentro del panel flotante: solo aparecía con una sección
           abierta, así que para limpiar había que abrir cualquiera primero. */}
       {hasFilters && (
-        <button onClick={onClear} className="mt-1 px-2.5 py-1 text-left text-xs font-medium text-red-400 transition-colors hover:text-red-300">
+        <button onClick={onClear} className="mt-1 px-2.5 py-1 text-left text-xs font-medium text-red-400 light:text-red-700 transition-colors hover:text-red-300 light:hover:text-red-700">
           Limpiar filtros
         </button>
       )}

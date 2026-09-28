@@ -32,15 +32,15 @@ export default function CatalogSidebarButton({ icon: Icon, label, value, active,
       className={
         'flex w-full items-start gap-2 rounded-xl px-2.5 py-2 text-left transition-colors ' +
         (active
-          ? 'border border-[#B7D31A]/30 bg-[#B7D31A]/10 text-[#B7D31A]'
-          : 'border border-transparent text-[#8A8A85] hover:bg-[#0C0C0C] hover:text-[#F7F6F7]')
+          ? 'border border-[#B7D31A]/30 bg-[#B7D31A]/10 text-brand-fg'
+          : 'border border-transparent text-fg-muted hover:bg-panel hover:text-fg')
       }
     >
       <Icon size={17} className="mt-0.5 flex-shrink-0" />
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="text-xs font-semibold leading-tight">{label}</span>
         {value && (
-          <span className="truncate text-[10px] leading-tight text-[#C7C7C0]" title={value}>
+          <span className="truncate text-[10px] leading-tight text-fg-soft" title={value}>
             {value}
           </span>
         )}

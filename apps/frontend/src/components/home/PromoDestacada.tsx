@@ -50,10 +50,10 @@ function Countdown({ endDate }: { endDate: string }) {
         { v: pad(seconds), l: 'SEG' },
       ].map(({ v, l }, i) => (
         <div key={l} className="flex items-center gap-3">
-          {i > 0 && <span className="text-[#B7D31A] font-black text-xl">:</span>}
+          {i > 0 && <span className="text-brand-fg font-black text-xl">:</span>}
           <div className="text-center">
-            <div className="bg-[030F14] border border-[#0D0F0F] rounded-lg px-4 py-3 min-w-[64px]">
-              <span className="text-white font-black text-3xl tabular-nums">{v}</span>
+            <div className="bg-[#030F14] light:bg-card border border-line rounded-lg px-4 py-3 min-w-[64px]">
+              <span className="text-fg font-black text-3xl tabular-nums">{v}</span>
             </div>
             <p className="text-gray-500 text-[10px] uppercase tracking-widest mt-1.5">{l}</p>
           </div>
@@ -70,19 +70,19 @@ export default function PromoDestacada({ promotion }: Props) {
   if (!promotion.active || new Date(promotion.endDate) < new Date()) return null;
 
   return (
-    <section className="section-gradient bg-[#050606] border-t border-b border-[#0D0F0F] py-10">
+    <section className="section-gradient bg-page border-t border-b border-line py-10">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-8">
           {/* Texto */}
           <div className="text-center md:text-left">
-            <span className="text-[#B7D31A] text-xs font-black uppercase tracking-widest mb-2 block">
+            <span className="text-brand-fg text-xs font-black uppercase tracking-widest mb-2 block">
               OFERTA POR TIEMPO LIMITADO
             </span>
-            <h2 className="text-white font-black text-3xl md:text-4xl uppercase leading-tight">
+            <h2 className="text-fg font-black text-3xl md:text-4xl uppercase leading-tight">
               {promotion.title}
             </h2>
             {promotion.description && (
-              <p className="text-gray-400 text-sm mt-1">{promotion.description}</p>
+              <p className="text-gray-400 light:text-gray-600 text-sm mt-1">{promotion.description}</p>
             )}
           </div>
 
