@@ -14,6 +14,7 @@ import { verificarFirma } from './payments.signature';
 import { AbandonedCartsService } from '../abandoned-carts/abandoned-carts.service';
 import { InventoryService } from '../inventory/inventory.service';
 import { PaymentsSettlementService } from './payments-settlement.service';
+import { esCuentaDePrueba } from '../common/test-accounts';
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
@@ -192,11 +193,13 @@ export class PaymentsService {
     shipping?: ShippingData,
     salesLinkId?: string,
   ) {
+    const isTest = await esCuentaDePrueba(this.prisma, [payer.email]);
     await this.prisma.$transaction(async (tx) => {
       const order = await tx.order.create({
         data: {
           number: orderNumber,
           userId: null,
+          isTest,
           status: 'PENDING',
           channel: salesLinkId ? 'SOCIAL' : 'ONLINE',
           total: totals.subtotal + totals.shipping - totals.discount,

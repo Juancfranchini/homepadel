@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import api from '@/lib/api';
 import { marcarConfigLista, trackMetaEvent } from '@/lib/metaPixel';
+import { modoPruebaActivo } from '@/lib/modoPrueba';
 
 interface MetaPixelConfig {
   pixelId?: string;
@@ -60,7 +61,8 @@ export default function MetaPixel() {
     const init = async () => {
       const config = await leerConfig();
 
-      if (config.pixelId && !instalado.current) {
+      // En modo prueba ni se instala: el Pixel manda eventos por su cuenta.
+      if (config.pixelId && !instalado.current && !modoPruebaActivo()) {
         window.__metaPixelId = config.pixelId;
         instalarPixel(config.pixelId);
         instalado.current = true;

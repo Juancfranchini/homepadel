@@ -6,6 +6,7 @@ import { hashPassword } from '../common/security/password';
 import { InventoryService } from '../inventory/inventory.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { enviarCompraAMeta } from './payments.meta';
+import { esCuentaDePrueba } from '../common/test-accounts';
 
 interface ApprovedPayment {
   id: string | number;
@@ -62,8 +63,13 @@ export class PaymentsSettlementService {
         })
       : null;
 
-    if (order) await this.settleOrder(order, payment, user, email, name, paymentId);
-    else await this.createFallback(payment, user, email, name);
+    // La cuenta de Mercado Pago con la que se pagó también cuenta: se puede
+    // probar con un mail en el checkout y pagar con la cuenta propia.
+    const esPrueba = await esCuentaDePrueba(this.prisma, [email]);
+    if (order) {
+      await this.settleOrder(order, payment, user, email, name, paymentId);
+      if (esPrueba) await this.prisma.order.update({ where: { id: order.id }, data: { isTest: true } });
+    } else await this.createFallback(payment, user, email, name, esPrueba);
     // El email del checkout y el de la cuenta de Mercado Pago pueden ser
     // distintos: se mandan los dos, Meta usa el que reconozca.
     const notas = this.parseNotes(order?.notes ?? null);
@@ -223,12 +229,14 @@ export class PaymentsSettlementService {
     user: User | null,
     email: string,
     name: string,
+    isTest: boolean,
   ) {
     const subtotal = payment.transaction_amount || 0;
     await this.prisma.$transaction(async (tx) => {
       const order = await tx.order.create({
         data: {
           number: `HP-${Date.now()}`,
+          isTest,
           userId: user?.id || null,
           status: 'PAID',
           paymentStatus: 'PAID',

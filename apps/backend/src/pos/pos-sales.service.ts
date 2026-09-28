@@ -15,6 +15,7 @@ import { CreateBranchDto, CreateCashRegisterDto } from './dto/pos-settings.dto';
 import { calculateSaleTotal } from './pos.calculations';
 import { PosPaymentsService } from './pos-payments.service';
 import { informarTransferenciaPagadaAMeta } from '../payments/payments.meta';
+import { esCuentaDePrueba } from '../common/test-accounts';
 
 export interface PosActor {
   id: string;
@@ -150,6 +151,7 @@ export class PosSalesService {
       dto.discountValue,
     );
     const number = `POS-${Date.now()}`;
+    const isTest = await esCuentaDePrueba(this.prisma, [dto.customer?.email]);
 
     return this.prisma.$transaction(async (tx) => {
       await this.assertCashSessionBranch(tx, dto.cashSessionId, dto.branchId);
@@ -163,6 +165,7 @@ export class PosSalesService {
         totals,
         number,
         customerId,
+        isTest,
       );
       return this.completeSale(tx, dto, actor, resolved, order, number, totals.total);
     });
@@ -177,10 +180,12 @@ export class PosSalesService {
     totals: { discount: number; total: number },
     number: string,
     customerId: string | null,
+    isTest: boolean,
   ) {
     return tx.order.create({
       data: {
         number,
+        isTest,
         status: 'PENDING',
         paymentStatus: 'PENDING',
         inventoryStatus: resolved.some((item) => !item.isMadeToOrder)

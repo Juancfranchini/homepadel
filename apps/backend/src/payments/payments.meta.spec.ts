@@ -47,6 +47,22 @@ describe('informarTransferenciaPagadaAMeta', () => {
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
+  it('no informa una compra de prueba', async () => {
+    await informarTransferenciaPagadaAMeta(construir({ ...ORDEN_TRANSFERENCIA, isTest: true }) as never, 'o-1');
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('no informa una compra hecha con un mail de prueba aunque la orden no esté marcada', async () => {
+    const prisma = construir(ORDEN_TRANSFERENCIA);
+    prisma.siteSection.findUnique.mockImplementation(async ({ where }: { where: { key: string } }) =>
+      where.key === 'cuentas_prueba'
+        ? { data: { emails: ['cliente@ejemplo.com'] } }
+        : { data: { pixelId: '1041282918808105', accessToken: 'token' } },
+    );
+    await informarTransferenciaPagadaAMeta(prisma as never, 'o-1');
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
   it('no informa las de Mercado Pago: esas ya se informan al acreditarse el pago', async () => {
     const mp = { ...ORDEN_TRANSFERENCIA, notes: JSON.stringify({ paymentMethod: 'mercadopago' }) };
     await informarTransferenciaPagadaAMeta(construir(mp) as never, 'o-1');

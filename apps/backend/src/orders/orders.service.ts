@@ -10,6 +10,7 @@ import { OrderStatus } from '@prisma/client';
 import { InventoryService } from '../inventory/inventory.service';
 import { informarTransferenciaPagadaAMeta } from '../payments/payments.meta';
 import { pedidoSinDatosPersonales } from './orders.public-view';
+import { esCuentaDePrueba } from '../common/test-accounts';
 
 interface SalesLinkContext {
   id: string;
@@ -198,6 +199,7 @@ export class OrdersService {
       shipping,
       discount,
       buyerInfo,
+      isTest: await this.esDePrueba(dto.buyerEmail, userId),
     });
 
     // Se consume el uso recién con la orden ya creada — si algo de arriba
@@ -243,6 +245,7 @@ export class OrdersService {
     shipping: number;
     discount: number;
     buyerInfo: Record<string, string>;
+    isTest: boolean;
   }) {
     return this.prisma.$transaction(async (tx) => {
       const { dto, userId, number, salesLink, resolvedItems } = input;
@@ -263,6 +266,7 @@ export class OrdersService {
           discount: input.discount,
           couponCode: dto.couponCode,
           notes: JSON.stringify(input.buyerInfo),
+          isTest: input.isTest,
           items: {
             create: resolvedItems.map((item) => ({
               productId: item.productId,
@@ -293,6 +297,14 @@ export class OrdersService {
         },
       });
     });
+  }
+
+  /** Compra hecha con un mail de prueba, sea el del checkout o el de la cuenta. */
+  private async esDePrueba(buyerEmail: string | undefined, userId?: string): Promise<boolean> {
+    const cuenta = userId
+      ? await this.prisma.user.findUnique({ where: { id: userId }, select: { email: true } })
+      : null;
+    return esCuentaDePrueba(this.prisma, [buyerEmail, cuenta?.email]);
   }
 
   private async resolveSalesLink(token?: string): Promise<SalesLinkContext | null> {

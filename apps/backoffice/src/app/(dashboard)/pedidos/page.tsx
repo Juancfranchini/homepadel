@@ -41,6 +41,17 @@ interface Order {
   branch?: { name: string };
   payments?: { id: string; method: string; kind: string; amount: number }[];
   items?: OrderItem[];
+  /** Compra de prueba: no suma en el panel ni en Estadísticas, y no va a Meta. */
+  isTest?: boolean;
+}
+
+function MarcaPrueba({ order }: { order: Order }) {
+  if (!order.isTest) return null;
+  return (
+    <span className="ml-1.5 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700" title="Compra de prueba: no suma en las estadísticas ni se informa a Meta">
+      Prueba
+    </span>
+  );
 }
 
 type StatusFilter = 'ALL' | 'PENDING' | 'PAID' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
@@ -138,7 +149,7 @@ function OrdersTable({ orders, onDetail }: { orders: Order[]; onDetail: (o: Orde
               const statusInfo = STATUS_TABS.find((t) => t.value === o.status);
               return (
                 <tr key={o.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
-                  <td className="px-3 py-3"><code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-900 font-semibold">{o.number}</code></td>
+                  <td className="px-3 py-3"><code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-900 font-semibold">{o.number}</code><MarcaPrueba order={o} /></td>
                   <td className="px-3 py-3">
                     <p className="text-gray-900 font-medium text-sm">{o.buyerName || o.user?.name || 'Invitado'}</p>
                     <p className="text-xs text-gray-400">{o.buyerEmail || o.user?.email || '-'}</p>
@@ -174,6 +185,7 @@ function OrdersCards({ orders, onDetail }: { orders: Order[]; onDetail: (o: Orde
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
                 <code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-900 font-semibold">{o.number}</code>
+                <MarcaPrueba order={o} />
                 <p className="text-sm font-semibold text-gray-900 mt-1 truncate">{o.buyerName || o.user?.name || 'Invitado'}</p>
                 <p className="text-xs text-gray-400">{o.buyerPhone || '-'}</p>
               </div>

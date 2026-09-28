@@ -1,6 +1,6 @@
 'use client';
 
-import { Eye, MousePointerClick, ShoppingCart, CreditCard, CheckCircle2 } from 'lucide-react';
+import { Eye, MousePointerClick, ShoppingCart, CreditCard, CheckCircle2, Info } from 'lucide-react';
 import {
   CartesianGrid,
   Line,
@@ -63,17 +63,49 @@ function Header({ days, onDaysChange }: { days: number; onDaysChange: (d: number
   );
 }
 
+const ZONA_ARGENTINA = 'America/Argentina/Buenos_Aires';
+
+/** YYYY-MM-DD en hora argentina, el mismo formato que las fechas del gráfico. */
+const diaArgentino = (fecha: Date) => new Intl.DateTimeFormat('en-CA', { timeZone: ZONA_ARGENTINA }).format(fecha);
+
 function Contenido({ stats }: { stats: MarketingStats }) {
+  const desde = stats.registrandoDesde ? new Date(stats.registrandoDesde) : null;
+  // Los días anteriores al primer evento no son "cero visitas": no se medía.
+  // Dibujarlos en cero hace creer que hubo días muertos.
+  const dias = desde ? stats.daily.filter((dia) => dia.date >= diaArgentino(desde)) : stats.daily;
+
   return (
     <>
+      {desde && <AvisoDatosDesde desde={desde} />}
       <FunnelCards funnel={stats.funnel} />
       <ConversionBar conversion={stats.conversion} />
-      <DailyChart rows={stats.daily} />
+      <DailyChart rows={dias} />
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
         <ProductRanking title="Productos más vistos" rows={stats.topViewed} />
         <ProductRanking title="Productos más agregados al carrito" rows={stats.topAddedToCart} />
       </div>
     </>
+  );
+}
+
+function AvisoDatosDesde({ desde }: { desde: Date }) {
+  const cuando = desde.toLocaleString('es-AR', {
+    timeZone: ZONA_ARGENTINA,
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  return (
+    <div className="flex gap-3 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
+      <Info className="mt-0.5 h-5 w-5 flex-shrink-0 text-sky-600" />
+      <p>
+        <strong>Datos desde el {cuando} hs.</strong> Ahí empezó este seguimiento: antes no hay registros, no es que
+        no hubo visitas. Para comparar con Meta, mirá en el Administrador de eventos el mismo período, a partir de
+        esa fecha. Lo que se hace con una cuenta de prueba o en modo prueba no se cuenta.
+      </p>
+    </div>
   );
 }
 

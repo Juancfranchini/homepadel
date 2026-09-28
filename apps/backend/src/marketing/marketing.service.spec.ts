@@ -29,6 +29,10 @@ function construirServicio(eventos: { eventName: string; productId?: string | nu
         }
         return filtrados;
       }),
+      findFirst: jest.fn(async () => {
+        const ordenados = [...eventos].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+        return ordenados[0] ? { createdAt: ordenados[0].createdAt } : null;
+      }),
       groupBy: jest.fn(async ({ where, take }: any) => {
         const filtrados = eventos.filter(
           (e) => e.eventName === where.eventName && e.productId && e.createdAt >= where.createdAt.gte,
@@ -124,6 +128,22 @@ describe('MarketingService.getStats', () => {
 
     expect(stats.topViewed).toEqual([]);
     expect(stats.topAddedToCart).toEqual([]);
+  });
+
+  it('informa desde cuándo hay datos, aunque el primer evento quede fuera del rango pedido', async () => {
+    const hace60Dias = new Date(Date.now() - 60 * 86400000);
+    const service = construirServicio([
+      { eventName: 'PageView', createdAt: HACE_1_DIA },
+      { eventName: 'PageView', createdAt: hace60Dias },
+    ]);
+    const stats = await service.getStats(30);
+
+    expect(stats.registrandoDesde).toEqual(hace60Dias);
+  });
+
+  it('sin ningún evento todavía, no inventa una fecha de inicio', async () => {
+    const stats = await construirServicio([]).getStats(30);
+    expect(stats.registrandoDesde).toBeNull();
   });
 
   it('arma un punto por día en el rango, con 0 en los días sin eventos', async () => {

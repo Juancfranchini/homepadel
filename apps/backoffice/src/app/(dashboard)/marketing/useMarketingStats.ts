@@ -38,6 +38,8 @@ export interface MarketingStats {
   daily: DiaEmbudo[];
   topViewed: ProductoRanking[];
   topAddedToCart: ProductoRanking[];
+  /** Primer evento registrado (ISO). Antes de esa fecha el seguimiento no existía. */
+  registrandoDesde: string | null;
 }
 
 export function useMarketingStats() {

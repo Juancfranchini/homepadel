@@ -86,6 +86,8 @@ export class PosStatsService {
 
   private orderFilter(query: PosStatsQueryDto): Prisma.OrderWhereInput {
     return {
+      // Las compras de prueba no son ventas: no suman en ninguna cifra.
+      isTest: false,
       ...(query.channel ? { channel: query.channel } : {}),
       ...(query.branchId ? { branchId: query.branchId } : {}),
       ...(query.sellerId ? { sellerId: query.sellerId } : {}),

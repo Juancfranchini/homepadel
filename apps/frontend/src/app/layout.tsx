@@ -4,6 +4,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import MetaPixel from '@/components/layout/MetaPixel';
 import WhatsAppFloat from '@/components/layout/WhatsAppFloat';
+import ModoPruebaAviso from '@/components/layout/ModoPruebaAviso';
 import { getSiteUrl } from '@/lib/siteUrl';
 
 async function getFaviconUrl(): Promise<string> {
@@ -92,6 +93,7 @@ export default function RootLayout({
         <main>{children}</main>
         <Footer />
         <WhatsAppFloat />
+        <ModoPruebaAviso />
         <MetaPixel />
       </body>
     </html>

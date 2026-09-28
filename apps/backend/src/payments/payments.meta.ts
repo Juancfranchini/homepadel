@@ -1,6 +1,7 @@
 import { Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { userDataParaMeta } from '../common/meta-user-data';
+import { esCuentaDePrueba } from '../common/test-accounts';
 
 const logger = new Logger('MetaPurchase');
 
@@ -23,6 +24,17 @@ export interface CompraParaMeta {
 }
 
 /**
+ * Una compra de prueba no se informa: Meta optimiza los anuncios con estas
+ * compras, y una que nunca existió le enseña a buscar al público equivocado.
+ * Cuenta la marca de la orden y también los mails, por si la orden todavía
+ * no la tiene (el mail de la cuenta de Mercado Pago se conoce recién al pagar).
+ */
+async function esCompraDePrueba(prisma: PrismaService, compra: CompraParaMeta): Promise<boolean> {
+  const orden = await prisma.order.findUnique({ where: { number: compra.orderNumber }, select: { isTest: true } });
+  return !!orden?.isTest || esCuentaDePrueba(prisma, compra.emails ?? []);
+}
+
+/**
  * Informa la compra a la API de Conversiones de Meta.
  *
  * Vive fuera de PaymentsService porque no es parte del cobro: si esto falla,
@@ -35,6 +47,10 @@ export interface CompraParaMeta {
  */
 export async function enviarCompraAMeta(prisma: PrismaService, compra: CompraParaMeta): Promise<void> {
   try {
+    if (await esCompraDePrueba(prisma, compra)) {
+      logger.log(`Compra de prueba ${compra.orderNumber}: no se informa a Meta.`);
+      return;
+    }
     const seccion = await prisma.siteSection.findUnique({ where: { key: 'meta_pixel' } });
     const config = (seccion?.data as { pixelId?: string; accessToken?: string; testEventCode?: string }) || {};
     if (!config.pixelId || !config.accessToken) return;

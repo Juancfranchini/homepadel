@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { CartItem } from '@/types';
 import { saveAbandonedCart } from '@/lib/api';
+import { modoPruebaActivo } from '@/lib/modoPrueba';
 
 /** Se espera a que deje de escribir antes de guardar, para no llamar en cada tecla. */
 const ESPERA_MS = 2500;
@@ -31,7 +32,8 @@ export function useAbandonedCart(items: CartItem[], datos: Datos, yaCompro: bool
 
   useEffect(() => {
     const email = datos.email?.trim().toLowerCase();
-    if (yaCompro || !email || !EMAIL_VALIDO.test(email) || items.length === 0) return;
+    // En modo prueba no se registra: no es un cliente al que haya que recuperar.
+    if (yaCompro || !email || !EMAIL_VALIDO.test(email) || items.length === 0 || modoPruebaActivo()) return;
 
     const carrito = items.map((item) => ({
       productId: item.product.id,

@@ -161,6 +161,41 @@ describe('TrackController', () => {
     expect(enviado).not.toContain('Compradora');
   });
 
+  it('lo que hace una cuenta de prueba no se guarda en el embudo ni llega a Meta', async () => {
+    const prisma = {
+      siteSection: {
+        findUnique: jest.fn(async ({ where }: { where: { key: string } }) =>
+          where.key === 'cuentas_prueba'
+            ? { data: { emails: ['dueno@homepadel.com.ar'] } }
+            : { data: { pixelId: '123', accessToken: 'token' } },
+        ),
+      },
+      marketingEvent: marketingEventFalso(),
+    };
+    global.fetch = jest.fn() as any;
+
+    const controller = new TrackController(prisma as any);
+    await controller.track({ ...EVENTO, eventName: 'InitiateCheckout', userData: { email: 'Dueno@HomePadel.com.ar' } }, construirRequestFalso());
+
+    expect(prisma.marketingEvent.create).not.toHaveBeenCalled();
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('una compra marcada como de prueba no llega a Meta ni al embudo', async () => {
+    const prisma = {
+      siteSection: { findUnique: jest.fn().mockResolvedValue({ data: { pixelId: '123', accessToken: 'token' } }) },
+      marketingEvent: marketingEventFalso(),
+      order: { findUnique: jest.fn().mockResolvedValue({ notes: null, isTest: true, user: null }) },
+    };
+    global.fetch = jest.fn() as any;
+
+    const controller = new TrackController(prisma as any);
+    await controller.track({ eventName: 'Purchase', eventId: 'purchase_HP-1', eventData: { value: 500 } }, construirRequestFalso());
+
+    expect(prisma.marketingEvent.create).not.toHaveBeenCalled();
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
   it('usa siempre el pixel configurado, aunque el navegador mande otro', async () => {
     const prisma = {
       siteSection: { findUnique: jest.fn().mockResolvedValue({ data: { pixelId: '1041282918808105', accessToken: 'token' } }) },

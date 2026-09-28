@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { PricingService } from '../pricing/pricing.service';
 import { SaveAbandonedCartDto } from './dto/save-abandoned-cart.dto';
+import { esCuentaDePrueba } from '../common/test-accounts';
 
 /** Un carrito más viejo que esto ya no se recupera: se deja de listar. */
 const DIAS_VIGENCIA = 30;
@@ -58,6 +59,7 @@ export class AbandonedCartsService {
       phone: dto.phone?.trim() || null,
       items: items as unknown as Prisma.InputJsonValue,
       total,
+      isTest: await esCuentaDePrueba(this.prisma, [email]),
     };
 
     await this.prisma.abandonedCart.upsert({
@@ -99,14 +101,17 @@ export class AbandonedCartsService {
     });
   }
 
-  /** Cuántos se abandonaron, cuántos se rescataron y cuánta plata representa. */
+  /**
+   * Cuántos se abandonaron, cuántos se rescataron y cuánta plata representa.
+   * Los de prueba no cuentan: se listan (marcados), pero no son clientes.
+   */
   async stats() {
     const desde = new Date(Date.now() - DIAS_VIGENCIA * 24 * 60 * 60 * 1000);
     const [pendientes, recuperados, sumaPendiente] = await Promise.all([
-      this.prisma.abandonedCart.count({ where: { recoveredAt: null, updatedAt: { gte: desde } } }),
-      this.prisma.abandonedCart.count({ where: { recoveredAt: { not: null }, updatedAt: { gte: desde } } }),
+      this.prisma.abandonedCart.count({ where: { recoveredAt: null, isTest: false, updatedAt: { gte: desde } } }),
+      this.prisma.abandonedCart.count({ where: { recoveredAt: { not: null }, isTest: false, updatedAt: { gte: desde } } }),
       this.prisma.abandonedCart.aggregate({
-        where: { recoveredAt: null, updatedAt: { gte: desde } },
+        where: { recoveredAt: null, isTest: false, updatedAt: { gte: desde } },
         _sum: { total: true },
       }),
     ]);

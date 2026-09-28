@@ -95,10 +95,24 @@ export default function CarritosAbandonadosPage() {
         </div>
       )}
 
+      <NotasAlPie />
+    </div>
+  );
+}
+
+function NotasAlPie() {
+  return (
+    <>
+      <p className="text-xs text-gray-400">
+        Los marcados como <strong>Prueba</strong> son de una cuenta de prueba (Configuración → Meta Pixel): se listan,
+        pero no suman en los contadores. Estos números cuentan desde que existe el registro de carritos, no desde que
+        empezó el seguimiento de Marketing: no son la misma fuente.
+      </p>
+
       <p className="text-xs text-gray-400 flex items-center gap-1.5">
         <Mail className="w-3.5 h-3.5" />
         El envío automático de emails de recuperación necesita el servicio de correo, que hoy no está contratado.
       </p>
-    </div>
+    </>
   );
 }

@@ -3,6 +3,7 @@
 // navegador y servidor.
 
 import api from './api';
+import { modoPruebaActivo } from './modoPrueba';
 
 type Datos = Record<string, unknown>;
 
@@ -68,7 +69,7 @@ export function trackMetaEvent(
   eventId: string = newEventId(),
   userData?: DatosComprador,
 ) {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined' || modoPruebaActivo()) return;
   const evento = { eventName, eventData, customData, eventId, eventSourceUrl: window.location.href, userData };
   if (!configLista) {
     pendientes.push(evento);

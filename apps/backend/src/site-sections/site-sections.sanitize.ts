@@ -17,6 +17,8 @@ const PRIVATE_KEYS = new Set([
   'resend',
   'meta_capi',
   'meta_conversions',
+  // Mails personales del dueño y de quien prueba la tienda.
+  'cuentas_prueba',
 ]);
 
 /**

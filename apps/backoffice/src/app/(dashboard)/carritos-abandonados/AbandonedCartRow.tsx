@@ -11,6 +11,8 @@ export interface AbandonedCart {
   total: number;
   contactedAt: string | null;
   updatedAt: string;
+  /** Hecho con una cuenta de prueba: se lista, pero no suma en los contadores. */
+  isTest?: boolean;
 }
 
 /**
@@ -54,7 +56,14 @@ export default function AbandonedCartRow({ carrito, onToggleContacted, onDelete 
     <div className={'bg-white border rounded-xl p-4 ' + (contactado ? 'border-gray-200 opacity-70' : 'border-gray-200')}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-gray-900">{carrito.name || 'Sin nombre'}</p>
+          <p className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+            {carrito.name || 'Sin nombre'}
+            {carrito.isTest && (
+              <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700" title="Cuenta de prueba: no suma en los contadores">
+                Prueba
+              </span>
+            )}
+          </p>
           <p className="text-xs text-gray-500">{carrito.email}{carrito.phone ? ' · ' + carrito.phone : ''}</p>
           <p className="text-[11px] text-gray-400 flex items-center gap-1 mt-0.5">
             <Clock className="w-3 h-3" /> {hace(carrito.updatedAt)}

@@ -27,13 +27,26 @@ export class MarketingService {
 
   async getStats(days: number) {
     const since = new Date(Date.now() - days * 86400000);
-    const [funnel, daily, topViewed, topAddedToCart] = await Promise.all([
+    const [funnel, daily, topViewed, topAddedToCart, registrandoDesde] = await Promise.all([
       this.getFunnelCounts(since),
       this.getDailyBreakdown(since, days),
       this.getTopProducts('ViewContent', since),
       this.getTopProducts('AddToCart', since),
+      this.getPrimerEvento(),
     ]);
-    return { funnel, conversion: this.getConversionRates(funnel), daily, topViewed, topAddedToCart };
+    return { funnel, conversion: this.getConversionRates(funnel), daily, topViewed, topAddedToCart, registrandoDesde };
+  }
+
+  /**
+   * Desde cuándo hay datos. Antes de esa fecha el seguimiento no existía: los
+   * días en cero no son "no hubo visitas", y compararlos con Meta engaña.
+   */
+  private async getPrimerEvento(): Promise<Date | null> {
+    const primero = await this.prisma.marketingEvent.findFirst({
+      orderBy: { createdAt: 'asc' },
+      select: { createdAt: true },
+    });
+    return primero?.createdAt ?? null;
   }
 
   private async getFunnelCounts(since: Date): Promise<Record<EventoEmbudo, number>> {

@@ -4,6 +4,13 @@ import type { Request } from 'express';
 import { PrismaService } from '../prisma/prisma.service';
 import { TrackEventDto } from './dto/track-event.dto';
 import { userDataParaMeta } from '../common/meta-user-data';
+import { esCuentaDePrueba } from '../common/test-accounts';
+
+interface DatosDelComprador {
+  emails: (string | undefined)[];
+  telefono?: string;
+  esPrueba: boolean;
+}
 
 interface MetaPixelConfig {
   pixelId?: string;
@@ -53,12 +60,15 @@ export class TrackController {
    * en el servidor: así no tienen que pasar por el navegador ni exponerse en
    * la consulta pública del pedido. En el resto de los eventos, los que
    * mande el navegador (los de la cuenta, si hay sesión).
+   *
+   * `esPrueba`: la compra está marcada como de prueba, o el mail es de una
+   * cuenta de prueba (ver common/test-accounts.ts).
    */
-  private async datosDelComprador(body: TrackEventDto): Promise<{ emails: (string | undefined)[]; telefono?: string }> {
+  private async datosDelComprador(body: TrackEventDto): Promise<DatosDelComprador> {
     if (body.eventName === 'Purchase' && body.eventId.startsWith('purchase_')) {
       const orden = await this.prisma.order.findUnique({
         where: { number: body.eventId.slice('purchase_'.length) },
-        select: { notes: true, user: { select: { email: true } } },
+        select: { notes: true, isTest: true, user: { select: { email: true } } },
       });
       let notas: { buyerEmail?: string; buyerPhone?: string } = {};
       try {
@@ -66,13 +76,21 @@ export class TrackController {
       } catch {
         notas = {};
       }
-      return { emails: [notas.buyerEmail, orden?.user?.email], telefono: notas.buyerPhone };
+      const emails = [notas.buyerEmail, orden?.user?.email];
+      const esPrueba = !!orden?.isTest || (await esCuentaDePrueba(this.prisma, emails));
+      return { emails, telefono: notas.buyerPhone, esPrueba };
     }
-    return { emails: [body.userData?.email], telefono: body.userData?.phone };
+    const emails = [body.userData?.email];
+    return { emails, telefono: body.userData?.phone, esPrueba: await esCuentaDePrueba(this.prisma, emails) };
   }
 
   @Post()
   async track(@Body() body: TrackEventDto, @Req() req: Request) {
+    // Lo que hace una cuenta de prueba no se registra en ningún lado: ni en
+    // el embudo propio ni en Meta.
+    const { esPrueba, ...comprador } = await this.datosDelComprador(body);
+    if (esPrueba) return { success: false, message: 'Evento de prueba: no se registra' };
+
     // El embudo propio del backoffice (Marketing) no depende de que Meta esté
     // configurado: se guarda siempre, aunque falte el Pixel o el token.
     const { productId, productName, value } = extraerDatosDeMarketing(body.eventData);
@@ -106,7 +124,7 @@ export class TrackController {
         user_data: {
           fbp: fbp || undefined,
           fbc: fbc || undefined,
-          ...userDataParaMeta({ ...(await this.datosDelComprador(body)), ip: clientIp, userAgent: clientUserAgent }),
+          ...userDataParaMeta({ ...comprador, ip: clientIp, userAgent: clientUserAgent }),
         },
         ...(body.eventData || {}),
         ...(body.customData ? { custom_data: body.customData } : {}),

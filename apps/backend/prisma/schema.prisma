@@ -174,6 +174,9 @@ model Order {
   paidAt             DateTime?
   cancelledAt        DateTime?
   cancellationReason String?
+  /// Compra de prueba (hecha con un mail de la lista `cuentas_prueba`): no
+  /// suma en las estadísticas ni se informa a Meta.
+  isTest             Boolean             @default(false)
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   user               User?               @relation("CustomerOrders", fields: [userId], references: [id])
@@ -351,6 +354,8 @@ model AbandonedCart {
   /// Cuándo terminó comprando, y con qué pedido.
   recoveredAt DateTime?
   orderNumber String?
+  /// Carrito de prueba: se lista con una marca, pero no suma en los contadores.
+  isTest      Boolean   @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 

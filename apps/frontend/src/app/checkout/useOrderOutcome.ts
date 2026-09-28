@@ -10,6 +10,8 @@ export type Resultado = 'cargando' | 'aprobado' | 'acreditando' | 'pendiente' | 
 export interface OrdenCobrada {
   total: number;
   items: { productId: string }[];
+  /** Compra de prueba (mail de la lista de cuentas de prueba): no se avisa a Meta. */
+  isTest: boolean;
 }
 
 /** Estados de la orden que significan que el dinero ya entró. */
@@ -76,6 +78,7 @@ export function useOrderOutcome(porDefecto: Resultado): { resultado: Resultado; 
           setOrden({
             total: ordenServidor.total,
             items: (ordenServidor.items || []).map((i: { productId: string }) => ({ productId: i.productId })),
+            isTest: ordenServidor.isTest === true,
           });
           setResultado('aprobado');
           return;

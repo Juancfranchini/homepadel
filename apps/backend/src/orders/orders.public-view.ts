@@ -7,6 +7,7 @@ interface PedidoCompleto {
   shipping: number;
   discount: number;
   createdAt: Date;
+  isTest: boolean;
   items: {
     productId: string;
     quantity: number;
@@ -30,6 +31,9 @@ export function pedidoSinDatosPersonales(order: PedidoCompleto) {
     shipping: order.shipping,
     discount: order.discount,
     createdAt: order.createdAt,
+    // La pantalla de vuelta de Mercado Pago no avisa la compra al pixel de
+    // Meta si es de prueba. No identifica a nadie: es solo una marca.
+    isTest: order.isTest,
     items: order.items.map((item) => ({
       productId: item.productId,
       quantity: item.quantity,

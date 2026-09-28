@@ -12,7 +12,10 @@ export class DashboardService {
     const sales = await this.getSalesData(thirtyDaysAgo);
     const productStats = this.getProductStats(sales.allOrders);
 
+    // Las compras de prueba (Order.isTest) no cuentan en ninguna cifra del
+    // panel; se siguen viendo en Pedidos, marcadas.
     const recentOrdersList = await this.prisma.order.findMany({
+      where: { isTest: false },
       orderBy: { createdAt: 'desc' },
       take: 5,
       include: { user: { select: { name: true } } },
@@ -37,12 +40,12 @@ export class DashboardService {
 
   private async getSalesData(thirtyDaysAgo: Date) {
     const recentOrders = await this.prisma.order.findMany({
-      where: { createdAt: { gte: thirtyDaysAgo }, status: { not: 'CANCELLED' } },
+      where: { createdAt: { gte: thirtyDaysAgo }, status: { not: 'CANCELLED' }, isTest: false },
       include: { items: { include: { product: true } } },
     });
 
     const allOrders = await this.prisma.order.findMany({
-      where: { status: { not: 'CANCELLED' } },
+      where: { status: { not: 'CANCELLED' }, isTest: false },
       include: { items: { include: { product: true } } },
     });
 
@@ -113,11 +116,11 @@ export class DashboardService {
         madeToOrder: await this.prisma.product.count({ where: { isMadeToOrder: true } }),
       },
       ordersByStatus: {
-        PENDING: await this.prisma.order.count({ where: { status: 'PENDING' } }),
-        PAID: await this.prisma.order.count({ where: { status: 'PAID' } }),
-        SHIPPED: await this.prisma.order.count({ where: { status: 'SHIPPED' } }),
-        DELIVERED: await this.prisma.order.count({ where: { status: 'DELIVERED' } }),
-        CANCELLED: await this.prisma.order.count({ where: { status: 'CANCELLED' } }),
+        PENDING: await this.prisma.order.count({ where: { status: 'PENDING', isTest: false } }),
+        PAID: await this.prisma.order.count({ where: { status: 'PAID', isTest: false } }),
+        SHIPPED: await this.prisma.order.count({ where: { status: 'SHIPPED', isTest: false } }),
+        DELIVERED: await this.prisma.order.count({ where: { status: 'DELIVERED', isTest: false } }),
+        CANCELLED: await this.prisma.order.count({ where: { status: 'CANCELLED', isTest: false } }),
       },
       reviewsStats: {
         total: await this.prisma.productReview.count(),

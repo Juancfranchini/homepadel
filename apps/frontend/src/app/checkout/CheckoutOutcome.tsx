@@ -63,6 +63,8 @@ export default function CheckoutOutcome({ porDefecto }: { porDefecto: Resultado 
   useEffect(() => {
     if (!cobrado || !orden || purchaseAvisado.current) return;
     purchaseAvisado.current = true;
+    // Una compra de prueba no se informa: el servidor tampoco la manda.
+    if (orden.isTest) return;
     trackMetaEvent(
       'Purchase',
       { content_ids: orden.items.map((i) => i.productId), content_type: 'product', value: orden.total, currency: 'ARS' },

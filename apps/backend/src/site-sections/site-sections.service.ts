@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import * as fs from 'fs';
 import * as path from 'path';
 
-export type SectionKey = 'categories' | 'meta_pixel' | 'hero' | 'benefits' | 'promo_destacada' | 'featured_products' | 'banners' | 'about' | 'testimonials' | 'brands' | 'instagram' | 'final_message' | 'branding' | 'settings' | 'trust_bottom' | 'politica_devolución' | 'envíos' | 'medios_pago' | 'terminos' | 'privacidad' | 'contacto' | 'talles' | 'reviews_info' | 'payment_methods' | 'email_settings' | 'shipping_rates' | 'formatos_paleta';
+export type SectionKey = 'categories' | 'meta_pixel' | 'hero' | 'benefits' | 'promo_destacada' | 'featured_products' | 'banners' | 'about' | 'testimonials' | 'brands' | 'instagram' | 'final_message' | 'branding' | 'settings' | 'trust_bottom' | 'politica_devolución' | 'envíos' | 'medios_pago' | 'terminos' | 'privacidad' | 'contacto' | 'talles' | 'reviews_info' | 'payment_methods' | 'email_settings' | 'shipping_rates' | 'formatos_paleta' | 'cuentas_prueba';
 
 @Injectable()
 export class SiteSectionsService {
@@ -145,6 +145,8 @@ export class SiteSectionsService {
       // Imagen por formato de paleta, para mostrar al lado del texto en el
       // catálogo. Vacío a propósito: sin imagen cargada no se dibuja nada.
       'formatos_paleta': { Diamante: '', Lagrima: '', Redondo: '', Hibrido: '' },
+      // Mails de prueba (ver common/test-accounts.ts). Privada: no se sirve a la tienda.
+      'cuentas_prueba': { emails: [] },
       'reviews_info': { content: 'Las opiniones son realizadas por clientes verificados que compraron el producto. El promedio se calcula en base a todas las resenas aprobadas.' },
       about: {
         title: 'Somos Home Padel',

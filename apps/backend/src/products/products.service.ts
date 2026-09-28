@@ -127,6 +127,7 @@ export class ProductsService {
       where: {
         order: {
           status: { in: ['PAID', 'SHIPPED', 'DELIVERED'] },
+          isTest: false,
         },
       },
       orderBy: { _sum: { quantity: 'desc' } },
