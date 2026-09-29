@@ -30,7 +30,7 @@ describe('informarTransferenciaPagadaAMeta', () => {
     const evento = cuerpo().data[0];
     expect(evento.event_name).toBe('Purchase');
     expect(evento.event_id).toBe('purchase_HP-100');
-    expect(evento.custom_data).toMatchObject({ value: 754500, currency: 'ARS', content_ids: ['prod-1'] });
+    expect(evento.custom_data).toMatchObject({ value: 754500, currency: 'ARS', content_ids: ['prod-1'], order_id: 'HP-100' });
   });
 
   it('manda email y teléfono cifrados, nunca en claro', async () => {

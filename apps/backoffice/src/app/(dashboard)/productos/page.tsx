@@ -9,6 +9,7 @@ import ProductDetailModal from './components/ProductDetailModal';
 import ProductForm from './components/ProductForm';
 import ProductsTable from './components/ProductsTable';
 import ProductsCards from './components/ProductsCards';
+import RevisionFichas from './components/RevisionFichas';
 import { useProductosPage } from './useProductosPage';
 
 export default function ProductosPage() {
@@ -41,6 +42,8 @@ export default function ProductosPage() {
           </button>
         </div>
       </div>
+
+      <RevisionFichas products={filtered} onEdit={openEdit} />
 
       {paginated.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 py-20 text-center"><p className="text-gray-400 text-sm">No se encontraron productos</p></div>
