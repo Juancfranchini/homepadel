@@ -5,6 +5,7 @@ import { Product } from '@/types';
 import { formatPrice, getDiscountPercent } from '@/lib/utils';
 import { useShippingRates } from '@/hooks/useShippingRates';
 import { formatDiscountPercent, getInstallmentTerms } from '@/lib/productPricing';
+import PrecioTransferencia from '@/components/ui/PrecioTransferencia';
 
 interface Props {
   product: Product;
@@ -45,6 +46,8 @@ export default function ProductCardPricing({ product, isMadeToOrder, hasDiscount
         )}
         </div>
       </div>
+
+      {!isMadeToOrder && <PrecioTransferencia product={product} />}
 
       {!isMadeToOrder && installments && (
         <p className="text-[10px] font-semibold text-brand-fg">

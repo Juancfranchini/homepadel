@@ -158,14 +158,16 @@ export class OrdersService {
         }[])
       : dto.items;
 
-    // S3 / F6 - Precios desde la base y verificación de stock. La misma lógica
-    // que usa el checkout de Mercado Pago, para que ambos caminos coincidan.
+    // S3 / F6 - Precios desde la base y verificación de stock. Este camino es
+    // siempre transferencia: cada producto sale a su precio de transferencia,
+    // el mismo que muestra la tienda.
     const resolvedItems = await this.pricing.resolveItems(
       requestedItems.map((item) => ({
         productId: item.productId,
         variantId: item.variantId,
         quantity: item.quantity,
       })),
+      { porTransferencia: true },
     );
 
     const subtotal = resolvedItems.reduce((acc, item) => acc + item.price * item.quantity, 0);

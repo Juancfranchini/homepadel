@@ -6,7 +6,7 @@
  * correcta para que no vuelva a divergir.
  */
 
-import { effectivePrice } from './effective-price';
+import { effectivePrice, precioPorTransferencia } from './effective-price';
 
 describe('effectivePrice', () => {
   it('usa el precio de lista si no hay salePrice', () => {
@@ -29,5 +29,20 @@ describe('effectivePrice', () => {
   it('ignora un salePrice mayor o igual al de lista', () => {
     expect(effectivePrice(100000, 150000)).toBe(100000);
     expect(effectivePrice(100000, 100000)).toBe(100000);
+  });
+});
+
+describe('precioPorTransferencia', () => {
+  it('usa el precio de transferencia cuando es menor que el vigente', () => {
+    expect(precioPorTransferencia(700000, null, 560000)).toBe(560000);
+  });
+
+  it('sin precio de transferencia (vacío o cero) cobra el vigente', () => {
+    expect(precioPorTransferencia(700000, null, null)).toBe(700000);
+    expect(precioPorTransferencia(700000, null, 0)).toBe(700000);
+  });
+
+  it('si la promo es más barata que el de transferencia, vale la promo', () => {
+    expect(precioPorTransferencia(700000, 500000, 560000)).toBe(500000);
   });
 });

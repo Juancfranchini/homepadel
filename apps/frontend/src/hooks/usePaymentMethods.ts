@@ -28,14 +28,27 @@ function parsePaymentMethods(response: unknown): PaymentMethodsData {
   return value && typeof value === 'object' ? value as PaymentMethodsData : {};
 }
 
+// Un solo pedido por carga de página: lo usan todas las tarjetas del
+// catálogo (precio con transferencia) y sin esto cada una pedía lo mismo.
+let pedido: Promise<PaymentMethodsData> | null = null;
+function cargarMediosDePago(): Promise<PaymentMethodsData> {
+  pedido ??= fetch(API_URL + '/site-sections/payment_methods')
+    .then((r) => r.json())
+    .then((res: unknown) => parsePaymentMethods(res))
+    .catch(() => {
+      pedido = null;
+      return {};
+    });
+  return pedido;
+}
+
 export function usePaymentMethods() {
   const [data, setData] = useState<PaymentMethodsData | null>(null);
 
   useEffect(() => {
-    fetch(API_URL + '/site-sections/payment_methods')
-      .then((r) => r.json())
-      .then((res: unknown) => setData(parsePaymentMethods(res)))
-      .catch(() => {});
+    let vigente = true;
+    cargarMediosDePago().then((medios) => { if (vigente) setData(medios); });
+    return () => { vigente = false; };
   }, []);
 
   return {

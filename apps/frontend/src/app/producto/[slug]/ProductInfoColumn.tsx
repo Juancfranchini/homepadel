@@ -36,6 +36,7 @@ export default function ProductInfoColumn({ product, display, activeVariants, va
         hasInstallmentsInterest={display.hasInstallmentsInterest} installmentsInterest={display.installmentsInterest}
         onShowPaymentModal={() => actions.setShowPaymentModal(true)}
         isMadeToOrder={product.isMadeToOrder} estimatedDays={product.estimatedDays} requiredDeposit={product.requiredDeposit}
+        transferPrice={product.transferPrice}
       />
       {!product.isMadeToOrder && <StockAlert stock={display.effectiveStock} />}
       <div className="h-px bg-[#0D0F0F] light:bg-[#FFFFFF]" />

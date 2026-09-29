@@ -10,6 +10,7 @@ import { usePaymentMethods } from '@/hooks/usePaymentMethods';
 import { useShippingRates } from '@/hooks/useShippingRates';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { useCoupon } from '@/hooks/useCoupon';
+import { subtotalConTransferencia } from '@/lib/productPricing';
 import { useInitiateCheckout } from './useInitiateCheckout';
 import { useCheckoutSubmit } from './useCheckoutSubmit';
 import { limpiarBorrador, useCheckoutDraft } from './useCheckoutDraft';
@@ -43,18 +44,22 @@ export default function CheckoutPage() {
   const settings = useSiteSettings();
   const { onSubmit, orderError, orderSuccess, orderNumber, pedidoTransferencia } = useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart, whatsapp: settings.whatsapp || settings.phone, bolsasRegalo: bolsasEfectivas(bolsasRegalo, items) });
 
-  const subtotal = totalPrice();
+  const { register, handleSubmit, formState: { errors, isSubmitting }, watch, reset, setValue } = useForm<CheckoutFormData>({
+    resolver: zodResolver(checkoutSchema),
+    defaultValues: { name: user?.name || '', email: user?.email || '', shippingMethod: 'correo_argentino', paymentMethod: 'mercadopago' },
+  });
+  const selectedPayment = watch('paymentMethod');
+
+  // Pagando por transferencia cada producto sale a su precio de transferencia
+  // (el servidor cobra lo mismo): cupón y envío gratis se calculan sobre eso.
+  const subtotalLista = totalPrice();
+  const subtotal = selectedPayment === 'transfer' ? subtotalConTransferencia(items) : subtotalLista;
   const coupon = useCoupon(subtotal);
   const { discount } = coupon;
   // Estimación para mostrar en pantalla — el servidor recalcula envío y
   // descuento al crear la orden o la preferencia de pago (P1/P2); esto nunca
   // es lo que se cobra de verdad.
   const correoCost = subtotal >= freeShippingThreshold ? 0 : flatRate;
-
-  const { register, handleSubmit, formState: { errors, isSubmitting }, watch, reset, setValue } = useForm<CheckoutFormData>({
-    resolver: zodResolver(checkoutSchema),
-    defaultValues: { name: user?.name || '', email: user?.email || '', shippingMethod: 'correo_argentino', paymentMethod: 'mercadopago' },
-  });
 
   useCheckoutDraft(watch, reset, transferencia.active === true);
   useInitiateCheckout(items, user ? { email: user.email, phone: user.phone } : undefined);
@@ -64,7 +69,6 @@ export default function CheckoutPage() {
   // Queda registrado el carrito de quien deja su email y no termina la compra,
   // para que la tienda pueda recuperarlo desde el backoffice.
   useAbandonedCart(items, { email: watch('email'), name: watch('name'), phone: watch('phone') }, orderSuccess);
-  const selectedPayment = watch('paymentMethod');
   const selectedShipping = watch('shippingMethod');
   const flex = useCheckoutFlex(watch, setValue);
   const guardadas = useDireccionesCheckout(Boolean(user), setValue);
@@ -108,6 +112,7 @@ export default function CheckoutPage() {
             <CheckoutOrderSummary
               items={items}
               subtotal={subtotal}
+              ahorroTransferencia={subtotalLista - subtotal}
               coupon={coupon}
               shippingCost={shippingCost}
               total={total}
