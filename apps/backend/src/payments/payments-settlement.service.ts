@@ -8,6 +8,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { enviarCompraAMeta } from './payments.meta';
 import { ClienteMeta } from '../common/meta/meta-cliente';
 import { esCuentaDePrueba } from '../common/test-accounts';
+import { filtroOrdenConPago } from './pago-registrado';
 
 interface ApprovedPayment {
   id: string | number;
@@ -50,7 +51,7 @@ export class PaymentsSettlementService {
     const paymentId = String(payment.id);
     const [registeredPayment, legacyOrder] = await Promise.all([
       this.prisma.payment.findUnique({ where: { externalId: paymentId } }),
-      this.prisma.order.findFirst({ where: { notes: { contains: paymentId } } }),
+      this.prisma.order.findFirst({ where: filtroOrdenConPago(paymentId) }),
     ]);
     if (registeredPayment?.status === 'CONFIRMED' || legacyOrder) return 'ya-estaba';
 
@@ -68,7 +69,11 @@ export class PaymentsSettlementService {
     // probar con un mail en el checkout y pagar con la cuenta propia.
     const esPrueba = await esCuentaDePrueba(this.prisma, [email]);
     if (order) {
-      await this.settleOrder(order, payment, user, email, name, paymentId);
+      // Si el aviso de Mercado Pago y la consulta de la tienda llegan a la vez,
+      // solo el que registra el pago sigue: el otro no vuelve a informar la
+      // compra (se contaba dos veces en el embudo y se mandaba dos veces a Meta).
+      const registrado = await this.settleOrder(order, payment, user, email, name, paymentId);
+      if (!registrado) return 'ya-estaba';
       if (esPrueba) await this.prisma.order.update({ where: { id: order.id }, data: { isTest: true } });
     } else await this.createFallback(payment, user, email, name, esPrueba);
     // El email del checkout y el de la cuenta de Mercado Pago pueden ser
@@ -120,17 +125,23 @@ export class PaymentsSettlementService {
     email: string,
     name: string,
     paymentId: string,
-  ) {
+  ): Promise<boolean> {
     const notes = this.parseNotes(order.notes);
+    let registrado: boolean;
     try {
-      await this.writeSettlement(order, payment, user, email, name, paymentId, notes, true);
+      registrado = await this.writeSettlement(order, payment, user, email, name, paymentId, notes, true);
     } catch (error) {
       if (!(error instanceof ConflictException)) throw error;
       this.logger.error(`Pago ${paymentId} aprobado sin stock para ${order.number}: ${error}`);
-      await this.writeSettlement(order, payment, user, email, name, paymentId, notes, false);
+      registrado = await this.writeSettlement(order, payment, user, email, name, paymentId, notes, false);
+    }
+    if (!registrado) {
+      this.logger.log(`Pago ${paymentId} ya registrado por otro aviso: no se repite.`);
+      return false;
     }
     this.abandonedCarts.markRecovered([notes.buyerEmail as string | undefined, email, user?.email], order.number);
     this.logger.log(`Orden ${order.number} marcada como pagada.`);
+    return true;
   }
 
   private async writeSettlement(
@@ -142,10 +153,11 @@ export class PaymentsSettlementService {
     paymentId: string,
     notes: Record<string, unknown>,
     deductInventory: boolean,
-  ) {
-    await this.prisma.$transaction(async (tx) => {
+  ): Promise<boolean> {
+    // True si esta llamada registró el pago; false si ya estaba registrado.
+    return this.prisma.$transaction(async (tx) => {
       const existing = await tx.payment.findUnique({ where: { externalId: paymentId } });
-      if (existing?.status === 'CONFIRMED') return;
+      if (existing?.status === 'CONFIRMED') return false;
       if (deductInventory) {
         await this.inventory.deductWithClient(tx, this.inventoryItems(order), {
           orderId: order.id,
@@ -182,6 +194,7 @@ export class PaymentsSettlementService {
         where: { orderId: order.id },
         data: { status: 'CONVERTED' },
       });
+      return true;
     });
   }
 

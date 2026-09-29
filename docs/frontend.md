@@ -62,6 +62,8 @@ La tienda vivía en Tiendanube y Google todavía tiene indexadas sus URLs. `src/
 | `/<categoria>/` | `/catalogo?categoria=<categoria>` |
 | `/<categoria>/<marca>/` | `/catalogo?categoria=<categoria>&marca=<marca>` si la marca tiene productos en esa categoría; si no, sin marca |
 
+Los parámetros de campaña (`utm_*`, `fbclid`, `gclid`, `gbraid`, `wbraid`, `msclkid`, `ttclid`, `_gl`) pasan a la URL nueva (`withAttribution`); los demás de Tiendanube se descartan. Antes se perdían y el anuncio que traía la visita quedaba sin atribuir.
+
 La lógica está en `lib/legacyUrls.ts` (pura, con tests en `lib/legacyUrls.test.ts` — correr con `npm test`). Si aparece otra categoría vieja de Tiendanube dando 404, sumarla en `LEGACY_CATEGORY_SLUGS` **y** en el `matcher` del middleware.
 
 ## SEO y datos para compartir

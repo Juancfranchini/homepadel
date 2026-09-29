@@ -27,10 +27,10 @@ export class CreateOrderDto {
   @ApiProperty() @IsEmail() buyerEmail: string;
   @ApiProperty() @IsString() @MinLength(8) buyerPhone: string;
   @ApiProperty() @IsString() @MinLength(2) buyerName: string;
-  @ApiPropertyOptional({ enum: ['correo_argentino', 'retiro_local', 'flex'] })
+  @ApiPropertyOptional({ enum: ['correo_argentino', 'retiro_local', 'flex', 'andreani'] })
   @IsOptional()
-  @IsIn(['correo_argentino', 'retiro_local', 'flex'])
-  carrier?: 'correo_argentino' | 'retiro_local' | 'flex';
+  @IsIn(['correo_argentino', 'retiro_local', 'flex', 'andreani'])
+  carrier?: 'correo_argentino' | 'retiro_local' | 'flex' | 'andreani';
   // Localidad de entrega: con Envío Flex define la zona y el precio.
   @ApiPropertyOptional() @IsOptional() @IsString() @MaxLength(100) city?: string;
   // Bolsas de regalo pedidas; el servidor las limita a las unidades compradas.

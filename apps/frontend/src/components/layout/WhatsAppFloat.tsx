@@ -1,9 +1,22 @@
 'use client';
 
 import { useSiteSettings, buildWhatsappUrl } from '@/hooks/useSiteSettings';
+import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { trackMetaEvent } from '@/lib/metaPixel';
+import { useCartStore } from '@/store/cartStore';
+import { CartItem } from '@/types';
 
 const MENSAJE = 'Hola! Tengo una consulta sobre un producto de Home Pádel.';
+
+/** Desde el carrito el mensaje ya lleva lo que tiene cargado, para no tener que repetirlo. */
+function mensajeDelCarrito(items: CartItem[]): string {
+  const lineas = items.map((item) => {
+    const variante = [item.variantSize, item.variantColor, item.variantDimensions].filter(Boolean).join(' / ');
+    return '- ' + item.quantity + ' x ' + item.product.name + (variante ? ' (' + variante + ')' : '');
+  });
+  return ['Hola! Tengo una consulta sobre mi carrito:', ...lineas].join('\n');
+}
 
 /**
  * Botón flotante de WhatsApp, visible en todo el sitio.
@@ -11,7 +24,13 @@ const MENSAJE = 'Hola! Tengo una consulta sobre un producto de Home Pádel.';
  */
 export default function WhatsAppFloat() {
   const settings = useSiteSettings();
-  const url = buildWhatsappUrl(settings.whatsapp || settings.phone, MENSAJE);
+  const enCarrito = usePathname() === '/carrito';
+  const items = useCartStore((s) => s.items);
+  // El carrito vive en el navegador: hasta montar se usa el mensaje genérico, igual que en el servidor.
+  const [montado, setMontado] = useState(false);
+  useEffect(() => setMontado(true), []);
+  const conCarrito = montado && enCarrito && items.length > 0;
+  const url = buildWhatsappUrl(settings.whatsapp || settings.phone, conCarrito ? mensajeDelCarrito(items) : MENSAJE);
   if (!url) return null;
 
   return (
@@ -20,7 +39,10 @@ export default function WhatsAppFloat() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Escribinos por WhatsApp"
-      onClick={() => trackMetaEvent('Contact', { content_type: 'whatsapp_flotante' })}
+      // Contact, nunca Purchase: la venta por WhatsApp se registra al cobrarla.
+      onClick={() => trackMetaEvent('Contact', conCarrito
+        ? { content_type: 'whatsapp_carrito', content_ids: items.map((i) => i.product.id) }
+        : { content_type: 'whatsapp_flotante' })}
       className="fixed bottom-5 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg shadow-black/40 transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#25D366] sm:bottom-6 sm:right-6"
     >
       <svg viewBox="0 0 32 32" width="30" height="30" fill="currentColor" aria-hidden="true">

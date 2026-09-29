@@ -82,7 +82,7 @@ export default function TarifaEnvioPage() {
         <Link href="/configuracion" className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"><ArrowLeft className="w-4 h-4" /></Link>
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><Banknote className="w-5 h-5 text-[#C8FF00]" />Tarifas de envío</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Correo Argentino (tarifa plana) y Envío Flex (por zona). Andreani y OCA se coordinan por WhatsApp y no usan estos importes.</p>
+          <p className="text-gray-500 text-sm mt-0.5">Correo Argentino (tarifa plana) y Envío Flex (por zona). Andreani es gratis desde el mismo monto que Correo Argentino; por debajo, igual que OCA, se coordina por WhatsApp.</p>
         </div>
       </div>
 

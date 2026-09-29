@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { CheckCircle, Clock, Loader2, XCircle } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { limpiarBorrador } from './useCheckoutDraft';
+import { olvidarIntento } from './intentoCheckout';
 import { Resultado, useOrderOutcome } from './useOrderOutcome';
 
 const TEXTOS: Record<Exclude<Resultado, 'cargando'>, { titulo: string; detalle: string; borde: string }> = {
@@ -50,7 +51,7 @@ export default function CheckoutOutcome({ porDefecto }: { porDefecto: Resultado 
   // El carrito nunca se vaciaba al pagar con Mercado Pago: quien volvía se
   // encontraba con todo adentro y podía terminar pagando dos veces.
   useEffect(() => {
-    if (cobrado) { clearCart(); limpiarBorrador(); }
+    if (cobrado) { clearCart(); limpiarBorrador(); olvidarIntento(); }
   }, [cobrado, clearCart]);
 
   // La compra no se informa a Meta desde acá: la manda el servidor cuando

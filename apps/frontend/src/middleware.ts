@@ -5,6 +5,7 @@ import {
   type BrandCandidate,
   type LegacyLookups,
   type ProductCandidate,
+  withAttribution,
 } from '@/lib/legacyUrls';
 
 const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api').replace(/\/+$/, '');
@@ -51,7 +52,8 @@ export async function middleware(request: NextRequest) {
     console.error('No se pudo resolver la URL vieja ' + request.nextUrl.pathname + ':', err);
     return '/catalogo';
   });
-  return NextResponse.redirect(new URL(destination, request.nextUrl), 308);
+  // Sin los utm/fbclid/gclid el anuncio que trajo la visita pierde la atribución.
+  return NextResponse.redirect(new URL(withAttribution(destination, request.nextUrl.search), request.nextUrl), 308);
 }
 
 export const config = {

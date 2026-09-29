@@ -19,6 +19,8 @@ interface Props {
   errors: FieldErrors<CheckoutFormData>;
   selectedMethod: CheckoutFormData['shippingMethod'];
   correoCost: number;
+  /** Compra desde el monto de envío gratis: Andreani también es gratis y se paga online. */
+  andreaniGratis: boolean;
   storeAddress?: string;
   flex: CheckoutFlex;
   direcciones?: DireccionGuardada[];
@@ -33,8 +35,9 @@ const SHIPPING_OPTIONS: { value: CheckoutFormData['shippingMethod']; label: stri
   { value: 'oca', label: 'OCA', detail: 'Costo a coordinar por WhatsApp' },
 ];
 
-function shippingOptionDetail(option: { value: CheckoutFormData['shippingMethod']; detail: string }, correoCost: number, flex: CheckoutFlex): string {
+function shippingOptionDetail(option: { value: CheckoutFormData['shippingMethod']; detail: string }, correoCost: number, flex: CheckoutFlex, andreaniGratis: boolean): string {
   if (option.value === 'correo_argentino') return correoCost === 0 ? 'Envío gratis' : formatPrice(correoCost);
+  if (option.value === 'andreani' && andreaniGratis) return 'Envío gratis';
   if (option.value === 'flex') {
     if (flex.zona) return `${formatPrice(flex.zona.precio)} · zona ${flex.zona.zona}`;
     const desde = Math.min(...flex.info.zonas.map((z) => z.precio));
@@ -44,7 +47,7 @@ function shippingOptionDetail(option: { value: CheckoutFormData['shippingMethod'
   return option.detail;
 }
 
-export default function CheckoutShippingFields({ register, errors, selectedMethod, correoCost, storeAddress, flex, direcciones = [], onUsarDireccion = () => {} }: Props) {
+export default function CheckoutShippingFields({ register, errors, selectedMethod, correoCost, andreaniGratis, storeAddress, flex, direcciones = [], onUsarDireccion = () => {} }: Props) {
   const esRetiro = selectedMethod === 'retiro_local';
   const opciones = SHIPPING_OPTIONS.filter((option) => option.value !== 'flex' || flex.info.activo);
 
@@ -62,11 +65,11 @@ export default function CheckoutShippingFields({ register, errors, selectedMetho
             <label key={option.value} className={'rounded-xl border p-3 cursor-pointer transition-colors ' + (selectedMethod === option.value ? 'border-[#B7D31A] bg-[#B7D31A]/5' : 'border-chip hover:border-[#B7D31A]/30')}>
               <input {...register('shippingMethod')} type="radio" value={option.value} className="sr-only" />
               <span className="block text-sm font-bold text-fg">{option.label}</span>
-              <span className="block text-[11px] text-fg-muted mt-1">{shippingOptionDetail(option, correoCost, flex)}</span>
+              <span className="block text-[11px] text-fg-muted mt-1">{shippingOptionDetail(option, correoCost, flex, andreaniGratis)}</span>
             </label>
           ))}
         </div>
-        {(selectedMethod === 'andreani' || selectedMethod === 'oca') && (
+        {(selectedMethod === 'oca' || (selectedMethod === 'andreani' && !andreaniGratis)) && (
           <p className="text-xs text-amber-300 light:text-amber-700 mt-3">No se realizará ningún cobro: enviaremos el detalle del pedido por WhatsApp para coordinar el costo.</p>
         )}
       </div>

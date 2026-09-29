@@ -7,6 +7,7 @@ import { formatPrice } from '@/lib/utils';
 import { getItemKey } from '@/store/cartStore';
 import CouponField from '@/components/cart/CouponField';
 import BolsaRegaloOption from '@/components/cart/BolsaRegaloOption';
+import { cuotasPara, useConfigCuotas } from '@/lib/cuotas';
 import type { CouponState } from '@/hooks/useCoupon';
 import CheckoutSummaryItem from './CheckoutSummaryItem';
 
@@ -35,6 +36,9 @@ export default function CheckoutOrderSummary({
 }: Props) {
   const vacio = items.length === 0;
   const { discount, couponCode } = coupon;
+  // Cuotas sin interés que ofrece Mercado Pago para esta compra, con la misma regla que el servidor.
+  const configCuotas = useConfigCuotas();
+  const cuotasMercadoPago = configCuotas.activo ? cuotasPara(subtotal - discount, configCuotas) : 0;
 
   return (
     <div className="lg:col-span-1">
@@ -76,6 +80,9 @@ export default function CheckoutOrderSummary({
           <div className="flex justify-between font-black text-base pt-2 border-t border-line text-fg"><span>{shippingToCoordinate || shippingPending ? 'Total sin envío' : 'Total'}</span><span>{formatPrice(total)}</span></div>
         </div>
 
+        {paymentMethod === 'mercadopago' && cuotasMercadoPago > 1 && !shippingToCoordinate && (
+          <p className="text-xs text-brand-fg font-semibold text-center mt-3">Hasta {cuotasMercadoPago} cuotas sin interés de {formatPrice(Math.ceil(total / cuotasMercadoPago))} con Mercado Pago</p>
+        )}
         {orderError && <p className="text-red-500 light:text-red-600 text-xs text-center mt-3">{orderError}</p>}
 
         <button type="submit" disabled={isSubmitting || vacio}

@@ -47,7 +47,7 @@ export default function VariantPropertiesSection({ register, hasSize, hasColor, 
           <div className="grid grid-cols-[1fr_auto] gap-2 mt-1">
             <input type="number" step="any" disabled={!hasWeight} {...register('weight')} className={inputClass} placeholder="Peso" />
             <select {...register('weightUnit')} className={inputClass}>
-              {['mg', 'g', 'kg', 'lb'].map((unit) => <option key={unit} value={unit}>{unit}</option>)}
+              {['g', 'kg', 'lb'].map((unit) => <option key={unit} value={unit}>{unit}</option>)}
             </select>
           </div>
         </div>}

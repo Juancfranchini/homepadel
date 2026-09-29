@@ -8,6 +8,7 @@ import {
   ValidateNested,
   Min,
   MaxLength,
+  Matches,
   IsInt,
   Max,
 } from 'class-validator';
@@ -45,7 +46,7 @@ class ShippingDto {
   @IsOptional() @IsString() @MaxLength(100) province?: string;
   @IsOptional() @IsString() @MaxLength(20) postalCode?: string;
   @IsString() @MaxLength(40) phone: string;
-  @IsOptional() @IsIn(['correo_argentino', 'retiro_local', 'flex']) carrier?: 'correo_argentino' | 'retiro_local' | 'flex';
+  @IsOptional() @IsIn(['correo_argentino', 'retiro_local', 'flex', 'andreani']) carrier?: 'correo_argentino' | 'retiro_local' | 'flex' | 'andreani';
 }
 
 export class CreatePreferenceDto {
@@ -80,6 +81,9 @@ export class CreatePreferenceDto {
 
   // Bolsas de regalo pedidas; el servidor las limita a las unidades compradas.
   @ApiPropertyOptional() @IsOptional() @IsInt() @Min(0) @Max(MAX_BOLSAS_REGALO) bolsasRegalo?: number;
+
+  // Id fijo del intento de compra en el navegador: reintentar no crea otro pedido (ver checkout-intento.ts).
+  @ApiPropertyOptional() @IsOptional() @IsString() @MaxLength(64) @Matches(/^[\w-]+$/) checkoutId?: string;
 
   // Cookies del Pixel del navegador, para informar la compra a Meta cuando Mercado Pago confirme el pago.
   @ApiPropertyOptional() @IsOptional() @ValidateNested() @Type(() => MetaNavegadorDto) meta?: MetaNavegadorDto;

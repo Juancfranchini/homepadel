@@ -271,7 +271,7 @@ export class OrdersService {
           createdById: salesLink?.sellerId,
           inventoryStatus: resolvedItems.some((item) => !item.isMadeToOrder) ? 'DEDUCTED' : 'NONE',
           soldAt: new Date(),
-          address: dto.carrier === 'flex' ? etiquetaFlex(dto.city) + dto.address : dto.address,
+          address: dto.carrier === 'flex' ? etiquetaFlex(dto.city) + dto.address : dto.carrier === 'andreani' ? 'Andreani — ' + dto.address : dto.address,
           subtotal: input.subtotal,
           total: input.total,
           shipping: input.shipping,

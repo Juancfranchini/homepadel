@@ -6,6 +6,7 @@ import { formatPrice, getDiscountPercent } from '@/lib/utils';
 import { useShippingRates } from '@/hooks/useShippingRates';
 import { formatDiscountPercent, getInstallmentTerms } from '@/lib/productPricing';
 import PrecioTransferencia from '@/components/ui/PrecioTransferencia';
+import { useConfigCuotas } from '@/lib/cuotas';
 
 interface Props {
   product: Product;
@@ -23,7 +24,8 @@ interface Props {
 export default function ProductCardPricing({ product, isMadeToOrder, hasDiscount }: Props) {
   const { freeShippingThreshold, isLoaded } = useShippingRates();
 
-  const installments = getInstallmentTerms(product);
+  const cuotas = useConfigCuotas();
+  const installments = getInstallmentTerms(product, cuotas);
   const discountPct = hasDiscount ? getDiscountPercent(product.price, product.effectivePrice) : 0;
 
   // El umbral se administra desde el backoffice y el servidor recalcula el costo

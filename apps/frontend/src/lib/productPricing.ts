@@ -1,4 +1,5 @@
 import { CartItem, Product } from '@/types';
+import { ConfigCuotas, cuotasPara } from './cuotas';
 
 type InstallmentProduct = Pick<Product, 'effectivePrice' | 'installments' | 'hasInstallmentsInterest' | 'installmentsInterest'>;
 
@@ -8,7 +9,16 @@ export interface InstallmentTerms {
   interestText: string;
 }
 
-export function getInstallmentTerms(product: InstallmentProduct): InstallmentTerms | null {
+/**
+ * Cuotas a mostrar para un producto. Con las cuotas por monto activas
+ * (`config`), mandan esas: sin interés, según el precio. Si no, las cargadas
+ * en el producto.
+ */
+export function getInstallmentTerms(product: InstallmentProduct, config?: ConfigCuotas): InstallmentTerms | null {
+  if (config?.activo) {
+    const cuotas = cuotasPara(product.effectivePrice, config);
+    return cuotas > 1 ? { count: cuotas, amount: Math.ceil(product.effectivePrice / cuotas), interestText: 'sin interés' } : null;
+  }
   const count = Number(product.installments || 0);
   if (!Number.isInteger(count) || count <= 0) return null;
   const interest = product.hasInstallmentsInterest ? Math.max(0, Number(product.installmentsInterest || 0)) : 0;

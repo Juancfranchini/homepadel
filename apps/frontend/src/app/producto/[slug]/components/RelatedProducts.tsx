@@ -8,6 +8,7 @@ import { formatPrice, getDiscountPercent, getImageUrl } from '@/lib/utils';
 import { formatDiscountPercent, getInstallmentTerms } from '@/lib/productPricing';
 import PrecioTransferencia from '@/components/ui/PrecioTransferencia';
 import { useShippingRates } from '@/hooks/useShippingRates';
+import { useConfigCuotas } from '@/lib/cuotas';
 
 interface Props {
   products: Product[];
@@ -16,6 +17,7 @@ interface Props {
 export default function RelatedProducts({ products }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { freeShippingThreshold, isLoaded } = useShippingRates();
+  const cuotas = useConfigCuotas();
 
   if (products.length === 0) return null;
 
@@ -36,7 +38,7 @@ export default function RelatedProducts({ products }: Props) {
               const relDiscount = !relMadeToOrder && p.effectivePrice < p.price;
               const discountPct = relDiscount ? getDiscountPercent(p.price, p.effectivePrice) : 0;
               const displayPrice = relMadeToOrder ? p.price : p.effectivePrice;
-              const installments = relMadeToOrder ? null : getInstallmentTerms(p);
+              const installments = relMadeToOrder ? null : getInstallmentTerms(p, cuotas);
               const freeShipping = isLoaded && !relMadeToOrder && displayPrice >= freeShippingThreshold;
               return (
                 <Link key={p.id} href={'/producto/' + p.slug}

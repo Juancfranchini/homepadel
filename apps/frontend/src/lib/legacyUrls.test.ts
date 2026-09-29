@@ -7,6 +7,7 @@ import {
   pickProductMatch,
   resolveLegacyDestination,
   searchText,
+  withAttribution,
   type LegacyLookups,
   type ProductCandidate,
 } from './legacyUrls.ts';
@@ -149,5 +150,21 @@ describe('resolveLegacyDestination', () => {
       throw new Error('caída');
     });
     assert.equal(await resolveLegacyDestination(parseLegacyPath('/paletas/nox/')!, caido), '/catalogo?categoria=paletas');
+  });
+});
+
+describe('withAttribution', () => {
+  it('conserva utm, fbclid y gclid al redirigir', () => {
+    assert.equal(
+      withAttribution('/producto/nox-at10', '?utm_source=ig&utm_campaign=lanz&fbclid=AbC123'),
+      '/producto/nox-at10?utm_source=ig&utm_campaign=lanz&fbclid=AbC123',
+    );
+    assert.equal(withAttribution('/catalogo?q=hack+3', '?gclid=G1'), '/catalogo?q=hack+3&gclid=G1');
+  });
+
+  it('descarta los parámetros propios de Tiendanube y no pisa los del destino', () => {
+    assert.equal(withAttribution('/catalogo?categoria=paletas', '?sort_by=price&page=2'), '/catalogo?categoria=paletas');
+    assert.equal(withAttribution('/catalogo?q=nox', '?q=otra&utm_medium=cpc'), '/catalogo?q=nox&utm_medium=cpc');
+    assert.equal(withAttribution('/producto/x', ''), '/producto/x');
   });
 });
