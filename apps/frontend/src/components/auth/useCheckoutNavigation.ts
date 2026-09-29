@@ -1,39 +1,23 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { useCartStore } from '@/store/cartStore';
 import { avisarInicioDeCheckout } from '@/lib/inicioCheckout';
-import { User } from '@/types';
 
+/**
+ * "Finalizar compra" lleva directo al checkout, con o sin sesión: se compra
+ * como invitado. Antes pedía el login acá y parte de la gente se iba.
+ */
 export function useCheckoutNavigation(beforeNavigate?: () => void) {
-  const { user, setAuth } = useAuthStore();
-  const [authOpen, setAuthOpen] = useState(false);
+  const { user } = useAuthStore();
   const router = useRouter();
 
-  const goToCheckout = () => {
+  const handleCheckout = () => {
+    avisarInicioDeCheckout(useCartStore.getState().items, user ? { email: user.email, phone: user.phone } : undefined);
     beforeNavigate?.();
     router.push('/checkout');
   };
 
-  const handleCheckout = () => {
-    // Antes de pedir el login: quien se va en esa pantalla también empezó a comprar.
-    avisarInicioDeCheckout(useCartStore.getState().items, user ? { email: user.email, phone: user.phone } : undefined);
-    if (user) goToCheckout();
-    else setAuthOpen(true);
-  };
-
-  const handleAuthenticated = (authenticatedUser: User, token: string) => {
-    setAuth(authenticatedUser, token);
-    setAuthOpen(false);
-    goToCheckout();
-  };
-
-  return {
-    authOpen,
-    closeAuth: () => setAuthOpen(false),
-    handleCheckout,
-    handleAuthenticated,
-  };
+  return { handleCheckout };
 }

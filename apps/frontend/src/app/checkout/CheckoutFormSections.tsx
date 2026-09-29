@@ -21,12 +21,14 @@ interface Props {
   flex: CheckoutFlex;
   direcciones: DireccionGuardada[];
   onUsarDireccion: (d: DireccionGuardada) => void;
+  /** Sin sesión: abre el ingreso opcional (se puede comprar como invitado). */
+  onIngresar?: () => void;
 }
 
 export default function CheckoutFormSections(props: Props) {
   return (
     <div className="lg:col-span-2 space-y-6">
-      <CheckoutPersonalDataFields register={props.register} errors={props.errors} />
+      <CheckoutPersonalDataFields register={props.register} errors={props.errors} onIngresar={props.onIngresar} />
       <CheckoutShippingFields register={props.register} errors={props.errors} selectedMethod={props.selectedShipping} correoCost={props.correoCost} andreaniGratis={props.andreaniGratis} storeAddress={props.storeAddress} flex={props.flex} direcciones={props.direcciones} onUsarDireccion={props.onUsarDireccion} />
       {!props.shippingToCoordinate ? (
         <CheckoutPaymentMethodFields register={props.register} errors={props.errors} selectedPayment={props.selectedPayment} mercadopago={props.mercadopago} transferencia={props.transferencia} />

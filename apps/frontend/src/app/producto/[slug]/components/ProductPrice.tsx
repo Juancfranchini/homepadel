@@ -84,7 +84,7 @@ export default function ProductPrice({
         </>
       )}
 
-      {hasFreeShipping && <p className="flex items-center gap-1.5 text-sm font-bold text-brand-fg"><Truck size={16} />Envío gratis con Correo Argentino</p>}
+      {hasFreeShipping && <p className="flex items-center gap-1.5 text-sm font-bold text-brand-fg"><Truck size={16} />Envío gratis por Correo Argentino o Andreani</p>}
 
       {/* Ver medios de pago */}
       {!isMadeToOrder && (

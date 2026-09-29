@@ -65,7 +65,7 @@ export default function CheckoutPage() {
 
   useCheckoutDraft(watch, reset, transferencia.active === true);
   useInitiateCheckout(items, user ? { email: user.email, phone: user.phone } : undefined);
-  const checkoutAuth = useCheckoutAuthGate(user, setAuth, handleSubmit, onSubmit);
+  const checkoutAuth = useCheckoutAuthGate(setAuth, handleSubmit, onSubmit, (u) => { setValue('name', watch('name') || u.name || ''); setValue('email', watch('email') || u.email); });
 
   // Queda registrado el carrito de quien deja su email y no termina la compra,
   // para que la tienda pueda recuperarlo desde el backoffice.
@@ -106,7 +106,7 @@ export default function CheckoutPage() {
               register={register} errors={errors} selectedShipping={selectedShipping} selectedPayment={selectedPayment}
               correoCost={correoCost} andreaniGratis={andreaniGratis} shippingToCoordinate={shippingToCoordinate}
               mercadopago={mercadopago} transferencia={transferencia}
-              storeAddress={settings.address} flex={flex}
+              storeAddress={settings.address} flex={flex} onIngresar={user ? undefined : checkoutAuth.openAuth}
               direcciones={guardadas.direcciones} onUsarDireccion={(d) => guardadas.usar(d, watch('phone'))}
             />
 

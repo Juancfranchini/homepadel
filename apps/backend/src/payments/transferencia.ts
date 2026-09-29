@@ -57,15 +57,25 @@ export function mediosDePagoPublicos<T extends { data?: unknown }>(section: T): 
  * sin tope, alguien podría dejar productos bloqueados con pedidos que nunca paga).
  * Devuelve los datos para transferir.
  */
-export async function exigirTransferencia(prisma: PrismaService, userId?: string): Promise<DatosTransferencia> {
+export async function exigirTransferencia(
+  prisma: PrismaService,
+  userId?: string,
+  buyerEmail?: string,
+): Promise<DatosTransferencia> {
   const section = await prisma.siteSection.findUnique({ where: { key: 'payment_methods' } });
   if (!transferenciaHabilitada(section?.data)) {
     throw new BadRequestException('La transferencia bancaria no está habilitada. Usá Mercado Pago.');
   }
-  if (userId) {
+  // Se compra también como invitado: el tope va por cuenta y por el mail del
+  // pedido (así es como se guarda: JSON.stringify de los datos del comprador).
+  const quien = [
+    ...(userId ? [{ userId }] : []),
+    ...(buyerEmail ? [{ notes: { contains: JSON.stringify({ buyerEmail: buyerEmail.trim() }).slice(1, -1), mode: 'insensitive' as const } }] : []),
+  ];
+  if (quien.length > 0) {
     const pendientes = await prisma.order.count({
       where: {
-        userId,
+        OR: quien,
         status: 'PENDING',
         createdAt: { gte: new Date(Date.now() - VENTANA_PENDIENTES_MS) },
         notes: { contains: '"paymentMethod":"transfer"' },

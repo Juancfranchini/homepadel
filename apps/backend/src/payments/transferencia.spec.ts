@@ -57,4 +57,13 @@ describe('Transferencia bancaria', () => {
     await expect(exigirTransferencia(fakePrisma(CONFIG, 2), 'u1')).rejects.toBeInstanceOf(BadRequestException);
     await expect(exigirTransferencia(fakePrisma(CONFIG, 1), 'u1')).resolves.toBeTruthy();
   });
+
+  it('comprando como invitado, el tope va por el mail del pedido', async () => {
+    process.env.ENABLE_BANK_TRANSFER = 'true';
+    const prisma = fakePrisma(CONFIG, 2);
+    await expect(exigirTransferencia(prisma, undefined, 'Invitado@Mail.com')).rejects.toBeInstanceOf(BadRequestException);
+    expect((prisma.order.count as jest.Mock).mock.calls[0][0].where.OR).toEqual([
+      { notes: { contains: '"buyerEmail":"Invitado@Mail.com"', mode: 'insensitive' } },
+    ]);
+  });
 });

@@ -5,6 +5,7 @@ import { Minus, Plus, X } from 'lucide-react';
 import { CartItem } from '@/types';
 import { getItemKey } from '@/store/cartStore';
 import { formatPrice, getImageUrl } from '@/lib/utils';
+import PrecioTransferencia from '@/components/ui/PrecioTransferencia';
 
 interface Props {
   item: CartItem;
@@ -47,6 +48,7 @@ export default function CarritoItemRow({ item, onRemove, onUpdateQuantity }: Pro
           <span className="text-sm font-black text-fg">{formatPrice(itemPrice)}</span>
           {hasDiscount && <span className="text-xs text-fg-muted line-through">{formatPrice(product.price)}</span>}
         </div>
+        <PrecioTransferencia product={product} />
         {(variantSize || variantColor || variantDimensions) && (
           <p className="text-[10px] text-fg-muted mt-1">
             {variantSize && 'Talle: ' + variantSize}

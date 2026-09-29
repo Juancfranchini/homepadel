@@ -10,15 +10,22 @@ const errorInputClass = 'w-full bg-field border border-red-500/50 rounded-lg px-
 interface Props {
   register: UseFormRegister<CheckoutFormData>;
   errors: FieldErrors<CheckoutFormData>;
+  onIngresar?: () => void;
 }
 
-export default function CheckoutPersonalDataFields({ register, errors }: Props) {
+export default function CheckoutPersonalDataFields({ register, errors, onIngresar }: Props) {
   return (
     <div className="bg-card rounded-2xl border border-[#B7D31A]/20 p-6">
       <div className="flex items-center gap-3 mb-5">
         <div className="w-8 h-8 bg-[#B7D31A] rounded-full flex items-center justify-center text-[#050606] font-black text-sm">1</div>
         <h2 className="font-black text-base uppercase tracking-wide text-fg flex items-center gap-2"><User size={16} /> Datos personales</h2>
       </div>
+      {onIngresar && (
+        <p className="text-xs text-fg-muted mb-4">
+          Podés comprar sin crear una cuenta.{' '}
+          <button type="button" onClick={onIngresar} className="font-semibold text-fg underline underline-offset-2 hover:text-[#B7D31A]">¿Ya tenés cuenta? Ingresá</button>
+        </p>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="sm:col-span-2">
           <label htmlFor="checkout-name" className="block text-xs font-semibold text-fg-muted uppercase tracking-wide mb-1">Nombre completo *</label>

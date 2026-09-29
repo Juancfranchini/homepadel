@@ -5,10 +5,14 @@ import { formatPrice } from '@/lib/utils';
 import CouponField from '@/components/cart/CouponField';
 import { cuotasPara, useConfigCuotas } from '@/lib/cuotas';
 import type { CouponState } from '@/hooks/useCoupon';
+import { CartItem } from '@/types';
+import CarritoTotalTransferencia from './CarritoTotalTransferencia';
 
 interface Props {
   coupon: CouponState;
+  items: CartItem[];
   subtotal: number;
+  flatRate: number;
   shippingCost: number;
   freeShippingThreshold: number;
   total: number;
@@ -16,7 +20,7 @@ interface Props {
 }
 
 export default function CarritoSummary({
-  coupon, subtotal, shippingCost, freeShippingThreshold, total, onCheckout,
+  coupon, items, subtotal, flatRate, shippingCost, freeShippingThreshold, total, onCheckout,
 }: Props) {
   const { discount } = coupon;
   const configCuotas = useConfigCuotas();
@@ -37,6 +41,7 @@ export default function CarritoSummary({
           </div>
           <div className="flex justify-between font-black text-base pt-2 border-t border-line text-fg"><span>Total</span><span>{formatPrice(total)}</span></div>
         </div>
+        <CarritoTotalTransferencia items={items} couponCode={coupon.couponCode} totalLista={total} flatRate={flatRate} freeShippingThreshold={freeShippingThreshold} />
 
         <button type="button" onClick={onCheckout} className="mt-5 w-full flex items-center justify-center gap-2 bg-[#B7D31A] text-[#050606] py-4 rounded-xl font-black text-sm uppercase tracking-wider hover:bg-[#c8e81f] transition-colors">
           Finalizar compra <ArrowRight size={15} />

@@ -4,7 +4,9 @@ import { clienteDesdeRequest } from '../common/meta/meta-cliente';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../common/guards/optional-jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { Permissions } from '../common/decorators/permissions.decorator';
@@ -37,9 +39,13 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard, PermissionsGuard) @Permissions(POS_PERMISSIONS.SELL)
   findOne(@Param('id') id: string) { return this.ordersService.findOne(id); }
 
+  // Se puede comprar como invitado (la sesión es opcional). Cada pedido por
+  // transferencia descuenta stock: por eso el límite por IP y el tope de
+  // pedidos sin pagar por cuenta o mail (exigirTransferencia).
   @Post()
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   create(@Body() dto: CreateOrderDto, @Req() req: Request, @CurrentUser() user?: any) {
     return this.ordersService.create(dto, user?.id, clienteDesdeRequest(req, dto.meta));
   }
