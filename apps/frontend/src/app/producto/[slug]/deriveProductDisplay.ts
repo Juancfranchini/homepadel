@@ -1,5 +1,6 @@
 import { Product } from '@/types';
 import { getDiscountPercent } from '@/lib/utils';
+import { ConfigCuotas, cuotasPara } from '@/lib/cuotas';
 
 export interface VideoIncrustado {
   url: string;
@@ -56,7 +57,7 @@ function getVideoEmbedUrl(url?: string): VideoIncrustado | null {
   return yaIncrustable ? { url, vertical: false } : null;
 }
 
-export function deriveProductDisplay(product: Product, selectedVariant: any, activeProductVariants: any[]) {
+export function deriveProductDisplay(product: Product, selectedVariant: any, activeProductVariants: any[], configCuotas?: ConfigCuotas) {
   const hasDiscount = !product.isMadeToOrder && product.effectivePrice < product.price;
   const discountPct = hasDiscount ? getDiscountPercent(product.price, product.effectivePrice) : 0;
   const displayPrice = product.isMadeToOrder ? product.price : product.effectivePrice;
@@ -71,9 +72,11 @@ export function deriveProductDisplay(product: Product, selectedVariant: any, act
       ? 0
       : product.stock;
 
-  const installments = product.installments || 0;
-  const hasInstallmentsInterest = product.hasInstallmentsInterest || false;
-  const installmentsInterest = product.installmentsInterest || 0;
+  // Con cuotas por monto activas mandan esas (sin interés, según el precio): lo mismo que se ofrece al pagar.
+  const cuotasPorMonto = configCuotas?.activo ? cuotasPara(displayPrice, configCuotas) : 0;
+  const installments = configCuotas?.activo ? (cuotasPorMonto > 1 ? cuotasPorMonto : 0) : product.installments || 0;
+  const hasInstallmentsInterest = configCuotas?.activo ? false : product.hasInstallmentsInterest || false;
+  const installmentsInterest = configCuotas?.activo ? 0 : product.installmentsInterest || 0;
   const cuota = installments > 0 ? Math.ceil((displayPrice * (1 + (hasInstallmentsInterest ? installmentsInterest / 100 : 0))) / installments) : 0;
   const transferPrice = product.transferPrice && product.transferPrice > 0 ? product.transferPrice : 0;
   const paymentMethods: string[] = Array.isArray(product.paymentMethods) ? product.paymentMethods.filter((m): m is string => typeof m === 'string') : [];

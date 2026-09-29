@@ -6,6 +6,7 @@ import { createOrder, createPaymentPreference } from '@/lib/api';
 import { buildWhatsappUrl } from '@/hooks/useSiteSettings';
 import { formatPrice } from '@/lib/utils';
 import { idsDeMeta } from '@/lib/metaNavegador';
+import { idDeIntento, pedidoYaPagado } from './intentoCheckout';
 import { CheckoutFormData } from './checkoutSchema';
 
 export interface DatosTransferencia {
@@ -40,14 +41,18 @@ function mensajeDeError(err: unknown, porDefecto: string): string {
  * campos ("... should not exist"). Durante ese rato del despliegue se
  * reintenta sin él, para no frenar ninguna compra por esto.
  */
-async function conCookiesDelPixel<T>(enviar: (extra: { meta?: ReturnType<typeof idsDeMeta> }) => Promise<T>): Promise<T> {
+async function conCookiesDelPixel<T>(
+  enviar: (extra: { meta?: ReturnType<typeof idsDeMeta>; checkoutId?: string }) => Promise<T>,
+  checkoutId?: string,
+): Promise<T> {
   const meta = idsDeMeta();
-  if (Object.keys(meta).length === 0) return enviar({});
+  const extra = { ...(Object.keys(meta).length > 0 ? { meta } : {}), ...(checkoutId ? { checkoutId } : {}) };
+  if (Object.keys(extra).length === 0) return enviar({});
   try {
-    return await enviar({ meta });
+    return await enviar(extra);
   } catch (err) {
     const detalle = JSON.stringify((err as { response?: { data?: unknown } })?.response?.data ?? '');
-    if (/(property meta|meta\.property \w+) should not exist/.test(detalle)) return enviar({});
+    if (/(property (meta|checkoutId)|meta\.property \w+) should not exist/.test(detalle)) return enviar({});
     throw err;
   }
 }
@@ -60,6 +65,14 @@ interface Params {
   whatsapp?: string;
   /** Bolsas de regalo que van (ya limitadas a las unidades del carrito). */
   bolsasRegalo: number;
+  /** Andreani es gratis (compra desde el monto de envío gratis): se paga online en vez de coordinar. */
+  andreaniGratis: boolean;
+}
+
+/** Transportista que va al servidor. */
+function carrierDe(data: CheckoutFormData): 'retiro_local' | 'flex' | 'andreani' | 'correo_argentino' {
+  if (data.shippingMethod === 'retiro_local' || data.shippingMethod === 'flex' || data.shippingMethod === 'andreani') return data.shippingMethod;
+  return 'correo_argentino';
 }
 
 function buildOrderItems(items: CartItem[]) {
@@ -86,7 +99,7 @@ function buildShippingPayload(data: CheckoutFormData) {
     province: data.province,
     postalCode: data.postalCode,
     phone: data.phone,
-    carrier: data.shippingMethod === 'flex' ? ('flex' as const) : ('correo_argentino' as const),
+    carrier: carrierDe(data),
   };
 }
 
@@ -108,7 +121,7 @@ function shippingCoordinationMessage(data: CheckoutFormData, items: CartItem[], 
   ].join('\n');
 }
 
-export function useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart, whatsapp, bolsasRegalo }: Params) {
+export function useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart, whatsapp, bolsasRegalo, andreaniGratis }: Params) {
   const [orderError, setOrderError] = useState('');
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
@@ -128,13 +141,16 @@ export function useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart
         couponCode: couponCode || undefined,
         salesLinkToken: salesLinkToken || undefined,
         bolsasRegalo: bolsasRegalo || undefined,
-      }));
+      }), idDeIntento());
       if (pref?.init_point) {
         window.location.href = pref.init_point;
         return;
       }
       setOrderError('No se pudo iniciar el pago con Mercado Pago. Probá de nuevo.');
     } catch (err) {
+      // Ese carrito ya se pagó (por ejemplo, cerró Mercado Pago antes de volver): se muestra el pedido.
+      const pagado = pedidoYaPagado(err);
+      if (pagado) return window.location.assign('/checkout/success?order=' + encodeURIComponent(pagado));
       setOrderError(mensajeDeError(err, 'Error al conectar con Mercado Pago. Probá de nuevo.'));
     }
   };
@@ -152,7 +168,7 @@ export function useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart
         buyerName: data.name,
         couponCode: couponCode || undefined,
         salesLinkToken: salesLinkToken || undefined,
-        carrier: esRetiro ? 'retiro_local' : data.shippingMethod === 'flex' ? 'flex' : 'correo_argentino',
+        carrier: carrierDe(data),
         city: esRetiro ? undefined : data.city,
         bolsasRegalo: bolsasRegalo || undefined,
       }));
@@ -167,7 +183,7 @@ export function useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart
 
   const onSubmit = async (data: CheckoutFormData) => {
     setOrderError('');
-    const coordinaPorWhatsapp = data.shippingMethod === 'andreani' || data.shippingMethod === 'oca';
+    const coordinaPorWhatsapp = data.shippingMethod === 'oca' || (data.shippingMethod === 'andreani' && !andreaniGratis);
     if (coordinaPorWhatsapp) {
       const url = buildWhatsappUrl(whatsapp, shippingCoordinationMessage(data, items, couponCode, bolsasRegalo));
       if (!url) {

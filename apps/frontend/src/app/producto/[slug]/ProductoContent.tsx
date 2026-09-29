@@ -8,6 +8,7 @@ import { ProductoSkeleton, ProductoLoadError, ProductoNotFound } from './Product
 import { useProductVariants } from './useProductVariants';
 import { useProductoActions } from './useProductoActions';
 import { deriveProductDisplay } from './deriveProductDisplay';
+import { useConfigCuotas } from '@/lib/cuotas';
 import ProductGallery from './components/ProductGallery';
 import ProductDescription from './components/ProductDescription';
 import ProductInfoColumn from './ProductInfoColumn';
@@ -29,12 +30,13 @@ export default function ProductoContent({ initialProduct }: Props) {
   const { product, related, loading, error, retry, hasSizeGuide } = useProductoData(params.slug, initialProduct);
   const variants = useProductVariants(product);
   const actions = useProductoActions(product, variants.selectedVariant, variants.activeProductVariants);
+  const cuotas = useConfigCuotas();
 
   if (loading) return <ProductoSkeleton />;
   if (error) return <ProductoLoadError onRetry={retry} />;
   if (!product) return <ProductoNotFound />;
 
-  const display = deriveProductDisplay(product, variants.selectedVariant, variants.activeProductVariants);
+  const display = deriveProductDisplay(product, variants.selectedVariant, variants.activeProductVariants, cuotas);
 
   return (
     <div className="min-h-screen bg-page text-fg">

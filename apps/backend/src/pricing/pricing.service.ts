@@ -154,6 +154,12 @@ export class PricingService {
     if (carrier === 'flex') return this.costoFlex(data.flex, localidad);
     const flatRate = Number(data.flatRate ?? 4500);
     const threshold = Number(data.freeShippingThreshold ?? 100000);
+    // Andreani es gratis desde el mismo monto que Correo Argentino. Por debajo
+    // no hay tarifa cargada: se coordina por WhatsApp, no se cobra online.
+    if (carrier === 'andreani') {
+      if (subtotal >= threshold) return 0;
+      throw new BadRequestException('Andreani es gratis desde ' + threshold + '; por debajo de ese monto el costo se coordina por WhatsApp.');
+    }
     return subtotal >= threshold ? 0 : flatRate;
   }
 

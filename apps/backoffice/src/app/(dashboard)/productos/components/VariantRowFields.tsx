@@ -47,7 +47,7 @@ export function VariantWeight({ v, inputClass, onUpdate }: { v: VariantData; inp
       <div className="grid grid-cols-[1fr_auto] gap-1">
         <input type="number" min="0" step="any" value={v.weight ?? ''} onChange={(e) => onUpdate('weight', e.target.value === '' ? undefined : Number(e.target.value))} className={inputClass + ' !py-1.5'} placeholder="Peso" />
         <select value={v.weightUnit || 'kg'} onChange={(e) => onUpdate('weightUnit', e.target.value)} className={inputClass + ' !py-1.5'}>
-          {['mg', 'g', 'kg', 'lb'].map((unit) => <option key={unit} value={unit}>{unit}</option>)}
+          {['g', 'kg', 'lb'].map((unit) => <option key={unit} value={unit}>{unit}</option>)}
         </select>
       </div>
     </div>

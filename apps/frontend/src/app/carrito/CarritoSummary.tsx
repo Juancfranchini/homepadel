@@ -3,6 +3,7 @@
 import { ArrowRight } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
 import CouponField from '@/components/cart/CouponField';
+import { cuotasPara, useConfigCuotas } from '@/lib/cuotas';
 import type { CouponState } from '@/hooks/useCoupon';
 
 interface Props {
@@ -18,6 +19,8 @@ export default function CarritoSummary({
   coupon, subtotal, shippingCost, freeShippingThreshold, total, onCheckout,
 }: Props) {
   const { discount } = coupon;
+  const configCuotas = useConfigCuotas();
+  const cuotasMercadoPago = configCuotas.activo ? cuotasPara(subtotal - discount, configCuotas) : 0;
   return (
     <div className="lg:col-span-1">
       <div className="bg-card rounded-2xl border border-[#B7D31A]/20 p-6 sticky top-24">
@@ -39,7 +42,10 @@ export default function CarritoSummary({
           Finalizar compra <ArrowRight size={15} />
         </button>
 
-        <p className="text-fg-muted text-xs text-center mt-3">Correo Argentino gratis en compras superiores a {formatPrice(freeShippingThreshold)}. Andreani y OCA se coordinan por WhatsApp.</p>
+        {cuotasMercadoPago > 1 && (
+          <p className="text-xs text-brand-fg font-semibold text-center mt-3">Hasta {cuotasMercadoPago} cuotas sin interés de {formatPrice(Math.ceil(total / cuotasMercadoPago))} con Mercado Pago</p>
+        )}
+        <p className="text-fg-muted text-xs text-center mt-3">Envío gratis por Correo Argentino o Andreani en compras desde {formatPrice(freeShippingThreshold)}. OCA se coordina por WhatsApp.</p>
       </div>
     </div>
   );

@@ -12,6 +12,7 @@ import FeaturedProductCardImage from './FeaturedProductCardImage';
 import { useShippingRates } from '@/hooks/useShippingRates';
 import { formatDiscountPercent, getInstallmentTerms } from '@/lib/productPricing';
 import PrecioTransferencia from '@/components/ui/PrecioTransferencia';
+import { useConfigCuotas } from '@/lib/cuotas';
 
 export default function FeaturedProductCard({ product }: { product: Product }) {
   const addItem = useCartStore((s) => s.addItem);
@@ -24,7 +25,8 @@ export default function FeaturedProductCard({ product }: { product: Product }) {
   const hasDiscount = !isMadeToOrder && product.effectivePrice < product.price;
   const discountPct = hasDiscount ? getDiscountPercent(product.price, product.effectivePrice) : 0;
   const displayPrice = isMadeToOrder ? product.price : product.effectivePrice;
-  const installments = isMadeToOrder ? null : getInstallmentTerms(product);
+  const cuotas = useConfigCuotas();
+  const installments = isMadeToOrder ? null : getInstallmentTerms(product, cuotas);
   const freeShipping = isLoaded && !isMadeToOrder && displayPrice >= freeShippingThreshold;
 
   const handleAdd = (e: React.MouseEvent) => {

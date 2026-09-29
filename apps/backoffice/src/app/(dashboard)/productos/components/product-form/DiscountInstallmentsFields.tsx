@@ -19,6 +19,7 @@ export default function DiscountInstallmentsFields({ register, hasInstallmentsIn
           <option value="9">9 cuotas</option>
           <option value="12">12 cuotas</option>
         </select>
+        <p className="text-gray-400 text-xs mt-1">Si las cuotas por monto están activas (Configuración → Cuotas), la tienda y Mercado Pago usan esas y este valor no se tiene en cuenta.</p>
       </div>
 
       <div className="sm:col-span-2">

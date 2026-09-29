@@ -42,7 +42,6 @@ export default function CheckoutPage() {
   const { mercadopago, transferencia } = usePaymentMethods();
   const { flatRate, freeShippingThreshold } = useShippingRates();
   const settings = useSiteSettings();
-  const { onSubmit, orderError, orderSuccess, orderNumber, pedidoTransferencia } = useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart, whatsapp: settings.whatsapp || settings.phone, bolsasRegalo: bolsasEfectivas(bolsasRegalo, items) });
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, watch, reset, setValue } = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
@@ -60,11 +59,13 @@ export default function CheckoutPage() {
   // descuento al crear la orden o la preferencia de pago (P1/P2); esto nunca
   // es lo que se cobra de verdad.
   const correoCost = subtotal >= freeShippingThreshold ? 0 : flatRate;
+  // Andreani también es gratis desde ese monto; por debajo se coordina por WhatsApp.
+  const andreaniGratis = subtotal >= freeShippingThreshold;
+  const { onSubmit, orderError, orderSuccess, orderNumber, pedidoTransferencia } = useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart, whatsapp: settings.whatsapp || settings.phone, bolsasRegalo: bolsasEfectivas(bolsasRegalo, items), andreaniGratis });
 
   useCheckoutDraft(watch, reset, transferencia.active === true);
   useInitiateCheckout(items, user ? { email: user.email, phone: user.phone } : undefined);
   const checkoutAuth = useCheckoutAuthGate(user, setAuth, handleSubmit, onSubmit);
-
 
   // Queda registrado el carrito de quien deja su email y no termina la compra,
   // para que la tienda pueda recuperarlo desde el backoffice.
@@ -72,7 +73,7 @@ export default function CheckoutPage() {
   const selectedShipping = watch('shippingMethod');
   const flex = useCheckoutFlex(watch, setValue);
   const guardadas = useDireccionesCheckout(Boolean(user), setValue);
-  const shippingToCoordinate = selectedShipping === 'andreani' || selectedShipping === 'oca';
+  const shippingToCoordinate = selectedShipping === 'oca' || (selectedShipping === 'andreani' && !andreaniGratis);
   const shippingCost = selectedShipping === 'correo_argentino' ? correoCost : selectedShipping === 'flex' ? flex.zona?.precio ?? 0 : 0;
   const total = subtotal + shippingCost - discount;
 
@@ -103,7 +104,7 @@ export default function CheckoutPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <CheckoutFormSections
               register={register} errors={errors} selectedShipping={selectedShipping} selectedPayment={selectedPayment}
-              correoCost={correoCost} shippingToCoordinate={shippingToCoordinate}
+              correoCost={correoCost} andreaniGratis={andreaniGratis} shippingToCoordinate={shippingToCoordinate}
               mercadopago={mercadopago} transferencia={transferencia}
               storeAddress={settings.address} flex={flex}
               direcciones={guardadas.direcciones} onUsarDireccion={(d) => guardadas.usar(d, watch('phone'))}

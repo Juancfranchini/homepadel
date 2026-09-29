@@ -51,6 +51,13 @@ function construirServicio() {
         ordenesCreadas.push(args.data);
         return Promise.resolve(args.data);
       }),
+      findFirst: jest.fn().mockResolvedValue(null),
+      findUnique: jest.fn(({ where }: { where: { number: string } }) => Promise.resolve(ordenesCreadas.find((o) => o.number === where.number) ?? null)),
+      update: jest.fn(({ where, data }: { where: { number: string }; data: Record<string, unknown> }) => {
+        const orden = ordenesCreadas.find((o) => o.number === where.number);
+        Object.assign(orden, data);
+        return Promise.resolve(orden);
+      }),
     },
   };
   (prisma as any).$transaction = jest.fn((callback: (tx: unknown) => unknown) => callback(prisma));
@@ -188,5 +195,53 @@ describe('PaymentsService.createPreference', () => {
     await service.createPreference(DTO_BASE);
 
     expect(cuerpoEnviado().shipments).toEqual({ cost: 12000, mode: 'not_specified' });
+  });
+
+  it('reintentar el mismo checkout con el mismo contenido reusa la preferencia, sin pedido nuevo', async () => {
+    const { service, prisma, ordenesCreadas } = construirServicio();
+    const primera = await service.createPreference({ ...DTO_BASE, checkoutId: 'chk-1' });
+    // Lo que devuelve la base al buscar el intento: el pedido recién creado.
+    prisma.order.findFirst.mockResolvedValue({ number: primera.orderNumber, status: 'PENDING', notes: ordenesCreadas[0].notes });
+
+    const segunda = await service.createPreference({ ...DTO_BASE, checkoutId: 'chk-1' });
+    expect(segunda).toEqual({ id: 'pref-123', init_point: 'https://mp.com/pagar', orderNumber: primera.orderNumber });
+    expect(ordenesCreadas).toHaveLength(1);
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('si cambió el carrito, el reintento arma un pedido nuevo', async () => {
+    const { service, prisma, pricing, ordenesCreadas } = construirServicio();
+    const primera = await service.createPreference({ ...DTO_BASE, checkoutId: 'chk-1' });
+    prisma.order.findFirst.mockResolvedValue({ number: primera.orderNumber, status: 'PENDING', notes: ordenesCreadas[0].notes });
+    pricing.resolveItems.mockResolvedValue([{ ...ITEM_RESUELTO, quantity: 2 }]);
+
+    await service.createPreference({ ...DTO_BASE, checkoutId: 'chk-1' });
+    expect(ordenesCreadas).toHaveLength(2);
+  });
+
+  it('si ese checkout ya se pagó, no deja pagar otra vez', async () => {
+    const { service, prisma } = construirServicio();
+    prisma.order.findFirst.mockResolvedValue({ number: 'HP-1', status: 'PAID', notes: '{}' });
+    await expect(service.createPreference({ ...DTO_BASE, checkoutId: 'chk-1' })).rejects.toMatchObject({
+      response: { yaPagado: true, orderNumber: 'HP-1' },
+    });
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('con cuotas por monto activas, le pone el tope a Mercado Pago según los productos', async () => {
+    const { service, prisma } = construirServicio();
+    prisma.siteSection.findUnique.mockImplementation(async ({ where }: { where: { key: string } }) =>
+      where.key === 'cuotas'
+        ? { data: { activo: true, tramos: [{ desde: 300000, cuotas: 9 }, { desde: 400000, cuotas: 12 }], cuotasBase: 1 } }
+        : { data: {} },
+    );
+    await service.createPreference(DTO_BASE);
+    expect(cuerpoEnviado().payment_methods).toEqual({ installments: 12 });
+  });
+
+  it('sin cuotas por monto activas, no cambia lo que ofrece Mercado Pago', async () => {
+    const { service } = construirServicio();
+    await service.createPreference(DTO_BASE);
+    expect(cuerpoEnviado().payment_methods).toBeUndefined();
   });
 });

@@ -3,8 +3,9 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import * as fs from 'fs';
 import * as path from 'path';
+import { CUOTAS_POR_DEFECTO } from '../payments/cuotas';
 
-export type SectionKey = 'categories' | 'meta_pixel' | 'hero' | 'benefits' | 'promo_destacada' | 'featured_products' | 'banners' | 'about' | 'testimonials' | 'brands' | 'instagram' | 'final_message' | 'branding' | 'settings' | 'trust_bottom' | 'politica_devolución' | 'envíos' | 'medios_pago' | 'terminos' | 'privacidad' | 'contacto' | 'talles' | 'reviews_info' | 'payment_methods' | 'email_settings' | 'shipping_rates' | 'formatos_paleta' | 'cuentas_prueba';
+export type SectionKey = 'categories' | 'meta_pixel' | 'hero' | 'benefits' | 'promo_destacada' | 'featured_products' | 'banners' | 'about' | 'testimonials' | 'brands' | 'instagram' | 'final_message' | 'branding' | 'settings' | 'trust_bottom' | 'politica_devolución' | 'envíos' | 'medios_pago' | 'terminos' | 'privacidad' | 'contacto' | 'talles' | 'reviews_info' | 'payment_methods' | 'email_settings' | 'shipping_rates' | 'formatos_paleta' | 'cuentas_prueba' | 'cuotas';
 
 @Injectable()
 export class SiteSectionsService {
@@ -112,6 +113,7 @@ export class SiteSectionsService {
       testimonials: {},
       brands: {},
       categories: { title: 'Categorias', description: 'Encontra lo que necesitas para tu mejor version en la cancha.' },
+      cuotas: { ...CUOTAS_POR_DEFECTO },
       meta_pixel: {
         pixelId: '',
         testEventCode: '',

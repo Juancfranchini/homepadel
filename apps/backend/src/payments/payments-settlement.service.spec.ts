@@ -42,7 +42,7 @@ describe('PaymentsSettlementService', () => {
     const service = new PaymentsSettlementService(prisma as never, {} as never, {} as never);
     Object.assign(service, {
       resolveUser: jest.fn().mockResolvedValue({ id: 'user-9' }),
-      settleOrder: jest.fn().mockResolvedValue(undefined),
+      settleOrder: jest.fn().mockResolvedValue(true),
     });
 
     await service.settle({ id: 'mp-1', status: 'approved', external_reference: 'ref_1', transaction_amount: 2000, payer: { email: 'mp@ejemplo.com' } } as never);
@@ -55,5 +55,20 @@ describe('PaymentsSettlementService', () => {
       cliente: metaCliente,
       userId: 'user-9',
     }));
+  });
+
+  it('si otro aviso ya registró el pago, no vuelve a informar la compra', async () => {
+    (enviarCompraAMeta as jest.Mock).mockClear();
+    const orden = { id: 'o-1', number: 'HP-1', notes: JSON.stringify({ externalReference: 'ref_1' }), items: [] };
+    const prisma = {
+      payment: { findUnique: jest.fn().mockResolvedValue(null) },
+      order: { findFirst: jest.fn().mockResolvedValueOnce(null).mockResolvedValueOnce(orden), update: jest.fn() },
+      siteSection: { findUnique: jest.fn().mockResolvedValue(null) },
+    };
+    const service = new PaymentsSettlementService(prisma as never, {} as never, {} as never);
+    Object.assign(service, { resolveUser: jest.fn().mockResolvedValue(null), settleOrder: jest.fn().mockResolvedValue(false) });
+
+    await expect(service.settle({ id: 'mp-1', status: 'approved', external_reference: 'ref_1' } as never)).resolves.toBe('ya-estaba');
+    expect(enviarCompraAMeta).not.toHaveBeenCalled();
   });
 });

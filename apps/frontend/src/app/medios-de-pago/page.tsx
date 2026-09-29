@@ -13,7 +13,7 @@ export default function MediosPagoPage() {
   const shippingMethods = [
     { name: 'Correo Argentino', logo: ca?.logo, detail: 'Opción principal con tarifa plana visible en el checkout' },
     { name: 'OCA', logo: oca?.logo, detail: 'Opción secundaria · Costo a coordinar por WhatsApp' },
-    { name: 'Andreani', logo: andreani?.logo, detail: 'Opción secundaria · Costo a coordinar por WhatsApp' },
+    { name: 'Andreani', logo: andreani?.logo, detail: 'Gratis desde el monto de envío gratis · por debajo, costo a coordinar por WhatsApp' },
   ];
 
   return (

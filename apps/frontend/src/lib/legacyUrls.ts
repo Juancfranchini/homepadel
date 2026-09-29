@@ -191,3 +191,28 @@ export async function resolveLegacyDestination(route: LegacyRoute, lookups: Lega
   const brand = brands ? pickBrandMatch(route.brandSegment, brands) : null;
   return catalogUrl(brand ? { categoria: route.category, marca: brand } : { categoria: route.category });
 }
+
+/**
+ * Parámetros de campaña que no se pueden perder en la redirección: sin ellos
+ * Meta/Google no atribuyen la visita al anuncio que la trajo.
+ */
+const ATTRIBUTION_PARAMS = ['fbclid', 'gclid', 'gbraid', 'wbraid', 'dclid', 'msclkid', 'ttclid', '_gl'];
+
+function isAttributionParam(key: string): boolean {
+  return key.startsWith('utm_') || ATTRIBUTION_PARAMS.includes(key);
+}
+
+/**
+ * Suma a la URL de destino los parámetros de atribución de la URL vieja. Los
+ * demás (filtros u orden de Tiendanube) se descartan porque la tienda nueva
+ * no los entiende, y nunca pisan lo que ya trae el destino.
+ */
+export function withAttribution(destination: string, originalSearch: string): string {
+  const [path, query = ''] = destination.split('?');
+  const params = new URLSearchParams(query);
+  for (const [key, value] of new URLSearchParams(originalSearch)) {
+    if (isAttributionParam(key.toLowerCase()) && !params.has(key)) params.append(key, value);
+  }
+  const merged = params.toString();
+  return merged ? path + '?' + merged : path;
+}

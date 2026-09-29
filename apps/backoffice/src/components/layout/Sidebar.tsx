@@ -110,6 +110,7 @@ const navGroups: NavGroup[] = [
       { label: 'Formatos de paleta', href: '/configuracion/formatos-paleta', icon: Shapes },
       { label: 'Envios', href: '/configuracion/envios', icon: Truck },
       { label: 'Tarifa de Envío', href: '/configuracion/tarifa-envio', icon: Banknote },
+      { label: 'Cuotas', href: '/configuracion/cuotas', icon: CreditCard },
       { label: 'Politica de Privacidad', href: '/configuracion/privacidad', icon: UserCheck },
       { label: 'Terminos y Condiciones', href: '/configuracion/terminos', icon: FileCheck },
     ],

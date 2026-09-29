@@ -7,6 +7,7 @@ import { formatPrice, getDiscountPercent, getImageUrl } from '@/lib/utils';
 import { formatDiscountPercent, getInstallmentTerms } from '@/lib/productPricing';
 import PrecioTransferencia from '@/components/ui/PrecioTransferencia';
 import { useShippingRates } from '@/hooks/useShippingRates';
+import { useConfigCuotas } from '@/lib/cuotas';
 
 interface Props {
   products: Product[];
@@ -15,6 +16,7 @@ interface Props {
 
 export default function CatalogList({ products, onAddToCart }: Props) {
   const { freeShippingThreshold, isLoaded } = useShippingRates();
+  const cuotas = useConfigCuotas();
 
   return (
     <div className="space-y-3">
@@ -23,7 +25,7 @@ export default function CatalogList({ products, onAddToCart }: Props) {
         const hasDiscount = !isMadeToOrder && product.effectivePrice < product.price;
         const discountPct = hasDiscount ? getDiscountPercent(product.price, product.effectivePrice) : 0;
         const displayPrice = isMadeToOrder ? product.price : product.effectivePrice;
-        const installments = isMadeToOrder ? null : getInstallmentTerms(product);
+        const installments = isMadeToOrder ? null : getInstallmentTerms(product, cuotas);
         const freeShipping = isLoaded && !isMadeToOrder && displayPrice >= freeShippingThreshold;
         const imageUrl = product.images?.length > 0 ? getImageUrl(product.images[0]) : null;
 

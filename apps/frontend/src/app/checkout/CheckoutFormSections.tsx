@@ -13,6 +13,7 @@ interface Props {
   selectedShipping: CheckoutFormData['shippingMethod'];
   selectedPayment: CheckoutFormData['paymentMethod'];
   correoCost: number;
+  andreaniGratis: boolean;
   shippingToCoordinate: boolean;
   mercadopago: PaymentMethodConfig;
   transferencia: PaymentMethodConfig;
@@ -26,7 +27,7 @@ export default function CheckoutFormSections(props: Props) {
   return (
     <div className="lg:col-span-2 space-y-6">
       <CheckoutPersonalDataFields register={props.register} errors={props.errors} />
-      <CheckoutShippingFields register={props.register} errors={props.errors} selectedMethod={props.selectedShipping} correoCost={props.correoCost} storeAddress={props.storeAddress} flex={props.flex} direcciones={props.direcciones} onUsarDireccion={props.onUsarDireccion} />
+      <CheckoutShippingFields register={props.register} errors={props.errors} selectedMethod={props.selectedShipping} correoCost={props.correoCost} andreaniGratis={props.andreaniGratis} storeAddress={props.storeAddress} flex={props.flex} direcciones={props.direcciones} onUsarDireccion={props.onUsarDireccion} />
       {!props.shippingToCoordinate ? (
         <CheckoutPaymentMethodFields register={props.register} errors={props.errors} selectedPayment={props.selectedPayment} mercadopago={props.mercadopago} transferencia={props.transferencia} />
       ) : (

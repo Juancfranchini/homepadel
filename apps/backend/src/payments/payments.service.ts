@@ -19,6 +19,10 @@ import { etiquetaFlex } from '../shipping/envio-flex';
 import { bolsasDeRegalo } from '../orders/bolsas-regalo';
 import { ClienteMeta } from '../common/meta/meta-cliente';
 import { esPedidoDePruebaDeMeta } from '../common/meta/meta-destino';
+import { firmaDelIntento, guardarIntento, intentoReutilizable } from './checkout-intento';
+import { topeDeCuotas } from './cuotas';
+import { itemsDePreferencia } from './preference-items';
+import { filtroOrdenConPago } from './pago-registrado';
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
@@ -84,6 +88,14 @@ export class PaymentsService {
     const { salesLink, resolvedItems, subtotal, shippingCost, discount } =
       await this.prepareCheckout(dto);
 
+    // Reintento del mismo checkout con el mismo contenido: misma preferencia, sin pedido nuevo.
+    const firmaCheckout = firmaDelIntento({
+      items: resolvedItems.map((i) => [i.productId, i.variantId ?? null, i.quantity, i.price]),
+      shippingCost, discount, couponCode: couponCode || null, shipping: dto.shipping ?? null, payer: payer.email, bolsas: dto.bolsasRegalo ?? 0,
+    });
+    const previo = await intentoReutilizable(this.prisma, dto.checkoutId, firmaCheckout);
+    if (previo) return previo;
+
     await this.createPendingOrder(
       orderNumber,
       externalReference,
@@ -97,7 +109,7 @@ export class PaymentsService {
       external_reference: externalReference,
       notification_url: backendUrl + '/api/payments/webhook',
       payer: { name: payer.name, email: payer.email },
-      items: this.buildPreferenceItems(resolvedItems, discount, couponCode),
+      items: itemsDePreferencia(resolvedItems, discount, couponCode),
       shipments: { cost: shippingCost, mode: 'not_specified' },
       back_urls: {
         success: frontendUrl + '/checkout/success?order=' + orderNumber,
@@ -105,6 +117,8 @@ export class PaymentsService {
         pending: frontendUrl + '/checkout/pending?order=' + orderNumber,
       },
       auto_return: 'approved',
+      // Cuotas sin interés según el monto de los productos (ver cuotas.ts).
+      ...(await topeDeCuotas(this.prisma, subtotal - discount)),
     };
     const response = await fetch('https://api.mercadopago.com/checkout/preferences', {
       method: 'POST',
@@ -121,6 +135,9 @@ export class PaymentsService {
         'No se pudo iniciar el pago con Mercado Pago. Probá de nuevo.',
       );
     }
+    await guardarIntento(this.prisma, orderNumber, {
+      checkoutId: dto.checkoutId, firmaCheckout, preferenceId: preference.id, initPoint: preference.init_point,
+    });
     return { id: preference.id, init_point: preference.init_point, orderNumber };
   }
 
@@ -186,6 +203,7 @@ export class PaymentsService {
     if (shipping.carrier === 'retiro_local') return 'Retiro en el local';
     if (!shipping.street) return 'Sin domicilio: pedírselo al comprador';
     const domicilio = `${shipping.street}, ${shipping.city}, ${shipping.province} (${shipping.postalCode})`;
+    if (shipping.carrier === 'andreani') return 'Andreani — ' + domicilio;
     return shipping.carrier === 'flex' ? etiquetaFlex(shipping.city) + domicilio : domicilio;
   }
 
@@ -262,31 +280,6 @@ export class PaymentsService {
    * Pago no tiene un campo de descuento propio, así que se resta como una
    * línea negativa — el patrón habitual para cupones con esta API.
    */
-  private buildPreferenceItems(
-    resolvedItems: ResolvedItem[],
-    discount: number,
-    couponCode?: string,
-  ) {
-    const preferenceItems = resolvedItems.map((item) => ({
-      id: item.productId,
-      title: item.name + (item.variantId ? ' - variante ' + item.variantId : ''),
-      quantity: item.quantity,
-      unit_price: item.price,
-      currency_id: 'ARS',
-    }));
-
-    if (discount > 0) {
-      preferenceItems.push({
-        id: 'discount',
-        title: 'Descuento (' + couponCode + ')',
-        quantity: 1,
-        unit_price: -discount,
-        currency_id: 'ARS',
-      });
-    }
-
-    return preferenceItems;
-  }
 
   /**
    * Mercado Pago avisa de dos maneras distintas según cómo esté configurada
@@ -333,7 +326,7 @@ export class PaymentsService {
     // P2 - Idempotencia: verificar si el pago ya fue procesado
     const [existingPayment, existingOrder] = await Promise.all([
       this.prisma.payment.findUnique({ where: { externalId: String(paymentId) } }),
-      this.prisma.order.findFirst({ where: { notes: { contains: String(paymentId) } } }),
+      this.prisma.order.findFirst({ where: filtroOrdenConPago(paymentId) }),
     ]);
     if (existingPayment?.status === 'CONFIRMED' || existingOrder) {
       this.logger.log(`Pago ya procesado, se ignora: ${paymentId}`);
