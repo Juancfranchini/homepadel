@@ -56,13 +56,41 @@ export async function leerConfigMeta(prisma: Pick<PrismaService, 'siteSection'>)
   return (seccion?.data as ConfigMeta) || {};
 }
 
-/** Null si el evento no tiene que salir hacia Meta. */
-export function destinoMeta(config: ConfigMeta, produccion: boolean): DestinoMeta | null {
+function codigoDePruebaConfigurado(config: ConfigMeta): string | undefined {
+  return (process.env.META_TEST_EVENT_CODE || config.testEventCode || '').trim() || undefined;
+}
+
+/**
+ * Probar eventos en la tienda real: quien entra con `?meta_test=CODIGO` manda
+ * sus eventos y su compra a "Probar eventos" de Meta, y su pedido queda como
+ * prueba. Solo vale el código cargado en el backoffice (o `META_TEST_EVENT_CODE`):
+ * un código cualquiera no cambia nada.
+ */
+export function esCodigoDePruebaValido(config: ConfigMeta, codigo?: string | null): boolean {
+  const configurado = codigoDePruebaConfigurado(config);
+  return !!codigo && !!configurado && codigo.trim() === configurado;
+}
+
+/** True si el pedido se hizo probando eventos de Meta con el código válido. */
+export async function esPedidoDePruebaDeMeta(
+  prisma: Pick<PrismaService, 'siteSection'>,
+  cliente?: { testEventCode?: string } | null,
+): Promise<boolean> {
+  if (!cliente?.testEventCode) return false;
+  return esCodigoDePruebaValido(await leerConfigMeta(prisma), cliente.testEventCode);
+}
+
+/**
+ * Null si el evento no tiene que salir hacia Meta. `probando`: el evento viene
+ * con el código de prueba válido, así que va a "Probar eventos" aunque sea de
+ * la tienda real.
+ */
+export function destinoMeta(config: ConfigMeta, produccion: boolean, probando = false): DestinoMeta | null {
   if (process.env.META_EVENTS_ENABLED === 'false') return null;
   if (!config.pixelId || !config.accessToken) return null;
   const base = { pixelId: config.pixelId, accessToken: config.accessToken };
-  if (produccion) return base;
-  const testEventCode = process.env.META_TEST_EVENT_CODE || config.testEventCode;
+  if (produccion && !probando) return base;
+  const testEventCode = codigoDePruebaConfigurado(config);
   return testEventCode ? { ...base, testEventCode } : null;
 }
 

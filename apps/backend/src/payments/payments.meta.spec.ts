@@ -124,6 +124,15 @@ describe('Purchase: solo producción cuenta de verdad', () => {
     expect(prisma.marketingEvent.create).not.toHaveBeenCalled();
   });
 
+  it('compra hecha probando eventos: va a Probar eventos con valor y moneda, sin sumar, aunque la orden sea de prueba', async () => {
+    const prisma = construir({ ...conCliente({ ...PRODUCCION, testEventCode: 'TEST777' }), isTest: true }, { testEventCode: 'TEST777' });
+    await informarTransferenciaPagadaAMeta(prisma as never, 'o-1');
+
+    expect(cuerpo().test_event_code).toBe('TEST777');
+    expect(cuerpo().data[0].custom_data).toMatchObject({ value: 754500, currency: 'ARS' });
+    expect(prisma.marketingEvent.create).not.toHaveBeenCalled();
+  });
+
   it('META_EVENTS_ENABLED=false apaga el envío a Meta, pero la venta real sigue sumando al embudo', async () => {
     process.env = { ...entorno, META_EVENTS_ENABLED: 'false' };
     const prisma = construir(conCliente(PRODUCCION));

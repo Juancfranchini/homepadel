@@ -2,7 +2,14 @@ import { Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { userDataParaMeta } from '../common/meta/meta-user-data';
 import { ClienteMeta } from '../common/meta/meta-cliente';
-import { destinoMeta, enviarEventoAMeta, esOrigenDeProduccion, hostsDeProduccion, leerConfigMeta } from '../common/meta/meta-destino';
+import {
+  destinoMeta,
+  enviarEventoAMeta,
+  esCodigoDePruebaValido,
+  esOrigenDeProduccion,
+  hostsDeProduccion,
+  leerConfigMeta,
+} from '../common/meta/meta-destino';
 import { esCuentaDePrueba } from '../common/test-accounts';
 
 const logger = new Logger('MetaPurchase');
@@ -66,13 +73,17 @@ function origenDeLaCompra(cliente?: ClienteMeta | null): string {
  */
 export async function enviarCompraAMeta(prisma: PrismaService, compra: CompraParaMeta): Promise<void> {
   try {
-    if (await esCompraDePrueba(prisma, compra)) {
+    const config = await leerConfigMeta(prisma);
+    // Compra hecha probando eventos de Meta (?meta_test= con el código
+    // válido): va a "Probar eventos" con su valor real y no suma en ningún lado.
+    const probando = esCodigoDePruebaValido(config, compra.cliente?.testEventCode);
+    if (!probando && (await esCompraDePrueba(prisma, compra))) {
       logger.log(`Compra de prueba ${compra.orderNumber}: no se cuenta ni se informa a Meta.`);
       return;
     }
     const valor = compra.valor || compra.items.reduce((acc, item) => acc + Number(item.price) * item.quantity, 0);
     const origen = origenDeLaCompra(compra.cliente);
-    const produccion = esOrigenDeProduccion(origen);
+    const produccion = !probando && esOrigenDeProduccion(origen);
 
     if (produccion) {
       await prisma.marketingEvent
@@ -80,7 +91,7 @@ export async function enviarCompraAMeta(prisma: PrismaService, compra: CompraPar
         .catch((err) => logger.warn(`No se pudo sumar la compra ${compra.orderNumber} al embudo propio: ${err}`));
     }
 
-    const destino = destinoMeta(await leerConfigMeta(prisma), produccion);
+    const destino = destinoMeta(config, produccion, probando);
     if (!destino) return;
 
     await enviarEventoAMeta(destino, {

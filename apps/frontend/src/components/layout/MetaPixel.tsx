@@ -5,7 +5,8 @@ import { usePathname } from 'next/navigation';
 import api from '@/lib/api';
 import { marcarConfigLista, trackMetaEvent } from '@/lib/metaPixel';
 import { modoPruebaActivo } from '@/lib/modoPrueba';
-import { capturarClicDeAnuncio, esSitioDeProduccion } from '@/lib/metaNavegador';
+import { codigoDePruebaMeta, esSitioDeProduccion, prepararCookiesDeMeta } from '@/lib/metaNavegador';
+import { useAuthStore } from '@/store/authStore';
 
 interface MetaPixelConfig {
   pixelId?: string;
@@ -28,28 +29,27 @@ async function leerConfig(): Promise<MetaPixelConfig> {
   }
 }
 
+/**
+ * El código base del Pixel, tal cual lo da Meta. Antes se usaba una versión
+ * reescrita a mano que no definía `window._fbq`, y el Pixel del navegador
+ * nunca mandó un evento desde este sitio: todo entraba solo por el servidor.
+ */
+const CODIGO_BASE_PIXEL =
+  "!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};" +
+  "if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;" +
+  "s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');";
+
 function instalarPixel(pixelId: string) {
-  // Stub oficial de Meta: se reemplaza a sí mismo al cargar fbevents.js, tiparlo no aporta nada.
-  const f: any = function (...args: unknown[]) {
-    if (f.callMethod) f.callMethod(...args);
-    else f.queue.push(args);
-  };
-  f.push = f;
-  f.loaded = true;
-  f.version = '2.0';
-  f.queue = [];
-  window.fbq = f;
+  const base = document.createElement('script');
+  base.text = CODIGO_BASE_PIXEL;
+  document.head.appendChild(base);
 
-  const script = document.createElement('script');
-  script.async = true;
-  script.src = 'https://connect.facebook.net/en_US/fbevents.js';
-  const primero = document.getElementsByTagName('script')[0];
-  primero.parentNode!.insertBefore(script, primero);
-
+  // La página no se recarga al navegar: el PageView de cada ruta lo manda
+  // trackMetaEvent, con el mismo id que el servidor.
   window.fbq.disablePushState = true;
-  window.fbq('consent', 'revoke');
-  window.fbq('init', pixelId);
-  window.fbq('consent', 'grant');
+  // Coincidencia avanzada: con sesión, el email va al Pixel (lo cifra el propio Pixel).
+  const email = useAuthStore.getState().user?.email;
+  window.fbq('init', pixelId, email ? { em: email.trim().toLowerCase() } : {});
 }
 
 export default function MetaPixel() {
@@ -59,13 +59,13 @@ export default function MetaPixel() {
 
   useEffect(() => {
     const init = async () => {
-      capturarClicDeAnuncio();
+      prepararCookiesDeMeta();
       const config = await leerConfig();
 
-      // Solo en la tienda de producción, y nunca en modo prueba: fuera de ahí
-      // (localhost, previews, dominios viejos) los eventos van a Meta solo
-      // como prueba y desde el servidor (ver /track).
-      if (config.pixelId && !instalado.current && !modoPruebaActivo() && esSitioDeProduccion()) {
+      // Solo en la tienda de producción, y nunca en modo prueba ni probando
+      // eventos de Meta: fuera de ahí (localhost, previews, dominios viejos)
+      // los eventos van a Meta solo como prueba y desde el servidor (ver /track).
+      if (config.pixelId && !instalado.current && !modoPruebaActivo() && !codigoDePruebaMeta() && esSitioDeProduccion()) {
         instalarPixel(config.pixelId);
         instalado.current = true;
       }

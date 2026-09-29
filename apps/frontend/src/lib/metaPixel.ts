@@ -9,6 +9,7 @@
 import api from './api';
 import { modoPruebaActivo } from './modoPrueba';
 import { idsDeMeta } from './metaNavegador';
+import { useAuthStore } from '@/store/authStore';
 
 type Datos = Record<string, unknown>;
 
@@ -42,8 +43,21 @@ export function newEventId(): string {
 let configLista = false;
 const pendientes: EventoPendiente[] = [];
 
+/**
+ * Email y teléfono para reconocer a la persona: los del evento (el checkout)
+ * o, si no hay, los de la cuenta con sesión. El servidor también los toma del
+ * token; mandarlos acá cubre al que tiene la sesión guardada pero el token
+ * vencido.
+ */
+function datosDeLaPersona(evento: EventoPendiente): DatosComprador | undefined {
+  if (evento.userData?.email || evento.userData?.phone) return evento.userData;
+  const cuenta = useAuthStore.getState().user;
+  return cuenta ? { email: cuenta.email, phone: cuenta.phone } : undefined;
+}
+
 async function enviar(evento: EventoPendiente) {
   try {
+    const persona = datosDeLaPersona(evento);
     const { data } = await api.post<{ pixel?: boolean }>('/track', {
       eventName: evento.eventName,
       eventId: evento.eventId,
@@ -51,8 +65,8 @@ async function enviar(evento: EventoPendiente) {
       eventData: evento.eventData,
       customData: evento.customData,
       ...idsDeMeta(),
-      ...(evento.userData?.email || evento.userData?.phone
-        ? { userData: { email: evento.userData.email || undefined, phone: evento.userData.phone || undefined } }
+      ...(persona?.email || persona?.phone
+        ? { userData: { email: persona.email || undefined, phone: persona.phone || undefined } }
         : {}),
     });
     if (data?.pixel && typeof window.fbq === 'function') {
