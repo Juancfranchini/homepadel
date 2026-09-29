@@ -51,6 +51,11 @@ Se usan con cualquier propiedad y con opacidad: `bg-page`, `text-fg-muted`, `bor
 - Texto sobre fotos con velo negro (tarjetas de categoría, botones sobre la imagen de un producto): va claro en los dos temas, con el hex fijo, no con `fg`.
 - Al agregar un color nuevo que se vaya a repetir: sumarlo en `globals.css` (los dos temas) y en `tailwind.config.ts`, y chequear contraste en el claro.
 
+## Checkout como invitado y precio por transferencia
+
+- "Finalizar compra" (carrito y panel lateral) va directo a `/checkout`, sin pedir login (`components/auth/useCheckoutNavigation.ts`). En el checkout, ingresar es opcional (`useCheckoutAuthGate.ts`: "¿Ya tenés cuenta? Ingresá" completa nombre y mail).
+- El carrito muestra el precio por transferencia de cada producto (`PrecioTransferencia`) y el total pagando así (`carrito/CarritoTotalTransferencia.tsx`), con la misma cuenta que el checkout y el servidor: subtotal a precio de transferencia, y cupón y envío gratis calculados sobre ese subtotal.
+
 ## URLs viejas de Tiendanube
 
 La tienda vivía en Tiendanube y Google todavía tiene indexadas sus URLs. `src/middleware.ts` las redirige con 308 (permanente), y **solo** corre para esas rutas (ver su `matcher`):

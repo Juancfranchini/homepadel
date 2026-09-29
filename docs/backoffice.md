@@ -30,6 +30,10 @@ types/
 
 Recharts, solo en `configuracion`/dashboard de métricas.
 
+## Fichas a revisar
+
+En Productos, un aviso lista las fichas **activas** con algo para corregir antes de pautarlas (`productos/revisionFicha.ts`): texto de relleno ("bla bla", "lorem"), sin descripción o muy corta, sin fotos, peso en mg, precio promo o de transferencia que no es menor al vigente (la tienda no los muestra) y sin stock. "Corregir" abre la ficha.
+
 ## Reglas
 
 - Todo lo que pega al backend pasa por `lib/api.ts`.

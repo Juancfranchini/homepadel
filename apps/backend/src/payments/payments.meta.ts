@@ -112,6 +112,7 @@ export async function enviarCompraAMeta(prisma: PrismaService, compra: CompraPar
       custom_data: {
         currency: 'ARS',
         value: valor,
+        order_id: compra.orderNumber,
         content_ids: compra.items.map((item) => item.productId),
         content_type: 'product',
         num_items: compra.items.reduce((acc, item) => acc + item.quantity, 0),
