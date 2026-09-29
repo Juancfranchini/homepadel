@@ -12,7 +12,10 @@ import CheckoutSummaryItem from './CheckoutSummaryItem';
 
 interface Props {
   items: CartItem[];
+  /** Subtotal que se cobra (con transferencia, ya con sus precios). */
   subtotal: number;
+  /** Lo que se ahorra pagando por transferencia; 0 con otro medio. */
+  ahorroTransferencia?: number;
   coupon: CouponState;
   shippingCost: number;
   total: number;
@@ -27,7 +30,7 @@ interface Props {
 }
 
 export default function CheckoutOrderSummary({
-  items, subtotal, coupon, shippingCost, total, orderError, isSubmitting,
+  items, subtotal, ahorroTransferencia = 0, coupon, shippingCost, total, orderError, isSubmitting,
   paymentMethod, shippingToCoordinate, shippingPending = false, onQuantityChange, onRemove,
 }: Props) {
   const vacio = items.length === 0;
@@ -66,7 +69,8 @@ export default function CheckoutOrderSummary({
         {!vacio && <CouponField coupon={coupon} />}
 
         <div className="border-t border-line pt-4 space-y-2 text-sm">
-          <div className="flex justify-between text-fg-soft"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
+          <div className="flex justify-between text-fg-soft"><span>Subtotal</span><span>{formatPrice(subtotal + ahorroTransferencia)}</span></div>
+          {ahorroTransferencia > 0 && <div className="flex justify-between text-green-500 light:text-green-700"><span>Precio con transferencia</span><span>-{formatPrice(ahorroTransferencia)}</span></div>}
           {discount > 0 && <div className="flex justify-between text-green-500 light:text-green-700"><span>Descuento{couponCode ? ' (' + couponCode + ')' : ''}</span><span>-{formatPrice(discount)}</span></div>}
           <div className="flex justify-between text-fg-soft"><span>Envío</span><span className={shippingToCoordinate || shippingPending ? 'text-amber-300 light:text-amber-700 font-semibold' : shippingCost === 0 ? 'text-green-500 light:text-green-700 font-semibold' : ''}>{shippingToCoordinate ? 'A coordinar' : shippingPending ? 'Elegí tu localidad' : shippingCost === 0 ? 'GRATIS' : formatPrice(shippingCost)}</span></div>
           <div className="flex justify-between font-black text-base pt-2 border-t border-line text-fg"><span>{shippingToCoordinate || shippingPending ? 'Total sin envío' : 'Total'}</span><span>{formatPrice(total)}</span></div>

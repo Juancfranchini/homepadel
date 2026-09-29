@@ -5,6 +5,7 @@ import { Truck } from 'lucide-react';
 import { Product } from '@/types';
 import { formatPrice, getDiscountPercent, getImageUrl } from '@/lib/utils';
 import { formatDiscountPercent, getInstallmentTerms } from '@/lib/productPricing';
+import PrecioTransferencia from '@/components/ui/PrecioTransferencia';
 import { useShippingRates } from '@/hooks/useShippingRates';
 
 interface Props {
@@ -51,6 +52,7 @@ export default function CatalogList({ products, onAddToCart }: Props) {
                   <span className="text-xl font-black text-fg">{formatPrice(displayPrice)}</span>
                   {hasDiscount && <span className="text-xs font-bold text-brand-fg">{formatDiscountPercent(discountPct)}% OFF</span>}
                 </div>
+                {!isMadeToOrder && <PrecioTransferencia product={product} />}
                 {installments && <p className="text-xs text-brand-fg mt-0.5">{installments.count} cuotas de {formatPrice(installments.amount)} {installments.interestText}</p>}
                 {freeShipping && <p className="flex items-center gap-1 text-xs font-bold text-brand-fg mt-1"><Truck size={12} />Envío gratis</p>}
               </div>

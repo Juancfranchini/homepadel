@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Truck } from 'lucide-react';
 import { Product } from '@/types';
 import { formatPrice, getDiscountPercent, getImageUrl } from '@/lib/utils';
 import { formatDiscountPercent, getInstallmentTerms } from '@/lib/productPricing';
+import PrecioTransferencia from '@/components/ui/PrecioTransferencia';
 import { useShippingRates } from '@/hooks/useShippingRates';
 
 interface Props {
@@ -58,6 +59,7 @@ export default function RelatedProducts({ products }: Props) {
                       {formatPrice(displayPrice)}
                       {relDiscount && <span className="text-brand-fg text-[10px]">{formatDiscountPercent(discountPct)}% OFF</span>}
                     </p>
+                    {!relMadeToOrder && <PrecioTransferencia product={p} />}
                     {installments && <p className="text-brand-fg text-[10px] mt-0.5">{installments.count} cuotas de {formatPrice(installments.amount)}</p>}
                     {freeShipping && <p className="flex items-center gap-1 text-brand-fg text-[10px] font-bold mt-1"><Truck size={10} />Envío gratis</p>}
                   </div>

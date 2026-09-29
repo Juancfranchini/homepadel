@@ -11,7 +11,7 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { InventoryContext, InventoryService } from '../inventory/inventory.service';
-import { effectivePrice } from './effective-price';
+import { effectivePrice, precioPorTransferencia } from './effective-price';
 import { configFlex, zonaFlexDe } from '../shipping/envio-flex';
 
 export interface RequestedItem {
@@ -42,7 +42,12 @@ export class PricingService {
    * precio tomado de la base y stock verificado. Descarta cualquier precio que
    * venga en la petición.
    */
-  async resolveItems(items: RequestedItem[]): Promise<ResolvedItem[]> {
+  /**
+   * `porTransferencia`: el pedido se paga por transferencia, así que cada
+   * producto sale a su precio de transferencia (ver precioPorTransferencia).
+   * Antes la tienda lo mostraba pero el pedido se cobraba al precio de lista.
+   */
+  async resolveItems(items: RequestedItem[], opciones: { porTransferencia?: boolean } = {}): Promise<ResolvedItem[]> {
     if (!Array.isArray(items) || items.length === 0) {
       throw new ConflictException('El pedido no tiene productos');
     }
@@ -60,6 +65,7 @@ export class PricingService {
             name: true,
             price: true,
             salePrice: true,
+            transferPrice: true,
             stock: true,
             active: true,
             isMadeToOrder: true,
@@ -109,7 +115,9 @@ export class PricingService {
           variantId: item.variantId,
           name: product.name,
           quantity,
-          price: effectivePrice(product.price, product.salePrice),
+          price: opciones.porTransferencia
+            ? precioPorTransferencia(product.price, product.salePrice, product.transferPrice)
+            : effectivePrice(product.price, product.salePrice),
           isMadeToOrder: product.isMadeToOrder,
         };
       }),

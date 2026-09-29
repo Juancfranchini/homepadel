@@ -11,6 +11,7 @@ import { formatPrice, getDiscountPercent } from '@/lib/utils';
 import FeaturedProductCardImage from './FeaturedProductCardImage';
 import { useShippingRates } from '@/hooks/useShippingRates';
 import { formatDiscountPercent, getInstallmentTerms } from '@/lib/productPricing';
+import PrecioTransferencia from '@/components/ui/PrecioTransferencia';
 
 export default function FeaturedProductCard({ product }: { product: Product }) {
   const addItem = useCartStore((s) => s.addItem);
@@ -67,6 +68,7 @@ export default function FeaturedProductCard({ product }: { product: Product }) {
           {hasDiscount && <span className="text-xs font-bold text-brand-fg">{formatDiscountPercent(discountPct)}% OFF</span>}
         </div>
 
+        {!isMadeToOrder && <PrecioTransferencia product={product} />}
         {installments && <p className="text-xs text-brand-fg font-medium">{installments.count} cuotas de {formatPrice(installments.amount)} {installments.interestText}</p>}
         {freeShipping && <p className="flex items-center gap-1 text-xs font-bold text-brand-fg"><Truck size={12} />Envío gratis</p>}
 

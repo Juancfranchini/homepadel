@@ -6,6 +6,7 @@ import { formatDiscountPercent } from '@/lib/productPricing';
 import { useShippingRates } from '@/hooks/useShippingRates';
 import MadeToOrderPricing from './MadeToOrderPricing';
 import RegularPricing from './RegularPricing';
+import PrecioTransferencia from '@/components/ui/PrecioTransferencia';
 
 interface Props {
   productName: string;
@@ -21,6 +22,8 @@ interface Props {
   isMadeToOrder?: boolean;
   estimatedDays?: number;
   requiredDeposit?: number;
+  /** Precio por transferencia cargado en el backoffice (se muestra si es menor y la transferencia está habilitada). */
+  transferPrice?: number;
 }
 
 export default function ProductPrice({
@@ -36,6 +39,7 @@ export default function ProductPrice({
   isMadeToOrder = false,
   estimatedDays,
   requiredDeposit = 0,
+  transferPrice,
 }: Props) {
   const { freeShippingThreshold, isLoaded: shippingLoaded } = useShippingRates();
   const showInstallments = !isMadeToOrder && installments > 0 && cuota > 0;
@@ -68,6 +72,8 @@ export default function ProductPrice({
           requiredDeposit={requiredDeposit}
         />
       ) : (
+        <>
+        <PrecioTransferencia product={{ effectivePrice: displayPrice, transferPrice }} variante="ficha" />
         <RegularPricing
           showInstallments={showInstallments}
           installments={installments}
@@ -75,6 +81,7 @@ export default function ProductPrice({
           interestLabel={interestLabel}
           interestPercent={interestPercent}
         />
+        </>
       )}
 
       {hasFreeShipping && <p className="flex items-center gap-1.5 text-sm font-bold text-brand-fg"><Truck size={16} />Envío gratis con Correo Argentino</p>}

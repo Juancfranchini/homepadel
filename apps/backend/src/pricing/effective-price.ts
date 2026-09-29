@@ -9,3 +9,15 @@ export function effectivePrice(price: number, salePrice?: number | null): number
   const hasValidSale = salePrice != null && salePrice > 0 && salePrice < price;
   return hasValidSale ? salePrice : price;
 }
+
+/**
+ * Precio de un producto pagando por transferencia: el "Precio
+ * transferencia/depósito" del backoffice, si está cargado y es menor que el
+ * precio vigente. Si no (vacío, cero o mayor que una promo), el vigente.
+ * Es el mismo criterio con el que la tienda lo muestra.
+ */
+export function precioPorTransferencia(price: number, salePrice?: number | null, transferPrice?: number | null): number {
+  const vigente = effectivePrice(price, salePrice);
+  const transferencia = Number(transferPrice);
+  return Number.isFinite(transferencia) && transferencia > 0 && transferencia < vigente ? transferencia : vigente;
+}

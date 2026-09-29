@@ -160,6 +160,14 @@ describe('PricingService — el precio sale de la base, no del navegador', () =>
     ]);
     expect(item.name).toBe('Paleta Nox AT10');
   });
+
+  it('pagando por transferencia cobra el precio de transferencia de la base', async () => {
+    const service = new PricingService(fakePrisma({ 'pal-1': { ...PALETA, transferPrice: 400000 } }));
+    const [transferencia] = await service.resolveItems([{ productId: 'pal-1', quantity: 1 }], { porTransferencia: true });
+    const [lista] = await service.resolveItems([{ productId: 'pal-1', quantity: 1 }]);
+    expect(transferencia.price).toBe(400000);
+    expect(lista.price).toBe(500000);
+  });
 });
 
 // ─── Disponibilidad ──────────────────────────────────────────────────────────

@@ -37,6 +37,7 @@ Regla dura del checkout: **nada de lo que manda el navegador determina cuánto s
 
 - Doble llave: `ENABLE_BANK_TRANSFER=true` en el backend (Railway) **y** el switch de Transferencia prendido en el backoffice (`site-sections` / `payment_methods` → `transferencia.active`). Con cualquiera de los dos apagado, la tienda no la ofrece y `POST /orders` responde 400. La tienda no tiene variable propia: lee `transferencia.active` que calcula el backend (`src/payments/transferencia.ts`).
 - Los datos de la cuenta (alias, CBU, titular, banco) **no** salen en `GET /site-sections/payment_methods` público (`mediosDePagoPublicos`): solo los ve el admin y el comprador, en la respuesta del pedido (`datosTransferencia`), para mostrarlos en la pantalla de pedido confirmado con el botón de mandar el comprobante por WhatsApp.
+- Precio por transferencia: un pedido por transferencia cobra cada producto a su "Precio transferencia/depósito" del backoffice, si es menor que el precio vigente (`precioPorTransferencia` en `src/pricing/effective-price.ts`; `resolveItems(..., { porTransferencia: true })`). La tienda lo muestra con la misma regla, y solo si la transferencia está habilitada (`components/ui/PrecioTransferencia.tsx`). Antes se mostraba pero el pedido se cobraba al precio de lista.
 - Un cliente puede tener como mucho 2 pedidos por transferencia pendientes de pago en 72 hs (`MAX_TRANSFERENCIAS_PENDIENTES`): el pedido descuenta stock al crearse, y sin tope alguien podría dejar productos bloqueados sin pagar.
 
 ## Bolsa de regalo
