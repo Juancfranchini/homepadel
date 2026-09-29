@@ -32,21 +32,22 @@ function mensajeDeError(err: unknown, porDefecto: string): string {
 }
 
 /**
- * Manda el pedido con las cookies del Pixel (`meta`), que el servidor guarda
- * para informar la compra a Meta cuando se confirme el pago.
+ * Manda el pedido con las cookies del Pixel y, si se están probando eventos,
+ * el código de prueba de Meta (`meta`). El servidor los guarda para informar
+ * la compra a Meta cuando se confirme el pago.
  *
- * `meta` es un campo nuevo: un backend todavía sin actualizar lo rechaza
- * ("property meta should not exist"). Durante ese rato del despliegue se
+ * Un backend todavía sin actualizar puede rechazar `meta` o alguno de sus
+ * campos ("... should not exist"). Durante ese rato del despliegue se
  * reintenta sin él, para no frenar ninguna compra por esto.
  */
-async function conCookiesDelPixel<T>(enviar: (extra: { meta?: { fbp?: string; fbc?: string } }) => Promise<T>): Promise<T> {
+async function conCookiesDelPixel<T>(enviar: (extra: { meta?: ReturnType<typeof idsDeMeta> }) => Promise<T>): Promise<T> {
   const meta = idsDeMeta();
-  if (!meta.fbp && !meta.fbc) return enviar({});
+  if (Object.keys(meta).length === 0) return enviar({});
   try {
     return await enviar({ meta });
   } catch (err) {
     const detalle = JSON.stringify((err as { response?: { data?: unknown } })?.response?.data ?? '');
-    if (detalle.includes('property meta should not exist')) return enviar({});
+    if (/(property meta|meta\.property \w+) should not exist/.test(detalle)) return enviar({});
     throw err;
   }
 }

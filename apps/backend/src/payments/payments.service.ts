@@ -18,6 +18,7 @@ import { esCuentaDePrueba } from '../common/test-accounts';
 import { etiquetaFlex } from '../shipping/envio-flex';
 import { bolsasDeRegalo } from '../orders/bolsas-regalo';
 import { ClienteMeta } from '../common/meta/meta-cliente';
+import { esPedidoDePruebaDeMeta } from '../common/meta/meta-destino';
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
@@ -197,7 +198,8 @@ export class PaymentsService {
     shipping?: ShippingData,
     salesLinkId?: string,
   ) {
-    const isTest = await esCuentaDePrueba(this.prisma, [payer.email]);
+    // Cuenta de prueba, o pedido hecho probando eventos de Meta (?meta_test=).
+    const isTest = (await esCuentaDePrueba(this.prisma, [payer.email])) || (await esPedidoDePruebaDeMeta(this.prisma, payer.cliente));
     await this.prisma.$transaction(async (tx) => {
       const order = await tx.order.create({
         data: {

@@ -13,6 +13,8 @@ const COOKIE_PIXEL = /^fb\.\d\.\d+\.[\w.-]+$/;
 export class MetaNavegadorDto {
   @IsOptional() @IsString() @MaxLength(255) @Matches(COOKIE_PIXEL) fbp?: string;
   @IsOptional() @IsString() @MaxLength(255) @Matches(COOKIE_PIXEL) fbc?: string;
+  /** Código de "Probar eventos" de Meta (`?meta_test=`). Solo cuenta si coincide con el del backoffice: ver meta-destino.ts. */
+  @IsOptional() @IsString() @MaxLength(40) @Matches(/^[A-Za-z0-9]+$/) testEventCode?: string;
 }
 
 /**
@@ -27,6 +29,8 @@ export interface ClienteMeta {
   userAgent?: string;
   fbp?: string;
   fbc?: string;
+  /** Código de "Probar eventos" con el que se hizo el pedido, si se estaba probando. */
+  testEventCode?: string;
 }
 
 function cookie(cookies: string, nombre: string): string | undefined {
@@ -56,6 +60,7 @@ export function clienteDesdeRequest(req: Request, navegador?: MetaNavegadorDto):
     userAgent: req.headers['user-agent'] || undefined,
     fbp: navegador?.fbp || cookie(cookies, '_fbp'),
     fbc: navegador?.fbc || cookie(cookies, '_fbc'),
+    testEventCode: navegador?.testEventCode,
   };
   return Object.fromEntries(Object.entries(cliente).filter(([, v]) => v)) as ClienteMeta;
 }

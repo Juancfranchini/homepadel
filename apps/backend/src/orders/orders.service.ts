@@ -14,6 +14,7 @@ import { esCuentaDePrueba } from '../common/test-accounts';
 import { etiquetaFlex } from '../shipping/envio-flex';
 import { bolsasDeRegalo } from './bolsas-regalo';
 import { ClienteMeta } from '../common/meta/meta-cliente';
+import { esPedidoDePruebaDeMeta } from '../common/meta/meta-destino';
 import { exigirTransferencia } from '../payments/transferencia';
 
 interface SalesLinkContext {
@@ -207,7 +208,7 @@ export class OrdersService {
       shipping,
       discount,
       buyerInfo,
-      isTest: await this.esDePrueba(dto.buyerEmail, userId),
+      isTest: (await this.esDePrueba(dto.buyerEmail, userId)) || (await esPedidoDePruebaDeMeta(this.prisma, cliente)),
     });
 
     // Se consume el uso recién con la orden ya creada — si algo de arriba

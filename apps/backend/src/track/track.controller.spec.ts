@@ -186,6 +186,41 @@ describe('TrackController', () => {
     expect(errores.map((e) => e.property)).toContain('eventName');
   });
 
+  it('probando eventos con el código del backoffice: va a Probar eventos, sin Pixel ni embudo, aunque sea producción', async () => {
+    const { prisma, controller } = construir({ pixelId: '1041282918808105', accessToken: 'token', testEventCode: 'TEST777' });
+    const resultado = await controller.track({ ...EVENTO, testEventCode: 'TEST777' }, request());
+    await esperarEnvio();
+
+    expect(resultado).toEqual({ registrado: false, pixel: false });
+    expect(prisma.marketingEvent.create).not.toHaveBeenCalled();
+    expect(cuerpo().test_event_code).toBe('TEST777');
+    expect(cuerpo().data[0].user_data).toMatchObject({ fbp: EVENTO.fbp, fbc: EVENTO.fbc });
+  });
+
+  it('probando eventos con una cuenta de prueba también llega a Probar eventos', async () => {
+    const { controller } = construir({ pixelId: '1041282918808105', accessToken: 'token', testEventCode: 'TEST777' }, ['cuenta@ejemplo.com']);
+    await controller.track({ ...EVENTO, testEventCode: 'TEST777' }, request(), { id: 'user-1' });
+    await esperarEnvio();
+    expect(cuerpo().test_event_code).toBe('TEST777');
+  });
+
+  it('un código de prueba que no es el del backoffice no cambia nada: evento real', async () => {
+    const { prisma, controller } = construir({ pixelId: '1041282918808105', accessToken: 'token', testEventCode: 'TEST777' });
+    const resultado = await controller.track({ ...EVENTO, testEventCode: 'OTRO1' }, request());
+    await esperarEnvio();
+
+    expect(resultado).toEqual({ registrado: true, pixel: true });
+    expect(prisma.marketingEvent.create).toHaveBeenCalled();
+    expect(cuerpo().test_event_code).toBeUndefined();
+  });
+
+  it('con sesión y sin email en el evento, el email sale de la cuenta (AddToCart con coincidencia)', async () => {
+    const { controller } = construir();
+    await controller.track(EVENTO, request(), { id: 'user-1' });
+    await esperarEnvio();
+    expect(cuerpo().data[0].user_data.em).toEqual([sha256('cuenta@ejemplo.com')]);
+  });
+
   it('rechaza cookies del Pixel con otro formato', async () => {
     const errores = await validate(plainToInstance(TrackEventDto, { ...EVENTO, fbp: '<script>' }));
     expect(errores.map((e) => e.property)).toContain('fbp');

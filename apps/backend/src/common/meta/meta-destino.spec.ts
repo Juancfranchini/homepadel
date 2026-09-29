@@ -1,4 +1,4 @@
-import { esOrigenDeProduccion } from './meta-destino';
+import { esCodigoDePruebaValido, esOrigenDeProduccion } from './meta-destino';
 import { clienteDesdeRequest } from './meta-cliente';
 
 describe('esOrigenDeProduccion', () => {
@@ -21,6 +21,22 @@ describe('esOrigenDeProduccion', () => {
   it('los dominios de producción se pueden cambiar por entorno', () => {
     process.env = { ...entorno, META_PRODUCTION_HOSTS: 'homepadel.com.ar, www.homepadel.com.ar' };
     expect(esOrigenDeProduccion('https://homepadel.com.ar')).toBe(true);
+  });
+});
+
+describe('esCodigoDePruebaValido', () => {
+  const entorno = process.env;
+  afterEach(() => {
+    process.env = entorno;
+  });
+
+  it('solo vale el código cargado en el backoffice o en el entorno', () => {
+    expect(esCodigoDePruebaValido({ testEventCode: 'TEST1' }, 'TEST1')).toBe(true);
+    expect(esCodigoDePruebaValido({ testEventCode: 'TEST1' }, 'TEST2')).toBe(false);
+    expect(esCodigoDePruebaValido({}, 'TEST1')).toBe(false);
+    expect(esCodigoDePruebaValido({ testEventCode: 'TEST1' }, undefined)).toBe(false);
+    process.env = { ...entorno, META_TEST_EVENT_CODE: 'ENV9' };
+    expect(esCodigoDePruebaValido({ testEventCode: 'TEST1' }, 'ENV9')).toBe(true);
   });
 });
 

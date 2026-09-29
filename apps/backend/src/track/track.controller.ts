@@ -7,7 +7,7 @@ import { OptionalJwtAuthGuard } from '../common/guards/optional-jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { userDataParaMeta } from '../common/meta/meta-user-data';
 import { clienteDesdeRequest } from '../common/meta/meta-cliente';
-import { destinoMeta, enviarEventoAMeta, esOrigenDeProduccion, leerConfigMeta } from '../common/meta/meta-destino';
+import { destinoMeta, enviarEventoAMeta, esCodigoDePruebaValido, esOrigenDeProduccion, leerConfigMeta } from '../common/meta/meta-destino';
 import { esCuentaDePrueba } from '../common/test-accounts';
 
 /** Qué pasó con el evento. `pixel`: si el navegador tiene que mandarlo también por el Pixel (mismo event_id). */
@@ -54,10 +54,14 @@ export class TrackController {
       ? await this.prisma.user.findUnique({ where: { id: usuario.id }, select: { id: true, email: true, phone: true } })
       : null;
     const emails = [body.userData?.email, cuenta?.email];
-    if (await esCuentaDePrueba(this.prisma, emails)) return { registrado: false, pixel: false };
-
+    const config = await leerConfigMeta(this.prisma);
     const cliente = clienteDesdeRequest(req, body);
-    const produccion = esOrigenDeProduccion(cliente.origen);
+    // Probando eventos de Meta (?meta_test= con el código del backoffice): va
+    // a "Probar eventos" aunque sea una cuenta de prueba, y no cuenta en ningún lado.
+    const probando = esCodigoDePruebaValido(config, cliente.testEventCode);
+    if (!probando && (await esCuentaDePrueba(this.prisma, emails))) return { registrado: false, pixel: false };
+
+    const produccion = !probando && esOrigenDeProduccion(cliente.origen);
 
     if (produccion) {
       const { productId, productName, value } = extraerDatosDeMarketing(body.eventData);
@@ -66,7 +70,7 @@ export class TrackController {
         .catch((err) => this.logger.warn(`No se pudo guardar el evento ${body.eventName} para el embudo propio: ${err}`));
     }
 
-    const destino = destinoMeta(await leerConfigMeta(this.prisma), produccion);
+    const destino = destinoMeta(config, produccion, probando);
     if (!destino) return { registrado: produccion, pixel: false };
 
     // Valor, productos y moneda van dentro de custom_data: antes iban sueltos
