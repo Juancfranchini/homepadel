@@ -3,11 +3,11 @@
 import { Truck, Store } from 'lucide-react';
 import { UseFormRegister, FieldErrors } from 'react-hook-form';
 import { CheckoutFormData } from './checkoutSchema';
-import { formatPrice } from '@/lib/utils';
 import { PROVINCIAS } from '@/lib/provincias';
 import CheckoutFlexFields, { SugerenciaFlex } from './CheckoutFlexFields';
 import { CheckoutFlex } from './useCheckoutFlex';
 import CheckoutDireccionesGuardadas from './CheckoutDireccionesGuardadas';
+import CheckoutShippingOptions from './CheckoutShippingOptions';
 import { DireccionGuardada } from '@/lib/api';
 
 const inputClass = 'w-full bg-field border border-chip rounded-lg px-4 py-2.5 text-sm text-fg placeholder-fg-muted focus:outline-none focus:border-[#B7D31A]/60 transition-colors';
@@ -27,52 +27,17 @@ interface Props {
   onUsarDireccion?: (d: DireccionGuardada) => void;
 }
 
-const SHIPPING_OPTIONS: { value: CheckoutFormData['shippingMethod']; label: string; detail: string }[] = [
-  { value: 'correo_argentino', label: 'Correo Argentino', detail: 'Opción principal' },
-  { value: 'flex', label: 'Envío Flex en moto', detail: 'AMBA · según tu localidad' },
-  { value: 'retiro_local', label: 'Retiro en el local', detail: 'Sin costo' },
-  { value: 'andreani', label: 'Andreani', detail: 'Costo a coordinar por WhatsApp' },
-  { value: 'oca', label: 'OCA', detail: 'Costo a coordinar por WhatsApp' },
-];
-
-function shippingOptionDetail(option: { value: CheckoutFormData['shippingMethod']; detail: string }, correoCost: number, flex: CheckoutFlex, andreaniGratis: boolean): string {
-  if (option.value === 'correo_argentino') return correoCost === 0 ? 'Envío gratis' : formatPrice(correoCost);
-  if (option.value === 'andreani' && andreaniGratis) return 'Envío gratis';
-  if (option.value === 'flex') {
-    if (flex.zona) return `${formatPrice(flex.zona.precio)} · zona ${flex.zona.zona}`;
-    const desde = Math.min(...flex.info.zonas.map((z) => z.precio));
-    return Number.isFinite(desde) ? `AMBA · desde ${formatPrice(desde)}` : option.detail;
-  }
-  if (option.value === 'retiro_local') return 'Sin costo';
-  return option.detail;
-}
-
 export default function CheckoutShippingFields({ register, errors, selectedMethod, correoCost, andreaniGratis, storeAddress, flex, direcciones = [], onUsarDireccion = () => {} }: Props) {
   const esRetiro = selectedMethod === 'retiro_local';
-  const opciones = SHIPPING_OPTIONS.filter((option) => option.value !== 'flex' || flex.info.activo);
 
   return (
     <div className="bg-card rounded-2xl border border-[#B7D31A]/20 p-6">
       <div className="flex items-center gap-3 mb-5">
         <div className="w-8 h-8 bg-[#B7D31A] rounded-full flex items-center justify-center text-[#050606] font-black text-sm">2</div>
-        <h2 className="font-black text-base uppercase tracking-wide text-fg flex items-center gap-2"><Truck size={16} /> Dirección de envío</h2>
+        <h2 className="font-black text-base uppercase tracking-wide text-fg flex items-center gap-2"><Truck size={16} /> Entrega</h2>
       </div>
 
-      <div className="mb-5">
-        <p className="block text-xs font-semibold text-fg-muted uppercase tracking-wide mb-3">Cómo lo recibís</p>
-        <div className="grid gap-2 sm:grid-cols-2">
-          {opciones.map((option) => (
-            <label key={option.value} className={'rounded-xl border p-3 cursor-pointer transition-colors ' + (selectedMethod === option.value ? 'border-[#B7D31A] bg-[#B7D31A]/5' : 'border-chip hover:border-[#B7D31A]/30')}>
-              <input {...register('shippingMethod')} type="radio" value={option.value} className="sr-only" />
-              <span className="block text-sm font-bold text-fg">{option.label}</span>
-              <span className="block text-[11px] text-fg-muted mt-1">{shippingOptionDetail(option, correoCost, flex, andreaniGratis)}</span>
-            </label>
-          ))}
-        </div>
-        {(selectedMethod === 'oca' || (selectedMethod === 'andreani' && !andreaniGratis)) && (
-          <p className="text-xs text-amber-300 light:text-amber-700 mt-3">No se realizará ningún cobro: enviaremos el detalle del pedido por WhatsApp para coordinar el costo.</p>
-        )}
-      </div>
+      <CheckoutShippingOptions register={register} selectedMethod={selectedMethod} correoCost={correoCost} andreaniGratis={andreaniGratis} flex={flex} />
 
       {!esRetiro && <CheckoutDireccionesGuardadas direcciones={direcciones} onUsar={onUsarDireccion} />}
       {selectedMethod === 'flex' ? (

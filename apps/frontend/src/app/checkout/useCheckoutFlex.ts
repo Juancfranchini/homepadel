@@ -29,9 +29,10 @@ export function useCheckoutFlex(watch: UseFormWatch<CheckoutFormData>, setValue:
     if (esFlex && info.zonas.length > 0 && !info.activo) setValue('shippingMethod', 'correo_argentino');
   }, [esFlex, info, setValue]);
 
-  const usarFlex = () => setValue('shippingMethod', 'flex', { shouldValidate: false });
+  const elegirMetodo = (valor: CheckoutFormData['shippingMethod']) => setValue('shippingMethod', valor, { shouldValidate: false });
+  const usarFlex = () => elegirMetodo('flex');
 
-  return { info, zona, esFlex, usarFlex };
+  return { info, zona, esFlex, usarFlex, elegirMetodo };
 }
 
 export type CheckoutFlex = ReturnType<typeof useCheckoutFlex>;
