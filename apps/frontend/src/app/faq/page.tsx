@@ -18,7 +18,7 @@ interface FaqItem {
 function applyPublicCheckoutPolicy(faq: FaqItem, conTransferencia: boolean): FaqItem {
   const question = faq.question.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   if (faq.category.toUpperCase() === 'ENVIOS' && question.includes('costo')) {
-    return { ...faq, answer: 'Correo Argentino usa una tarifa plana visible en el carrito y puede ser gratis desde el monto configurado. En AMBA también está el Envío Flex en moto, con precio según tu partido o localidad. Andreani es gratis desde el mismo monto que Correo Argentino; por debajo, igual que OCA, el costo se coordina por WhatsApp.' };
+    return { ...faq, answer: 'Correo Argentino usa una tarifa plana visible en el carrito y puede ser gratis desde el monto configurado. En Buenos Aires también está el Envío Flex en moto, con precio según tu partido o localidad. Andreani es gratis desde el mismo monto que Correo Argentino; por debajo, igual que OCA, el costo se coordina por WhatsApp.' };
   }
   if (faq.category.toUpperCase() !== 'PAGOS') return faq;
   if (question.includes('metodo') && question.includes('pago')) {

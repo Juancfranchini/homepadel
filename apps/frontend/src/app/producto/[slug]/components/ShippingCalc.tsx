@@ -18,7 +18,7 @@ export default function ShippingCalc() {
       </div>
       <div className="space-y-2 text-xs">
         <div className="flex items-center justify-between gap-3"><span className="text-fg font-semibold">Correo Argentino</span><span className="text-fg-soft">Tarifa {formatPrice(flatRate)}</span></div>
-        {flexDesde !== null && <div className="flex items-center justify-between gap-3"><span className="text-fg font-semibold">Envío Flex en moto (AMBA)</span><span className="text-fg-soft">Desde {formatPrice(flexDesde)}</span></div>}
+        {flexDesde !== null && <div className="flex items-center justify-between gap-3"><span className="text-fg font-semibold">Envío Flex en moto (Buenos Aires)</span><span className="text-fg-soft">Desde {formatPrice(flexDesde)}</span></div>}
         <div className="flex items-center justify-between gap-3"><span className="text-fg font-semibold">Andreani</span><span className="text-fg-soft">Gratis desde {formatPrice(freeShippingThreshold)}</span></div>
         <div className="flex items-center justify-between gap-3"><span className="text-fg-soft">OCA</span><span className="text-amber-300 light:text-amber-700 flex items-center gap-1"><MessageCircle size={11} />Costo a coordinar</span></div>
       </div>

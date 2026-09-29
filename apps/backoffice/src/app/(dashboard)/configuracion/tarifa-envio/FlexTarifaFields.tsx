@@ -24,7 +24,7 @@ export default function FlexTarifaFields({ register, errors }: { register: UseFo
     <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4 max-w-lg">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2"><Bike className="w-4 h-4 text-[#84cc16]" />Envío Flex en moto (AMBA)</h2>
+          <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2"><Bike className="w-4 h-4 text-[#84cc16]" />Envío Flex en moto (Buenos Aires)</h2>
           <p className="text-gray-500 text-xs mt-1">Kiosco Lo de Juan · Tribulato 1149. Colecta de 13 a 14 hs, reparto desde las 16 hs. Se cobra según la zona de la localidad del cliente y no tiene envío gratis.</p>
         </div>
         <label className="flex items-center gap-2 text-sm text-gray-700 flex-shrink-0 cursor-pointer">
