@@ -9,7 +9,6 @@ import CarritoItemRow from './CarritoItemRow';
 import CarritoSummary from './CarritoSummary';
 import CarritoEmpty from './CarritoEmpty';
 import BolsaRegaloOption from '@/components/cart/BolsaRegaloOption';
-import AuthModal from '@/components/auth/AuthModal';
 import { useCheckoutNavigation } from '@/components/auth/useCheckoutNavigation';
 
 function CartTitle({ count, onClear }: { count: number; onClear: () => void }) {
@@ -58,7 +57,9 @@ export default function CarritoPage() {
 
           <CarritoSummary
             coupon={coupon}
+            items={items}
             subtotal={subtotal}
+            flatRate={flatRate}
             shippingCost={shippingCost}
             freeShippingThreshold={freeShippingThreshold}
             total={total}
@@ -66,12 +67,6 @@ export default function CarritoPage() {
           />
         </div>
       </div>
-      <AuthModal
-        isOpen={checkoutNavigation.authOpen}
-        returnTo="/checkout"
-        onClose={checkoutNavigation.closeAuth}
-        onAuthenticated={checkoutNavigation.handleAuthenticated}
-      />
     </div>
   );
 }

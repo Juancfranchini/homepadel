@@ -147,7 +147,7 @@ export class OrdersService {
   }
 
   async create(dto: CreateOrderDto, userId?: string, cliente?: ClienteMeta) {
-    const datosTransferencia = await exigirTransferencia(this.prisma, userId);
+    const datosTransferencia = await exigirTransferencia(this.prisma, userId, dto.buyerEmail);
     const number = 'HP-' + Date.now();
     const salesLink = await this.resolveSalesLink(dto.salesLinkToken);
     const requestedItems = salesLink
