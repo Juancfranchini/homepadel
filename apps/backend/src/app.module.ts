@@ -33,6 +33,7 @@ import { ShippingModule } from './shipping/shipping.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { TrackModule } from './track/track.module';
 import { MarketingModule } from './marketing/marketing.module';
+import { CatalogFeedModule } from './catalog-feed/catalog-feed.module';
 import { PosModule } from './pos/pos.module';
 import { CashModule } from './cash/cash.module';
 
@@ -71,6 +72,7 @@ import { CashModule } from './cash/cash.module';
     DashboardModule,
     TrackModule,
     MarketingModule,
+    CatalogFeedModule,
     PosModule,
     CashModule,
   ],
