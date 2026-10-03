@@ -1,12 +1,8 @@
 import { CartItem } from '@/types';
 import { trackMetaEvent, DatosComprador } from './metaPixel';
+import { contenidoDeCarrito, firmaDeCarrito as firma } from './metaContenido';
 
 const CLAVE = 'hp_inicio_checkout';
-
-/** Mismos productos y cantidades: el mismo inicio de checkout. */
-function firma(items: CartItem[]): string {
-  return items.map((i) => `${i.product.id}:${i.variantId ?? ''}:${i.quantity}`).sort().join('|');
-}
 
 /**
  * InitiateCheckout: alguien quiere pagar lo que tiene en el carrito.
@@ -29,11 +25,5 @@ export function avisarInicioDeCheckout(items: CartItem[], comprador?: DatosCompr
   } catch {
     // Sin almacenamiento: se avisa igual.
   }
-  trackMetaEvent('InitiateCheckout', {
-    currency: 'ARS',
-    value: items.reduce((acc, i) => acc + i.product.effectivePrice * i.quantity, 0),
-    num_items: items.reduce((acc, i) => acc + i.quantity, 0),
-    content_ids: items.map((i) => i.product.id),
-    content_type: 'product',
-  }, {}, undefined, comprador);
+  trackMetaEvent('InitiateCheckout', contenidoDeCarrito(items), {}, undefined, comprador);
 }

@@ -6,6 +6,7 @@ import { createOrder, createPaymentPreference } from '@/lib/api';
 import { buildWhatsappUrl } from '@/hooks/useSiteSettings';
 import { formatPrice } from '@/lib/utils';
 import { idsDeMeta } from '@/lib/metaNavegador';
+import { avisarDatosDePago } from '@/lib/metaContenido';
 import { idDeIntento, pedidoYaPagado } from './intentoCheckout';
 import { CheckoutFormData } from './checkoutSchema';
 
@@ -193,6 +194,8 @@ export function useCheckoutSubmit({ items, couponCode, salesLinkToken, clearCart
       window.location.href = url;
       return;
     }
+    // Antes de pedir el pago: con Mercado Pago la página se va enseguida.
+    avisarDatosDePago(items, data.email, data.phone, data.paymentMethod === 'transfer' ? 'transfer' : 'mercadopago');
     if (data.paymentMethod === 'transfer') {
       await submitTransfer(data);
       return;

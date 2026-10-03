@@ -15,6 +15,7 @@ import { useInitiateCheckout } from './useInitiateCheckout';
 import { useCheckoutSubmit } from './useCheckoutSubmit';
 import { limpiarBorrador, useCheckoutDraft } from './useCheckoutDraft';
 import { useAbandonedCart } from './useAbandonedCart';
+import { useContactoParaMeta } from './useContactoParaMeta';
 import CheckoutEmptyCart from './CheckoutEmptyCart';
 import CheckoutSuccessScreen from './CheckoutSuccessScreen';
 import CheckoutFormSections from './CheckoutFormSections';
@@ -70,6 +71,7 @@ export default function CheckoutPage() {
   // Queda registrado el carrito de quien deja su email y no termina la compra,
   // para que la tienda pueda recuperarlo desde el backoffice.
   useAbandonedCart(items, { email: watch('email'), name: watch('name'), phone: watch('phone') }, orderSuccess);
+  useContactoParaMeta(watch('email'), watch('phone'));
   const selectedShipping = watch('shippingMethod');
   const flex = useCheckoutFlex(watch, setValue);
   const guardadas = useDireccionesCheckout(Boolean(user), setValue);

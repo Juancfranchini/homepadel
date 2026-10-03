@@ -89,6 +89,7 @@ export function useProductoData(slug: string | undefined, initialProduct: Produc
       content_name: product.name,
       value: product.effectivePrice,
       currency: 'ARS',
+      contents: [{ id: product.id, quantity: 1, item_price: product.effectivePrice }],
     });
   }, [product, refreshing]);
 
