@@ -128,13 +128,14 @@ export class AbandonedCartsService {
    */
   async stats() {
     const desde = new Date(Date.now() - DIAS_VIGENCIA * 24 * 60 * 60 * 1000);
-    const [pendientes, recuperados, sumaPendiente] = await Promise.all([
+    const [pendientes, recuperados, sumaPendiente, embudo] = await Promise.all([
       this.prisma.abandonedCart.count({ where: { recoveredAt: null, isTest: false, updatedAt: { gte: desde } } }),
       this.prisma.abandonedCart.count({ where: { recoveredAt: { not: null }, isTest: false, updatedAt: { gte: desde } } }),
       this.prisma.abandonedCart.aggregate({
         where: { recoveredAt: null, isTest: false, updatedAt: { gte: desde } },
         _sum: { total: true },
       }),
+      this.embudo(desde),
     ]);
 
     return {
@@ -142,6 +143,30 @@ export class AbandonedCartsService {
       recuperados,
       montoPendiente: sumaPendiente._sum.total ?? 0,
       dias: DIAS_VIGENCIA,
+      ...embudo,
+    };
+  }
+
+  /**
+   * El total real, no solo los que dejaron su mail: cuántos inicios de
+   * checkout hubo y por cuánta plata, y cuántas compras. Sale del embudo de
+   * Marketing (marketing_events), que ya deja afuera las pruebas y lo que no
+   * viene de la tienda de producción. De un anónimo no hay a quién
+   * contactar, pero sí se ve cuánto se pierde antes de que deje sus datos.
+   */
+  private async embudo(desde: Date) {
+    const [inicios, compras] = await Promise.all([
+      this.prisma.marketingEvent.aggregate({
+        where: { eventName: 'InitiateCheckout', createdAt: { gte: desde } },
+        _count: { id: true },
+        _sum: { value: true },
+      }),
+      this.prisma.marketingEvent.count({ where: { eventName: 'Purchase', createdAt: { gte: desde } } }),
+    ]);
+    return {
+      iniciosCheckout: inicios._count.id,
+      montoIniciado: inicios._sum.value ?? 0,
+      compras,
     };
   }
 

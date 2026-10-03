@@ -77,3 +77,22 @@ describe('AbandonedCartsService.markRecovered', () => {
     expect(prisma.abandonedCart.updateMany).not.toHaveBeenCalled();
   });
 });
+
+describe('AbandonedCartsService.stats', () => {
+  it('suma el embudo real (inicios de checkout y compras), no solo los que dejaron contacto', async () => {
+    const prisma = {
+      abandonedCart: {
+        count: jest.fn().mockResolvedValueOnce(5).mockResolvedValueOnce(1),
+        aggregate: jest.fn().mockResolvedValue({ _sum: { total: 2850000 } }),
+      },
+      marketingEvent: {
+        aggregate: jest.fn().mockResolvedValue({ _count: { id: 19 }, _sum: { value: 9500000 } }),
+        count: jest.fn().mockResolvedValue(0),
+      },
+    };
+    const service = new AbandonedCartsService(prisma as never, {} as never);
+    const stats = await service.stats();
+    expect(stats).toMatchObject({ pendientes: 5, recuperados: 1, montoPendiente: 2850000, iniciosCheckout: 19, montoIniciado: 9500000, compras: 0 });
+    expect(prisma.marketingEvent.aggregate).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({ eventName: 'InitiateCheckout' }) }));
+  });
+});
