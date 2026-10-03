@@ -279,6 +279,8 @@ model Coupon {
   type      String    @default("PERCENTAGE")
   minAmount Float?
   maxUses   Int?
+  /// Tope del descuento en pesos (cupones de porcentaje). Null = sin tope.
+  maxDiscount Float?
   usedCount Int       @default(0)
   active    Boolean   @default(true)
   expiresAt DateTime?

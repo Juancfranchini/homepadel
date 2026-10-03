@@ -3,13 +3,26 @@
 // Los tipos de cupón son: PERCENTAGE (porcentaje) | FIXED (monto fijo)
 
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { CreateCouponDto, UpdateCouponDto } from './dto/coupon.dto';
 
-function normalizeDto(dto: any): any {
-  const { isActive, expiresAt, ...rest } = dto;
-  if (isActive !== undefined) rest.active = isActive;
-  if (expiresAt) rest.expiresAt = new Date(expiresAt);
-  return rest;
+/** Del DTO validado a los datos de Prisma: `isActive` es el nombre viejo de `active`. */
+function datosDelCupon(dto: UpdateCouponDto): Prisma.CouponUpdateInput {
+  const { isActive, expiresAt, ...resto } = dto;
+  return {
+    ...resto,
+    ...(resto.code ? { code: resto.code.trim().toUpperCase() } : {}),
+    ...(isActive !== undefined && resto.active === undefined ? { active: isActive } : {}),
+    ...(expiresAt !== undefined ? { expiresAt: expiresAt ? new Date(expiresAt) : null } : {}),
+  };
+}
+
+/** Un porcentaje mayor a 100 regalaría el pedido: depende del tipo, por eso no está en el DTO. */
+function chequearPorcentaje(type: string | undefined, discount: number | undefined): void {
+  if (type === 'PERCENTAGE' && discount !== undefined && discount > 100) {
+    throw new BadRequestException('Un cupón de porcentaje no puede superar el 100%');
+  }
 }
 
 @Injectable()
@@ -35,22 +48,31 @@ export class CouponsService {
     return coupon;
   }
 
-  /** Monto de descuento para un subtotal dado. Nunca deja el total negativo. */
-  calculateDiscount(coupon: { type: string; discount: number }, subtotal: number): number {
+  /**
+   * Monto de descuento para un subtotal dado. Nunca deja el total negativo y
+   * respeta el tope en pesos (`maxDiscount`) si el cupón lo tiene. Es el
+   * mismo cálculo para el carrito, el checkout y lo que se cobra.
+   */
+  calculateDiscount(coupon: { type: string; discount: number; maxDiscount?: number | null }, subtotal: number): number {
     const raw = coupon.type === 'FIXED' ? coupon.discount : (subtotal * coupon.discount) / 100;
-    return Math.min(Math.round(raw), subtotal);
+    const conTope = coupon.maxDiscount && coupon.maxDiscount > 0 ? Math.min(raw, coupon.maxDiscount) : raw;
+    return Math.min(Math.round(conTope), subtotal);
   }
 
   incrementUsage(id: string) {
     return this.prisma.coupon.update({ where: { id }, data: { usedCount: { increment: 1 } } });
   }
 
-  create(dto: any) { return this.prisma.coupon.create({ data: normalizeDto(dto) }); }
+  create(dto: CreateCouponDto) {
+    chequearPorcentaje(dto.type, dto.discount);
+    return this.prisma.coupon.create({ data: datosDelCupon(dto) as Prisma.CouponCreateInput });
+  }
 
-  async update(id: string, dto: any) {
+  async update(id: string, dto: UpdateCouponDto) {
     const c = await this.prisma.coupon.findUnique({ where: { id } });
     if (!c) throw new NotFoundException('Cupón no encontrado');
-    return this.prisma.coupon.update({ where: { id }, data: normalizeDto(dto) });
+    chequearPorcentaje(dto.type ?? c.type, dto.discount ?? c.discount);
+    return this.prisma.coupon.update({ where: { id }, data: datosDelCupon(dto) });
   }
 
   async remove(id: string) {
