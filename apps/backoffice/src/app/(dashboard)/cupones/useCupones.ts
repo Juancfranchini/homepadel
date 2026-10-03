@@ -13,20 +13,33 @@ export interface Coupon {
   type: string;
   minAmount?: number;
   maxUses?: number;
+  maxDiscount?: number | null;
   usedCount: number;
   active: boolean;
   expiresAt?: string;
 }
 
+/**
+ * Número opcional: un input vacío ("") es "sin valor". z.coerce.number() lo
+ * convertía en 0, y "Usos máximos" vacío (ilimitado) fallaba el mínimo de 1:
+ * no se podía crear un cupón sin límite de usos.
+ */
+const numeroOpcional = (min: number, entero = false) =>
+  z.preprocess(
+    (v) => (v === '' || v === null || v === undefined ? undefined : v),
+    (entero ? z.coerce.number().int('Tiene que ser un número entero') : z.coerce.number()).min(min, 'Mínimo ' + min).optional(),
+  );
+
 const schema = z.object({
-  code: z.string().min(3, 'El código es requerido').toUpperCase(),
+  code: z.string().trim().min(3, 'El código es requerido').regex(/^[A-Za-z0-9_-]+$/, 'Solo letras, números, guiones y guiones bajos').toUpperCase(),
   discount: z.coerce.number().min(1, 'Minimo 1'),
   type: z.enum(['PERCENTAGE', 'FIXED']),
-  minAmount: z.coerce.number().min(0).optional(),
-  maxUses: z.coerce.number().int().min(1).optional(),
+  minAmount: numeroOpcional(0),
+  maxUses: numeroOpcional(1, true),
+  maxDiscount: numeroOpcional(1),
   active: z.boolean().default(true),
   expiresAt: z.string().optional().or(z.literal('')),
-});
+}).refine((d) => d.type !== 'PERCENTAGE' || d.discount <= 100, { message: 'Un porcentaje no puede superar el 100%', path: ['discount'] });
 export type FormData = z.infer<typeof schema>;
 
 export function useCupones() {
@@ -58,13 +71,20 @@ export function useCupones() {
   useEffect(() => { load(); }, [load]);
   useEffect(() => { setCurrentPage(1); }, [isMobile]);
 
-  const openCreate = () => { setEditItem(null); reset({ code: '', discount: 10, type: 'PERCENTAGE', minAmount: 0, maxUses: undefined, active: true, expiresAt: '' }); setModalOpen(true); };
-  const openEdit = (c: Coupon) => { setEditItem(c); reset({ code: c.code, discount: c.discount, type: c.type as any, minAmount: c.minAmount, maxUses: c.maxUses, active: c.active, expiresAt: c.expiresAt ? c.expiresAt.slice(0, 10) : '' }); setModalOpen(true); };
+  const openCreate = () => { setEditItem(null); reset({ code: '', discount: 10, type: 'PERCENTAGE', minAmount: 0, maxUses: undefined, maxDiscount: undefined, active: true, expiresAt: '' }); setModalOpen(true); };
+  const openEdit = (c: Coupon) => { setEditItem(c); reset({ code: c.code, discount: c.discount, type: c.type as any, minAmount: c.minAmount, maxUses: c.maxUses, maxDiscount: c.maxDiscount ?? undefined, active: c.active, expiresAt: c.expiresAt ? c.expiresAt.slice(0, 10) : '' }); setModalOpen(true); };
 
   const onSubmit = async (data: FormData) => {
     setSaving(true);
     try {
-      const payload = { ...data, expiresAt: data.expiresAt ? new Date(data.expiresAt).toISOString() : undefined };
+      // null y no undefined: al editar, vaciar un campo tiene que borrarlo, no dejar el valor anterior.
+      const payload = {
+        ...data,
+        minAmount: data.minAmount ?? null,
+        maxUses: data.maxUses ?? null,
+        maxDiscount: data.maxDiscount ?? null,
+        expiresAt: data.expiresAt ? new Date(data.expiresAt).toISOString() : null,
+      };
       if (editItem) { await api.patch('/coupons/' + editItem.id, payload); toast('Cupón actualizado', 'success'); }
       else { await api.post('/coupons', payload); toast('Cupón creado', 'success'); }
       setModalOpen(false); load();

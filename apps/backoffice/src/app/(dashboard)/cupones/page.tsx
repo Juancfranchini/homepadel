@@ -9,7 +9,10 @@ import { useCupones, Coupon } from './useCupones';
 const inputClass = 'w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40 focus:border-[#C8FF00]';
 const labelClass = 'block text-sm font-medium text-gray-700 mb-1';
 
-function discountLabel(c: Coupon) { return c.type === 'PERCENTAGE' ? c.discount + '%' : '$' + c.discount.toLocaleString('es-AR'); }
+function discountLabel(c: Coupon) {
+  const base = c.type === 'PERCENTAGE' ? c.discount + '%' : '$' + c.discount.toLocaleString('es-AR');
+  return c.maxDiscount ? base + ' · tope $' + c.maxDiscount.toLocaleString('es-AR') : base;
+}
 
 function CouponsTable({ coupons, onToggleActive, onEdit, onDelete }: { coupons: Coupon[]; onToggleActive: (c: Coupon) => void; onEdit: (c: Coupon) => void; onDelete: (c: Coupon) => void }) {
   return (
@@ -94,6 +97,7 @@ function CouponFormModal({ isOpen, editItem, register, errors, watchType, saving
           <div>
             <label className={labelClass}>Descuento * {watchType === 'PERCENTAGE' ? '(%)' : '($)'}</label>
             <input type="number" {...register('discount')} className={inputClass} />
+            {errors.discount && <p className="text-xs text-red-600 mt-1">{errors.discount.message}</p>}
           </div>
           <div>
             <label className={labelClass}>Tipo</label>
@@ -107,11 +111,19 @@ function CouponFormModal({ isOpen, editItem, register, errors, watchType, saving
           <div>
             <label className={labelClass}>Monto minimo</label>
             <input type="number" {...register('minAmount')} className={inputClass} placeholder="Opcional" />
+            {errors.minAmount && <p className="text-xs text-red-600 mt-1">{errors.minAmount.message}</p>}
           </div>
           <div>
             <label className={labelClass}>Usos maximos</label>
             <input type="number" {...register('maxUses')} className={inputClass} placeholder="Ilimitado" />
+            {errors.maxUses && <p className="text-xs text-red-600 mt-1">{errors.maxUses.message}</p>}
           </div>
+        </div>
+        <div>
+          <label className={labelClass}>Tope de descuento ($)</label>
+          <input type="number" {...register('maxDiscount')} className={inputClass} placeholder="Sin tope" />
+            {errors.maxDiscount && <p className="text-xs text-red-600 mt-1">{errors.maxDiscount.message}</p>}
+          <p className="text-xs text-gray-400 mt-1">Para cupones de porcentaje: el descuento nunca supera este monto, por más grande que sea la compra.</p>
         </div>
         <div>
           <label className={labelClass}>Fecha de expiracion</label>
