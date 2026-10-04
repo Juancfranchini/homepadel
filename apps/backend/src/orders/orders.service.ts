@@ -11,6 +11,7 @@ import { InventoryService } from '../inventory/inventory.service';
 import { informarTransferenciaPagadaAMeta } from '../payments/payments.meta';
 import { pedidoSinDatosPersonales } from './orders.public-view';
 import { esCuentaDePrueba } from '../common/test-accounts';
+import { datosAlConfirmarPago } from './orders.confirm-payment';
 import { etiquetaFlex } from '../shipping/envio-flex';
 import { bolsasDeRegalo } from './bolsas-regalo';
 import { ClienteMeta } from '../common/meta/meta-cliente';
@@ -351,9 +352,15 @@ export class OrdersService {
     if (trackingNumber) data.trackingNumber = trackingNumber;
     if (trackingUrl) data.trackingUrl = trackingUrl;
 
-    const updated = await this.prisma.order.update({ where: { id }, data });
+    const pasaAPagado = status === OrderStatus.PAID && anterior.status !== OrderStatus.PAID;
+    const confirmacion = pasaAPagado ? datosAlConfirmarPago(anterior) : null;
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const pedido = await tx.order.update({ where: { id }, data: { ...data, ...(confirmacion?.pedido ?? {}) } });
+      if (confirmacion?.cobro) await tx.payment.create({ data: confirmacion.cobro });
+      return pedido;
+    });
 
-    if (status === OrderStatus.PAID && anterior.status !== OrderStatus.PAID) {
+    if (pasaAPagado) {
       await informarTransferenciaPagadaAMeta(this.prisma, id);
     }
 
