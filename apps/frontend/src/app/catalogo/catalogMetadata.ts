@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { getSiteUrl } from '@/lib/siteUrl';
 import { OPEN_GRAPH_BASE } from '@/lib/seoPortada';
-import type { CatalogFilters } from './catalogQuery';
+import { valoresDe, type CatalogFilters } from './catalogQuery';
 import type { CatalogResult, MenuCatalogo, MarcaMenu } from './getCatalogData';
 
 /** Más de tres marcas y el título se corta en Google; el resto va en la descripción. */
@@ -87,7 +87,29 @@ function urlCanonica(f: CatalogFilters): string {
   return getSiteUrl() + '/catalogo' + (query ? '?' + query : '');
 }
 
-export function buildCatalogMetadata(f: CatalogFilters, menu: MenuCatalogo, result: CatalogResult): Metadata {
+/**
+ * Una combinación de varias marcas, categorías o géneros (?marca=nox,royal) no
+ * es una página para el buscador: con todas las combinaciones posibles, Google
+ * vería cientos de listados casi iguales. Se titula y se canoniza como el
+ * listado sin esos filtros, y no se indexa.
+ */
+function sinFiltrosCombinados(f: CatalogFilters): { base: CatalogFilters; combinado: boolean } {
+  const multiple = (v: string) => valoresDe(v).length > 1;
+  const combinado = multiple(f.selectedCategory) || multiple(f.selectedBrand) || multiple(f.selectedGender);
+  if (!combinado) return { base: f, combinado };
+  return {
+    base: {
+      ...f,
+      selectedCategory: multiple(f.selectedCategory) ? '' : f.selectedCategory,
+      selectedBrand: multiple(f.selectedBrand) ? '' : f.selectedBrand,
+      selectedGender: multiple(f.selectedGender) ? '' : f.selectedGender,
+    },
+    combinado,
+  };
+}
+
+export function buildCatalogMetadata(filtros: CatalogFilters, menu: MenuCatalogo, result: CatalogResult): Metadata {
+  const { base: f, combinado } = sinFiltrosCombinados(filtros);
   const { titulo, completo } = encabezado(f, menu);
   const pagina = f.currentPage > 1 ? ' — página ' + f.currentPage : '';
   const title = (f.searchQuery ? 'Resultados para "' + f.searchQuery + '"' : titulo) + pagina;
@@ -100,7 +122,7 @@ export function buildCatalogMetadata(f: CatalogFilters, menu: MenuCatalogo, resu
 
   // Una búsqueda o un listado vacío no son páginas para el buscador; se siguen
   // los enlaces igual para que lleguen a las fichas.
-  const indexable = !f.searchQuery && !result.error && result.totalCount > 0;
+  const indexable = !combinado && !f.searchQuery && !result.error && result.totalCount > 0;
 
   return {
     title,

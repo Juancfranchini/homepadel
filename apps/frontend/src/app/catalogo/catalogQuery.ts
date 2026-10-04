@@ -68,6 +68,19 @@ export function leerDeObjeto(params: Record<string, string | string[] | undefine
   };
 }
 
+/**
+ * Los filtros de varios valores viajan en la URL separados por coma
+ * (?marca=nox,royal). La API los interpreta como "cualquiera de estos".
+ */
+export const valoresDe = (texto: string): string[] => texto.split(',').map((v) => v.trim()).filter(Boolean);
+
+/** Tilda o destilda un valor del filtro; null si no queda ninguno (el parámetro se borra). */
+export function alternarValor(texto: string, valor: string): string | null {
+  const actuales = valoresDe(texto);
+  const nuevos = actuales.includes(valor) ? actuales.filter((v) => v !== valor) : [...actuales, valor];
+  return nuevos.length > 0 ? nuevos.join(',') : null;
+}
+
 export function buildProductsQuery(f: CatalogFilters): URLSearchParams {
   // El orden viaja a la API: ordenar del lado del navegador solo reacomodaría
   // los doce productos de la página visible.

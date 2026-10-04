@@ -6,6 +6,7 @@ import CatalogCheckboxOption from './CatalogCheckboxOption';
 import CatalogAttributeSelect from './CatalogAttributeSelect';
 import CatalogPriceRange from './CatalogPriceRange';
 import { etiquetaFormato } from '../useCatalogFilters';
+import { valoresDe } from '../catalogQuery';
 
 export type ActivePanel = 'categories' | 'brands' | 'attributes' | 'price' | 'sort' | null;
 
@@ -50,6 +51,26 @@ export interface PanelProps {
 const toOptions = (values: string[]) => values.map((value) => ({ value, label: value }));
 
 /**
+ * Atributo de varios valores (género, formato, nivel, talle, color): casillas
+ * que se combinan, en vez de un desplegable que dejaba elegir uno solo.
+ */
+function OpcionesMultiples({ label, seleccion, opciones, onToggle }: {
+  label: string; seleccion: string; opciones: { value: string; label: string }[]; onToggle: (valor: string) => void;
+}) {
+  const elegidos = valoresDe(seleccion);
+  return (
+    <div>
+      <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-fg">{label}</p>
+      <div className="space-y-2">
+        {opciones.map((o) => (
+          <CatalogCheckboxOption key={o.value} label={o.label} checked={elegidos.includes(o.value)} onChange={() => onToggle(o.value)} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
  * Contenido de una sección de filtros de la barra lateral.
  *
  * Se renderiza dentro de la barra, debajo del control que la abre. Antes vivía
@@ -78,8 +99,8 @@ function CategoriesSection({ categories, selectedCategory, onCategoryChange }: P
           <CatalogCheckboxOption
             key={cat.id}
             label={cat.name}
-            checked={selectedCategory === cat.slug}
-            onChange={() => onCategoryChange(selectedCategory === cat.slug ? null : cat.slug)}
+            checked={valoresDe(selectedCategory).includes(cat.slug)}
+            onChange={() => onCategoryChange(cat.slug)}
           />
         ))}
       </div>
@@ -95,8 +116,8 @@ function BrandsSection({ brands, selectedBrand, onBrandChange }: PanelProps) {
           <CatalogCheckboxOption
             key={brand.id}
             label={brand.name.trim()}
-            checked={selectedBrand === brand.slug}
-            onChange={() => onBrandChange(selectedBrand === brand.slug ? null : brand.slug)}
+            checked={valoresDe(selectedBrand).includes(brand.slug)}
+            onChange={() => onBrandChange(brand.slug)}
           />
         ))}
       </div>
@@ -125,19 +146,19 @@ function AttributesSection(props: PanelProps) {
   return (
     <div className="space-y-4">
       {genders.length > 0 && (
-        <CatalogAttributeSelect label="Género" value={selectedGender} options={toOptions(genders)} onChange={onGenderChange} />
+        <OpcionesMultiples label="Género" seleccion={selectedGender} opciones={toOptions(genders)} onToggle={onGenderChange} />
       )}
       {shapes.length > 0 && (
-        <CatalogAttributeSelect label="Formato" value={selectedShape} options={shapes.map((s) => ({ value: s, label: etiquetaFormato(s) }))} onChange={onShapeChange} />
+        <OpcionesMultiples label="Formato" seleccion={selectedShape} opciones={shapes.map((s) => ({ value: s, label: etiquetaFormato(s) }))} onToggle={onShapeChange} />
       )}
       {levels.length > 0 && (
-        <CatalogAttributeSelect label="Nivel" value={selectedLevel} options={toOptions(levels)} onChange={onLevelChange} />
+        <OpcionesMultiples label="Nivel" seleccion={selectedLevel} opciones={toOptions(levels)} onToggle={onLevelChange} />
       )}
       {sizes.length > 0 && (
-        <CatalogAttributeSelect label="Talle" value={selectedSize} options={toOptions(sizes)} onChange={onSizeChange} />
+        <OpcionesMultiples label="Talle" seleccion={selectedSize} opciones={toOptions(sizes)} onToggle={onSizeChange} />
       )}
       {colors.length > 0 && (
-        <CatalogAttributeSelect label="Color" value={selectedColor} options={toOptions(colors)} onChange={onColorChange} />
+        <OpcionesMultiples label="Color" seleccion={selectedColor} opciones={toOptions(colors)} onToggle={onColorChange} />
       )}
       {weights.length > 0 && (
         <CatalogAttributeSelect label="Peso" value={selectedWeight} options={toOptions(weights)} onChange={onWeightChange} />

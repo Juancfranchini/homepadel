@@ -3,6 +3,7 @@
 import { MessageCircle } from 'lucide-react';
 import { useSiteSettings, buildWhatsappUrl } from '@/hooks/useSiteSettings';
 import { trackMetaEvent } from '@/lib/metaPixel';
+import { valoresDe } from '../catalogQuery';
 
 const MENSAJE =
   'Hola! Estoy mirando el catálogo y quiero ayuda para elegir una paleta.';
@@ -28,7 +29,7 @@ export default function CatalogAdvisor({ selectedCategory }: Props) {
   const settings = useSiteSettings();
   const url = buildWhatsappUrl(settings.whatsapp || settings.phone, MENSAJE);
 
-  if (!CATEGORIAS_CON_ASESORAMIENTO.includes(selectedCategory)) return null;
+  if (!valoresDe(selectedCategory).some((c) => CATEGORIAS_CON_ASESORAMIENTO.includes(c))) return null;
   if (!url) return null;
 
   return (

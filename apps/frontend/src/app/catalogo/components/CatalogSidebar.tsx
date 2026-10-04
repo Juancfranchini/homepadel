@@ -6,6 +6,7 @@ import { Category, Brand } from '@/types';
 import { formatPrice } from '@/lib/utils';
 import { sortLabel } from '../sortOptions';
 import { etiquetaFormato } from '../useCatalogFilters';
+import { valoresDe } from '../catalogQuery';
 import CatalogSidebarPanel, { ActivePanel, PanelProps } from './CatalogSidebarPanel';
 import CatalogSidebarButton from './CatalogSidebarButton';
 import CatalogSidebarSection from './CatalogSidebarSection';
@@ -41,9 +42,15 @@ export default function CatalogSidebar(props: Props) {
 
   // El valor vigente se muestra debajo de cada control: así se entiende qué
   // hace el botón y, a la vez, qué filtro está aplicado sin tener que abrirlo.
-  const nombreCategoria = categories.find((c) => c.slug === selectedCategory)?.name;
-  const nombreMarca = brands.find((b) => b.slug === selectedBrand)?.name.trim();
-  const atributos = [selectedGender, selectedShape && etiquetaFormato(selectedShape), selectedLevel, selectedSize, selectedColor, selectedWeight].filter(Boolean);
+  // Con varios valores elegidos se listan todos, separados por coma.
+  const nombres = (seleccion: string, lista: { slug: string; name: string }[]) =>
+    valoresDe(seleccion).map((slug) => lista.find((x) => x.slug === slug)?.name.trim() ?? slug).join(', ') || undefined;
+  const nombreCategoria = nombres(selectedCategory, categories);
+  const nombreMarca = nombres(selectedBrand, brands);
+  const atributos = [
+    valoresDe(selectedGender).join(', '), valoresDe(selectedShape).map(etiquetaFormato).join(', '), valoresDe(selectedLevel).join(', '),
+    valoresDe(selectedSize).join(', '), valoresDe(selectedColor).join(', '), selectedWeight,
+  ].filter(Boolean);
   const rangoPrecio = minPrice != null || maxPrice != null
     ? [minPrice != null ? formatPrice(minPrice) : '$0', maxPrice != null ? formatPrice(maxPrice) : 'sin tope'].join(' – ')
     : undefined;

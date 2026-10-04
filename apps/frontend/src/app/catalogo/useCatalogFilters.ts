@@ -3,7 +3,7 @@
 import { useTransition } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { formatPrice } from '@/lib/utils';
-import { parseCatalogFilters } from './catalogQuery';
+import { alternarValor, parseCatalogFilters, valoresDe } from './catalogQuery';
 
 const ETIQUETA_FORMATO: Record<string, string> = { Lagrima: 'Lágrima', Hibrido: 'Híbrido' };
 export const etiquetaFormato = (valor: string) => ETIQUETA_FORMATO[valor] ?? valor;
@@ -22,7 +22,16 @@ function textoRangoPrecio(min: number | null, max: number | null): string {
  * servidor responde, `isPending` deja mostrar el esqueleto en vez de dejar
  * la grilla vieja como si nada hubiera pasado.
  */
-export function useCatalogFilters() {
+interface NombresDeFiltros {
+  categories: { slug: string; name: string }[];
+  brands: { slug: string; name: string }[];
+}
+
+/** El nombre visible de un slug ("royal-padel" → "Royal Pádel"); el slug si todavía no cargó la lista. */
+const nombreDe = (lista: { slug: string; name: string }[] | undefined, slug: string) =>
+  lista?.find((x) => x.slug === slug)?.name.trim() ?? slug;
+
+export function useCatalogFilters(nombres?: NombresDeFiltros) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -54,15 +63,21 @@ export function useCatalogFilters() {
     || !!selectedWeight || !!selectedShape || !!selectedGender || !!selectedLevel || minPrice != null || maxPrice != null;
 
   const activeChips: { label: string; onRemove: () => void }[] = [];
+  // Un chip por valor: con dos marcas elegidas se puede sacar una sola.
+  const chips = (seleccion: string, param: string, etiqueta: (valor: string) => string) => {
+    for (const valor of valoresDe(seleccion)) {
+      activeChips.push({ label: etiqueta(valor), onRemove: () => setParam(param, alternarValor(seleccion, valor)) });
+    }
+  };
   if (isOffer) activeChips.push({ label: 'Ofertas', onRemove: () => setParam('oferta', null) });
-  if (selectedCategory) activeChips.push({ label: selectedCategory, onRemove: () => setParam('categoria', null) });
-  if (selectedBrand) activeChips.push({ label: selectedBrand, onRemove: () => setParam('marca', null) });
-  if (selectedSize) activeChips.push({ label: 'Talle: ' + selectedSize, onRemove: () => setParam('talle', null) });
-  if (selectedColor) activeChips.push({ label: 'Color: ' + selectedColor, onRemove: () => setParam('color', null) });
+  chips(selectedCategory, 'categoria', (v) => nombreDe(nombres?.categories, v));
+  chips(selectedBrand, 'marca', (v) => nombreDe(nombres?.brands, v));
+  chips(selectedSize, 'talle', (v) => 'Talle: ' + v);
+  chips(selectedColor, 'color', (v) => 'Color: ' + v);
   if (selectedWeight) activeChips.push({ label: 'Peso: ' + selectedWeight, onRemove: () => setParam('peso', null) });
-  if (selectedShape) activeChips.push({ label: 'Formato: ' + etiquetaFormato(selectedShape), onRemove: () => setParam('formato', null) });
-  if (selectedGender) activeChips.push({ label: 'Género: ' + selectedGender, onRemove: () => setParam('genero', null) });
-  if (selectedLevel) activeChips.push({ label: 'Nivel: ' + selectedLevel, onRemove: () => setParam('nivel', null) });
+  chips(selectedShape, 'formato', (v) => 'Formato: ' + etiquetaFormato(v));
+  chips(selectedGender, 'genero', (v) => 'Género: ' + v);
+  chips(selectedLevel, 'nivel', (v) => 'Nivel: ' + v);
   if (minPrice != null || maxPrice != null) {
     activeChips.push({ label: 'Precio: ' + textoRangoPrecio(minPrice, maxPrice), onRemove: () => setParams({ desde: null, hasta: null }) });
   }
@@ -70,8 +85,9 @@ export function useCatalogFilters() {
 
   const capitalizar = (texto: string) => texto.charAt(0).toUpperCase() + texto.slice(1);
   // Entrando desde "Hombre" o "Mujer" del menú, el título lo dice.
-  const pageTitle = isOffer ? 'Ofertas' : selectedCategory ? capitalizar(selectedCategory)
-    : selectedGender ? capitalizar(selectedGender) : 'Catálogo';
+  const enTitulo = (seleccion: string) => valoresDe(seleccion).map(capitalizar).join(' y ');
+  const pageTitle = isOffer ? 'Ofertas' : selectedCategory ? enTitulo(selectedCategory)
+    : selectedGender ? enTitulo(selectedGender) : 'Catálogo';
 
   return {
     ...filters,
