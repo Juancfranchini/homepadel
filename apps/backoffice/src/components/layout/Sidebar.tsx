@@ -3,126 +3,9 @@
 import Link from 'next/link';
 import NextImage from 'next/image';
 import { usePathname } from 'next/navigation';
-import { useEffect, useRef } from 'react';
-import {
-  HelpCircle,
-  LayoutDashboard,
-  Package,
-  Tags,
-  Award,
-  ShoppingBag,
-  Users,
-  Percent,
-  Image,
-  Tag,
-  Receipt,
-  Settings,
-  PlaySquare,
-  Sparkles,
-  Shield,
-  MessageSquare,
-  Info,
-  Instagram,
-  Megaphone,
-  Star,
-  FileEdit,
-  FileText,
-  RefreshCw,
-  CreditCard,
-  Ruler,
-  Truck,
-  Banknote,
-  UserCheck,
-  FileCheck,
-  X,
-  ShoppingCart,
-  Shapes,
-  Store,
-  Wallet,
-  BarChart3,
-  Activity,
-} from 'lucide-react';
-
-interface NavItem {
-  label: string;
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-}
-
-interface NavGroup {
-  title?: string;
-  items: NavItem[];
-}
-
-const navGroups: NavGroup[] = [
-  {
-    items: [
-      { label: 'Dashboard', href: '/', icon: LayoutDashboard },
-    ],
-  },
-  {
-    title: 'Ecommerce',
-    items: [
-      { label: 'Productos', href: '/productos', icon: Package },
-      { label: 'Contenido Productos', href: '/productos-contenido', icon: FileEdit },
-      { label: 'Categorias', href: '/categorias', icon: Tags },
-      { label: 'Marcas', href: '/marcas', icon: Award },
-      { label: 'Pedidos', href: '/pedidos', icon: ShoppingBag },
-      { label: 'Reviews', href: '/reviews', icon: Star },
-      { label: 'Clientes', href: '/clientes', icon: Users },
-    ],
-  },
-  {
-    title: 'Ventas',
-    items: [
-      { label: 'Punto de Venta', href: '/punto-de-venta', icon: Store },
-      { label: 'Caja', href: '/caja', icon: Wallet },
-      { label: 'Estadísticas', href: '/estadisticas-ventas', icon: BarChart3 },
-      { label: 'Equipo PDV', href: '/equipo-pdv', icon: Shield },
-      { label: 'Configuración PDV', href: '/configuracion-pdv', icon: Settings },
-    ],
-  },
-  {
-    title: 'Marketing',
-    items: [
-      { label: 'Trazabilidad', href: '/marketing', icon: Activity },
-      { label: 'Promociones', href: '/promociones', icon: Percent },
-      { label: 'Cupones', href: '/cupones', icon: Tag },
-      { label: 'Carritos abandonados', href: '/carritos-abandonados', icon: ShoppingCart },
-    ],
-  },
-  {
-    title: 'Landing Page',
-    items: [
-      { label: 'Hero Slider', href: '/hero', icon: PlaySquare },
-      { label: 'Beneficios', href: '/beneficios', icon: Sparkles },
-      { label: 'Banners', href: '/banners', icon: Image },
-      { label: 'Sobre Nosotros', href: '/configuracion/about', icon: Info },
-      { label: 'Testimonios', href: '/testimonios', icon: MessageSquare },
-      { label: 'FAQ', href: '/faq', icon: HelpCircle },
-      { label: 'Contacto', href: '/contacto', icon: FileText },
-      { label: 'Instagram', href: '/configuracion/instagram', icon: Instagram },
-      { label: 'CTA & Newsletter', href: '/configuracion/mensaje-final', icon: Megaphone },
-      { label: 'Confianza Productos', href: '/configuracion/confianza-productos', icon: Shield },
-      { label: 'Medios de Pago', href: '/configuracion/medios-pago', icon: CreditCard },
-      { label: 'Politica de Devolucion', href: '/configuracion/paginas', icon: RefreshCw },
-      { label: 'Guia de Talles', href: '/configuracion/talles', icon: Ruler },
-      { label: 'Formatos de paleta', href: '/configuracion/formatos-paleta', icon: Shapes },
-      { label: 'Envios', href: '/configuracion/envios', icon: Truck },
-      { label: 'Tarifa de Envío', href: '/configuracion/tarifa-envio', icon: Banknote },
-      { label: 'Cuotas', href: '/configuracion/cuotas', icon: CreditCard },
-      { label: 'Politica de Privacidad', href: '/configuracion/privacidad', icon: UserCheck },
-      { label: 'Terminos y Condiciones', href: '/configuracion/terminos', icon: FileCheck },
-    ],
-  },
-  {
-    title: 'Sistema',
-    items: [
-      { label: 'Gastos', href: '/gastos', icon: Receipt },
-      { label: 'Configuracion', href: '/configuracion', icon: Settings },
-    ],
-  },
-];
+import { useEffect, useRef, useState } from 'react';
+import { ChevronDown, X } from 'lucide-react';
+import { GRUPOS_MENU, rutaActiva } from './navegacion';
 
 interface SidebarProps {
   collapsed: boolean;
@@ -130,29 +13,58 @@ interface SidebarProps {
   onMobileClose: () => void;
 }
 
-function isActivePath(pathname: string, href: string) {
-  if (href === '/') return pathname === '/';
-  if (href === '/productos') return pathname === '/productos';
-  if (href === '/configuracion') return pathname === '/configuracion';
-  return pathname.startsWith(href);
+const CLAVE_PLEGADOS = 'bo_menu_plegados';
+
+/**
+ * Grupos plegados por quien usa el panel, recordados en este navegador. El
+ * grupo de la pantalla abierta se muestra siempre, aunque se haya plegado.
+ */
+function useGruposPlegados() {
+  const [plegados, setPlegados] = useState<string[]>([]);
+  useEffect(() => {
+    try {
+      const guardado = JSON.parse(localStorage.getItem(CLAVE_PLEGADOS) || '[]');
+      if (Array.isArray(guardado)) setPlegados(guardado.filter((g) => typeof g === 'string'));
+    } catch {
+      // Sin almacenamiento: todo desplegado.
+    }
+  }, []);
+  const alternar = (titulo: string) => setPlegados((actuales) => {
+    const nuevos = actuales.includes(titulo) ? actuales.filter((t) => t !== titulo) : [...actuales, titulo];
+    try { localStorage.setItem(CLAVE_PLEGADOS, JSON.stringify(nuevos)); } catch { /* sin almacenamiento */ }
+    return nuevos;
+  });
+  return { plegados, alternar };
 }
 
 function SidebarNav({ pathname, collapsed }: { pathname: string; collapsed: boolean }) {
+  const { plegados, alternar } = useGruposPlegados();
   return (
-    <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-4">
-      {navGroups.map((group, gi) => (
+    <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-3">
+      {GRUPOS_MENU.map((group, gi) => {
+        const tieneActiva = group.items.some((item) => rutaActiva(pathname, item.href));
+        // Con la barra angosta (solo íconos) no hay títulos: se ve todo.
+        const abierto = collapsed || !group.title || tieneActiva || !plegados.includes(group.title);
+        return (
         <div key={gi}>
           {group.title && (
             <>
-              <p className={'px-3 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-600 whitespace-nowrap ' + (collapsed ? 'lg:hidden' : '')}>
+              <button
+                type="button"
+                onClick={() => alternar(group.title as string)}
+                aria-expanded={abierto}
+                className={'flex w-full items-center justify-between px-3 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-300 whitespace-nowrap ' + (collapsed ? 'lg:hidden' : '')}
+              >
                 {group.title}
-              </p>
+                <ChevronDown className={'h-3 w-3 transition-transform ' + (abierto ? '' : '-rotate-90')} />
+              </button>
               {collapsed && <div className="px-3 mb-1 border-b border-white/10 hidden lg:block" />}
             </>
           )}
+          {abierto && (
           <ul className="space-y-0.5">
             {group.items.map((item) => {
-              const active = isActivePath(pathname, item.href);
+              const active = rutaActiva(pathname, item.href);
               const Icon = item.icon;
               return (
                 <li key={item.href}>
@@ -172,8 +84,10 @@ function SidebarNav({ pathname, collapsed }: { pathname: string; collapsed: bool
               );
             })}
           </ul>
+          )}
         </div>
-      ))}
+        );
+      })}
     </nav>
   );
 }

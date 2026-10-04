@@ -2,29 +2,22 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { LogOut, Bell, Menu, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { GRUPOS_MENU } from './navegacion';
 
-const PAGE_LABELS: Record<string, string> = {
-  '/': 'Dashboard',
-  '/productos': 'Productos',
-  '/categorias': 'Categorias',
-  '/marcas': 'Marcas',
-  '/pedidos': 'Pedidos',
-  '/clientes': 'Clientes',
-  '/promociones': 'Promociones',
-  '/banners': 'Banners',
-  '/cupones': 'Cupones',
-  '/gastos': 'Gastos',
-  '/configuracion': 'Configuracion',
-  '/reviews': 'Reviews',
-  '/productos-contenido': 'Contenido Productos',
-  '/testimonios': 'Testimonios',
-  '/faq': 'FAQ',
-  '/hero': 'Hero Slider',
-  '/beneficios': 'Beneficios',
-  '/punto-de-venta': 'Punto de Venta',
-  '/caja': 'Caja',
-  '/estadisticas-ventas': 'Estadísticas de ventas',
-};
+/**
+ * El título sale del mismo menú (navegacion.ts): antes había una lista aparte
+ * que se desactualizaba y media docena de pantallas decían solo "BackOffice".
+ * Para una subpágina (/productos/nuevo) se usa la entrada más específica.
+ */
+function tituloDe(pathname: string): string {
+  const items = GRUPOS_MENU.flatMap((g) => g.items);
+  const exacta = items.find((i) => i.href === pathname);
+  if (exacta) return exacta.label;
+  const padre = items
+    .filter((i) => i.href !== '/' && pathname.startsWith(i.href + '/'))
+    .sort((a, b) => b.href.length - a.href.length)[0];
+  return padre?.label ?? 'BackOffice';
+}
 
 interface DashboardHeaderProps {
   onMenuClick: () => void;
@@ -36,7 +29,7 @@ export function DashboardHeader({ onMenuClick, onCollapseToggle, collapsed }: Da
   const pathname = usePathname();
   const router = useRouter();
 
-  const pageLabel = PAGE_LABELS[pathname] ?? 'BackOffice';
+  const pageLabel = tituloDe(pathname);
 
   const handleLogout = () => {
     localStorage.removeItem('bo_token');
