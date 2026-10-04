@@ -12,6 +12,21 @@ import slugify from 'slugify';
  * que usa el checkout (PricingService). El frontend nunca vuelve a decidir
  * solo qué precio mostrar.
  */
+/** "nox,royal" o ["nox","royal"] → ['nox','royal']: sin vacíos ni repetidos, con un tope razonable. */
+export function listaDeValores(valor: unknown): string[] {
+  const crudos = Array.isArray(valor) ? valor : typeof valor === 'string' ? valor.split(',') : [];
+  return [...new Set(crudos.map((v) => String(v).trim()).filter(Boolean))].slice(0, 30);
+}
+
+/**
+ * Una paleta unisex le sirve a hombre y a mujer: "Hombre" sin las unisex
+ * mostraba 1 sola paleta de 37. Pedir solo "Unisex" sigue trayendo solo esas.
+ */
+export function generosConUnisex(generos: string[]): string[] {
+  const conUnisex = generos.some((g) => g === 'Hombre' || g === 'Mujer') ? [...generos, 'Unisex'] : generos;
+  return [...new Set(conUnisex)];
+}
+
 function withEffectivePrice<T extends { price: number; salePrice: number | null }>(product: T): T & { effectivePrice: number } {
   return { ...product, effectivePrice: effectivePrice(product.price, product.salePrice) };
 }
@@ -50,16 +65,24 @@ export class ProductsService {
 
     const where: any = showAll === '1' ? {} : { active: true };
     const propertyFilters: any[] = [];
-    if (category) where.category = { slug: category };
-    if (brand) where.brand = { slug: brand };
+    // Cada filtro acepta varios valores separados por coma (?brand=nox,royal):
+    // dentro de un filtro es "cualquiera de estos"; entre filtros distintos,
+    // "todos a la vez" (marca y precio y formato...).
+    const categorias = listaDeValores(category);
+    const marcas = listaDeValores(brand);
+    const formatos = listaDeValores(shape);
+    const niveles = listaDeValores(level);
+    const talles = listaDeValores(size);
+    const colores = listaDeValores(color);
+    if (categorias.length) where.category = { slug: { in: categorias } };
+    if (marcas.length) where.brand = { slug: { in: marcas } };
     if (isOffer === 'true') where.isOffer = true;
-    if (shape) where.shape = shape;
-    // Una paleta unisex le sirve a hombre y a mujer: "Hombre" sin las unisex
-    // mostraba 1 sola paleta de 37. Pedir "Unisex" sigue trayendo solo esas.
-    if (gender) where.gender = gender === 'Hombre' || gender === 'Mujer' ? { in: [gender, 'Unisex'] } : gender;
-    if (level) where.level = level;
-    if (size) propertyFilters.push({ OR: [{ size }, { variants: { some: { size, active: true } } }] });
-    if (color) propertyFilters.push({ OR: [{ color }, { variants: { some: { color, active: true } } }] });
+    if (formatos.length) where.shape = { in: formatos };
+    const generos = generosConUnisex(listaDeValores(gender));
+    if (generos.length) where.gender = { in: generos };
+    if (niveles.length) where.level = { in: niveles };
+    if (talles.length) propertyFilters.push({ OR: [{ size: { in: talles } }, { variants: { some: { size: { in: talles }, active: true } } }] });
+    if (colores.length) propertyFilters.push({ OR: [{ color: { in: colores } }, { variants: { some: { color: { in: colores }, active: true } } }] });
     if (weight && Number.isFinite(Number(weight))) {
       const numericWeight = Number(weight);
       const unit = String(weightUnit || '').toLowerCase();
