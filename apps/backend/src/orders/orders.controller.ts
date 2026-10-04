@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Param, Body, Query, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Body, Query, Req, UseGuards, ParseEnumPipe } from '@nestjs/common';
 import type { Request } from 'express';
 import { clienteDesdeRequest } from '../common/meta/meta-cliente';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
@@ -11,6 +11,7 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { Permissions } from '../common/decorators/permissions.decorator';
 import { POS_PERMISSIONS } from '../common/permissions';
+import { OrderStatus } from '@prisma/client';
 
 @ApiTags('Orders')
 @Controller('orders')
@@ -55,10 +56,11 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard, PermissionsGuard) @Permissions(POS_PERMISSIONS.SELL)
   updateStatus(
     @Param('id') id: string,
-    @Body('status') status: string,
+    // Solo los estados que existen: antes llegaba cualquier texto y se guardaba tal cual.
+    @Body('status', new ParseEnumPipe(OrderStatus)) status: OrderStatus,
     @Body('trackingNumber') trackingNumber?: string,
     @Body('trackingUrl') trackingUrl?: string,
   ) {
-    return this.ordersService.updateStatus(id, status as any, trackingNumber, trackingUrl);
+    return this.ordersService.updateStatus(id, status, trackingNumber, trackingUrl);
   }
 }

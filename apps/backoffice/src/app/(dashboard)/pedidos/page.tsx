@@ -1,373 +1,143 @@
-﻿'use client';
+'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { ArrowRight, ChevronDown, Gift } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Search } from 'lucide-react';
 import api from '@/lib/api';
-import { formatPrice, formatDate } from '@/lib/utils';
-import { Modal } from '@/components/ui/Modal';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useToast } from '@/components/ui/Toast';
-import { OrderAftercare } from './OrderAftercare';
+import type { Etapa, Pedido } from './tipos';
+import { coincideBusqueda, etapaDe, ETAPAS } from './formato';
+import { PedidosTabla, PedidosTarjetas } from './PedidosLista';
+import { PedidoDetalle } from './PedidoDetalle';
 
-interface OrderItem {
-  id: string;
-  quantity: number;
-  price: number;
-  product: { name: string; sku: string; images?: string[] };
-  variant?: { size: string; color?: string };
+/**
+ * Pedidos, ordenados como en Tiendanube: qué hay que hacer con cada uno
+ * (cobrar, enviar, entregar), cómo pagó y cómo se entrega, a simple vista.
+ * Las etiquetas salen de formato.ts; la lista y el detalle viven aparte.
+ */
+function useEtapas(pedidos: Pedido[]) {
+  return useMemo(() => {
+    const cuentas: Record<Etapa, number> = { todos: pedidos.length, cobrar: 0, enviar: 0, retirar: 0, enviados: 0, entregados: 0, cancelados: 0 };
+    for (const p of pedidos) cuentas[etapaDe(p)] += 1;
+    return cuentas;
+  }, [pedidos]);
 }
 
-interface Order {
-  id: string;
-  number: string;
-  status: string;
-  paymentStatus?: string;
-  channel?: string;
-  total: number;
-  subtotal: number;
-  shipping: number;
-  discount: number;
-  createdAt: string;
-  address: string;
-  trackingNumber?: string;
-  trackingUrl?: string;
-  buyerName?: string;
-  buyerEmail?: string;
-  buyerPhone?: string;
-  paymentMethod?: string;
-  /** Bolsas de regalo a incluir en el paquete (sin cargo). */
-  bolsasRegalo?: number;
-  user?: { name: string; email: string };
-  seller?: { name: string };
-  branch?: { name: string };
-  payments?: { id: string; method: string; kind: string; amount: number }[];
-  items?: OrderItem[];
-  /** Compra de prueba: no suma en el panel ni en Estadísticas, y no va a Meta. */
-  isTest?: boolean;
-}
-
-function MarcaPrueba({ order }: { order: Order }) {
-  if (!order.isTest) return null;
-  return (
-    <span className="ml-1.5 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700" title="Compra de prueba: no suma en las estadísticas ni se informa a Meta">
-      Prueba
-    </span>
-  );
-}
-
-type StatusFilter = 'ALL' | 'PENDING' | 'PAID' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
-
-const STATUS_TABS: { value: StatusFilter; label: string; color: string; bgActive: string; icon: string }[] = [
-  { value: 'ALL', label: 'Todos', color: 'bg-gray-50 text-gray-600 border-gray-200', bgActive: 'bg-[#0f172a] border-[#0f172a]', icon: '' },
-  { value: 'PENDING', label: 'Pendiente', color: 'bg-amber-50 text-amber-700 border-amber-200', bgActive: 'bg-amber-500 border-amber-500', icon: '' },
-  { value: 'PAID', label: 'Pagado', color: 'bg-blue-50 text-blue-700 border-blue-200', bgActive: 'bg-blue-500 border-blue-500', icon: '' },
-  { value: 'SHIPPED', label: 'Enviado', color: 'bg-purple-50 text-purple-700 border-purple-200', bgActive: 'bg-purple-500 border-purple-500', icon: '' },
-  { value: 'DELIVERED', label: 'Entregado', color: 'bg-green-50 text-green-700 border-green-200', bgActive: 'bg-green-500 border-green-500', icon: '' },
-  { value: 'CANCELLED', label: 'Cancelado', color: 'bg-red-50 text-red-700 border-red-200', bgActive: 'bg-red-500 border-red-500', icon: '' },
-];
-
-const STATUS_OPTIONS = ['PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
-const STATUS_LABELS: Record<string, string> = {
-  PENDING: 'Pendiente', PAID: 'Pagado', SHIPPED: 'Enviado', DELIVERED: 'Entregado', CANCELLED: 'Cancelado',
-};
-
-function MarcaRegalo({ order }: { order: Order }) {
-  if (!order.bolsasRegalo) return null;
-  return <Gift size={14} className="inline ml-1.5 text-amber-600" aria-label={`Para regalo: ${order.bolsasRegalo} bolsa(s)`} />;
-}
-
-function StatusTabsGrid({ orders, statusFilter, onSelect }: { orders: Order[]; statusFilter: StatusFilter; onSelect: (v: StatusFilter) => void }) {
-  return (
-    <div className="hidden min-[345px]:grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 w-full">
-      {STATUS_TABS.map((tab) => {
-        const count = tab.value === 'ALL' ? orders.length : orders.filter((o) => o.status === tab.value).length;
-        const isActive = statusFilter === tab.value;
-        return (
-          <button
-            key={tab.value}
-            onClick={() => onSelect(tab.value)}
-            className={'flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 border ' +
-              (isActive ? 'bg-[#0f172a] text-white border-[#0f172a] shadow-sm' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:border-gray-300')}
-          >
-            <span className="flex items-center gap-2 truncate">
-              <span className="text-sm leading-none shrink-0">{tab.icon}</span>
-              <span className="truncate">{tab.label}</span>
-            </span>
-            <span className={'text-xs font-bold px-2 py-0.5 rounded-full shrink-0 ml-2 ' + (isActive ? 'bg-[#C8FF00] text-[#0f172a]' : 'bg-gray-100 text-gray-500')}>{count}</span>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function StatusDropdown({ orders, dropdownOpen, onToggle, dropdownRef }: { orders: Order[]; dropdownOpen: boolean; onToggle: () => void; dropdownRef: React.RefObject<HTMLDivElement | null> }) {
-  return (
-    <div className="min-[345px]:hidden relative" ref={dropdownRef}>
-      <div className="w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <button onClick={onToggle} className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-          <span className="flex items-center gap-2">
-            <span>Todos</span>
-            <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">{orders.length}</span>
-          </span>
-          <span className="p-1 rounded-md bg-gray-100 text-gray-500 hover:bg-gray-200 hover:bg-opacity-10 transition-colors">
-            <ChevronDown className={'w-4 h-4 transition-transform ' + (dropdownOpen ? 'rotate-180' : '')} />
-          </span>
-        </button>
-        {dropdownOpen && (
-          <div className="border-t border-gray-100">
-            {STATUS_TABS.filter((t) => t.value !== 'ALL').map((tab) => {
-              const count = orders.filter((o) => o.status === tab.value).length;
-              return (
-                <div key={tab.value} className="flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-600 bg-gray-50/50">
-                  <span>{tab.label}</span>
-                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">{count}</span>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function OrdersTable({ orders, onDetail }: { orders: Order[]; onDetail: (o: Order) => void }) {
-  return (
-    <div className="hidden md:block bg-white border border-gray-200 rounded-xl overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[800px]">
-          <thead>
-            <tr className="border-b border-gray-100">
-              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Numero</th>
-              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Cliente</th>
-              <th className="text-left px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Telefono</th>
-              <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Items</th>
-              <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
-              <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-              <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Canal</th>
-              <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Fecha</th>
-              <th className="text-center px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Opciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map((o) => {
-              const statusInfo = STATUS_TABS.find((t) => t.value === o.status);
-              return (
-                <tr key={o.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
-                  <td className="px-3 py-3"><code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-900 font-semibold">{o.number}</code><MarcaPrueba order={o} /><MarcaRegalo order={o} /></td>
-                  <td className="px-3 py-3">
-                    <p className="text-gray-900 font-medium text-sm">{o.buyerName || o.user?.name || 'Invitado'}</p>
-                    <p className="text-xs text-gray-400">{o.buyerEmail || o.user?.email || '-'}</p>
-                  </td>
-                  <td className="px-3 py-3 text-sm text-gray-500">{o.buyerPhone || '-'}</td>
-                  <td className="px-3 py-3 text-center text-sm text-gray-500">{(o.items || []).length} items</td>
-                  <td className="px-3 py-3 text-center font-semibold text-sm">{formatPrice(o.total)}</td>
-                  <td className="px-3 py-3 text-center">
-                    <span className={'text-xs font-medium px-2 py-1 rounded-full ' + (statusInfo?.color || 'bg-gray-100')}>{STATUS_LABELS[o.status] || o.status}</span>
-                  </td>
-                  <td className="px-3 py-3 text-center text-xs font-medium text-gray-600">{o.channel || 'ONLINE'}</td>
-                  <td className="px-3 py-3 text-center text-xs text-gray-500">{formatDate(o.createdAt)}</td>
-                  <td className="px-3 py-3 text-center">
-                    <button onClick={() => onDetail(o)} className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors" title="Ver detalle"><ArrowRight className="w-4 h-4" /></button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-function OrdersCards({ orders, onDetail }: { orders: Order[]; onDetail: (o: Order) => void }) {
-  return (
-    <div className="md:hidden space-y-3">
-      {orders.map((o) => {
-        const statusInfo = STATUS_TABS.find((t) => t.value === o.status);
-        return (
-          <div key={o.id} className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex-1 min-w-0">
-                <code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-900 font-semibold">{o.number}</code>
-                <MarcaPrueba order={o} />
-                <MarcaRegalo order={o} />
-                <p className="text-sm font-semibold text-gray-900 mt-1 truncate">{o.buyerName || o.user?.name || 'Invitado'}</p>
-                <p className="text-xs text-gray-400">{o.buyerPhone || '-'}</p>
-              </div>
-              <span className={'text-xs font-medium px-2 py-1 rounded-full shrink-0 ' + (statusInfo?.color || 'bg-gray-100')}>{STATUS_LABELS[o.status] || o.status}</span>
-            </div>
-            <div className="bg-[#0f172a] rounded-lg p-3 flex items-center justify-between">
-              <div>
-                <p className="text-xs text-[#C8FF00] font-medium">Items</p>
-                <p className="text-sm font-semibold text-white">{(o.items || []).length} items</p>
-              </div>
-              <div className="text-right">
-                <p className="text-xs text-[#C8FF00] font-medium">Total</p>
-                <p className="text-sm font-bold text-[#C8FF00]">{formatPrice(o.total)}</p>
-              </div>
-            </div>
-            <div className="text-xs text-gray-400">{formatDate(o.createdAt)}</div>
-            <div className="flex justify-end pt-2 border-t border-gray-100">
-              <button onClick={() => onDetail(o)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-blue-600 bg-blue-50/50 hover:bg-blue-50 transition-opacity hover:opacity-80">
-                Ver mas <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function OrderDetailModal({ isOpen, order, updatingStatus, onStatusChange, onChanged, onClose }: {
-  isOpen: boolean; order: Order | null; updatingStatus: boolean; onStatusChange: (status: string) => void; onChanged: () => void; onClose: () => void;
+function Filtros({ cuentas, etapa, onEtapa, busqueda, onBusqueda }: {
+  cuentas: Record<Etapa, number>; etapa: Etapa; onEtapa: (e: Etapa) => void; busqueda: string; onBusqueda: (t: string) => void;
 }) {
-  if (!isOpen || !order) return null;
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={'Pedido ' + order.number} size="lg">
-      <div className="space-y-5 p-4 sm:p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-          <div className="bg-gray-50 rounded-lg p-4">
-            <p className="text-xs font-semibold text-gray-400 uppercase mb-1">Cliente</p>
-            <p className="font-semibold text-gray-900">{order.buyerName || order.user?.name || 'Invitado'}</p>
-            <p className="text-sm text-gray-500">{order.buyerEmail || order.user?.email || '-'}</p>
-            <p className="text-sm text-gray-500">{order.buyerPhone || '-'}</p>
-          </div>
-          <div className="bg-gray-50 rounded-lg p-4">
-            <p className="text-xs font-semibold text-gray-400 uppercase mb-1">Direccion</p>
-            <p className="text-sm text-gray-700">{order.address}</p>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-          <div className="bg-gray-50 rounded-lg p-4">
-            <p className="text-xs font-semibold text-gray-400 uppercase mb-1">Medio de pago</p>
-            <p className="text-sm text-gray-700">{order.paymentMethod || 'No especificado'}</p>
-          </div>
-          <div className="bg-gray-50 rounded-lg p-4">
-            <p className="text-xs font-semibold text-gray-400 uppercase mb-1">Fecha</p>
-            <p className="font-medium text-gray-900">{formatDate(order.createdAt)}</p>
-          </div>
-          <div className="bg-gray-50 rounded-lg p-4">
-            <p className="text-xs font-semibold text-gray-400 uppercase mb-1">Estado</p>
-            <select value={order.status} disabled={updatingStatus} onChange={(e) => onStatusChange(e.target.value)}
-              className="mt-1 w-full text-sm border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40">
-              {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
-            </select>
-          </div>
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-gray-700 mb-3">Productos</p>
-          {(order.bolsasRegalo ?? 0) > 0 && (
-            <p className="mb-3 flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-sm font-semibold text-amber-800">
-              <Gift size={16} /> Para regalo: incluir {order.bolsasRegalo === 1 ? '1 bolsa' : order.bolsasRegalo + ' bolsas'} Home Pádel
-            </p>
-          )}
-          <div className="space-y-2">
-            {(order.items || []).map((item) => (
-              <div key={item.id} className="flex items-center justify-between p-3 bg-[#0f172a] rounded-lg">
-                <div>
-                  <p className="text-sm font-medium text-white">{item.product.name}</p>
-                  <p className="text-xs text-[#C8FF00]">{item.product.sku} x {item.quantity}</p>
-                </div>
-                <p className="text-sm font-bold text-[#C8FF00]">{formatPrice(item.price)}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm"><div className="bg-gray-50 rounded-lg p-3"><p className="text-xs text-gray-400">Canal</p><p className="font-semibold">{order.channel || 'ONLINE'}</p></div><div className="bg-gray-50 rounded-lg p-3"><p className="text-xs text-gray-400">Cobro</p><p className="font-semibold">{order.paymentStatus || 'PENDING'}</p></div><div className="bg-gray-50 rounded-lg p-3"><p className="text-xs text-gray-400">Sucursal / vendedor</p><p className="font-semibold">{order.branch?.name || '-'} · {order.seller?.name || 'Web'}</p></div></div>
-        <OrderAftercare order={order} onChanged={onChanged} />
+    <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-3 lg:flex-row lg:items-center lg:justify-between">
+      <label className="relative block lg:w-72">
+        <span className="sr-only">Buscar pedidos</span>
+        <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+        <input value={busqueda} onChange={(e) => onBusqueda(e.target.value)} placeholder="Buscar por número, cliente, mail o teléfono"
+          className="w-full rounded-lg border border-gray-200 py-2 pl-8 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8FF00]/40" />
+      </label>
+      <div className="flex flex-wrap gap-1.5">
+        {ETAPAS.map((e) => {
+          const activa = etapa === e.valor;
+          return (
+            <button key={e.valor} type="button" onClick={() => onEtapa(e.valor)}
+              className={'flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors ' + (activa ? 'border-[#0f172a] bg-[#0f172a] text-white' : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50')}>
+              {e.texto}
+              <span className={'rounded-full px-1.5 text-[10px] font-bold ' + (activa ? 'bg-[#C8FF00] text-[#0f172a]' : 'bg-gray-100 text-gray-500')}>{cuentas[e.valor]}</span>
+            </button>
+          );
+        })}
       </div>
-    </Modal>
+    </div>
+  );
+}
+
+function Paginas({ total, actual, onPagina }: { total: number; actual: number; onPagina: (n: number) => void }) {
+  if (total <= 1) return null;
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-2">
+      {Array.from({ length: total }).map((_, i) => (
+        <button key={i} type="button" onClick={() => onPagina(i + 1)}
+          className={'h-8 w-8 rounded-lg text-sm font-medium ' + (i + 1 === actual ? 'bg-[#C8FF00] text-[#0f172a]' : 'text-gray-500 hover:bg-gray-100')}>{i + 1}</button>
+      ))}
+    </div>
   );
 }
 
 export default function PedidosPage() {
   const { toast } = useToast();
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [detailOpen, setDetailOpen] = useState(false);
-  const [updatingStatus, setUpdatingStatus] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const isMobile = useIsMobile();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const pageSize = isMobile ? 3 : 10;
-  useEffect(() => { setCurrentPage(1); }, [isMobile, statusFilter]);
+  const esCelular = useIsMobile();
+  const [pedidos, setPedidos] = useState<Pedido[]>([]);
+  const [cargando, setCargando] = useState(true);
+  const [etapa, setEtapa] = useState<Etapa>('todos');
+  const [busqueda, setBusqueda] = useState('');
+  const [pagina, setPagina] = useState(1);
+  const [abiertoId, setAbiertoId] = useState<string | null>(null);
+  const [guardando, setGuardando] = useState(false);
+  const porPagina = esCelular ? 10 : 20;
 
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const load = useCallback(async () => {
-    setLoading(true);
+  const cargar = useCallback(async () => {
     try {
       const res = await api.get('/orders');
       const data = res.data?.value || res.data?.data || res.data;
-      setOrders(Array.isArray(data) ? data : []);
-    } catch { setOrders([]); } finally { setLoading(false); }
-  }, []);
+      setPedidos(Array.isArray(data) ? data : []);
+    } catch {
+      toast('No se pudieron cargar los pedidos', 'error');
+    } finally {
+      setCargando(false);
+    }
+  }, [toast]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { cargar(); }, [cargar]);
+  useEffect(() => { setPagina(1); }, [etapa, busqueda, esCelular]);
 
-  const filtered = statusFilter === 'ALL' ? orders : orders.filter((o) => o.status === statusFilter);
-  const totalPages = Math.ceil(filtered.length / pageSize);
-  const paginated = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const cuentas = useEtapas(pedidos);
+  const filtrados = pedidos.filter((p) => (etapa === 'todos' || etapaDe(p) === etapa) && coincideBusqueda(p, busqueda));
+  const totalPaginas = Math.ceil(filtrados.length / porPagina);
+  const visibles = filtrados.slice((pagina - 1) * porPagina, pagina * porPagina);
+  const abierto = pedidos.find((p) => p.id === abiertoId) ?? null;
 
-  const handleStatusChange = async (newStatus: string) => {
-    if (!selectedOrder) return;
-    const orderId = selectedOrder.id;
-    setUpdatingStatus(true);
+  const guardarEstado = async (estado: string, seguimiento?: { numero: string; url: string }) => {
+    if (!abierto) return;
+    setGuardando(true);
     try {
-      await api.patch('/orders/' + orderId + '/status', { status: newStatus });
-      toast('Estado actualizado', 'success');
-      setOrders((prev) => prev.map((o) => o.id === orderId ? { ...o, status: newStatus } : o));
-      setSelectedOrder((prev) => prev ? { ...prev, status: newStatus } : prev);
-    } catch { toast('Error', 'error'); } finally { setUpdatingStatus(false); }
+      await api.patch('/orders/' + abierto.id + '/status', {
+        status: estado,
+        ...(seguimiento?.numero ? { trackingNumber: seguimiento.numero } : {}),
+        ...(seguimiento?.url ? { trackingUrl: seguimiento.url } : {}),
+      });
+      toast('Pedido actualizado', 'success');
+      // Se recarga entero: marcar pagado también registra el cobro y cambia el estado del pago.
+      await cargar();
+    } catch {
+      toast('No se pudo actualizar el pedido', 'error');
+    } finally {
+      setGuardando(false);
+    }
   };
 
-  if (loading) return <PageLoader />;
-
-  const openDetail = (o: Order) => { setSelectedOrder(o); setDetailOpen(true); };
+  if (cargando) return <PageLoader />;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Pedidos</h1>
-        <p className="text-gray-500 text-sm mt-0.5">{filtered.length} pedidos</p>
+        <p className="mt-0.5 text-sm text-gray-500">{cuentas.cobrar} por cobrar · {cuentas.enviar} por enviar · {cuentas.retirar} por retirar</p>
       </div>
 
-      <StatusTabsGrid orders={orders} statusFilter={statusFilter} onSelect={(v) => { setStatusFilter(v); setCurrentPage(1); }} />
-      <StatusDropdown orders={orders} dropdownOpen={dropdownOpen} onToggle={() => setDropdownOpen(!dropdownOpen)} dropdownRef={dropdownRef} />
+      <Filtros cuentas={cuentas} etapa={etapa} onEtapa={setEtapa} busqueda={busqueda} onBusqueda={setBusqueda} />
 
-      {paginated.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 py-20 text-center"><p className="text-gray-400 text-sm">No se encontraron pedidos</p></div>
+      {visibles.length === 0 ? (
+        <div className="rounded-xl border border-gray-200 bg-white py-20 text-center"><p className="text-sm text-gray-400">No hay pedidos con estos filtros</p></div>
       ) : (
-        <div>
-          <OrdersTable orders={paginated} onDetail={openDetail} />
-          <OrdersCards orders={paginated} onDetail={openDetail} />
-        </div>
+        <>
+          <PedidosTabla pedidos={visibles} onAbrir={(p) => setAbiertoId(p.id)} />
+          <PedidosTarjetas pedidos={visibles} onAbrir={(p) => setAbiertoId(p.id)} />
+        </>
       )}
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          {Array.from({ length: totalPages }).map((_, i) => (
-            <button key={i} onClick={() => setCurrentPage(i + 1)} className={'w-8 h-8 rounded-lg text-sm font-medium ' + (i + 1 === currentPage ? 'bg-[#C8FF00] text-[#0f172a]' : 'text-gray-500 hover:bg-gray-50')}>{i + 1}</button>
-          ))}
-        </div>
-      )}
+      <Paginas total={totalPaginas} actual={pagina} onPagina={setPagina} />
 
-      <OrderDetailModal isOpen={detailOpen} order={selectedOrder} updatingStatus={updatingStatus} onStatusChange={handleStatusChange} onChanged={load} onClose={() => setDetailOpen(false)} />
+      <PedidoDetalle pedido={abierto} guardando={guardando} onGuardarEstado={guardarEstado} onCambio={cargar} onCerrar={() => setAbiertoId(null)} />
     </div>
   );
 }
