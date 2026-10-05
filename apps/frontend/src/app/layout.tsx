@@ -48,7 +48,11 @@ export async function generateMetadata(): Promise<Metadata> {
     publisher: 'Home Padel',
     formatDetection: { email: false, address: false, telephone: false },
     // Verificación de la propiedad en Google Search Console. No es secreto: Google lo lee del HTML público.
-    verification: { google: 'afdLYXFIA-0q2Sk5r1bdl3cV-3CxHPe5nrgbRVvi4jg' },
+    verification: {
+      google: 'afdLYXFIA-0q2Sk5r1bdl3cV-3CxHPe5nrgbRVvi4jg',
+      // Verificación del dominio en Meta (Administrador comercial). No es secreta: Meta la lee del HTML público.
+      other: { 'facebook-domain-verification': 'r4z38j9gbvmmxtehpqmuq7yg7untd' },
+    },
     metadataBase: new URL(siteUrl),
     // Sin `alternates.canonical` a propósito: los metadatos se heredan, y un
     // canonical '/' acá hacía que toda ruta que no lo pisara (/terminos,
