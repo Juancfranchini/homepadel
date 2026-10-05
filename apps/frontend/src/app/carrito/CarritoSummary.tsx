@@ -7,6 +7,7 @@ import { cuotasPara, useConfigCuotas } from '@/lib/cuotas';
 import type { CouponState } from '@/hooks/useCoupon';
 import { CartItem } from '@/types';
 import CarritoTotalTransferencia from './CarritoTotalTransferencia';
+import CarritoGuardarMail from './CarritoGuardarMail';
 
 interface Props {
   coupon: CouponState;
@@ -50,6 +51,7 @@ export default function CarritoSummary({
         {cuotasMercadoPago > 1 && (
           <p className="text-xs text-brand-fg font-semibold text-center mt-3">Hasta {cuotasMercadoPago} cuotas sin interés de {formatPrice(Math.ceil(total / cuotasMercadoPago))} con Mercado Pago</p>
         )}
+        <CarritoGuardarMail items={items} />
         <p className="text-fg-muted text-xs text-center mt-3">Envío gratis por Correo Argentino o Andreani en compras desde {formatPrice(freeShippingThreshold)}. OCA se coordina por WhatsApp.</p>
       </div>
     </div>
