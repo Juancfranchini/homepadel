@@ -28,5 +28,6 @@ export class UpdateReviewDto {
   @IsOptional() @IsInt() @Min(1) @Max(5) rating?: number;
   @IsOptional() @IsString() @MinLength(10) @MaxLength(1000) comment?: string;
   @IsOptional() @IsBoolean() active?: boolean;
+  /** Se acepta para no romper backoffices viejos, pero el servidor lo ignora. */
   @IsOptional() @IsBoolean() verified?: boolean;
 }

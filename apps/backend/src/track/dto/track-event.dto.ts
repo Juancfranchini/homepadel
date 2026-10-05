@@ -4,7 +4,9 @@ import { MetaNavegadorDto } from '../../common/meta/meta-cliente';
 
 // Sin Purchase: la compra la informa solo el servidor cuando el pago se
 // confirma (ver payments.meta.ts). Desde acá cualquiera podía inventar una.
-const EVENTOS_PERMITIDOS = ['PageView', 'ViewContent', 'AddToCart', 'InitiateCheckout', 'AddPaymentInfo', 'Contact'];
+// ViewCategory no es estándar en Meta: llega como evento personalizado, con
+// content_category. Reemplaza a los "Vio accesorios" del pixel de Tiendanube.
+const EVENTOS_PERMITIDOS = ['PageView', 'ViewContent', 'AddToCart', 'InitiateCheckout', 'AddPaymentInfo', 'Contact', 'ViewCategory'];
 
 /**
  * Datos del comprador para mejorar la coincidencia en Meta. Llegan en claro

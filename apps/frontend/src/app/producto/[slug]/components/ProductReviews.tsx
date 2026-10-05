@@ -74,7 +74,7 @@ export default function ProductReviews({ productId }: Props) {
               </span>
               {review.verified && (
                 <span className="text-[10px] text-green-500 light:text-green-700 bg-green-500/10 px-2 py-0.5 rounded-full flex items-center gap-0.5">
-                  <CheckCircle className="w-2.5 h-2.5" />Verificado
+                  <CheckCircle className="w-2.5 h-2.5" />Compra verificada
                 </span>
               )}
             </div>

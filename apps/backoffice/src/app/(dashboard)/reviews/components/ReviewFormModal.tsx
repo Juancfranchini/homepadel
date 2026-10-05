@@ -12,7 +12,7 @@ export default function ReviewFormModal({ isOpen, editItem, products, register, 
 }) {
   if (!isOpen) return null;
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={editItem ? 'Editar resena' : 'Nueva resena'} size="md">
+    <Modal isOpen={isOpen} onClose={onClose} title="Moderar resena" size="md">
       <form onSubmit={onSubmit} className="space-y-4 p-4 sm:p-6">
         <div>
           <label className={labelClass}>Producto *</label>
@@ -41,11 +41,14 @@ export default function ReviewFormModal({ isOpen, editItem, products, register, 
         </div>
         <div className="flex items-center gap-4">
           <label className="flex items-center gap-2"><input type="checkbox" {...register('active')} className="w-4 h-4 rounded accent-[#C8FF00]" /> Aprobada</label>
-          <label className="flex items-center gap-2"><input type="checkbox" {...register('verified')} className="w-4 h-4 rounded accent-[#C8FF00]" /> Verificada</label>
+          {/* Lo decide el servidor: el cliente compró ese producto y el pago se acreditó. */}
+          <span className={'text-xs font-semibold ' + (editItem?.verified ? 'text-green-700' : 'text-gray-400')}>
+            {editItem?.verified ? 'Compra verificada' : 'Sin compra verificada'}
+          </span>
         </div>
         <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
           <button type="button" onClick={onClose} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancelar</button>
-          <button type="submit" disabled={saving} className="px-4 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg text-sm font-semibold hover:bg-[#b8ef00] disabled:opacity-50">{saving ? 'Guardando...' : editItem ? 'Actualizar' : 'Crear'}</button>
+          <button type="submit" disabled={saving} className="px-4 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg text-sm font-semibold hover:bg-[#b8ef00] disabled:opacity-50">{saving ? 'Guardando...' : 'Guardar'}</button>
         </div>
       </form>
     </Modal>

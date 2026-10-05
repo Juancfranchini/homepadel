@@ -25,7 +25,6 @@ const schema = z.object({
   rating: z.coerce.number().min(1).max(5),
   comment: z.string().min(10, 'El comentario debe tener al menos 10 caracteres'),
   active: z.boolean().default(true),
-  verified: z.boolean().default(true),
 });
 export type FormData = z.infer<typeof schema>;
 
@@ -84,14 +83,16 @@ export function useReviews() {
 
   useEffect(() => { load(); }, [load]);
 
-  const openCreate = () => { setEditItem(null); reset({ productId: '', name: '', rating: 5, comment: '', active: true, verified: true }); setModalOpen(true); };
-  const openEdit = (r: Review) => { setEditItem(r); reset({ productId: r.productId, name: r.name, rating: r.rating, comment: r.comment, active: r.active, verified: r.verified }); setModalOpen(true); };
+  // Las reseñas las dejan los clientes desde la ficha; acá solo se moderan.
+  // Crearlas a mano permitía publicar reseñas inventadas como "verificadas".
+  const openEdit = (r: Review) => { setEditItem(r); reset({ productId: r.productId, name: r.name, rating: r.rating, comment: r.comment, active: r.active }); setModalOpen(true); };
 
   const onSubmit = async (data: FormData) => {
     setSaving(true);
     try {
-      if (editItem) { await api.patch('/reviews/' + editItem.id, data); toast('Resena actualizada', 'success'); }
-      else { await api.post('/reviews', data); toast('Resena creada', 'success'); }
+      if (!editItem) return;
+      await api.patch('/reviews/' + editItem.id, data);
+      toast('Resena actualizada', 'success');
       setModalOpen(false); load();
     } catch { toast('Error', 'error'); } finally { setSaving(false); }
   };
@@ -135,6 +136,6 @@ export function useReviews() {
     form, loading, modalOpen, setModalOpen, editItem, deleteTarget, setDeleteTarget, deleting, saving,
     search, setSearch, advancedOpen, setAdvancedOpen, advancedFilters, setAdvancedFilters, sortField,
     currentPage, setCurrentPage, showInfoModal, setShowInfoModal, products, infoData,
-    openCreate, openEdit, onSubmit, toggleActive, handleDelete, handleSort, filtered, totalPages, paginated,
+    openEdit, onSubmit, toggleActive, handleDelete, handleSort, filtered, totalPages, paginated,
   };
 }

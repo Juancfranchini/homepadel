@@ -1,6 +1,6 @@
 'use client';
 
-import { Plus, HelpCircle } from 'lucide-react';
+import { HelpCircle } from 'lucide-react';
 import { Modal, ConfirmDialog } from '@/components/ui/Modal';
 import { PageLoader } from '@/components/ui/LoadingSpinner';
 import ReviewsSearchBar from './components/ReviewsSearchBar';
@@ -15,7 +15,7 @@ export default function ReviewsPage() {
     form, loading, modalOpen, setModalOpen, editItem, deleteTarget, setDeleteTarget, deleting, saving,
     search, setSearch, advancedOpen, setAdvancedOpen, advancedFilters, setAdvancedFilters, sortField,
     currentPage, setCurrentPage, showInfoModal, setShowInfoModal, products, infoData,
-    openCreate, openEdit, onSubmit, toggleActive, handleDelete, handleSort, filtered, totalPages, paginated,
+    openEdit, onSubmit, toggleActive, handleDelete, handleSort, filtered, totalPages, paginated,
   } = useReviews();
   const { register, handleSubmit, watch, formState: { errors } } = form;
 
@@ -37,11 +37,6 @@ export default function ReviewsPage() {
             <HelpCircle className="w-4 h-4" />
             <span className="hidden sm:inline">Info</span>
             <span className="sm:hidden">i</span>
-          </button>
-          <button onClick={openCreate} className="flex items-center gap-1.5 px-3 py-2 bg-[#C8FF00] text-[#0f172a] rounded-lg font-semibold text-sm hover:bg-[#b8ef00] transition-colors whitespace-nowrap shrink-0">
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Nueva resena</span>
-            <span className="sm:hidden">Nueva</span>
           </button>
         </div>
       </div>

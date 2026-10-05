@@ -14,6 +14,8 @@ import { useAuthStore } from '@/store/authStore';
 
 type Datos = Record<string, unknown>;
 
+const EVENTOS_ESTANDAR = new Set(['PageView', 'ViewContent', 'AddToCart', 'InitiateCheckout', 'AddPaymentInfo', 'Purchase', 'Contact', 'Search', 'Lead']);
+
 /** Email y teléfono del comprador: el servidor los cifra antes de mandarlos a Meta y no los guarda. */
 export interface DatosComprador {
   email?: string | null;
@@ -73,7 +75,10 @@ async function enviar(evento: EventoPendiente) {
         : {}),
     });
     if (data?.pixel && typeof window.fbq === 'function') {
-      window.fbq('track', evento.eventName, evento.eventData, { eventID: evento.eventId });
+      // Los eventos que Meta no tiene como estándar (ViewCategory) van por trackCustom:
+      // con 'track' el Pixel los marca como error.
+      const metodo = EVENTOS_ESTANDAR.has(evento.eventName) ? 'track' : 'trackCustom';
+      window.fbq(metodo, evento.eventName, evento.eventData, { eventID: evento.eventId });
     }
   } catch {
     // Sin servidor no se sabe si el evento cuenta: no se manda por ningún lado.

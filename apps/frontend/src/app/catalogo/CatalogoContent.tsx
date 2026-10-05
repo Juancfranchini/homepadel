@@ -6,6 +6,7 @@ import { Filter } from 'lucide-react';
 import { Product } from '@/types';
 import { useCartStore } from '@/store/cartStore';
 import { useCatalogPage } from './useCatalogPage';
+import { useVistaDeCategoria } from './useVistaDeCategoria';
 import type { CatalogResult } from './getCatalogData';
 import CatalogHeader from './components/CatalogHeader';
 import CatalogAdvisor from './components/CatalogAdvisor';
@@ -42,6 +43,7 @@ export default function CatalogoContent({ result }: Props) {
     hasFilters, activeChips, pageTitle, clearFilters, handleSearch, setParam,
     sidebarProps,
   } = useCatalogPage(result);
+  useVistaDeCategoria(sidebarProps.selectedCategory, sidebarProps.categories, products);
 
   return (
     <div className="min-h-screen bg-waves">
