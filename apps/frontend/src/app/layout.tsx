@@ -3,6 +3,7 @@ import './globals.css';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import MetaPixel from '@/components/layout/MetaPixel';
+import GoogleAnalytics from '@/components/layout/GoogleAnalytics';
 import WhatsAppFloat from '@/components/layout/WhatsAppFloat';
 import ModoPruebaAviso from '@/components/layout/ModoPruebaAviso';
 import CarritoDeCuenta from '@/components/layout/CarritoDeCuenta';
@@ -103,6 +104,7 @@ export default function RootLayout({
         <CarritoDeCuenta />
         <FavoritosSync />
         <MetaPixel />
+        <GoogleAnalytics />
       </body>
     </html>
   );
