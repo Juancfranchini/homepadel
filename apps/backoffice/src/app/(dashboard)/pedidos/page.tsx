@@ -10,6 +10,14 @@ import type { Etapa, Pedido } from './tipos';
 import { coincideBusqueda, etapaDe, ETAPAS } from './formato';
 import { PedidosTabla, PedidosTarjetas } from './PedidosLista';
 import { PedidoDetalle } from './PedidoDetalle';
+import type { AplicarEstado } from './EstadoRapido';
+
+/** El servidor explica por qué rechazó el cambio (link inválido, estado inexistente...): se le muestra a la tienda. */
+function motivoDelError(err: unknown): string {
+  const detalle = (err as { response?: { data?: { message?: unknown } } })?.response?.data?.message;
+  if (Array.isArray(detalle)) return detalle.join('. ');
+  return typeof detalle === 'string' ? detalle : 'No se pudo actualizar el pedido';
+}
 
 /**
  * Pedidos, ordenados como en Tiendanube: qué hay que hacer con cada uno
@@ -72,7 +80,7 @@ export default function PedidosPage() {
   const [busqueda, setBusqueda] = useState('');
   const [pagina, setPagina] = useState(1);
   const [abiertoId, setAbiertoId] = useState<string | null>(null);
-  const [guardando, setGuardando] = useState(false);
+  const [ocupadoId, setOcupadoId] = useState<string | null>(null);
   const porPagina = esCelular ? 10 : 20;
 
   const cargar = useCallback(async () => {
@@ -96,22 +104,24 @@ export default function PedidosPage() {
   const visibles = filtrados.slice((pagina - 1) * porPagina, pagina * porPagina);
   const abierto = pedidos.find((p) => p.id === abiertoId) ?? null;
 
-  const guardarEstado = async (estado: string, seguimiento?: { numero: string; url: string }) => {
-    if (!abierto) return;
-    setGuardando(true);
+  /** Un solo camino para la lista y el detalle. Devuelve si el servidor aceptó el cambio. */
+  const aplicarEstado: AplicarEstado = async (pedido, estado, seguimiento) => {
+    setOcupadoId(pedido.id);
     try {
-      await api.patch('/orders/' + abierto.id + '/status', {
+      await api.patch('/orders/' + pedido.id + '/status', {
         status: estado,
         ...(seguimiento?.numero ? { trackingNumber: seguimiento.numero } : {}),
         ...(seguimiento?.url ? { trackingUrl: seguimiento.url } : {}),
       });
-      toast('Pedido actualizado', 'success');
+      toast('Pedido ' + pedido.number + ' actualizado', 'success');
       // Se recarga entero: marcar pagado también registra el cobro y cambia el estado del pago.
       await cargar();
-    } catch {
-      toast('No se pudo actualizar el pedido', 'error');
+      return true;
+    } catch (err) {
+      toast(motivoDelError(err), 'error');
+      return false;
     } finally {
-      setGuardando(false);
+      setOcupadoId(null);
     }
   };
 
@@ -130,14 +140,14 @@ export default function PedidosPage() {
         <div className="rounded-xl border border-gray-200 bg-white py-20 text-center"><p className="text-sm text-gray-400">No hay pedidos con estos filtros</p></div>
       ) : (
         <>
-          <PedidosTabla pedidos={visibles} onAbrir={(p) => setAbiertoId(p.id)} />
-          <PedidosTarjetas pedidos={visibles} onAbrir={(p) => setAbiertoId(p.id)} />
+          <PedidosTabla pedidos={visibles} onAbrir={(p) => setAbiertoId(p.id)} onAplicar={aplicarEstado} ocupadoId={ocupadoId} />
+          <PedidosTarjetas pedidos={visibles} onAbrir={(p) => setAbiertoId(p.id)} onAplicar={aplicarEstado} ocupadoId={ocupadoId} />
         </>
       )}
 
       <Paginas total={totalPaginas} actual={pagina} onPagina={setPagina} />
 
-      <PedidoDetalle pedido={abierto} guardando={guardando} onGuardarEstado={guardarEstado} onCambio={cargar} onCerrar={() => setAbiertoId(null)} />
+      <PedidoDetalle pedido={abierto} guardando={ocupadoId === abierto?.id} onGuardarEstado={(estado, seguimiento) => abierto && aplicarEstado(abierto, estado, seguimiento)} onCambio={cargar} onCerrar={() => setAbiertoId(null)} />
     </div>
   );
 }

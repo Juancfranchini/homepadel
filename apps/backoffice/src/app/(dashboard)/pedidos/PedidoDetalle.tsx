@@ -101,12 +101,13 @@ function CambiarEstado({ pedido, guardando, onGuardar }: {
       </select>
       {estado === 'SHIPPED' && !formaDeEntrega(pedido).esRetiro && (
         <>
+          <p className="text-xs text-gray-500">Al guardar, el cliente recibe un mail con el seguimiento.</p>
           <input value={numero} onChange={(e) => setNumero(e.target.value)} placeholder="Número de seguimiento (opcional)" className={input} maxLength={80} />
           <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="Link de seguimiento (opcional)" className={input} maxLength={300} />
         </>
       )}
       {estado === 'PAID' && pedido.status === 'PENDING' && (
-        <p className="text-xs text-gray-500">Marcarlo pagado registra el cobro (si fue por transferencia) e informa la venta a Meta.</p>
+        <p className="text-xs text-gray-500">Marcarlo pagado registra el cobro (si fue por transferencia), informa la venta a Meta y le avisa al cliente por mail.</p>
       )}
       <button type="button" disabled={!cambio || guardando} onClick={() => onGuardar(estado, estado === 'SHIPPED' ? { numero: numero.trim(), url: url.trim() } : undefined)}
         className="w-full rounded-lg bg-[#0f172a] px-3 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400">
