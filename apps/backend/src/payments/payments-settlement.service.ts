@@ -8,6 +8,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { enviarCompraAMeta } from './payments.meta';
 import { ClienteMeta } from '../common/meta/meta-cliente';
 import { esCuentaDePrueba } from '../common/test-accounts';
+import { EmailService } from '../email/email.service';
 import { filtroOrdenConPago } from './pago-registrado';
 
 interface ApprovedPayment {
@@ -45,6 +46,8 @@ export class PaymentsSettlementService {
     private readonly prisma: PrismaService,
     private readonly inventory: InventoryService,
     private readonly abandonedCarts: AbandonedCartsService,
+    /** Opcional para no romper quien arma este servicio a mano (pruebas): sin él, no se manda el mail. */
+    private readonly emails?: EmailService,
   ) {}
 
   async settle(payment: ApprovedPayment): Promise<'registrado' | 'ya-estaba'> {
@@ -79,6 +82,7 @@ export class PaymentsSettlementService {
     // El email del checkout y el de la cuenta de Mercado Pago pueden ser
     // distintos: se mandan los dos, Meta usa el que reconozca.
     const notas = this.parseNotes(order?.notes ?? null);
+    if (order) this.avisarPagoAlCliente(order, notas, email, payment.transaction_amount);
     const pagador = payment.payer as { ip_address?: string; user_agent?: string } | undefined;
     await enviarCompraAMeta(this.prisma, {
       orderNumber: order?.number || `HP-${Date.now()}`,
@@ -97,6 +101,24 @@ export class PaymentsSettlementService {
       userId: user?.id,
     });
     return 'registrado';
+  }
+
+  /**
+   * "Recibimos tu pago" al mail del checkout (o, si no hay, al de la cuenta de
+   * Mercado Pago). Sin esperar y sin lanzar: el cobro ya está registrado.
+   */
+  private avisarPagoAlCliente(order: PendingOrder & { number: string }, notas: Record<string, unknown>, emailMp: string, monto?: number): void {
+    const destino = (notas.buyerEmail as string | undefined) || emailMp;
+    if (!this.emails || !destino) return;
+    this.emails
+      .sendPaymentReceived(destino, {
+        orderNumber: order.number,
+        customerName: (notas.buyerName as string | undefined) || 'Cliente',
+        items: order.items.map((item) => ({ name: item.product.name, quantity: item.quantity, price: item.price })),
+        total: monto || order.total,
+        esRetiro: notas.shippingCarrier === 'retiro_local',
+      })
+      .catch((err) => this.logger.error('No se pudo avisar el pago de ' + order.number + ': ' + err));
   }
 
   parseNotes(notes: string | null): Record<string, unknown> {

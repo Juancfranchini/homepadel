@@ -12,6 +12,7 @@ import { informarTransferenciaPagadaAMeta } from '../payments/payments.meta';
 import { pedidoSinDatosPersonales } from './orders.public-view';
 import { esCuentaDePrueba } from '../common/test-accounts';
 import { datosAlConfirmarPago } from './orders.confirm-payment';
+import { avisarAlCliente, queAvisar } from './orders.status-emails';
 import { etiquetaFlex } from '../shipping/envio-flex';
 import { bolsasDeRegalo } from './bolsas-regalo';
 import { ClienteMeta } from '../common/meta/meta-cliente';
@@ -243,6 +244,13 @@ export class OrdersService {
       })
       .catch((err) => console.error('Error enviando aviso de transferencia:', err.message));
 
+    // Al cliente: cómo pagar y que mande el comprobante por WhatsApp.
+    if (dto.buyerEmail) {
+      this.emailService
+        .sendTransferInstructions(dto.buyerEmail, { orderNumber: number, customerName: buyerInfo.buyerName, items: itemsForEmail, total, datos: datosTransferencia })
+        .catch((err) => console.error('Error enviando las instrucciones de transferencia:', err.message));
+    }
+
     // Los datos de la cuenta van solo a quien acaba de hacer el pedido.
     return { ...order, datosTransferencia };
   }
@@ -352,47 +360,21 @@ export class OrdersService {
     if (trackingNumber) data.trackingNumber = trackingNumber;
     if (trackingUrl) data.trackingUrl = trackingUrl;
 
-    const pasaAPagado = status === OrderStatus.PAID && anterior.status !== OrderStatus.PAID;
-    const confirmacion = pasaAPagado ? datosAlConfirmarPago(anterior) : null;
+    // Seguimiento: solo http(s); va como link en el mail del cliente.
+    if (trackingUrl && !/^https?:\/\//i.test(trackingUrl)) {
+      throw new BadRequestException('El link de seguimiento tiene que empezar con http:// o https://');
+    }
+    const aviso = queAvisar(anterior, { status, trackingNumber });
+    // Marcar enviado un pedido sin cobrar es "pagado y enviado": el cobro también se registra.
+    const confirmacion = aviso.pasoAPagado ? datosAlConfirmarPago(anterior) : null;
     const updated = await this.prisma.$transaction(async (tx) => {
       const pedido = await tx.order.update({ where: { id }, data: { ...data, ...(confirmacion?.pedido ?? {}) } });
       if (confirmacion?.cobro) await tx.payment.create({ data: confirmacion.cobro });
       return pedido;
     });
 
-    if (pasaAPagado) {
-      await informarTransferenciaPagadaAMeta(this.prisma, id);
-    }
-
-    if (status === 'SHIPPED') {
-      const order = await this.prisma.order.findUnique({
-        where: { id },
-        include: { user: { select: { id: true, name: true, email: true } } },
-      });
-      if (order) {
-        let buyerInfo: any = {};
-        try {
-          buyerInfo = order.notes ? JSON.parse(order.notes) : {};
-        } catch {
-          console.warn('No se pudo parsear notes de la orden ' + order.number);
-        }
-        const customerEmail = buyerInfo.buyerEmail || order.user?.email;
-
-        if (customerEmail) {
-          const tracking = trackingNumber || order.trackingNumber || 'Pendiente';
-          const url = trackingUrl || order.trackingUrl || null;
-          this.emailService
-            .sendOrderShipped(
-              customerEmail,
-              order.number,
-              buyerInfo.buyerName || order.user?.name || 'Cliente',
-              tracking,
-              url,
-            )
-            .catch((err) => console.error('Error enviando email de despacho:', err.message));
-        }
-      }
-    }
+    if (aviso.pasoAPagado) await informarTransferenciaPagadaAMeta(this.prisma, id);
+    await avisarAlCliente(this.prisma, this.emailService, id, aviso);
 
     return updated;
   }

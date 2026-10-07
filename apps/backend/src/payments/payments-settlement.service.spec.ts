@@ -57,6 +57,45 @@ describe('PaymentsSettlementService', () => {
     }));
   });
 
+  it('al acreditarse el pago le avisa al cliente por mail, con los productos y el monto cobrado', async () => {
+    const orden = {
+      id: 'o-1',
+      number: 'HP-1',
+      total: 1000,
+      notes: JSON.stringify({ externalReference: 'ref_1', buyerEmail: 'cliente@ejemplo.com', buyerName: 'Ana', shippingCarrier: 'correo_argentino' }),
+      items: [{ productId: 'p-1', quantity: 2, price: 1000, product: { name: 'Paleta' } }],
+    };
+    const prisma = {
+      payment: { findUnique: jest.fn().mockResolvedValue(null) },
+      order: { findFirst: jest.fn().mockResolvedValueOnce(null).mockResolvedValueOnce(orden), update: jest.fn() },
+      siteSection: { findUnique: jest.fn().mockResolvedValue(null) },
+    };
+    const emails = { sendPaymentReceived: jest.fn().mockResolvedValue({}) };
+    const service = new PaymentsSettlementService(prisma as never, {} as never, {} as never, emails as never);
+    Object.assign(service, { resolveUser: jest.fn().mockResolvedValue({ id: 'user-9' }), settleOrder: jest.fn().mockResolvedValue(true) });
+
+    await service.settle({ id: 'mp-1', status: 'approved', external_reference: 'ref_1', transaction_amount: 2000, payer: { email: 'mp@ejemplo.com' } } as never);
+
+    expect(emails.sendPaymentReceived).toHaveBeenCalledWith('cliente@ejemplo.com', {
+      orderNumber: 'HP-1', customerName: 'Ana', items: [{ name: 'Paleta', quantity: 2, price: 1000 }], total: 2000, esRetiro: false,
+    });
+  });
+
+  it('si otro aviso ya registró el pago, no manda el mail otra vez', async () => {
+    const orden = { id: 'o-1', number: 'HP-1', total: 1000, notes: JSON.stringify({ externalReference: 'ref_1', buyerEmail: 'c@e.com' }), items: [] };
+    const prisma = {
+      payment: { findUnique: jest.fn().mockResolvedValue(null) },
+      order: { findFirst: jest.fn().mockResolvedValueOnce(null).mockResolvedValueOnce(orden), update: jest.fn() },
+      siteSection: { findUnique: jest.fn().mockResolvedValue(null) },
+    };
+    const emails = { sendPaymentReceived: jest.fn() };
+    const service = new PaymentsSettlementService(prisma as never, {} as never, {} as never, emails as never);
+    Object.assign(service, { resolveUser: jest.fn().mockResolvedValue(null), settleOrder: jest.fn().mockResolvedValue(false) });
+
+    await expect(service.settle({ id: 'mp-1', status: 'approved', external_reference: 'ref_1' } as never)).resolves.toBe('ya-estaba');
+    expect(emails.sendPaymentReceived).not.toHaveBeenCalled();
+  });
+
   it('si otro aviso ya registró el pago, no vuelve a informar la compra', async () => {
     (enviarCompraAMeta as jest.Mock).mockClear();
     const orden = { id: 'o-1', number: 'HP-1', notes: JSON.stringify({ externalReference: 'ref_1' }), items: [] };

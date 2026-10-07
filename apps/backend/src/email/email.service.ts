@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Resend } from 'resend';
+import { DatosBancarios, mailDespachado, mailPagoRecibido, mailTransferencia, PedidoMail } from './order-emails';
 
 interface TransferOrderNotification {
   orderNumber: string;
@@ -118,33 +119,38 @@ export class EmailService {
     return this.sendEmail(to, subject, html);
   }
 
-  async sendOrderShipped(to: string, orderNumber: string, customerName: string, trackingNumber: string, trackingUrl?: string) {
+  /**
+   * Pedido despachado. El seguimiento es opcional: si la tienda no lo cargó,
+   * el mail avisa igual que va en camino, sin inventar un número.
+   */
+  async sendOrderShipped(to: string, orderNumber: string, customerName: string, trackingNumber?: string | null, trackingUrl?: string | null) {
     const template = await this.getTemplateByType('order_shipped');
+    if (!template) return this.enviarArmado(to, mailDespachado({ orderNumber, customerName, trackingNumber, trackingUrl }));
 
-    let html: string;
-    let subject: string;
+    // La plantilla la edita la tienda desde el backoffice; lo del cliente va escapado.
+    const variables = { orderNumber: escapeHtml(orderNumber), customerName: escapeHtml(customerName), trackingNumber: escapeHtml(trackingNumber || ''), trackingUrl: /^https?:\/\//i.test(trackingUrl || '') ? escapeHtml(trackingUrl as string) : '' };
+    return this.sendEmail(to, this.replaceVariables(template.subject, variables), this.replaceVariables(template.content, variables));
+  }
 
-    if (template) {
-      html = this.replaceVariables(template.content, {
-        orderNumber,
-        customerName,
-        trackingNumber,
-        trackingUrl: trackingUrl || '',
-      });
-      subject = this.replaceVariables(template.subject, { orderNumber, customerName, trackingNumber });
-    } else {
-      html = '<!DOCTYPE html><html><body style="font-family: Arial, sans-serif; background-color: #0C0C0C; color: #F7F6F7; padding: 20px;">' +
-        '<div style="max-width: 600px; margin: 0 auto; background-color: #1A1F21; border-radius: 8px; padding: 30px;">' +
-        '<h1 style="color: #C8FF00; text-align: center;">¡Tu pedido fue despachado!</h1>' +
-        '<p style="color: #C7C7C0;">Tu pedido <strong style="color: #C8FF00;">' + orderNumber + '</strong> esta en camino.</p>' +
-        '<div style="background-color: #0C0C0C; padding: 15px; border-radius: 5px; margin: 20px 0;">' +
-        '<p style="color: #C7C7C0;">Número de seguimiento: <strong style="color: #C8FF00;">' + trackingNumber + '</strong></p>' +
-        (trackingUrl ? '<p style="color: #C7C7C0;">Podes seguir tu envío <a href="' + trackingUrl + '" style="color: #C8FF00;">aca</a></p>' : '') +
-        '</div></div></body></html>';
-      subject = 'Tu Pedido ' + orderNumber + ' fue despachado - Home Padel';
-    }
+  private enviarArmado(to: string, mail: { subject: string; html: string }) {
+    return this.sendEmail(to, mail.subject, mail.html);
+  }
 
-    return this.sendEmail(to, subject, html);
+  /** WhatsApp de la tienda, el que figura en Configuración. Null si no hay. */
+  private async whatsappDeLaTienda(): Promise<string | null> {
+    const seccion = await this.prisma.siteSection.findUnique({ where: { key: 'settings' } });
+    const datos = (seccion?.data ?? {}) as { whatsapp?: string; phone?: string };
+    return datos.whatsapp || datos.phone || null;
+  }
+
+  /** Recibimos el pago: Mercado Pago acreditado, o transferencia confirmada por la tienda. */
+  async sendPaymentReceived(to: string, pedido: PedidoMail & { esRetiro: boolean }) {
+    return this.enviarArmado(to, mailPagoRecibido(pedido));
+  }
+
+  /** Eligió transferencia: datos de la cuenta y aviso de mandar el comprobante por WhatsApp. */
+  async sendTransferInstructions(to: string, pedido: PedidoMail & { datos: DatosBancarios | null }) {
+    return this.enviarArmado(to, mailTransferencia({ ...pedido, whatsapp: await this.whatsappDeLaTienda() }));
   }
 
   async sendTransferOrderNotification(order: TransferOrderNotification) {

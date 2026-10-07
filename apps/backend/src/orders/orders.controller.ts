@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Patch, Param, Body, Query, Req, UseGuards, ParseEnumPipe } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Body, Query, Req, UseGuards } from '@nestjs/common';
 import type { Request } from 'express';
 import { clienteDesdeRequest } from '../common/meta/meta-cliente';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../common/guards/optional-jwt-auth.guard';
@@ -11,7 +12,6 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { Permissions } from '../common/decorators/permissions.decorator';
 import { POS_PERMISSIONS } from '../common/permissions';
-import { OrderStatus } from '@prisma/client';
 
 @ApiTags('Orders')
 @Controller('orders')
@@ -54,13 +54,7 @@ export class OrdersController {
   @Patch(':id/status')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, PermissionsGuard) @Permissions(POS_PERMISSIONS.SELL)
-  updateStatus(
-    @Param('id') id: string,
-    // Solo los estados que existen: antes llegaba cualquier texto y se guardaba tal cual.
-    @Body('status', new ParseEnumPipe(OrderStatus)) status: OrderStatus,
-    @Body('trackingNumber') trackingNumber?: string,
-    @Body('trackingUrl') trackingUrl?: string,
-  ) {
-    return this.ordersService.updateStatus(id, status, trackingNumber, trackingUrl);
+  updateStatus(@Param('id') id: string, @Body() dto: UpdateOrderStatusDto) {
+    return this.ordersService.updateStatus(id, dto.status, dto.trackingNumber, dto.trackingUrl);
   }
 }
